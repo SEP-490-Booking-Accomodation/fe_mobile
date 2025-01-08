@@ -23,9 +23,11 @@
     "dayjs": "^1.11.13",
     "expo": "~52.0.23",
     "expo-image-picker": "^16.0.3",
+    "expo-splash-screen": "~0.29.18",
     "expo-status-bar": "~2.0.0",
     "firebase": "^11.1.0",
     "jwt-decode": "^4.0.0",
+    "lucide-react-native": "^0.469.0",
     "react": "18.3.1",
     "react-native": "0.76.5",
     "react-native-config": "^1.5.3",
@@ -33,6 +35,7 @@
     "react-native-elements": "^3.4.3",
     "react-native-gesture-handler": "^2.21.2",
     "react-native-image-picker": "^7.2.3",
+    "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-pager-view": "^6.6.1",
     "react-native-ratings": "^8.1.0",
     "react-native-reanimated": "^3.16.6",
@@ -40,8 +43,7 @@
     "react-native-screens": "^4.4.0",
     "react-native-swiper": "^1.6.0",
     "react-native-tab-view": "^4.0.5",
-    "react-native-vector-icons": "^10.2.0",
-    "expo-splash-screen": "~0.29.18"
+    "react-native-vector-icons": "^10.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
