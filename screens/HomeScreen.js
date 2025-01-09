@@ -1,37 +1,12 @@
-import {
-  Keyboard,
-  StyleSheet,
-  Text,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
-import React, { useState } from "react";
-import SearchField from "../components/Search";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { StyleSheet, Text, View } from "react-native";
+import React from "react";
 
-const HomeScreen = () => {
-  const [searchValue, setSearchValue] = useState("");
-
+export default function HomeScreen() {
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <SafeAreaView style={[styles.container]}>
-        <Text>HomeScreen</Text>
-        <SearchField
-          placeholder="Search for something..."
-          value={searchValue}
-          onChangeText={setSearchValue}
-          backIcon={false}
-          filterIcon={false}
-        />
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+    <View>
+      <Text>HomeScreen</Text>
+    </View>
   );
-};
+}
 
-export default HomeScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+const styles = StyleSheet.create({});
