@@ -5,6 +5,7 @@ import { AsyncStorageProvider } from "./context/AsyncStorageContext"; // Cập n
 import AppStack from "./navigator/AppStack";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { STRIPE_PUBLIC_KEY } from "@env";
+import VerticalCard from "./components/cards/VerticalCard";
 
 export default function App() {
   return (
