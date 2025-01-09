@@ -1,10 +1,10 @@
 import { Image, StyleSheet, Touchable, TouchableOpacity, View, Text } from "react-native";
-import  Icon  from "react-native-vector-icons/MaterialIcons";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import React from "react";
+import { useState } from 'react';
 
-import {useState} from 'react';
-/*
- * How to use this components?
+//#region How to use this components?
+/* 
          <VerticalCard 
                 imageUrl = {require("./assets/images/verticalCardImage.jpeg")}
                 openHour = {"3:00"}
@@ -23,22 +23,22 @@ import {useState} from 'react';
  * 
  * 
  * */
-
+//#endregion
 
 export default function VerticalCard(props) {
-    const { 
-        imageUrl = require("../../assets/images/verticalCardImage.jpeg"),
-        openHour = "3:00",
-        closeHour = "20:00", 
-        placeName = "Nhà con nhộng Bình Thạnh giá rẻ", 
-        minPrice = "300.000",
-        maxPrice = "1.200.000", 
-        location = "Bình Thạnh, HCM", 
-        ratingPoint = "5",  
-        numberOfReview = "3.5k", 
-        initFavourite = false, 
-        onFavouritePress, 
-        onCardPress 
+    const {
+        imageUrl,
+        openHour,
+        closeHour,
+        placeName,
+        minPrice,
+        maxPrice,
+        location,
+        ratingPoint,
+        numberOfReview,
+        initFavourite,
+        onFavouritePress,
+        onCardPress
     } = props;
 
     const [isFavourite, setIsFavourite] = useState(initFavourite);
@@ -61,7 +61,7 @@ export default function VerticalCard(props) {
         >
             <View style={styles.imageContainer}>
                 <Image
-                    source={  imageUrl }
+                    source={imageUrl}
                     style={styles.image}
                     resizeMode="cover"
                 />
@@ -94,7 +94,7 @@ export default function VerticalCard(props) {
                 <View style={styles.ratingContainer}>
                     <Icon name="star" size={20} color={"#ffc907"}></Icon>
                     <Text style={styles.ratingText}>
-                        {ratingPoint} ({numberOfReview} reviews)
+                        {ratingPoint} ({numberOfReview} đánh giá)
                     </Text>
                 </View>
             </View>
@@ -107,12 +107,11 @@ export default function VerticalCard(props) {
 
 const styles = StyleSheet.create({
     card: {
-        
         backgroundColor: "white",
         borderRadius: 20,
-        overflow: 'hidden',
+
         marginVertical: 16,
-        shadowColor: '#000',
+        shadowColor: '#000000f',
         shadowOffset: {
             width: 0,
             height: 2,
@@ -120,7 +119,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.05,
         shadowRadius: 3.84,
         elevation: 5,
-        borderWidth: 2
     },
     imageContainer: {
         position: 'relative',
@@ -149,7 +147,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 1.41,
         elevation: 2,
-        zIndex:1
+        zIndex: 1
     },
     openingHoursContainer: {
         position: 'absolute',

@@ -5,6 +5,8 @@ import { AsyncStorageProvider } from "./context/AsyncStorageContext"; // Cập n
 import AppStack from "./navigator/AppStack";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { STRIPE_PUBLIC_KEY } from "@env";
+
+import HorizontalCardMedium from "./components/cards/HorizontalCardMedium";
 import VerticalCard from "./components/cards/VerticalCard";
 
 export default function App() {
@@ -16,7 +18,7 @@ export default function App() {
           <AsyncStorageProvider>
             <AppStack />
           </AsyncStorageProvider>
-        </NavigationContainer>
+        </NavigationContainer>    
       </>
     </StripeProvider>
   );
