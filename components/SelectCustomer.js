@@ -67,14 +67,14 @@ const SelectCustomer = ({ maxGuests, onSelect, isVisible, onClose }) => {
             </View>
             <View style={styles.counterContainer}>
               <TouchableOpacity
-                style={styles.button}
+                style={styles.buttonDecrease}
                 onPress={() => handleChangeCount("adult", "decrease")}
               >
                 <Icon name="remove-outline" size={20} color="#fff" />
               </TouchableOpacity>
               <Text style={styles.countText}>{adultCount}</Text>
               <TouchableOpacity
-                style={styles.button}
+                style={styles.buttonIncrease}
                 onPress={() => handleChangeCount("adult", "increase")}
               >
                 <Icon name="add-outline" size={20} color="#fff" />
@@ -90,14 +90,14 @@ const SelectCustomer = ({ maxGuests, onSelect, isVisible, onClose }) => {
             </View>
             <View style={styles.counterContainer}>
               <TouchableOpacity
-                style={styles.button}
+                style={styles.buttonDecrease}
                 onPress={() => handleChangeCount("children", "decrease")}
               >
                 <Icon name="remove-outline" size={20} color="#fff" />
               </TouchableOpacity>
               <Text style={styles.countText}>{childrenCount}</Text>
               <TouchableOpacity
-                style={styles.button}
+                style={styles.buttonIncrease}
                 onPress={() => handleChangeCount("children", "increase")}
               >
                 <Icon name="add-outline" size={20} color="#fff" />
@@ -113,14 +113,14 @@ const SelectCustomer = ({ maxGuests, onSelect, isVisible, onClose }) => {
             </View>
             <View style={styles.counterContainer}>
               <TouchableOpacity
-                style={styles.button}
+                style={styles.buttonDecrease}
                 onPress={() => handleChangeCount("infant", "decrease")}
               >
                 <Icon name="remove-outline" size={20} color="#fff" />
               </TouchableOpacity>
               <Text style={styles.countText}>{infantCount}</Text>
               <TouchableOpacity
-                style={styles.button}
+                style={styles.buttonIncrease}
                 onPress={() => handleChangeCount("infant", "increase")}
               >
                 <Icon name="add-outline" size={20} color="#fff" />
@@ -180,8 +180,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "30%",
   },
-  button: {
-    backgroundColor: "#4E72E3",
+  buttonDecrease: {
+    backgroundColor: "#D9D9D9",
+    padding: 8,
+    borderRadius: 4,
+  },
+  buttonIncrease: {
+    backgroundColor: "#131D2F",
     padding: 8,
     borderRadius: 4,
   },
