@@ -1,11 +1,10 @@
 import { Image, StyleSheet, Touchable, TouchableOpacity, View, Text } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import React from "react";
-import { useState } from 'react';
-//#region How to use this component? 
-/* 
-
-    <HorizontalCardMedium
+//#region How to use this components
+/**
+ * @example
+ * <HorizontalCardMedium
             imageUrlLogo = {require("./assets/images/horizontalCardImage.jpeg")}
             placeName = {"Nhà con nhộng giá rẻ Bình Tân"}
             openHour = {"3:00"}
@@ -17,10 +16,10 @@ import { useState } from 'react';
             numOfReviews = {"12.5k"}
             distance = "22.4"
             ></HorizontalCardMedium>
-
-*/
-
-
+ * @param {imageUrlLogo, placeName, openHour, closeHour, minPrice, maxPrice,location, rating, numOfReviews} props 
+ * @returns HorizontalCardMedium
+ */
+//#endregion
 export default function HorizontalCardMedium(props) {
 
     const {
