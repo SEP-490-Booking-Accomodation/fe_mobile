@@ -5,8 +5,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import SplashScreen from "../screens/SplashScreen";
 import OnboardingScreen from "../screens/OnboardingScreen";
 import LoginScreen from "../screens/LoginScreen";
-import AppDrawer from "../navigator/AppDrawer";
 import RegisterScreen from "../screens/RegisterScreen";
+import HomeScreen from "../screens/HomeScreen"
 
 const Stack = createNativeStackNavigator();
 
@@ -48,7 +48,7 @@ const AppStack = () => {
         <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="AppDrawer" component={AppDrawer} options={{ headerShown: false }} />
+        <Stack.Screen name="Home" component={HomeScreen} />
       </Stack.Navigator>
 
     </>
