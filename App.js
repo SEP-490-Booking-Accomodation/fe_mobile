@@ -1,10 +1,11 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { StatusBar } from "react-native";
+import { StatusBar, StyleSheet, View } from "react-native";
 import { AsyncStorageProvider } from "./context/AsyncStorageContext"; // Cập nhật đường dẫn đúng
 import AppStack from "./navigator/AppStack";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { STRIPE_PUBLIC_KEY } from "@env";
+
 
 export default function App() {
   return (
@@ -15,8 +16,9 @@ export default function App() {
           <AsyncStorageProvider>
             <AppStack />
           </AsyncStorageProvider>
-        </NavigationContainer>
+        </NavigationContainer>    
       </>
+
     </StripeProvider>
   );
 }
