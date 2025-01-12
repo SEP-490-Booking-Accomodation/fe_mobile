@@ -10,12 +10,14 @@ import {
   ImageBackground,
   Dimensions
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../components/Button';
 import CustomInput from '../components/TextInput';
 
 const { height } = Dimensions.get('window');
 
 const LoginScreen = () => {
+  const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,16 +26,17 @@ const LoginScreen = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
+      navigation.replace('Home');
     }, 1500);
   };
 
   return (
     <ImageBackground
-      source={require('../assets/images/bg_login.png')} 
+      source={require('../assets/images/bg_login.png')}
       style={styles.backgroundImage}
     >
       <SafeAreaView style={styles.safeArea}>
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.keyboardAvoid}
         >
@@ -67,7 +70,7 @@ const LoginScreen = () => {
                   inputContainerStyle={styles.input}
                   passwordIconColor="#6B7280"
                 />
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.forgotPasswordButton}
                   onPress={() => {}}
                 >
@@ -193,5 +196,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
+
 
 export default LoginScreen;
