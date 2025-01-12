@@ -50,9 +50,8 @@ const AppStack = () => {
         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} />
       </Stack.Navigator>
-
     </>
   );
 };
 
-export default AppStack
+export default AppStack;

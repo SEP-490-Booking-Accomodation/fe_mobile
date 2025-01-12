@@ -1,18 +1,7 @@
-import React, { useState } from 'react';
-import { Modal, Text, View } from 'react-native';
-import ButtonGroup from '../components/ButtonGroup';
-import MultiSelectButtonGroup from '../components/MultiSelectButtonGroup';
-import IconButton from '../components/IconButton';
-import BottomTabs from '../components/BottomTabs';
-import Filter from '../components/Filter';
-import Tag from '../components/Tag';
-import MapWithPopup from '../components/MapWithPopup';
+import { StyleSheet, Text, View } from "react-native";
+import React from "react";
 
-const HomeScreen = ({ navigation }) => {
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [selectedIndexes1, setSelectedIndexes1] = useState([]);
-  const [showFilter, setShowFilter] = useState(false);
-
+export default function HomeScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: '#E5E7EB' }}>
       <View
@@ -27,6 +16,6 @@ const HomeScreen = ({ navigation }) => {
       </View>
     </View>
   );
-};
+}
 
-export default HomeScreen;
+const styles = StyleSheet.create({});
