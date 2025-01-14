@@ -1,7 +1,11 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
+import { useNavigation } from "@react-navigation/native";
+import BottomTabs from "../components/BottomTabs";
 
 export default function HomeScreen() {
+  const navigation = useNavigation(); 
+
   return (
     <View style={{ flex: 1, backgroundColor: '#E5E7EB' }}>
       <View

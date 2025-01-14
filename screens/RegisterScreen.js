@@ -1,238 +1,214 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ActivityIndicator,
+  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
-  ScrollView,
-} from "react-native";
-import { register } from "../api/userApi";
+  StyleSheet,
+  TouchableOpacity,
+  ImageBackground,
+  Dimensions
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import CustomButton from '../components/Button';
+import CustomInput from '../components/TextInput';
 
-const RegisterScreen = ({ navigation }) => {
-  const [fullName, setFullName] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [address, setAddress] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const roleId = "66eeb2c875b031f4c4559489"; // Set the default roleId
+const { height } = Dimensions.get('window');
 
-  const handleRegister = async () => {
-    if (
-      !fullName ||
-      !username ||
-      !password ||
-      !confirmPassword ||
-      !phoneNumber ||
-      !address
-    ) {
-      Alert.alert("Đăng ký thất bại", "Vui lòng điền đầy đủ thông tin");
-      return;
-    }
+const RegisterScreen = () => {
+  const navigation = useNavigation();
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
+  const handleRegister = () => {
     if (password !== confirmPassword) {
-      Alert.alert(
-        "Đăng ký thất bại",
-        "Mật khẩu và xác nhận mật khẩu không khớp"
-      );
+      alert('Mật khẩu và xác nhận mật khẩu không khớp!');
       return;
     }
-
-    setIsLoading(true);
-
-    const requestData = {
-      fullName,
-      username,
-      password,
-      phoneNumber,
-      address,
-      roleId,
-    };
-
-    // Call the register API here using requestData
-    // For example:
-    // await register(requestData);
-
-    try {
-      const response = await register(requestData); // Call the register function
-      setIsLoading(false);
-      console.log(response);
-
-      Alert.alert(
-        "Đăng ký thành công!",
-        `Chào mừng ${username} đến với cửa hàng cá koi!`
-      );
-      navigation.navigate("Login");
-    } catch (error) {
-      setIsLoading(false);
-      Alert.alert("Đăng ký thất bại", error.message);
-    }
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      navigation.replace('VerifyBy');
+    }, 1500);
   };
 
   return (
-    <SafeAreaView style={styles.con}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.container}>
-            <Text style={styles.title}>Đăng Ký</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Họ và tên"
-              value={fullName}
-              onChangeText={setFullName}
-              placeholderTextColor="#999"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Tên đăng nhập"
-              value={username}
-              onChangeText={setUsername}
-              placeholderTextColor="#999"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Mật khẩu"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              placeholderTextColor="#999"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Xác nhận mật khẩu"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-              placeholderTextColor="#999"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Số điện thoại"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              placeholderTextColor="#999"
-              keyboardType="phone-pad"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Địa chỉ"
-              value={address}
-              onChangeText={setAddress}
-              placeholderTextColor="#999"
-            />
-            <TouchableOpacity
-              style={styles.registerButton}
-              onPress={handleRegister}
-              disabled={isLoading}
-            >
-              <Text style={styles.registerButtonText}>Đăng Ký</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.loginButton}
-              onPress={() => navigation.navigate("Login")}
-            >
-              <Text style={styles.loginButtonText}>
-                Đã có tài khoản? Đăng Nhập
+    <ImageBackground
+      source={require('../assets/images/bg_login.png')}
+      style={styles.backgroundImage}
+    >
+      <View style={styles.safeArea}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardAvoid}
+        >
+          <View style={styles.contentContainer}>
+            <View style={styles.header}>
+              <Text style={styles.title}>Đăng ký</Text>
+              <Text style={styles.subtitle}>
+                Bắt đầu hành trình của bạn: Đăng ký để khám phá
               </Text>
-            </TouchableOpacity>
-          </View>
-          {isLoading && (
-            <View style={styles.loadingOverlay}>
-              <ActivityIndicator size="large" color="#ff6347" />
             </View>
-          )}
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            <View style={styles.card}>
+              <View style={styles.formContainer}>
+                <View style={styles.dot} />
+                <CustomInput
+                  label="Họ và tên"
+                  placeholder="Nhập họ và tên"
+                  value={fullName}
+                  onChangeText={setFullName}
+                  autoCapitalize="words"
+                  containerStyle={styles.inputContainer}
+                  inputContainerStyle={styles.input}
+                />
+                <CustomInput
+                  label="Số điện thoại"
+                  placeholder="Nhập số điện thoại"
+                  value={phone}
+                  onChangeText={setPhone}
+                  keyboardType="phone-pad"
+                  containerStyle={styles.inputContainer}
+                  inputContainerStyle={styles.input}
+                />
+                <CustomInput
+                  label="Email"
+                  placeholder="Nhập email"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  containerStyle={styles.inputContainer}
+                  inputContainerStyle={styles.input}
+                />
+                <CustomInput
+                  label="Mật khẩu"
+                  placeholder="Nhập mật khẩu"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                  containerStyle={styles.inputContainer}
+                  inputContainerStyle={styles.input}
+                  passwordIconColor="#6B7280"
+                />
+                <CustomInput
+                  label="Xác nhận mật khẩu"
+                  placeholder="Nhập lại mật khẩu"
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry
+                  containerStyle={styles.inputContainer}
+                  inputContainerStyle={styles.input}
+                  passwordIconColor="#6B7280"
+                />
+                <CustomButton
+                  title="Đăng ký"
+                  backgroundColor="#1A2741"
+                  disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
+                  titleColor="#FFFFFF"
+                  disabledTitleColor="#FFFFFF"
+                  loading={loading}
+                  disabled={!fullName || !phone || !email || !password || !confirmPassword}
+                  style={styles.loginButton}
+                  onPress={handleRegister}
+                />
+                <View style={styles.signupContainer}>
+                  <Text style={styles.signupText}>
+                    Đã có tài khoản?{' '}
+                  </Text>
+                  <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                    <Text style={styles.signupButtonText}>
+                      Đăng nhập
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  con: {
-    flex: 1,
-    backgroundColor: "#f0f0f0",
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-  },
   container: {
-    padding: 20,
-    marginHorizontal: 20,
-    marginTop: 40,
-    borderRadius: 12,
-    backgroundColor: "#ffffff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    flex: 1,
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover',
+  },
+  safeArea: {
+    flex: 1,
+  },
+  keyboardAvoid: {
+    flex: 1,
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  header: {
+    paddingHorizontal: 24,
+    paddingTop: 70,
   },
   title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#ba2d32",
-    textAlign: "center",
-    marginBottom: 30,
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 12,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#EFF6FF',
+    lineHeight: 24,
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    paddingTop: 32,
+  },
+  formContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: Platform.OS === 'ios' ? 50 : 24,
+  },
+  dot: {
+    width: 48,
+    height: 6,
+    borderRadius: 4,
+    backgroundColor: '#EBEBEB',
+    alignSelf: 'center',
+    marginBottom: 24,
+  },
+  inputContainer: {
+    marginBottom: 24,
   },
   input: {
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: "#ddd",
-    padding: 14,
-    marginBottom: 16,
-    borderRadius: 8,
-    backgroundColor: "#f9f9f9",
-    fontSize: 16,
-  },
-  registerButton: {
-    backgroundColor: "#ba2d32",
-    paddingVertical: 14,
-    borderRadius: 8,
-    marginBottom: 16,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  registerButtonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 18,
+    borderColor: '#E2E8F0',
   },
   loginButton: {
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ba2d32",
+    marginBottom: 24,
   },
-  loginButtonText: {
-    color: "#ba2d32",
-    fontWeight: "600",
-    textAlign: "center",
-    fontSize: 16,
+  signupContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  loadingOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 10,
+  signupText: {
+    color: '#94A3B8',
+    fontSize: 14,
+  },
+  signupButtonText: {
+    color: '#4E72E3',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });
 
