@@ -10,8 +10,11 @@ const IconButton = ({
   buttonSize = 50,
   borderRadius = 10,
   buttonColor = '#4E72E3',
+  borderWidth = 0, 
+  borderColor = 'transparent',
   shadow = false,
   library = 'Feather',
+  style, 
 }) => {
   const renderIcon = () => {
     switch (library) {
@@ -38,14 +41,19 @@ const IconButton = ({
           height: buttonSize,
           borderRadius: borderRadius,
           backgroundColor: buttonColor,
+          borderWidth: borderWidth, 
+          borderColor: borderColor, 
           ...(shadow && styles.shadow),
         },
+        style, 
       ]}
     >
       {renderIcon()}
     </TouchableOpacity>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   button: {

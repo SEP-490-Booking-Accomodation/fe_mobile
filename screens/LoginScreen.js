@@ -35,7 +35,7 @@ const LoginScreen = () => {
       source={require('../assets/images/bg_login.png')}
       style={styles.backgroundImage}
     >
-      <SafeAreaView style={styles.safeArea}>
+      <View style={styles.safeArea}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.keyboardAvoid}
@@ -72,7 +72,7 @@ const LoginScreen = () => {
                 />
                 <TouchableOpacity
                   style={styles.forgotPasswordButton}
-                  onPress={() => {}}
+                  onPress={() => navigation.navigate('ForgotPassword')}
                 >
                   <Text style={styles.forgotPasswordText}>
                     Quên Mật khẩu?
@@ -93,7 +93,7 @@ const LoginScreen = () => {
                   <Text style={styles.signupText}>
                     Chưa có tài khoản?{' '}
                   </Text>
-                  <TouchableOpacity onPress={() => {}}>
+                  <TouchableOpacity onPress={() => navigation.navigate('Register')}>
                     <Text style={styles.signupButtonText}>
                       Đăng ký ngay
                     </Text>
@@ -103,7 +103,7 @@ const LoginScreen = () => {
             </View>
           </View>
         </KeyboardAvoidingView>
-      </SafeAreaView>
+      </View>
     </ImageBackground>
   );
 };
@@ -146,7 +146,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: 32,
-    marginBottom: Platform.OS === 'ios' ? (height > 800 ? -50 : -40) : 0, 
   },
   formContainer: {
     paddingHorizontal: 24,
