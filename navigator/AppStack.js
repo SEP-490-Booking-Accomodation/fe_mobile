@@ -11,6 +11,7 @@ import VerifyByScreen from "../screens/VerifyByScreen";
 import OTPVerificationScreen from "../screens/OTPVerificationScreen";
 import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import ResetPasswordScreen from "../screens/ResetPasswordScreen";
+import DetailRentalLocationScreen from "../screens/DetailRentalLocationScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -57,6 +58,7 @@ const AppStack = () => {
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="DetailRentalLocation" component={DetailRentalLocationScreen} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </>
   );
