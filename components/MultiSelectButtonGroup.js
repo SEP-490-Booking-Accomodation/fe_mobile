@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 const MultiSelectButtonGroup = ({
     items = [],
-    onChange = () => {},
+    onSelect = () => {},
     containerStyle = {},
     buttonStyle = {},
     activeButtonStyle = {},
@@ -14,28 +14,30 @@ const MultiSelectButtonGroup = ({
     spacing = 8,
     borderRadius = 20,
 }) => {
-    const [selectedIndexes, setSelectedIndexes] = useState([]);
+    const [selectedItems, setSelectedItems] = useState([]); 
 
-    const handlePress = (index) => {
-        const newSelectedIndexes = [...selectedIndexes];
-        const selectedIndex = newSelectedIndexes.indexOf(index);
+    const handlePress = (item) => {
+        const newSelectedItems = [...selectedItems];
+        const selectedIndex = newSelectedItems.indexOf(item);
+        
         if (selectedIndex === -1) {
-            newSelectedIndexes.push(index);
+            newSelectedItems.push(item);
         } else {
-            newSelectedIndexes.splice(selectedIndex, 1);
+            newSelectedItems.splice(selectedIndex, 1);
         }
-        setSelectedIndexes(newSelectedIndexes);
-        onChange(newSelectedIndexes);
+        
+        setSelectedItems(newSelectedItems);
+        onSelect(newSelectedItems);
     };
 
     return (
         <View style={[styles.container, containerStyle]}>
             {items.map((item, index) => {
-                const isSelected = selectedIndexes.includes(index);
+                const isSelected = selectedItems.includes(item);
                 return (
                     <TouchableOpacity
                         key={index}
-                        onPress={() => handlePress(index)}
+                        onPress={() => handlePress(item)}
                         style={[
                             styles.button,
                             {

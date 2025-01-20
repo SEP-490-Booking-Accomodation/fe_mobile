@@ -43,7 +43,7 @@ const mockData = {
             location: "Vũng Tàu",
             rating: 4.8,
             reviews: 50,
-            amenities: ["Wifi"],
+            amenities: ["Tủ lạnh"],
             imageUrl: require('../assets/images/beach.jpg'),
         },
     ],
@@ -87,8 +87,8 @@ const DetailRentalLocationScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <ScrollView style={styles.container}>
-                <View style={styles.headerActionContainer}>
+            <View style={styles.mainContainer}>
+                <View style={styles.fixedHeaderActions}>
                     <TouchableOpacity onPress={() => console.log('Back button pressed')}>
                         <Icon name="arrow-back" size={24} color="#333" />
                     </TouchableOpacity>
@@ -105,62 +105,67 @@ const DetailRentalLocationScreen = () => {
                         </TouchableOpacity>
                     </View>
                 </View>
-                <View style={styles.headerContainer}>
-                    <Image
-                        source={require('../assets/images/beach.jpg')}
-                        style={styles.headerImage}
-                    />
-                    <View style={styles.headerDetails}>
-                        <View style={styles.destinationHeader}>
-                            <Text style={styles.destinationName}>{destination.name}</Text>
-                            <Tag text={destination.openHours} backgroundColor="#4CAF50" textColor="#fff" />
-                        </View>
-                        <View style={styles.locationContainer}>
-                            <Icon name="location-on" size={20} color={'#4e72e3'} />
-                            <Text style={styles.locationText}>{destination.location}</Text>
-                        </View>
-                        <View style={styles.ratingContainer}>
-                            <Icon name="star" size={20} color={'#ffc907'} />
-                            <Text style={styles.ratingText}>
-                                {destination.rating} ({destination.reviews} Reviews)
+
+                <ScrollView style={styles.container}>
+                    <View style={styles.headerContainer}>
+                        <Image
+                            source={require('../assets/images/beach.jpg')}
+                            style={styles.headerImage}
+                        />
+                        <View style={styles.headerDetails}>
+                            <View style={styles.destinationHeader}>
+                                <Text style={styles.destinationName}>{destination.name}</Text>
+                                <Tag text={destination.openHours} backgroundColor="#4CAF50" textColor="#fff" />
+                            </View>
+                            <View style={styles.locationContainer}>
+                                <Icon name="location-on" size={20} color={'#4e72e3'} />
+                                <Text style={styles.locationText}>{destination.location}</Text>
+                            </View>
+                            <View style={styles.ratingContainer}>
+                                <Icon name="star" size={20} color={'#ffc907'} />
+                                <Text style={styles.ratingText}>
+                                    {destination.rating} ({destination.reviews} Reviews)
+                                </Text>
+                            </View>
+                            <Text style={styles.description}>
+                                {isDescriptionExpanded
+                                    ? destination.description
+                                    : `${destination.description.slice(0, 90)}...`}
+                                <TouchableOpacity
+                                    onPress={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                                    style={styles.readMoreContainer}
+                                >
+                                    <Text style={styles.readMoreText}>
+                                        {isDescriptionExpanded ? "Thu gọn" : "Đọc thêm"}
+                                    </Text>
+                                </TouchableOpacity>
                             </Text>
                         </View>
-                        <Text style={styles.description}>
-                            {isDescriptionExpanded
-                                ? destination.description
-                                : `${destination.description.slice(0, 90)}...`}
-                            <TouchableOpacity
-                                onPress={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                                style={styles.readMoreContainer}
-                            >
-                                <Text style={styles.readMoreText}>
-                                    {isDescriptionExpanded ? "Thu gọn" : "Đọc thêm"}
-                                </Text>
-                            </TouchableOpacity>
-                        </Text>
                     </View>
-                </View>
-                <MultiSelectButtonGroup
-                    items={destination.amenities}
-                    activeButtonStyle={styles.activeButton}
-                    inactiveButtonStyle={styles.inactiveButton}
-                    activeTextStyle={styles.activeText}
-                    inactiveTextStyle={styles.inactiveText}
-                    onSelect={(selectedItems) => setSelectedAmenities(selectedItems)}
-                />
-                {filteredRooms.map((room) => (
-                    <SimpleVerticalCard
-                        key={room.id}
-                        imageUrl={room.imageUrl}
-                        placeName={room.name}
-                        price={`${room.price}đ`}
-                        location={room.location}
-                        ratingPoint={room.rating}
-                        numberOfReview={room.reviews}
-                        onCardPress={() => console.log(`${room.name} pressed`)}
-                    />
-                ))}
-            </ScrollView>
+                    <View style={styles.multiSelectButtonGroup}>
+                        <MultiSelectButtonGroup
+                            items={destination.amenities}
+                            activeButtonStyle={styles.activeButton}
+                            inactiveButtonStyle={styles.inactiveButton}
+                            activeTextStyle={styles.activeText}
+                            inactiveTextStyle={styles.inactiveText}
+                            onSelect={setSelectedAmenities}
+                        />
+                    </View>
+                    {filteredRooms.map((room) => (
+                        <SimpleVerticalCard
+                            key={room.id}
+                            imageUrl={room.imageUrl}
+                            placeName={room.name}
+                            price={`${room.price}đ`}
+                            location={room.location}
+                            ratingPoint={room.rating}
+                            numberOfReview={room.reviews}
+                            onCardPress={() => console.log(`${room.name} pressed`)}
+                        />
+                    ))}
+                </ScrollView>
+            </View>
         </SafeAreaView>
     );
 };
@@ -170,23 +175,31 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f8f9fa',
     },
-    container: {
+    mainContainer: {
         flex: 1,
-        padding: 16,
+        position: 'relative',
     },
-    headerActionContainer: {
+    fixedHeaderActions: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 999,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 16,
+        padding: 16,
+        backgroundColor: '#f8f9fa',
+    },
+    container: {
+        flex: 1,
+        padding: 16,
+        paddingTop: 80,
     },
     actionIcons: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 16,
-    },
-    headerContainer: {
-        marginBottom: 16,
     },
     headerImage: {
         width: '100%',
@@ -246,7 +259,6 @@ const styles = StyleSheet.create({
         paddingTop: 12,
         paddingBottom: 12,
     },
-
     activeButton: {
         backgroundColor: 'rgba(78, 114, 227, 0.33)',
         borderColor: 'transparent',
@@ -260,6 +272,9 @@ const styles = StyleSheet.create({
     },
     inactiveText: {
         color: '#374151',
+    },
+    multiSelectButtonGroup: {
+        marginBottom: 16,
     },
 });
 
