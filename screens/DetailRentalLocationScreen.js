@@ -49,7 +49,7 @@ const mockData = {
     ],
 };
 
-const DetailRentalLocationScreen = () => {
+const DetailRentalLocationScreen = ({ navigation }) => {
     const { destination, rooms } = mockData;
     const [isFavorite, setIsFavorite] = useState(false);
     const [selectedAmenities, setSelectedAmenities] = useState([]);
@@ -79,6 +79,10 @@ const DetailRentalLocationScreen = () => {
         ]);
     };
 
+    const handleCardPress = (room) => {
+        navigation.navigate('DetailAccomodation', { room });
+    };
+
     const filteredRooms = selectedAmenities.length > 0
         ? rooms.filter((room) =>
             selectedAmenities.every((amenity) => room.amenities?.includes(amenity))
@@ -89,7 +93,7 @@ const DetailRentalLocationScreen = () => {
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.mainContainer}>
                 <View style={styles.fixedHeaderActions}>
-                    <TouchableOpacity onPress={() => console.log('Back button pressed')}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-back" size={24} color="#333" />
                     </TouchableOpacity>
                     <View style={styles.actionIcons}>
@@ -161,7 +165,7 @@ const DetailRentalLocationScreen = () => {
                             location={room.location}
                             ratingPoint={room.rating}
                             numberOfReview={room.reviews}
-                            onCardPress={() => console.log(`${room.name} pressed`)}
+                            onCardPress={() => handleCardPress(room)}
                         />
                     ))}
                 </ScrollView>
