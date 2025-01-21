@@ -9,16 +9,20 @@ import {
     TouchableOpacity,
     FlatList,
     Dimensions,
+    Modal,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import MapWithPopup from '../components/MapWithPopup';
 import CustomButton from '../components/Button';
-import MultiSelectButtonGroup from '../components/MultiSelectButtonGroup';
 import Tag from '../components/Tag';
+import ImageViewing from 'react-native-image-viewing';
 import MultipleButtonNoSelect from '../components/MultipleButtonNoSelect';
 
 const RoomDetailScreen = ({ route, navigation }) => {
     const [activeTab, setActiveTab] = useState(0);
+    const [isImageModalVisible, setImageModalVisible] = useState(false);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+    const [currentImageSet, setCurrentImageSet] = useState([]);
     const { room } = route.params;
 
     const amenities = [
@@ -32,8 +36,32 @@ const RoomDetailScreen = ({ route, navigation }) => {
         'Gym'
     ];
 
-    const handleAmenitiesSelect = (selectedAmenities) => {
-        console.log('Selected amenities:', selectedAmenities);
+    const galleryImages = Array(12).fill(null).map((_, index) => ({
+        id: `image-${index}`,
+        source: require('../assets/images/beach.jpg')
+    }));
+
+    const reviewImages = Array(3).fill(null).map((_, index) => ({
+        id: `review-image-${index}`,
+        source: require('../assets/images/beach.jpg')
+    }));
+
+    const openGalleryModal = (index) => {
+        setCurrentImageSet(galleryImages.map(img => ({ uri: Image.resolveAssetSource(img.source).uri })));
+        setSelectedImageIndex(index);
+        setImageModalVisible(true);
+    };
+
+    const openReviewModal = (index) => {
+        setCurrentImageSet(reviewImages.map(img => ({ uri: Image.resolveAssetSource(img.source).uri })));
+        setSelectedImageIndex(index);
+        setImageModalVisible(true);
+    };
+
+    const openSingleImageModal = (image) => {
+        setCurrentImageSet([{ uri: Image.resolveAssetSource(image).uri }]);
+        setSelectedImageIndex(0);
+        setImageModalVisible(true);
     };
 
     const renderHeader = () => (
@@ -49,10 +77,12 @@ const RoomDetailScreen = ({ route, navigation }) => {
 
     const renderMainInfo = () => (
         <View style={styles.mainInfo}>
-            <Image
-                source={require('../assets/images/beach.jpg')}
-                style={styles.mainImage}
-            />
+            <TouchableOpacity onPress={() => openSingleImageModal(require('../assets/images/beach.jpg'))}>
+                <Image
+                    source={require('../assets/images/beach.jpg')}
+                    style={styles.mainImage}
+                />
+            </TouchableOpacity>
             <View style={styles.infoContainer}>
                 <View style={styles.roomHeader}>
                     <Text style={styles.roomName}>Phòng 1</Text>
@@ -90,7 +120,7 @@ const RoomDetailScreen = ({ route, navigation }) => {
             />
         </View>
     );
-    
+
     const renderLocation = () => (
         <View style={styles.locationSection}>
             <Text style={styles.sectionTitle}>Location</Text>
@@ -134,33 +164,35 @@ const RoomDetailScreen = ({ route, navigation }) => {
 
         return (
             <FlatList
-                data={Array(12).fill(null)}
+                data={galleryImages}
                 numColumns={numColumns}
                 contentContainerStyle={styles.photosContainer}
-                renderItem={({ index }) => (
-                    <View
+                renderItem={({ item, index }) => (
+                    <TouchableOpacity
+                        onPress={() => openGalleryModal(index)}
                         style={[
                             styles.imageWrapper,
                             {
                                 marginRight: (index + 1) % numColumns === 0 ? 0 : spacing,
                                 marginBottom: spacing,
-                            }
+                            },
                         ]}
                     >
                         <Image
-                            source={require('../assets/images/beach.jpg')}
+                            source={item.source}
                             style={[
                                 styles.gridImage,
-                                { width: imageWidth, height: imageWidth }
+                                { width: imageWidth, height: imageWidth },
                             ]}
                             resizeMode="cover"
                         />
-                    </View>
+                    </TouchableOpacity>
                 )}
-                keyExtractor={(_, index) => index.toString()}
+                keyExtractor={item => item.id}
             />
         );
     };
+
     const renderReviews = () => (
         <View style={styles.reviewsContainer}>
             <View style={styles.ratingSummaryContainer}>
@@ -201,19 +233,22 @@ const RoomDetailScreen = ({ route, navigation }) => {
                 </View>
                 <Text style={styles.reviewText}>Gất tuyệt 🥰💯</Text>
                 <View style={styles.reviewImagesContainer}>
-                    {[1, 2, 3].map((_, index) => (
-                        <Image
-                            key={index}
-                            source={require('../assets/images/beach.jpg')}
-                            style={styles.reviewImage}
-                        />
+                    {reviewImages.map((image, index) => (
+                        <TouchableOpacity
+                            key={image.id}
+                            onPress={() => openReviewModal(index)}
+                        >
+                            <Image
+                                source={image.source}
+                                style={styles.reviewImage}
+                            />
+                        </TouchableOpacity>
                     ))}
                 </View>
                 <Text style={styles.reviewDate}>30/12/2024</Text>
             </View>
         </View>
     );
-
 
     const renderContent = () => {
         switch (activeTab) {
@@ -252,9 +287,17 @@ const RoomDetailScreen = ({ route, navigation }) => {
                     backgroundColor="#101828"
                 />
             </View>
+            <ImageViewing
+                images={currentImageSet}
+                imageIndex={selectedImageIndex}
+                visible={isImageModalVisible}
+                onRequestClose={() => setImageModalVisible(false)}
+                keyExtractor={(_, index) => `modal-image-${index}`}
+            />
         </SafeAreaView>
     );
 };
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -306,12 +349,62 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#4e72e3',
     },
+    reviewContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    ratingText: {
+        marginLeft: 8,
+        color: '#555',
+    },
+    amenitiesContainer: {
+        paddingHorizontal: 16,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    locationSection: {
+        padding: 16,
+    },
+    tabContainer: {
+        flexDirection: 'row',
+        padding: 16,
+        backgroundColor: '#f8f9fa',
+    },
+    tab: {
+        flex: 1,
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+    activeTab: {
+        borderBottomWidth: 2,
+        borderBottomColor: '#4e72e3',
+    },
+    tabText: {
+        color: '#666',
+    },
+    activeTabText: {
+        color: '#4e72e3',
+        fontWeight: '600',
+    },
+    photosContainer: {
+        padding: 16,
+    },
+    imageWrapper: {
+        overflow: 'hidden',
+    },
+    gridImage: {
+        borderRadius: 8,
+    },
     reviewsContainer: {
         padding: 16,
         backgroundColor: '#f8f9fa',
     },
     ratingSummaryContainer: {
-        flexDirection: 'row-reverse',
+        flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 16,
     },
@@ -358,13 +451,9 @@ const styles = StyleSheet.create({
     },
     reviewCard: {
         backgroundColor: '#fff',
-        borderRadius: 12,
         padding: 16,
+        borderRadius: 12,
         marginBottom: 16,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
     },
     reviewHeader: {
         flexDirection: 'row',
@@ -377,120 +466,6 @@ const styles = StyleSheet.create({
         marginRight: 12,
     },
     reviewerDetails: {
-        flexDirection: 'row',
-        justifyContent: 'space-around'
-    },
-    reviewerName: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#333',
-    },
-    starContainer: {
-        flexDirection: 'row',
-        marginTop: 4,
-    },
-    reviewText: {
-        fontSize: 14,
-        color: '#666',
-        marginTop: 8,
-        marginBottom: 8,
-    },
-    reviewImagesContainer: {
-        flexDirection: 'row',
-        marginTop: 8,
-    },
-    reviewImage: {
-        width: 60,
-        height: 60,
-        borderRadius: 8,
-        marginRight: 8,
-    },
-    reviewDate: {
-        fontSize: 12,
-        color: '#999',
-        marginTop: 8,
-    },
-    tabContainer: {
-        flexDirection: 'row',
-        padding: 16,
-        backgroundColor: '#f8f9fa',
-    },
-    tab: {
-        flex: 1,
-        alignItems: 'center',
-        paddingVertical: 12,
-    },
-    activeTab: {
-        borderBottomWidth: 2,
-        borderBottomColor: '#4e72e3',
-    },
-    tabText: {
-        color: '#666',
-    },
-    activeTabText: {
-        color: '#4e72e3',
-        fontWeight: '600',
-    },
-    amenitiesContainer: {
-        paddingHorizontal: 16,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },  
-    locationSection: {
-        padding: 16,
-    },
-    photosContainer: {
-        padding: 16,
-    },
-    imageWrapper: {
-        overflow: 'hidden',
-    },
-    gridImage: {
-        borderRadius: 8,
-    },
-    ratingBreakdown: {
-        marginBottom: 16,
-    },
-    ratingBar: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    ratingNumber: {
-        width: 20,
-        marginRight: 8,
-    },
-    barContainer: {
-        flex: 1,
-        height: 8,
-        backgroundColor: '#f0f0f0',
-        borderRadius: 4,
-    },
-    bar: {
-        height: 8,
-        backgroundColor: '#ffc907',
-        borderRadius: 4,
-    },
-    reviewCard: {
-        backgroundColor: '#fff',
-        padding: 16,
-        borderRadius: 12,
-        marginBottom: 16,
-    },
-    reviewHeader: {
-        flexDirection: 'row',
-        marginBottom: 8,
-    },
-    reviewerImage: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        marginRight: 12,
-    },
-    reviewerInfo: {
         flex: 1,
     },
     reviewerName: {
@@ -503,6 +478,23 @@ const styles = StyleSheet.create({
     reviewText: {
         color: '#666',
     },
+    reviewImagesContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        marginVertical: 8,
+    },
+    reviewImage: {
+        width: 60,
+        height: 60,
+        borderRadius: 8,
+        marginRight: 8,
+    },
+    reviewDate: {
+        fontSize: 12,
+        color: '#999',
+        marginTop: 8,
+        alignSelf: 'flex-end',
+    },
     footer: {
         padding: 14,
         backgroundColor: '#f8f9fa',
@@ -510,16 +502,18 @@ const styles = StyleSheet.create({
     bookButton: {
         width: '100%',
     },
-
-    reviewContainer: {
-        flexDirection: 'row',
+    modalBackground: {
+        flex: 1,
+        justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 8,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
     },
-    ratingText: {
-        marginLeft: 8,
-        color: '#555',
-    }
+    fullScreenImage: {
+        width: '90%',
+        height: '90%',
+        borderRadius: 20,
+        resizeMode: 'contain',
+    },
 });
 
 export default RoomDetailScreen;
