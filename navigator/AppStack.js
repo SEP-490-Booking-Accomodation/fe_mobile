@@ -13,6 +13,8 @@ import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 import DetailRentalLocationScreen from "../screens/DetailRentalLocationScreen";
 import RoomDetailScreen from "../screens/RoomDetailScreen";
+import PolicyScreen from "../screens/PolicyScreen";
+import PolicyDetailScreen from "../screens/PolicyDetailScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -61,6 +63,8 @@ const AppStack = () => {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="DetailRentalLocation" component={DetailRentalLocationScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="DetailAccomodation" component={RoomDetailScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="Policies" component={PolicyScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="PolicyDetail" component={PolicyDetailScreen} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </>
   );
