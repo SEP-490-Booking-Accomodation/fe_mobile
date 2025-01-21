@@ -29,7 +29,7 @@ export default function SimpleVerticalCard(props) {
 
             <View style={styles.contentContainer}>
                 <Text style={styles.title}>{placeName}</Text>
-                <Text style={styles.price}>{price}/h</Text>
+                <Text style={styles.price}>{price}</Text>
 
                 <View style={styles.locationContainer}>
                     <Icon name="location-on" size={16} color={"#4e72e3"} />
