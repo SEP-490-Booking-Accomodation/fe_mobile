@@ -11,36 +11,28 @@ import {
     Dimensions
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import CustomButton from '../components/Button';
-import CustomInput from '../components/TextInput';
-import IconButton from '../components/IconButton';
+import CustomButton from '../../components/buttons/Button';
+import CustomInput from '../../components/TextInput';
+import IconButton from '../../components/buttons/IconButton';
 
 const { height } = Dimensions.get('window');
 
-const ResetPasswordScreen = () => {
+const ForgotPasswordScreen = () => {
     const navigation = useNavigation();
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const handleResetPassword = () => {
-        if (password !== confirmPassword) {
-            alert("Mật khẩu không khớp!");
-            return;
-        }
+    const handleLogin = () => {
         setLoading(true);
         setTimeout(() => {
             setLoading(false);
-            navigation.replace('Home');
+            navigation.replace('ResetPassword');
         }, 1500);
     };
 
-    const isFormValid = password === confirmPassword && password !== '' && confirmPassword !== '';
-
     return (
         <ImageBackground
-            source={require('../assets/images/bg_login.png')}
+            source={require('../../assets/images/bg_login.png')}
             style={styles.backgroundImage}
         >
             <View style={styles.safeArea}>
@@ -60,45 +52,45 @@ const ResetPasswordScreen = () => {
                             style={styles.backButton}
                         />
                         <View style={styles.header}>
-                            <Text style={styles.title}>Đặt lại mật khẩu</Text>
+                            <Text style={styles.title}>Quên mật khẩu</Text>
                             <Text style={styles.subtitle}>
-                                Renew hành trình của bạn: Đặt lại mật khẩu
+                                Nhập email hoặc số điện thoại của bạn để khôi phục mật khẩu.
                             </Text>
                         </View>
                         <View style={styles.card}>
                             <View style={styles.formContainer}>
                                 <View style={styles.dot} />
                                 <CustomInput
-                                    label="Mật khẩu mới"
-                                    placeholder="*************"
-                                    value={password}
-                                    onChangeText={setPassword}
-                                    secureTextEntry
+                                    label="Email hoặc Số điện thoại"
+                                    placeholder="Nhập email hoặc số điện thoại"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    autoCapitalize="none"
+                                    keyboardType="email-address"
                                     containerStyle={styles.inputContainer}
                                     inputContainerStyle={styles.input}
-                                    passwordIconColor="#6B7280"
-                                />
-                                <CustomInput
-                                    label="Xác nhận mật khẩu mới"
-                                    placeholder="*************"
-                                    value={confirmPassword}
-                                    onChangeText={setConfirmPassword}
-                                    secureTextEntry
-                                    containerStyle={styles.inputContainer}
-                                    inputContainerStyle={styles.input}
-                                    passwordIconColor="#6B7280"
                                 />
                                 <CustomButton
-                                    title="Đặt lại mật khẩu"
+                                    title="Gửi"
                                     backgroundColor="#1A2741"
                                     disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
                                     titleColor="#FFFFFF"
                                     disabledTitleColor="#FFFFFF"
                                     loading={loading}
-                                    disabled={!isFormValid}
+                                    disabled={!email}
                                     style={styles.loginButton}
-                                    onPress={handleResetPassword}
+                                    onPress={handleLogin}
                                 />
+                                <View style={styles.signupContainer}>
+                                    <Text style={styles.signupText}>
+                                        Đã có tài khoản?{' '}
+                                    </Text>
+                                    <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                                        <Text style={styles.signupButtonText}>
+                                            Đăng nhập
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         </View>
                     </View>
@@ -173,6 +165,9 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#E2E8F0',
     },
+    loginButton: {
+        marginBottom: 24,
+    },
     signupContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -189,4 +184,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ResetPasswordScreen;
+export default ForgotPasswordScreen;

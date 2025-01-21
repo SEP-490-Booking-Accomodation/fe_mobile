@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
-import PolicyItem from "../components/policies/PolicyItem";
+import PolicyItem from "../../components/policies/PolicyItem";
 import { useNavigation } from "@react-navigation/native";
-import { mockPolicies } from "../data/mockData";
+import { mockPolicies } from "../../data/mockData";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 

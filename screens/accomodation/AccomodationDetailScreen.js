@@ -12,13 +12,13 @@ import {
     Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import MapWithPopup from '../components/MapWithPopup';
-import CustomButton from '../components/Button';
-import Tag from '../components/Tag';
+import MapWithPopup from '../../components/MapWithPopup';
+import CustomButton from '../../components/buttons/Button';
+import Tag from '../../components/Tag';
 import ImageViewing from 'react-native-image-viewing';
-import MultipleButtonNoSelect from '../components/MultipleButtonNoSelect';
+import MultipleButtonNoSelect from '../../components/buttons/MultipleButtonNoSelect';
 
-const RoomDetailScreen = ({ route, navigation }) => {
+const AccomodationDetailScreen = ({ route, navigation }) => {
     const [activeTab, setActiveTab] = useState(0);
     const [isImageModalVisible, setImageModalVisible] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -92,9 +92,9 @@ const RoomDetailScreen = ({ route, navigation }) => {
 
     const renderMainInfo = () => (
         <View style={styles.mainInfo}>
-            <TouchableOpacity onPress={() => openSingleImageModal(require('../assets/images/beach.jpg'))}>
+            <TouchableOpacity onPress={() => openSingleImageModal(require('../../assets/images/beach.jpg'))}>
                 <Image
-                    source={require('../assets/images/beach.jpg')}
+                    source={require('../../assets/images/beach.jpg')}
                     style={styles.mainImage}
                 />
             </TouchableOpacity>
@@ -232,7 +232,7 @@ const RoomDetailScreen = ({ route, navigation }) => {
                <View key={index} style={styles.reviewCard}>
                    <View style={styles.reviewHeader}>
                        <Image
-                           source={require('../assets/images/beach.jpg')}
+                           source={require('../../assets/images/beach.jpg')}
                            style={styles.reviewerImage}
                        />
                        <View style={styles.reviewerDetails}>
@@ -536,4 +536,4 @@ const styles = StyleSheet.create({
    },
 });
 
-export default RoomDetailScreen;
+export default AccomodationDetailScreen;

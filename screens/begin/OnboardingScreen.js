@@ -6,9 +6,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const { width, height } = Dimensions.get("window");
 
 const slides = [
-  { image: require("../assets/images/mountain.jpg") },
-  { image: require("../assets/images/lake.jpg") },
-  { image: require("../assets/images/beach.jpg") },
+  { image: require("../../assets/images/mountain.jpg") },
+  { image: require("../../assets/images/lake.jpg") },
+  { image: require("../../assets/images/beach.jpg") },
 ];
 const OnboardingScreen = ({ navigation }) => {
   const swiperRef = useRef(null);
@@ -49,7 +49,7 @@ const OnboardingScreen = ({ navigation }) => {
               {index > 0 && (
                 <TouchableOpacity onPress={handleBack} style={styles.backButton}>
                   <Image
-                    source={require("../assets/icons/back.png")}
+                    source={require("../../assets/icons/back.png")}
                     style={styles.navIcon}
                   />
                 </TouchableOpacity>
@@ -57,7 +57,7 @@ const OnboardingScreen = ({ navigation }) => {
               {index === slides.length - 1 && (
                 <TouchableOpacity onPress={handleDone}>
                   <Image
-                    source={require("../assets/icons/check.png")}
+                    source={require("../../assets/icons/check.png")}
                     style={styles.navIcon}
                   />
                 </TouchableOpacity>

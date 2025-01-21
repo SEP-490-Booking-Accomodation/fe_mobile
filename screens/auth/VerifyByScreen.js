@@ -10,9 +10,9 @@ import {
     Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import CustomButton from '../components/Button';
+import CustomButton from '../../components/buttons/Button';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import IconButton from '../components/IconButton';
+import IconButton from '../../components/buttons/IconButton';
 
 const { height } = Dimensions.get('window');
 
@@ -22,7 +22,7 @@ const VerifyByScreen = () => {
 
     return (
         <ImageBackground
-            source={require('../assets/images/bg_login.png')}
+            source={require('../../assets/images/bg_login.png')}
             style={styles.backgroundImage}
         >
             <View style={styles.safeArea}>

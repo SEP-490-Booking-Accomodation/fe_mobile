@@ -2,19 +2,19 @@ import React, { useEffect, useState } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar, ActivityIndicator, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import SplashScreen from "../screens/SplashScreen";
-import OnboardingScreen from "../screens/OnboardingScreen";
-import LoginScreen from "../screens/LoginScreen";
-import RegisterScreen from "../screens/RegisterScreen";
+import SplashScreen from "../screens/begin/SplashScreen";
+import OnboardingScreen from "../screens/begin/OnboardingScreen";
+import LoginScreen from "../screens/auth/LoginScreen";
+import RegisterScreen from "../screens/auth/RegisterScreen";
 import HomeScreen from "../screens/HomeScreen"
-import VerifyByScreen from "../screens/VerifyByScreen";
-import OTPVerificationScreen from "../screens/OTPVerificationScreen";
-import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
-import ResetPasswordScreen from "../screens/ResetPasswordScreen";
-import DetailRentalLocationScreen from "../screens/DetailRentalLocationScreen";
-import RoomDetailScreen from "../screens/RoomDetailScreen";
-import PolicyScreen from "../screens/PolicyScreen";
-import PolicyDetailScreen from "../screens/PolicyDetailScreen";
+import VerifyByScreen from "../screens/auth/VerifyByScreen";
+import OTPVerificationScreen from "../screens/auth/OTPVerificationScreen";
+import ForgotPasswordScreen from "../screens/auth/ForgotPasswordScreen";
+import ResetPasswordScreen from "../screens/auth/ResetPasswordScreen";
+import DetailRentalLocationScreen from "../screens/rentalLocation/DetailRentalLocationScreen";
+import AccomodationDetailScreen from "../screens/accomodation/AccomodationDetailScreen";
+import PolicyScreen from "../screens/policies/PolicyScreen";
+import PolicyDetailScreen from "../screens/policies/PolicyDetailScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -62,7 +62,7 @@ const AppStack = () => {
         <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="DetailRentalLocation" component={DetailRentalLocationScreen} options={{ headerShown: false }}/>
-        <Stack.Screen name="DetailAccomodation" component={RoomDetailScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="DetailAccomodation" component={AccomodationDetailScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="Policies" component={PolicyScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="PolicyDetail" component={PolicyDetailScreen} options={{ headerShown: false }}/>
       </Stack.Navigator>

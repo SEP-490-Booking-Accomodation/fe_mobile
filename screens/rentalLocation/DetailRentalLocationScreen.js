@@ -11,10 +11,10 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import MultiSelectButtonGroup from '../components/MultiSelectButtonGroup';
-import Tag from '../components/Tag';
-import SimpleVerticalCard from '../components/cards/SimpleVerticalCard';
-import { mockData } from '../data/mockData';
+import MultiSelectButtonGroup from '../../components/buttons/MultiSelectButtonGroup';
+import Tag from '../../components/Tag';
+import SimpleVerticalCard from '../../components/cards/SimpleVerticalCard';
+import { mockData } from '../../data/mockData';
 
 const DetailRentalLocationScreen = ({ navigation }) => {
     const destination = mockData.destinations[0];
@@ -82,7 +82,7 @@ const DetailRentalLocationScreen = ({ navigation }) => {
                 <ScrollView style={styles.container}>
                     <View style={styles.headerContainer}>
                         <Image
-                            source={require('../assets/images/beach.jpg')}
+                            source={require('../../assets/images/beach.jpg')}
                             style={styles.headerImage}
                         />
                         <View style={styles.headerDetails}>
