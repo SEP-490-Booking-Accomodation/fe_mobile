@@ -12,8 +12,8 @@ import {
     TextInput
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import CustomButton from '../components/Button';
-import IconButton from '../components/IconButton';
+import CustomButton from '../../components/buttons/Button';
+import IconButton from '../../components/buttons/IconButton';
 
 const { height } = Dimensions.get('window');
 
@@ -42,7 +42,7 @@ const LoginScreen = () => {
 
     return (
         <ImageBackground
-            source={require('../assets/images/bg_login.png')}
+            source={require('../../assets/images/bg_login.png')}
             style={styles.backgroundImage}
         >
             <View style={styles.safeArea}>
