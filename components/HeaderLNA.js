@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 
-const Header = ({
+const HeaderLNA = ({
   location = "Your Location",
   onNotificationPress,
   onAvatarPress,
@@ -14,7 +14,13 @@ const Header = ({
       {/* Location */}
       <View style={styles.locationContainer}>
         <Icon name="location-outline" size={24} color="#4E72E3" />
-        <Text style={styles.locationText}>{location}</Text>
+        <Text
+          numberOfLines={1} // Giới hạn chỉ hiển thị 1 dòng
+          ellipsizeMode="tail" // Hiển thị dấu ba chấm ở cuối nếu quá dài
+          style={styles.locationText}
+        >
+          {location || "Đang tải..."}
+        </Text>
       </View>
 
       {/* Right Side (Notification + Avatar) */}
@@ -60,13 +66,16 @@ const styles = StyleSheet.create({
   },
   locationContainer: {
     flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   locationText: {
-    fontSize: 18,
+    fontSize: 12,
     fontWeight: "500",
     color: "#4E72E3",
     marginLeft: 10,
+    maxWidth: "100%", // Đảm bảo giới hạn chiều rộng
+    overflow: "hidden", // Ẩn nội dung thừa
   },
   rightContainer: {
     flexDirection: "row",
@@ -101,4 +110,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Header;
+export default HeaderLNA;
