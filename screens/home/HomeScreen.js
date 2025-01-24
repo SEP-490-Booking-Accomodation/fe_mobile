@@ -10,12 +10,12 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import BottomTabs from "../../components/BottomTabs";
-import SearchField from "../../components/SearchField";
 import HeaderLNA from "../../components/HeaderLNA";
 import * as Location from "expo-location";
 import { CheckLocation } from "./CheckLocation";
 import LocationList from "./LocationList";
 import { Scroll } from "lucide-react-native";
+import SearchField from "./SearchField";
 
 export default function HomeScreen() {
   const navigation = useNavigation();
@@ -117,7 +117,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
-  paddingVertical: { paddingHorizontal: 10 },
+  paddingVertical: { paddingHorizontal: 20 },
   button: {
     backgroundColor: "#1D4ED8",
     paddingVertical: 12,
