@@ -6,7 +6,7 @@ import SplashScreen from "../screens/begin/SplashScreen";
 import OnboardingScreen from "../screens/begin/OnboardingScreen";
 import LoginScreen from "../screens/auth/LoginScreen";
 import RegisterScreen from "../screens/auth/RegisterScreen";
-import HomeScreen from "../screens/HomeScreen"
+import HomeScreen from "../screens/home/HomeScreen";
 import VerifyByScreen from "../screens/auth/VerifyByScreen";
 import OTPVerificationScreen from "../screens/auth/OTPVerificationScreen";
 import ForgotPasswordScreen from "../screens/auth/ForgotPasswordScreen";
@@ -52,21 +52,75 @@ const AppStack = () => {
   return (
     <>
       <StatusBar animated={true} />
-      <Stack.Navigator initialRouteName="Splash" screenOptions={{ gestureEnabled: false }}>
-        <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="VerifyBy" component={VerifyByScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="DetailRentalLocation" component={DetailRentalLocationScreen} options={{ headerShown: false }}/>
-        <Stack.Screen name="DetailAccomodation" component={AccomodationDetailScreen} options={{ headerShown: false }}/>
-        <Stack.Screen name="Policies" component={PolicyScreen} options={{ headerShown: false }}/>
-        <Stack.Screen name="PolicyDetail" component={PolicyDetailScreen} options={{ headerShown: false }}/>
-        <Stack.Screen name="Map" component={MapScreen} options={{ headerShown: false }}/>
+      <Stack.Navigator
+        initialRouteName="Splash"
+        screenOptions={{ gestureEnabled: false }}
+      >
+        <Stack.Screen
+          name="Splash"
+          component={SplashScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Onboarding"
+          component={OnboardingScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Register"
+          component={RegisterScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="VerifyBy"
+          component={VerifyByScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="OTPVerification"
+          component={OTPVerificationScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ForgotPassword"
+          component={ForgotPasswordScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ResetPassword"
+          component={ResetPasswordScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="DetailRentalLocation"
+          component={DetailRentalLocationScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="DetailAccomodation"
+          component={AccomodationDetailScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Policies"
+          component={PolicyScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="PolicyDetail"
+          component={PolicyDetailScreen}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </>
   );
