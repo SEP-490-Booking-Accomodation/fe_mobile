@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, PanResponder, Animated, Dimensions } from 'react-native';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
-import ButtonGroup from '../components/ButtonGroup';
-import MultiSelectButtonGroup from '../components/MultiSelectButtonGroup';
-import CustomButton from '../components/Button';
+import ButtonGroup from '../components/buttons/ButtonGroup';
+import MultiSelectButtonGroup from '../components/buttons/MultiSelectButtonGroup';
+import CustomButton from '../components/buttons/Button';
 
 const Filter = ({ visible, onClose, onApply }) => {
     const [priceRange, setPriceRange] = useState([100000, 100000000]);

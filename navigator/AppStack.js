@@ -15,6 +15,7 @@ import DetailRentalLocationScreen from "../screens/rentalLocation/DetailRentalLo
 import AccomodationDetailScreen from "../screens/accomodation/AccomodationDetailScreen";
 import PolicyScreen from "../screens/policies/PolicyScreen";
 import PolicyDetailScreen from "../screens/policies/PolicyDetailScreen";
+import MapScreen from "../screens/map/MapScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -65,6 +66,7 @@ const AppStack = () => {
         <Stack.Screen name="DetailAccomodation" component={AccomodationDetailScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="Policies" component={PolicyScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="PolicyDetail" component={PolicyDetailScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="Map" component={MapScreen} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </>
   );
