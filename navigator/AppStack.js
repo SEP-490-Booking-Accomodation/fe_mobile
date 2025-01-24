@@ -121,6 +121,11 @@ const AppStack = () => {
           component={PolicyDetailScreen}
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="Map"
+          component={MapScreen}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </>
   );
