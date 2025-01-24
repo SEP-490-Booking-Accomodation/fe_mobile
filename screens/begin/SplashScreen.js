@@ -7,7 +7,7 @@ const SplashScreenComponent = ({ navigation }) => {
     const loadApp = async () => {
       await SplashScreen.preventAutoHideAsync();
       setTimeout(async () => {
-        await SplashScreen.hideAsync(); 
+        await SplashScreen.hideAsync();
         navigation.replace("Onboarding");
       }, 3000);
     };

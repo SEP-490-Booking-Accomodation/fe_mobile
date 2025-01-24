@@ -12,6 +12,7 @@ export const AsyncStorageProvider = ({ children }) => {
   const navigation = useNavigation();
 
   const [data, setData] = useState(null);
+  const [searchHistory, setSearchHistory] = useState([]);
 
   const loadData = async () => {
     try {
@@ -51,6 +52,7 @@ export const AsyncStorageProvider = ({ children }) => {
 
   useEffect(() => {
     loadData();
+    loadSearchHistory();
   }, []);
 
   const logout = async () => {
@@ -62,9 +64,66 @@ export const AsyncStorageProvider = ({ children }) => {
       console.error("Logout failed:", error);
     }
   };
+
+  const loadSearchHistory = async () => {
+    try {
+      const history = await AsyncStorage.getItem("search_history");
+      if (history) {
+        setSearchHistory(JSON.parse(history));
+      }
+    } catch (error) {
+      console.error("Failed to load search history:", error);
+    }
+  };
+  const addSearchTerm = async (term) => {
+    try {
+      const updatedHistory = [term, ...searchHistory.filter((t) => t !== term)];
+      if (updatedHistory.length > 6) {
+        updatedHistory.pop(); // Giới hạn 6 mục
+      }
+      setSearchHistory(updatedHistory);
+      await AsyncStorage.setItem(
+        "search_history",
+        JSON.stringify(updatedHistory)
+      );
+    } catch (error) {
+      console.error("Failed to add search term:", error);
+    }
+  };
+
+  const clearSearchHistory = async () => {
+    try {
+      await AsyncStorage.removeItem("search_history");
+      setSearchHistory([]);
+    } catch (error) {
+      console.error("Failed to clear search history:", error);
+    }
+  };
+  const removeSearchTerm = async (term) => {
+    try {
+      const updatedHistory = searchHistory.filter((t) => t !== term);
+      setSearchHistory(updatedHistory);
+      await AsyncStorage.setItem(
+        "search_history",
+        JSON.stringify(updatedHistory)
+      );
+    } catch (error) {
+      console.error("Failed to remove search term:", error);
+    }
+  };
+
   return (
     <AsyncStorageContext.Provider
-      value={{ data, saveData, removeItems, logout }}
+      value={{
+        data,
+        saveData,
+        removeItems,
+        logout,
+        searchHistory,
+        addSearchTerm,
+        clearSearchHistory,
+        removeSearchTerm,
+      }}
     >
       {children}
     </AsyncStorageContext.Provider>

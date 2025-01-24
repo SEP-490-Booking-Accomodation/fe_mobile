@@ -12,21 +12,13 @@ export default function LocationList() {
   const [selectedFilter, setSelectedFilter] = useState("Tất cả");
 
   const filters = ["Tất cả", "Gợi ý", "Yêu thích", "Phổ biến", "Gần bạn"];
-  // const filteredData = data.filter((item) => {
-  //   if (selectedFilter === "Tất cả") return true;
-  //   // Bạn có thể thêm các điều kiện lọc khác ở đây dựa trên loại bộ lọc
-  //   if (selectedFilter === "Yêu thích") return item.name.includes("Yêu thích");
-  //   if (selectedFilter === "Phổ biến") return item.name.includes("Phổ biến");
-  //   if (selectedFilter === "Gần bạn") return item.location.includes("HCM");
-  //   return false;
-  // });
 
   return (
-    <View>
+    <View style={styles.container}>
       <View style={styles.jusSpace}>
         <Text style={styles.h4}>Khám phá các thành phố</Text>
         <TouchableOpacity>
-          <Text>Xem tất cả</Text>
+          <Text style={styles.viewAllText}>Xem tất cả</Text>
         </TouchableOpacity>
       </View>
       <ScrollView
@@ -77,9 +69,7 @@ export default function LocationList() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: "#f4f4f4",
+    marginVertical: 10,
   },
   filterContainer: {
     // marginBottom: 16,
@@ -87,7 +77,10 @@ const styles = StyleSheet.create({
   filterButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: "#ddd",
+    backgroundColor: "#fff",
+    borderColor: "#4e72e3",
+    color: "#4e72e3",
+    borderWidth: 1,
     borderRadius: 20,
     marginRight: 10, // Khoảng cách giữa các nút
   },
@@ -116,10 +109,12 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
+    alignItems: "center",
+    marginBottom: 20,
   },
   h4: {
     fontSize: 18,
     fontWeight: 500,
   },
+  viewAllText: { color: "#4E72E3", fontWeight: 600 },
 });
