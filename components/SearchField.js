@@ -1,3 +1,4 @@
+import { AntDesign } from "@expo/vector-icons";
 import React from "react";
 import {
   View,
@@ -54,7 +55,7 @@ const SearchField = ({
           //   style={styles.iconFilterContainer}
         >
           <View style={styles.iconFilter}>
-            <Icon name="filter-outline" size={24} color="#fff" />
+            <AntDesign name="filter" size={26} color="#fff" />
           </View>
         </TouchableOpacity>
       )}
@@ -67,17 +68,17 @@ const styles = StyleSheet.create({
   wrapper: {
     flexDirection: "row",
     alignItems: "center",
-    marginHorizontal: 10,
-    paddingVertical: 10,
+    // marginHorizontal: 10,
+    // paddingVertical: 10,
   },
   searchContainer: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#f7f7f7",
     borderRadius: 30,
-    backgroundColor: "#fff",
+    backgroundColor: "#f7f7f7",
     paddingHorizontal: 18,
     paddingVertical: 10,
   },
@@ -107,12 +108,12 @@ const styles = StyleSheet.create({
   },
 
   iconFilter: {
-    padding: 8,
+    padding: 10,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 12,
     backgroundColor: "#6F8EF1",
-    marginLeft: 8,
+    marginLeft: 20,
   },
 });
 
