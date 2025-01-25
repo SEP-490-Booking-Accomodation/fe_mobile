@@ -10,7 +10,7 @@ const BottomTabs = ({ navigation, state }) => {
   const tabs = [
     { icon: (color) => <Ionicons name="home" size={24} color={color} />, route: 'Home' },
     { icon: (color) => <Ionicons name="chatbubble-outline" size={24} color={color} />, route: 'Messages' },
-    { icon: (color) => <Ionicons name="map" size={28} color={color} />, route: 'Map' }, // Icon Map lớn hơn
+    { icon: (color) => <Ionicons name="map" size={28} color={color} />, route: 'Map' }, 
     { icon: (color) => <MaterialIcons name="local-activity" size={24} color={color} />, route: 'Tickets' },
     { icon: (color) => <Feather name="settings" size={24} color={color} />, route: 'Settings' },
   ];
