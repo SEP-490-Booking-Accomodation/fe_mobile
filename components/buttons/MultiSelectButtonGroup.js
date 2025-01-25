@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 const MultiSelectButtonGroup = ({
     items = [],
-    onSelect = () => {},
+    selectedIndexes = [], 
+    onChange = () => {},
     containerStyle = {},
     buttonStyle = {},
     activeButtonStyle = {},
@@ -14,30 +15,22 @@ const MultiSelectButtonGroup = ({
     spacing = 8,
     borderRadius = 20,
 }) => {
-    const [selectedItems, setSelectedItems] = useState([]); 
-
-    const handlePress = (item) => {
-        const newSelectedItems = [...selectedItems];
-        const selectedIndex = newSelectedItems.indexOf(item);
+    const handlePress = (index) => {
+        const newSelectedIndexes = selectedIndexes.includes(index)
+            ? selectedIndexes.filter(selectedIndex => selectedIndex !== index)
+            : [...selectedIndexes, index];
         
-        if (selectedIndex === -1) {
-            newSelectedItems.push(item);
-        } else {
-            newSelectedItems.splice(selectedIndex, 1);
-        }
-        
-        setSelectedItems(newSelectedItems);
-        onSelect(newSelectedItems);
+        onChange(newSelectedIndexes);
     };
 
     return (
         <View style={[styles.container, containerStyle]}>
             {items.map((item, index) => {
-                const isSelected = selectedItems.includes(item);
+                const isSelected = selectedIndexes.includes(index);
                 return (
                     <TouchableOpacity
                         key={index}
-                        onPress={() => handlePress(item)}
+                        onPress={() => handlePress(index)}
                         style={[
                             styles.button,
                             {
@@ -83,23 +76,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         flexDirection: 'row',
     },
-    activeButton: {
-        backgroundColor: 'rgba(78, 114, 227, 0.33)',
-        borderColor: 'transparent',
-    },
-    inactiveButton: {
-        backgroundColor: 'white',
-        borderColor: '#E5E7EB',
-    },
     text: {
         fontSize: 14,
         fontWeight: '500',
-    },
-    activeText: {
-        color: 'white',
-    },
-    inactiveText: {
-        color: '#374151',
     },
     closeButton: {
         color: '#4D78FF',
@@ -107,6 +86,5 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
 });
-
 
 export default MultiSelectButtonGroup;
