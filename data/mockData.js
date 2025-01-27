@@ -1,44 +1,131 @@
 export const mockData = {
-  destinations: [{
-    id: '1',
-    name: 'Beach Resort',
-    location: 'Vũng Tàu',
-    rating: 4.5,
-    reviews: 3000,
-    openHours: 'Mở cửa 10:00 - 23:00',
-    description: 'A beautiful beach resort with stunning views and excellent amenities. Perfect for a weekend getaway or extended vacation. Enjoy the sea breeze and luxurious accommodations.',
-    amenities: ['WiFi', 'Pool', 'Parking', 'Restaurant', 'Spa'],
-    rooms: [
-      {
-        id: '1',
-        name: 'Deluxe Ocean View',
-        location: 'Wing A',
-        price: '500.000',
-        priceUnit: 'h',
-        rating: 4.5,
-        reviewCount: 3000,
-        imageUrl: require('../assets/images/beach.jpg'),
-        images: [
-          { id: '1', source: require('../assets/images/beach.jpg') },
-          { id: '2', source: require('../assets/images/beach.jpg') },
-          { id: '3', source: require('../assets/images/beach.jpg') }
-        ],
-        amenities: ['WiFi', 'AC', 'TV', 'Mini Bar', 'Ocean View'],
-        reviews: [{
+  destinations: [
+    {
+      id: '1',
+      name: 'Beach Resort',
+      location: 'Vũng Tàu',
+      rating: 4.5,
+      reviews: 3000,
+      openHours: 'Mở cửa 10:00 - 23:00',
+      description: 'A beautiful beach resort with stunning views and excellent amenities. Perfect for a weekend getaway or extended vacation. Enjoy the sea breeze and luxurious accommodations.',
+      coordinate: {
+        latitude: 10.4483,
+        longitude: 107.1438
+      },
+      amenities: ['WiFi', 'Pool', 'Parking', 'Restaurant', 'Spa'],
+      rooms: [
+        {
           id: '1',
-          userName: 'Zane Pham',
-          rating: 5,
-          comment: 'Gất tuyệt 🥰💯',
+          name: 'Deluxe Ocean View',
+          location: 'Wing A',
+          price: '500.000',
+          priceUnit: 'h',
+          rating: 4.5,
+          reviewCount: 3000,
+          imageUrl: require('../assets/images/beach.jpg'),
+          images: [
+            { id: '1', source: require('../assets/images/beach.jpg') },
+            { id: '2', source: require('../assets/images/beach.jpg') },
+            { id: '3', source: require('../assets/images/beach.jpg') }
+          ],
+          amenities: ['WiFi', 'AC', 'TV', 'Mini Bar', 'Ocean View'],
+          reviews: [{
+            id: '1',
+            userName: 'Zane Pham',
+            rating: 5,
+            comment: 'Gất tuyệt 🥰💯',
+            images: [
+              { id: '1', source: require('../assets/images/beach.jpg') },
+              { id: '2', source: require('../assets/images/beach.jpg') }
+            ],
+            date: '30/12/2024'
+          }]
+        }
+      ]
+    },
+    {
+      id: '2',
+      name: 'Mountain Retreat',
+      location: 'Đà Lạt',
+      rating: 4.8,
+      reviews: 2500,
+      openHours: 'Mở cửa 08:00 - 22:00',
+      description: 'A serene mountain retreat offering breathtaking views and peaceful surroundings. Perfect for those seeking relaxation and connection with nature.',
+      coordinate: {
+        latitude: 11.9404,
+        longitude: 108.4583
+      },
+      amenities: ['WiFi', 'Hiking Trails', 'Restaurant', 'Garden', 'Fireplace'],
+      rooms: [
+        {
+          id: '1',
+          name: 'Mountain View Suite',
+          location: 'Main Lodge',
+          price: '800.000',
+          priceUnit: 'h',
+          rating: 4.7,
+          reviewCount: 1500,
+          imageUrl: require('../assets/images/mountain.jpg'),
           images: [
             { id: '1', source: require('../assets/images/beach.jpg') },
             { id: '2', source: require('../assets/images/beach.jpg') }
           ],
-          date: '30/12/2024'
-        }]
-      }
-      // Add more rooms as needed
-    ]
-  }]
+          amenities: ['WiFi', 'Balcony', 'Heating', 'Mountain View'],
+          reviews: [{
+            id: '1',
+            userName: 'Emily Nguyen',
+            rating: 5,
+            comment: 'Tuyệt vời! Không gian yên bình và thoáng đãng.',
+            images: [
+              { id: '1', source: require('../assets/images/mountain.jpg') }
+            ],
+            date: '15/01/2025'
+          }]
+        }
+      ]
+    },
+    {
+      id: '3',
+      name: 'City Center Hotel',
+      location: 'Hồ Chí Minh',
+      rating: 4.3,
+      reviews: 4000,
+      openHours: 'Mở cửa 00:00 - 23:59',
+      description: 'A modern hotel located in the heart of the city, offering convenient access to shopping, dining, and cultural attractions.',
+      coordinate: {
+        latitude: 10.7769,
+        longitude: 106.7009
+      },
+      amenities: ['WiFi', 'Fitness Center', 'Restaurant', 'Bar', 'Concierge'],
+      rooms: [
+        {
+          id: '1',
+          name: 'Deluxe City View',
+          location: 'Main Building',
+          price: '700.000',
+          priceUnit: 'h',
+          rating: 4.4,
+          reviewCount: 2000,
+          imageUrl: require('../assets/images/beach.jpg'),
+          images: [
+            { id: '1', source: require('../assets/images/beach.jpg') },
+            { id: '2', source: require('../assets/images/beach.jpg') }
+          ],
+          amenities: ['WiFi', 'AC', 'City View', 'Work Desk'],
+          reviews: [{
+            id: '1',
+            userName: 'Michael Tran',
+            rating: 4,
+            comment: 'Tiện nghi và vị trí rất tốt.',
+            images: [
+              { id: '1', source: require('../assets/images/beach.jpg') }
+            ],
+            date: '20/02/2025'
+          }]
+        }
+      ]
+    }
+  ]
 };
 
 export const mockPolicies = [

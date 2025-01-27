@@ -16,9 +16,9 @@ import Tag from "../../components/Tag";
 import SimpleVerticalCard from "../../components/cards/SimpleVerticalCard";
 import { mockData } from "../../data/mockData";
 
-const DetailRentalLocationScreen = ({ navigation }) => {
-  const destination = mockData.destinations[0];
-  const { rooms } = destination;
+const DetailRentalLocationScreen = ({ route,navigation }) => {
+  const { destination } = route.params || {};
+  const { rooms } = destination || mockData.destinations[0];
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedAmenities, setSelectedAmenities] = useState([]);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
