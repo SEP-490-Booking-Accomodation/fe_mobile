@@ -8,6 +8,7 @@ import LoginScreen from "../screens/auth/LoginScreen";
 import RegisterScreen from "../screens/auth/RegisterScreen";
 import HomeScreen from "../screens/home/HomeScreen";
 import SearchScreen from "../screens/search/SearchScreen";
+import SearchResult from "../screens/search/SearchResult";
 import VerifyByScreen from "../screens/auth/VerifyByScreen";
 import OTPVerificationScreen from "../screens/auth/OTPVerificationScreen";
 import ForgotPasswordScreen from "../screens/auth/ForgotPasswordScreen";
@@ -104,6 +105,11 @@ const AppStack = () => {
         <Stack.Screen
           name="SearchScreen"
           component={SearchScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SearchResult"
+          component={SearchResult}
           options={{ headerShown: false }}
         />
         <Stack.Screen

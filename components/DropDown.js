@@ -68,21 +68,21 @@ const Dropdown = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 10,
+    // marginHorizontal: 10,
   },
   dropdown: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#fff",
+    // borderWidth: 1,
+    // borderColor: "#ccc",
+    // borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    // backgroundColor: "#ccc",
   },
   selectedText: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#333",
   },
   dropdownContainer: {
