@@ -6,60 +6,18 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
-  ScrollView,
+  FlatList,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
-import HorizontalCardSmall from "../../components/cards/HorizontalCardSmall";
 import HorizontalCardMedium from "../../components/cards/HorizontalCardMedium";
 
 const SearchScreen = ({ route, navigation }) => {
-  const [searchQuery, setSearchQuery] = useState(
-    route.params?.initialQuery || ""
-  );
   const { searchHistory, addSearchTerm, clearSearchHistory, removeSearchTerm } =
     useAsyncStorage();
   const [searchTerm, setSearchTerm] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const [showAllHistory, setShowAllHistory] = useState(false);
-
-  const handleSearch = () => {
-    if (searchTerm.trim()) {
-      addSearchTerm(searchTerm.trim());
-      setSearchQuery(searchTerm.trim());
-      setSearchTerm("");
-    }
-  };
-
-  const displayedHistory = showAllHistory
-    ? searchHistory
-    : searchHistory.slice(0, 3);
-
-  const renderHistoryItem = (item, index) => (
-    <View key={index} style={styles.historyItemContainer}>
-      <TouchableOpacity
-        style={styles.historyItem}
-        onPress={() => {
-          setSearchQuery(item);
-          setSearchTerm(item);
-          handleSearch();
-        }}
-      >
-        {/* <Icon
-          name="time-outline"
-          size={20}
-          color="#666"
-          style={styles.historyIcon}
-        /> */}
-        <Text style={styles.historyText}>{item}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={() => removeSearchTerm(item)}
-      >
-        <Icon name="close" size={20} color="#4E72E3" />
-      </TouchableOpacity>
-    </View>
-  );
 
   const exampleData = [
     {
@@ -92,22 +50,135 @@ const SearchScreen = ({ route, navigation }) => {
     },
   ];
 
-  const renderSuggestLocation = () =>
-    exampleData.map((item) => (
-      <HorizontalCardMedium
-        key={item.id}
-        imageUrlLogo={item.imageUrlLogo}
-        placeName={item.placeName}
-        openHour={item.openHour}
-        closeHour={item.closeHour}
-        minPrice={item.minPrice}
-        maxPrice={item.maxPrice}
-        location={item.location}
-        rating={item.rating}
-        numOfReviews={item.numOfReviews}
-        distance={item.distance}
+  const filteredHistory = searchTerm
+    ? searchHistory.filter((item) =>
+        item.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
+
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      addSearchTerm(searchTerm.trim());
+      navigation.navigate("SearchResult", { query: searchTerm.trim() });
+      setSearchTerm("");
+      setIsSearching(false);
+    }
+  };
+
+  const renderHistoryItem = ({ item }) => (
+    <View style={styles.historyItemContainer}>
+      <TouchableOpacity
+        style={styles.historyItem}
+        onPress={() => {
+          removeSearchTerm(item);
+          addSearchTerm(item);
+          setSearchTerm(item);
+          navigation.navigate("SearchResult", { query: item }); // Điều hướng
+        }}
+      >
+        <Text style={styles.historyText}>{item}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => removeSearchTerm(item)}
+      >
+        <Icon name="close" size={20} color="#4E72E3" />
+      </TouchableOpacity>
+    </View>
+  );
+  const renderHistoryItemOverlay = ({ item }) => (
+    <View style={styles.historyItemContainer}>
+      <TouchableOpacity
+        style={styles.historyItem}
+        onPress={() => {
+          removeSearchTerm(item);
+          addSearchTerm(item);
+          setSearchTerm(item);
+          navigation.navigate("SearchResult", { query: item }); // Điều hướng
+        }}
+      >
+        <Text style={styles.historyText}>{item}</Text>
+      </TouchableOpacity>
+
+      {/* <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => removeSearchTerm(item)}
+      >
+        <Icon name="close" size={20} color="#4E72E3" />
+      </TouchableOpacity> */}
+    </View>
+  );
+
+  const renderContent = () => {
+    const sections = [
+      {
+        title: "Lịch sử tìm kiếm",
+        data: showAllHistory ? searchHistory : searchHistory.slice(0, 3),
+        renderItem: renderHistoryItem,
+        keyExtractor: (item, index) => index.toString(),
+        footer:
+          searchHistory.length > 3 ? (
+            <>
+              <TouchableOpacity
+                onPress={() => setShowAllHistory(!showAllHistory)}
+                style={styles.showMoreButton}
+              >
+                <Text style={styles.showMoreText}>
+                  {showAllHistory ? "Ẩn bớt" : "Xem thêm"}
+                </Text>
+              </TouchableOpacity>
+              {showAllHistory && searchHistory.length > 0 && (
+                <TouchableOpacity
+                  onPress={clearSearchHistory}
+                  style={styles.clearHistoryButton}
+                >
+                  <Text style={styles.clearHistoryText}>Xóa tất cả</Text>
+                </TouchableOpacity>
+              )}
+            </>
+          ) : null,
+      },
+      {
+        title: "Gợi ý địa điểm",
+        data: exampleData,
+        renderItem: ({ item }) => (
+          <HorizontalCardMedium
+            key={item.id}
+            imageUrlLogo={item.imageUrlLogo}
+            placeName={item.placeName}
+            openHour={item.openHour}
+            closeHour={item.closeHour}
+            minPrice={item.minPrice}
+            maxPrice={item.maxPrice}
+            location={item.location}
+            rating={item.rating}
+            numOfReviews={item.numOfReviews}
+            distance={item.distance}
+          />
+        ),
+        keyExtractor: (item) => item.id.toString(),
+      },
+    ];
+
+    return (
+      <FlatList
+        data={sections}
+        keyExtractor={(item) => item.title}
+        renderItem={({ item }) => (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{item.title}</Text>
+            <FlatList
+              data={item.data}
+              renderItem={item.renderItem}
+              keyExtractor={item.keyExtractor}
+              ListFooterComponent={item.footer}
+            />
+          </View>
+        )}
       />
-    ));
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -122,12 +193,18 @@ const SearchScreen = ({ route, navigation }) => {
           style={styles.searchInput}
           placeholder="Nhập nội dung tìm kiếm"
           value={searchTerm}
-          onChangeText={setSearchTerm}
+          onChangeText={(text) => {
+            setSearchTerm(text);
+            setIsSearching(text.trim() !== "");
+          }}
           onSubmitEditing={handleSearch}
         />
         {searchTerm ? (
           <TouchableOpacity
-            onPress={() => setSearchTerm("")}
+            onPress={() => {
+              setSearchTerm("");
+              setIsSearching(false);
+            }}
             style={styles.clearButton}
           >
             <Icon name="close" size={20} color="#666" />
@@ -135,45 +212,26 @@ const SearchScreen = ({ route, navigation }) => {
         ) : null}
       </View>
 
-      <ScrollView>
-        <View style={styles.section}>
-          <View style={styles.flexBetween}>
-            <Text style={styles.sectionTitle}>Lịch sử tìm kiếm</Text>
-          </View>
-
-          {displayedHistory.map((item, index) =>
-            renderHistoryItem(item, index)
-          )}
-
-          {searchHistory.length > 3 && (
-            <TouchableOpacity
-              onPress={() => setShowAllHistory(!showAllHistory)}
-              style={styles.showMoreButton}
-            >
-              <Text style={styles.showMoreText}>
-                {showAllHistory ? "Ẩn bớt" : "Xem thêm"}
-              </Text>
-            </TouchableOpacity>
-          )}
-
-          {showAllHistory && searchHistory.length > 0 && (
-            <TouchableOpacity
-              onPress={clearSearchHistory}
-              style={styles.clearHistoryButton}
-            >
-              <Text style={styles.clearHistoryText}>Xóa tất cả</Text>
-            </TouchableOpacity>
+      {isSearching ? (
+        <View style={styles.overlay}>
+          {filteredHistory.length > 0 ? (
+            <FlatList
+              data={filteredHistory}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={renderHistoryItemOverlay}
+            />
+          ) : (
+            <Text style={styles.noResultsText}>Không có kết quả phù hợp</Text>
           )}
         </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Gợi ý địa điểm</Text>
-          {renderSuggestLocation()}
-        </View>
-      </ScrollView>
+      ) : (
+        renderContent()
+      )}
     </SafeAreaView>
   );
 };
+
+export default SearchScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -198,6 +256,10 @@ const styles = StyleSheet.create({
   clearButton: {
     marginLeft: 10,
   },
+  overlay: {
+    padding: 15,
+    backgroundColor: "#fff",
+  },
   section: {
     marginTop: 20,
     paddingHorizontal: 15,
@@ -211,48 +273,40 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 5,
-    borderRadius: 20,
-    // marginBottom: 10,
+    // paddingVertical: 10,
   },
   historyItem: {
-    flexDirection: "row",
-    alignItems: "center",
     flex: 1,
-  },
-  historyIcon: {
-    marginRight: 10,
+    paddingVertical: 10,
+    borderBottomColor: "#999",
+    borderBottomWidth: 0.2,
   },
   historyText: {
-    fontSize: 14,
+    fontSize: 16,
+    borderBottomColor: "#999",
   },
   deleteButton: {
     marginLeft: 10,
-    padding: 5,
   },
   showMoreButton: {
-    justifyContent: "center",
     alignItems: "center",
-    // paddingHorizontal: 20,
-    paddingVertical: 10,
+    marginTop: 10,
   },
   showMoreText: {
-    fontSize: 14,
     color: "#4E72E3",
+    fontSize: 14,
   },
   clearHistoryButton: {
-    marginTop: 10,
     alignItems: "center",
+    marginTop: 10,
   },
   clearHistoryText: {
     color: "#4E72E3",
-    // fontWeight: "bold",
+    fontSize: 14,
   },
-  flexBetween: {
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexDirection: "row",
+  noResultsText: {
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 20,
   },
 });
-
-export default SearchScreen;

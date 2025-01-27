@@ -92,6 +92,7 @@ export default function HomeScreen() {
           style={styles.mh}
           placeholder="Tìm kiếm điểm đến của bạn"
           backIcon={false}
+          filterIcon={false}
         />
         <LocationList />
       </ScrollView>

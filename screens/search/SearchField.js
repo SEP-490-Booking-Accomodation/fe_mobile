@@ -1,0 +1,129 @@
+import { AntDesign } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import React from "react";
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
+import Icon from "react-native-vector-icons/Ionicons";
+
+const SearchField = ({
+  placeholder = "Tìm kiếm...",
+  onChangeText,
+  value,
+  backIcon = true,
+  filterIcon = true,
+  onPressBackIcon = () => {},
+  onPressFilterIcon = () => {},
+  style,
+  inputStyle,
+}) => {
+  const navigation = useNavigation();
+
+  const handleSearchPress = () => {
+    navigation.goBack();
+    navigation.navigate("SearchScreen", { searchQuery: value }); // Change "PreviousScreen" to your actual screen name
+  };
+
+  return (
+    <View style={[styles.wrapper, style]}>
+      {backIcon && (
+        <TouchableOpacity
+          onPress={() => {
+            onPressBackIcon();
+            navigation.goBack(); // Pass back the search value when back is pressed
+            // navigation.navigate("SearchScreen", { searchQuery: value });
+          }}
+          style={styles.iconBackContainer}
+        >
+          <View style={styles.iconBack}>
+            <Icon name="arrow-back-outline" size={24} color="#fff" />
+          </View>
+        </TouchableOpacity>
+      )}
+      <TouchableWithoutFeedback onPress={handleSearchPress}>
+        <View style={styles.searchContainer}>
+          <Icon
+            name="search-outline"
+            size={20}
+            color="#666"
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={[styles.input, inputStyle]}
+            placeholder={placeholder}
+            placeholderTextColor="#aaa"
+            onChangeText={onChangeText}
+            value={value}
+            editable={false} // Ngăn không cho bàn phím mở
+          />
+        </View>
+      </TouchableWithoutFeedback>
+
+      {filterIcon && (
+        <TouchableOpacity onPress={onPressFilterIcon}>
+          <View style={styles.iconFilter}>
+            <AntDesign name="filter" size={26} color="#fff" />
+          </View>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  wrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  searchContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#f7f7f7",
+    borderRadius: 30,
+    backgroundColor: "#f7f7f7",
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+  },
+  searchIcon: {
+    marginRight: 8,
+    color: "#4E72E3",
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
+  },
+  iconBackContainer: {
+    padding: 5,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 24,
+    backgroundColor: "#fff",
+    marginRight: 8,
+  },
+  iconBack: {
+    padding: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 24,
+    backgroundColor: "#6F8EF1",
+  },
+
+  iconFilter: {
+    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 12,
+    backgroundColor: "#6F8EF1",
+    marginLeft: 20,
+  },
+});
+
+export default SearchField;
