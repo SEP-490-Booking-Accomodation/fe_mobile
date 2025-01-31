@@ -46,6 +46,10 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
         ? room.reviews[0].images 
         : [];
 
+
+    const handleBookNow = () => {
+        navigation.navigate('ConfirmBooking', { room });
+    };
     const openGalleryModal = (index) => {
         const imageSet = galleryImages.map(img => ({
             uri: img?.source ? Image.resolveAssetSource(img.source).uri : ''
@@ -301,6 +305,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
            </View>
            <View style={styles.footer}>
                <CustomButton
+                   onPress={handleBookNow}
                    title="Đặt ngay"
                    style={styles.bookButton}
                    backgroundColor="#101828"

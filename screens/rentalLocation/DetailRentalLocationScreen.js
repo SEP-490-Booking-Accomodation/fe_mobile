@@ -49,8 +49,9 @@ const DetailRentalLocationScreen = ({ route,navigation }) => {
 
   const handleCardPress = (room) => {
     console.log("Navigating with room:", room);
-    navigation.navigate("DetailAccomodation", { room });
+    navigation.navigate("ConfirmBooking", { roomData: room });
   };
+  
 
   const filteredRooms =
     selectedAmenities.length > 0
