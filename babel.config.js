@@ -12,6 +12,7 @@ module.exports = function (api) {
           allowUndefined: true, // Cho phép biến không được định nghĩa (nếu cần)
         },
       ],
+      ['react-native-reanimated/plugin'],
     ],
   };
 };

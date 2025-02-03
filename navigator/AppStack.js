@@ -18,6 +18,7 @@ import AccomodationDetailScreen from "../screens/accomodation/AccomodationDetail
 import PolicyScreen from "../screens/policies/PolicyScreen";
 import PolicyDetailScreen from "../screens/policies/PolicyDetailScreen";
 import MapScreen from "../screens/map/MapScreen";
+import ConfirmBooking from "../screens/booking/ConfirmBooking";
 
 const Stack = createNativeStackNavigator();
 
@@ -136,6 +137,11 @@ const AppStack = () => {
         <Stack.Screen
           name="Map"
           component={MapScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ConfirmBooking"
+          component={ConfirmBooking}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
