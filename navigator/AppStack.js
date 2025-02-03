@@ -18,6 +18,8 @@ import AccomodationDetailScreen from "../screens/accomodation/AccomodationDetail
 import PolicyScreen from "../screens/policies/PolicyScreen";
 import PolicyDetailScreen from "../screens/policies/PolicyDetailScreen";
 import MapScreen from "../screens/map/MapScreen";
+import MessagesScreen from "../screens/chat/MessagesScreen";
+import ChatScreen from "../screens/chat/ChatScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -137,6 +139,16 @@ const AppStack = () => {
           name="Map"
           component={MapScreen}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Messages"
+          component={MessagesScreen}
+          options={{ headerShown: true, title: "Nhắn tin" }}
+        />
+        <Stack.Screen
+          name="Chat"
+          component={ChatScreen}
+          options={{ headerShown: false, title: "Tin nhắn" }}
         />
       </Stack.Navigator>
     </>
