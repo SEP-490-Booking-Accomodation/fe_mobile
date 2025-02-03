@@ -19,6 +19,8 @@ import PolicyScreen from "../screens/policies/PolicyScreen";
 import PolicyDetailScreen from "../screens/policies/PolicyDetailScreen";
 import MapScreen from "../screens/map/MapScreen";
 import ConfirmBooking from "../screens/booking/ConfirmBooking";
+import PaymentConfirm from "../screens/payment/PaymentConfirm";
+import PaymentSuccess from "../screens/payment/PaymentSuccess";
 
 const Stack = createNativeStackNavigator();
 
@@ -144,6 +146,18 @@ const AppStack = () => {
           component={ConfirmBooking}
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="PaymentConfirm"
+          component={PaymentConfirm}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="PaymentSuccess"
+          component={PaymentSuccess}
+          options={{ headerShown: false }}
+        />
+
       </Stack.Navigator>
     </>
   );
