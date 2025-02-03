@@ -20,6 +20,9 @@ import PolicyDetailScreen from "../screens/policies/PolicyDetailScreen";
 import MapScreen from "../screens/map/MapScreen";
 import MessagesScreen from "../screens/chat/MessagesScreen";
 import ChatScreen from "../screens/chat/ChatScreen";
+import ConfirmBooking from "../screens/booking/ConfirmBooking";
+import PaymentConfirm from "../screens/payment/PaymentConfirm";
+import PaymentSuccess from "../screens/payment/PaymentSuccess";
 
 const Stack = createNativeStackNavigator();
 
@@ -140,6 +143,23 @@ const AppStack = () => {
           component={MapScreen}
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="ConfirmBooking"
+          component={ConfirmBooking}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="PaymentConfirm"
+          component={PaymentConfirm}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="PaymentSuccess"
+          component={PaymentSuccess}
+          options={{ headerShown: false }}
+        />
+
         <Stack.Screen
           name="Messages"
           component={MessagesScreen}
