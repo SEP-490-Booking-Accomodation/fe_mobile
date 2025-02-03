@@ -1,36 +1,61 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, SafeAreaView } from "react-native";
 import SearchField from "../search/SearchField";
-import Dropdown from "../../components/DropDown"; // Import Dropdown component
+import Dropdown from "../../components/DropDown";
 import VerticalCard from "../../components/cards/VerticalCard";
-import { dataCC } from "./data"; // Adjust path as needed
+import Filter from "../../components/Filter"; // Import Filter component
+import { dataCC } from "./data";
+import BottomTabs from "../../components/BottomTabs";
 
 const SearchResult = ({ route, navigation }) => {
   const { query } = route.params;
-  const [data, setData] = useState(dataCC); // Assume this data comes from an API or static list
+  const [data, setData] = useState(dataCC);
   const [sortedData, setSortedData] = useState([]);
   const [selectedSortOption, setSelectedSortOption] = useState(
     "Giá từ thấp đến cao"
   );
-  const [isNoResult, setIsNoResult] = useState(false); // Track if there are no results
+  const [isNoResult, setIsNoResult] = useState(false);
+  const [isFilterVisible, setIsFilterVisible] = useState(false); // State quản lý modal filter
+  const [filterParams, setFilterParams] = useState({
+    priceRange: [100000, 100000000],
+    selectedRating: null,
+    selectedAmenities: [],
+  });
 
   useEffect(() => {
-    // Hàm lọc dữ liệu dựa trên từ khóa tìm kiếm
     const filterData = () => {
-      const filtered = data.filter(
-        (item) =>
+      const filtered = data.filter((item) => {
+        const matchesQuery =
           item.placeName.toLowerCase().includes(query.toLowerCase()) ||
-          item.location.toLowerCase().includes(query.toLowerCase())
-      );
+          item.location.toLowerCase().includes(query.toLowerCase());
+
+        const matchesPrice =
+          item.minPrice >= filterParams.priceRange[0] &&
+          item.minPrice <= filterParams.priceRange[1];
+
+        const matchesRating =
+          filterParams.selectedRating === null ||
+          item.ratingPoint === filterParams.selectedRating;
+
+        const matchesAmenities =
+          filterParams.selectedAmenities.length === 0 ||
+          filterParams.selectedAmenities.every((amenity) =>
+            item.amenities.includes(amenity)
+          );
+
+        return (
+          matchesQuery && matchesPrice && matchesRating && matchesAmenities
+        );
+      });
+
       return filtered;
     };
 
-    // Lọc và sắp xếp lại dữ liệu sau khi thay đổi query hoặc sortOption
     const filteredData = filterData();
     if (filteredData.length === 0) {
-      setIsNoResult(true); // Nếu không có kết quả, hiển thị thông báo không có kết quả
+      setIsNoResult(true);
     } else {
-      setIsNoResult(false); // Có kết quả tìm thấy
+      setIsNoResult(false);
     }
 
     const sorted = filteredData.sort((a, b) =>
@@ -40,10 +65,15 @@ const SearchResult = ({ route, navigation }) => {
     );
 
     setSortedData(sorted);
-  }, [query, selectedSortOption, data]);
+  }, [query, selectedSortOption, data, filterParams]);
 
   const handleSortChange = (option) => {
-    setSelectedSortOption(option); // Cập nhật giá trị sắp xếp
+    setSelectedSortOption(option);
+  };
+
+  const handleApplyFilter = (filters) => {
+    setFilterParams(filters);
+    setIsFilterVisible(false);
   };
 
   const renderCard = ({ item }) => (
@@ -52,10 +82,10 @@ const SearchResult = ({ route, navigation }) => {
       openHour="18:00"
       closeHour="20:00"
       placeName={item.placeName}
-      minPrice={String(item.minPrice)} // Chuyển minPrice thành string
-      maxPrice={String(item.maxPrice)} // Chuyển maxPrice thành string
+      minPrice={String(item.minPrice)}
+      maxPrice={String(item.maxPrice)}
       location={item.location}
-      ratingPoint={String(item.ratingPoint)} // Chuyển ratingPoint thành string
+      ratingPoint={String(item.ratingPoint)}
       numberOfReview={item.numberOfReview}
       initFavourite={false}
       onFavouritePress={(isFav) => console.log("Yêu thích:", isFav)}
@@ -67,11 +97,12 @@ const SearchResult = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{}}>
+      <View>
         <SearchField
           style={styles.mh}
           placeholder="Tìm kiếm điểm đến của bạn"
           onPressBackIcon={() => navigation.goBack()}
+          onPressFilterIcon={() => setIsFilterVisible(true)} // Hiển thị modal filter
           value={query}
         />
       </View>
@@ -100,8 +131,26 @@ const SearchResult = ({ route, navigation }) => {
           data={sortedData.length > 0 ? sortedData : data}
           renderItem={renderCard}
           keyExtractor={(item) => item.id}
+          numColumns={1} // Nếu không cần dạng lưới, để mặc định là 1
         />
       )}
+
+      {/* Filter modal */}
+      <Filter
+        visible={isFilterVisible}
+        onClose={() => setIsFilterVisible(false)}
+        onApply={handleApplyFilter}
+      />
+      {/* <View
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+        }}
+      >
+        <BottomTabs navigation={navigation} />
+      </View> */}
     </SafeAreaView>
   );
 };
@@ -115,10 +164,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     marginVertical: 10,
   },
-
   dropdown: {
-    // marginVertical: 10,
-    // width: 300,
     zIndex: 999,
   },
   noResultContainer: {
@@ -135,7 +181,6 @@ const styles = StyleSheet.create({
     color: "#4E72E3",
   },
   sortContainer: {
-    display: "flex",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",

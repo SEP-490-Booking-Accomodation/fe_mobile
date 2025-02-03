@@ -12,9 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import BottomTabs from "../../components/BottomTabs";
 import HeaderLNA from "../../components/HeaderLNA";
 import * as Location from "expo-location";
-import { CheckLocation } from "./CheckLocation";
 import LocationList from "./LocationList";
-import { Scroll } from "lucide-react-native";
 import SearchField from "./SearchField";
 
 export default function HomeScreen() {
