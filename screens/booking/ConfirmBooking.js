@@ -108,17 +108,13 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "#fff",
+    padding: 20,
+    backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: "#eee",
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    borderTopColor: '#eee',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   backButton: {
     width: 40,
@@ -159,22 +155,26 @@ const styles = StyleSheet.create({
 })
 
 export default function ConfirmBooking({ route, navigation }) {
-  const { roomData } = route.params || {}
+  const { roomData } = route.params || {};
 
-  const [isDatePickerVisible, setDatePickerVisible] = useState(false)
-  const [isGuestModalVisible, setGuestModalVisible] = useState(false)
-  const [selectedDateTime, setSelectedDateTime] = useState("")
+  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const [isGuestModalVisible, setGuestModalVisible] = useState(false);
+  const [selectedDateTime, setSelectedDateTime] = useState("");
   const [guestCount, setGuestCount] = useState({
     adults: 0,
     children: 0,
     infants: 0,
-  })
+  });
 
   const renderHeader = () => (
     <View style={styles.header}>
       <Text style={styles.textHeader}>Xác nhận đặt phòng</Text>
     </View>
-  )
+  );
+
+  const handleReturnBack = () => {
+    //navigation.navigate("DetailAccomodation", { roomData })
+  };
 
   const formatDateTime = useCallback((date) => {
     if (!date) return ""
@@ -182,7 +182,7 @@ export default function ConfirmBooking({ route, navigation }) {
       2,
       "0",
     )}:${String(date.minute).padStart(2, "0")}`
-  }, [])
+  }, []);
 
   const handleDateTimeSelect = useCallback(
     (dateTime) => {
@@ -190,20 +190,20 @@ export default function ConfirmBooking({ route, navigation }) {
       setSelectedDateTime(formattedDateTime)
     },
     [formatDateTime],
-  )
+  );
 
   const closeDatePicker = useCallback(() => {
     setDatePickerVisible(false)
-  }, [])
+  }, []);
 
   const openDatePicker = () => {
     setDatePickerVisible(true)
-  }
+  };
 
   const handleGuestSelection = (guests) => {
     setGuestCount(guests)
     setGuestModalVisible(false)
-  }
+  };
 
   const formatGuestCount = () => {
     const total = guestCount.adults + guestCount.children + guestCount.infants
@@ -220,7 +220,7 @@ export default function ConfirmBooking({ route, navigation }) {
       parts.push(`${guestCount.infants} trẻ sơ sinh`)
     }
     return parts.join(", ")
-  }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -268,14 +268,19 @@ export default function ConfirmBooking({ route, navigation }) {
 
       {/* Footer */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => 
+          //handleReturnBack()
+          navigation.goBack() 
+        }>
           <ArrowLeft size={24} color="#000" />
         </TouchableOpacity>
         <View style={styles.priceContainer}>
           <Text style={styles.currencySymbol}>Tổng</Text>
           <Text style={styles.price}>500.000đ</Text>
         </View>
-        <CustomButton style={{width: "45%"}} title="Xác nhận" onPress={() => {}}></CustomButton>
+        <CustomButton style={{width: "45%"}} title="Xác nhận" onPress={() => {
+          navigation.navigate("PaymentConfirm");
+        }}></CustomButton>
       </View>
 
       {/* Modals */}
