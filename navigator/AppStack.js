@@ -25,6 +25,7 @@ import PaymentConfirm from "../screens/payment/PaymentConfirm";
 import PaymentSuccess from "../screens/payment/PaymentSuccess";
 import WalletScreen from "../screens/wallet/WalletScreen";
 import PaymentMethod from "../screens/payment/PaymentMethod";
+import NotificationScreen from "../screens/notification/Notification";
 
 const Stack = createNativeStackNavigator();
 
@@ -62,7 +63,7 @@ const AppStack = () => {
     <>
       <StatusBar animated={true} />
       <Stack.Navigator
-        initialRouteName="PaymentMethod"
+        initialRouteName="Home"
         screenOptions={{ gestureEnabled: true }}
       >
         <Stack.Screen
@@ -181,6 +182,11 @@ const AppStack = () => {
           name="PaymentMethod"
           component={PaymentMethod}
           options={{ headerShown: true, title: "Payment Method" }}
+        />
+        <Stack.Screen
+          name="NotificationScreen"
+          component={NotificationScreen}
+          options={{ headerShown: false}}
         />
       </Stack.Navigator>
     </>
