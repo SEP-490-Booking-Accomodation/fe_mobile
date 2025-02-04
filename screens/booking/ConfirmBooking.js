@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Modal, ScrollView } from "react-native";
+import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Modal, ScrollView, KeyboardAvoidingView } from "react-native";
 import { Calendar, Users, ArrowLeft } from "lucide-react-native";
 import HorizontalCardSmall from "../../components/cards/HorizontalCardSmall";
 import DateTimePicker from "../../components/DateTimePicker/DateTimePicker";
@@ -252,7 +252,8 @@ export default function ConfirmBooking({ route, navigation }) {
             </TouchableOpacity>
           </View>
 
-          <View>
+          <KeyboardAvoidingView  >
+            <View style={{paddingBottom:120}}>
             <Text style={styles.sectionHeader}>Thông tin người đại diện</Text>
             <Text style={styles.sectionHeader2}>Họ tên</Text>
             <CustomInput placeholder="Nhập họ tên" keyboardType="default" />
@@ -262,7 +263,8 @@ export default function ConfirmBooking({ route, navigation }) {
             <View style={styles.breakLine}></View>
             <Text style={styles.sectionHeader2}>Email</Text>
             <CustomInput placeholder="Nhập email" keyboardType="email-address" />
-          </View>
+            </View>
+          </KeyboardAvoidingView>
         </View>
       </ScrollView>
 

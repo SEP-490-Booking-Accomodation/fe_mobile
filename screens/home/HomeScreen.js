@@ -77,6 +77,7 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container}>
       <HeaderLNA
         location={address}
+        onNotificationPress={() => navigation.navigate("NotificationScreen")}
         notificationCount={2}
         avatarSource={
           "https://i.pinimg.com/236x/0d/85/e4/0d85e4a8cd465ac49c265e29af5e53e8.jpg"

@@ -21,7 +21,7 @@ const IconButton = ({
       case 'Feather':
         return <Feather name={iconName} size={iconSize} color={iconColor} />;
       case 'FontAwesome':
-        return <FontAwesome name={iconName} size={iconSize} color={iconColor} />;
+        return <FontAwesome name={iconName} size={iconSize} color={iconColor} />; 
       case 'MaterialIcons':
         return <MaterialIcons name={iconName} size={iconSize} color={iconColor} />;
       case 'Ionicons':
