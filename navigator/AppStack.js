@@ -26,6 +26,7 @@ import PaymentSuccess from "../screens/payment/PaymentSuccess";
 import WalletScreen from "../screens/wallet/WalletScreen";
 import PaymentMethod from "../screens/payment/PaymentMethod";
 import NotificationScreen from "../screens/notification/Notification";
+import SettingList from "../screens/setting/SettingList";
 
 const Stack = createNativeStackNavigator();
 
@@ -186,6 +187,11 @@ const AppStack = () => {
         <Stack.Screen
           name="NotificationScreen"
           component={NotificationScreen}
+          options={{ headerShown: false}}
+        />
+        <Stack.Screen
+          name="SettingList"
+          component={SettingList}
           options={{ headerShown: false}}
         />
       </Stack.Navigator>

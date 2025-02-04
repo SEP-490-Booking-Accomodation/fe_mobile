@@ -12,7 +12,7 @@ const BottomTabs = ({ navigation, state }) => {
     { icon: (color) => <Ionicons name="chatbubble-outline" size={24} color={color} />, route: 'Messages' },
     { icon: (color) => <Ionicons name="map" size={28} color={color} />, route: 'Map' }, 
     { icon: (color) => <MaterialIcons name="local-activity" size={24} color={color} />, route: 'Tickets' },
-    { icon: (color) => <Feather name="settings" size={24} color={color} />, route: 'Settings' },
+    { icon: (color) => <Feather name="settings" size={24} color={color} />, route: 'SettingList' },
   ];
 
   const handlePress = (index, route) => {
@@ -31,9 +31,9 @@ const BottomTabs = ({ navigation, state }) => {
                 styles.tabItem,
                 activeTab === index && styles.activeTabItem,
               ]}
-              onPress={() => handlePress(index, tab.route)}
+              onPress={() => handlePress(index + 3, tab.route)}
             >
-              {tab.icon(activeTab === index ? '#FFFFFF' : '#8E8E93')}
+              {tab.icon(activeTab === index + 3 ? '#FFFFFF' : '#8E8E93')}
             </TouchableOpacity>
           ))}
         </View>
@@ -58,6 +58,7 @@ const BottomTabs = ({ navigation, state }) => {
       >
         {tabs[2].icon('#FFFFFF')}
       </TouchableOpacity>
+
     </View>
   );
 };
