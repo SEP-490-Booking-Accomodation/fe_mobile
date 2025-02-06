@@ -1,17 +1,49 @@
+import React, { useState } from "react";
 import {
-  ScrollView,
-  StyleSheet,
+  View,
   Text,
   TouchableOpacity,
-  View,
+  StyleSheet,
+  ScrollView,
 } from "react-native";
-import React, { useState } from "react";
-import HorizontalCardMedium from "../../components/cards/HorizontalCardMedium";
 import VerticalCard from "../../components/cards/VerticalCard";
-export default function LocationList() {
-  const [selectedFilter, setSelectedFilter] = useState("Tất cả");
+import ButtonGroup from "../../components/buttons/ButtonGroup"; // Import ButtonGroup
 
-  const filters = ["Tất cả", "Gợi ý", "Yêu thích", "Phổ biến", "Gần bạn"];
+const filters = ["Tất cả", "Gợi ý ", "Yêu thích ", "Phổ biến ", "Gần bạn "];
+
+const locations = [
+  {
+    id: 1,
+    imageUrl:
+      "https://media.vneconomy.vn/w800/images/upload/2021/10/10/bds5.png",
+    openHour: "3:00",
+    closeHour: "20:00",
+    placeName: "Nhà con nhộng Bình Thạnh giá rẻ",
+    minPrice: "300.000",
+    maxPrice: "1.200.000",
+    location: "Bình Thạnh, HCM",
+    ratingPoint: "5",
+    numberOfReview: "3.5k",
+    initFavourite: false,
+  },
+  {
+    id: 2,
+    imageUrl:
+      "https://media.vneconomy.vn/w800/images/upload/2021/10/10/bds5.png",
+    openHour: "5:00",
+    closeHour: "22:00",
+    placeName: "Khách sạn view biển đẹp",
+    minPrice: "500.000",
+    maxPrice: "2.000.000",
+    location: "Vũng Tàu",
+    ratingPoint: "4.7",
+    numberOfReview: "1.2k",
+    initFavourite: true,
+  },
+];
+
+export default function LocationList() {
+  const [selectedFilterIndex, setSelectedFilterIndex] = useState(0);
 
   return (
     <View style={styles.container}>
@@ -21,48 +53,37 @@ export default function LocationList() {
           <Text style={styles.viewAllText}>Xem tất cả</Text>
         </TouchableOpacity>
       </View>
-      <ScrollView
-        horizontal
-        style={styles.filterContainer}
-        showsHorizontalScrollIndicator={false}
-      >
-        {filters.map((filter, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.filterButton,
-              selectedFilter === filter && styles.selectedFilter,
-            ]}
-            onPress={() => setSelectedFilter(filter)}
-          >
-            <Text
-              style={[
-                styles.filterText,
-                selectedFilter === filter && styles.selectedText,
-              ]}
-            >
-              {filter}
-            </Text>
-          </TouchableOpacity>
+
+      {/* ButtonGroup thay thế ScrollView filter */}
+      <ButtonGroup
+        items={filters}
+        selectedIndex={selectedFilterIndex}
+        onChange={setSelectedFilterIndex}
+        containerStyle={styles.filterContainer}
+        buttonStyle={styles.filterButton}
+        activeButtonStyle={styles.selectedFilter}
+        inactiveButtonStyle={styles.unselectedFilter}
+        textStyle={styles.filterText}
+        activeTextStyle={styles.selectedText}
+        inactiveTextStyle={styles.unselectedText}
+      />
+
+      {/* Danh sách địa điểm */}
+      <ScrollView style={{ marginTop: 10 }}>
+        {locations.map((item) => (
+          <VerticalCard
+            key={item.id}
+            {...item}
+            onFavouritePress={(isFav) =>
+              console.log(
+                `Đã ${isFav ? "thêm" : "bỏ"} yêu thích:`,
+                item.placeName
+              )
+            }
+            onCardPress={() => console.log("Đã nhấn vào card:", item.placeName)}
+          />
         ))}
       </ScrollView>
-
-      <VerticalCard
-        imageUrl={
-          "https://media.vneconomy.vn/w800/images/upload/2021/10/10/bds5.png"
-        }
-        openHour={"3:00"}
-        closeHour={"20:00"}
-        placeName={"Nhà con nhộng Bình Thạnh giá rẻ"}
-        minPrice={"300.000"}
-        maxPrice={"1.200.000"}
-        location={"Bình Thạnh, HCM"}
-        ratingPoint={"5"}
-        numberOfReview={"3.5k"}
-        initFavourite={false}
-        onFavouritePress={(isFav) => console.log("Yêu thích:", isFav)}
-        onCardPress={() => console.log("Đã nhấn vào card")}
-      />
     </View>
   );
 }
@@ -72,41 +93,36 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   filterContainer: {
-    // marginBottom: 16,
+    marginBottom: 10,
+    paddingHorizontal: 8,
   },
   filterButton: {
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: "#fff",
-    borderColor: "#4e72e3",
-    color: "#4e72e3",
+    paddingHorizontal: 16,
     borderWidth: 1,
     borderRadius: 20,
-    marginRight: 10, // Khoảng cách giữa các nút
+    alignItems: "center",
+    justifyContent: "center",
   },
   selectedFilter: {
-    backgroundColor: "#4e72e3",
+    backgroundColor: "#3B82F6",
+    borderColor: "transparent",
+  },
+  unselectedFilter: {
+    backgroundColor: "white",
+    borderColor: "#E5E7EB",
   },
   filterText: {
-    color: "#000",
-    fontSize: 16,
+    fontSize: 14,
+    fontWeight: "500",
   },
   selectedText: {
-    color: "#fff",
+    color: "white",
   },
-  card: {
-    backgroundColor: "#fff",
-    padding: 16,
-    marginBottom: 16,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+  unselectedText: {
+    color: "#374151",
   },
   jusSpace: {
-    display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -114,7 +130,7 @@ const styles = StyleSheet.create({
   },
   h4: {
     fontSize: 18,
-    fontWeight: 500,
+    fontWeight: "500",
   },
-  viewAllText: { color: "#4E72E3", fontWeight: 600 },
+  viewAllText: { color: "#4E72E3", fontWeight: "600" },
 });
