@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import BottomTabs from "../../components/BottomTabs";
+// import BottomTabs from "../../components/BottomTabs";
 import HeaderLNA from "../../components/HeaderLNA";
 import * as Location from "expo-location";
 import LocationList from "./LocationList";
@@ -109,7 +109,7 @@ export default function HomeScreen() {
           right: 0,
         }}
       >
-        <BottomTabs navigation={navigation} />
+        {/* <BottomTabs navigation={navigation} /> */}
       </View>
     </SafeAreaView>
   );

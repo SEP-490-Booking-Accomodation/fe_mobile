@@ -5,7 +5,7 @@ import Dropdown from "../../components/DropDown";
 import VerticalCard from "../../components/cards/VerticalCard";
 import Filter from "../../components/Filter"; // Import Filter component
 import { dataCC } from "./data";
-import BottomTabs from "../../components/BottomTabs";
+// import BottomTabs from "../../components/BottomTabs";
 
 const SearchResult = ({ route, navigation }) => {
   const { query } = route.params;
