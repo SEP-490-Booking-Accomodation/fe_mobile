@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { StatusBar, ActivityIndicator, View, TouchableOpacity } from "react-native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import {
+  StatusBar,
+  ActivityIndicator,
+  View,
+  TouchableOpacity,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
-import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
+import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 
 // Begin Screens
 import SplashScreen from "../screens/begin/SplashScreen";
@@ -43,22 +48,22 @@ const Tab = createBottomTabNavigator();
 
 // Screens where we want to hide the tab bar
 const hideTabBarScreens = [
-  'SearchScreen',
-  'SearchResult',
-  'DetailRentalLocation',
-  'DetailAccomodation',
-  'ConfirmBooking',
-  'PaymentConfirm',
-  'PaymentSuccess',
-  'Chat',
-  'Policies',
-  'PolicyDetail',
-  'MapScreen'
+  "SearchScreen",
+  "SearchResult",
+  "DetailRentalLocation",
+  "DetailAccomodation",
+  "ConfirmBooking",
+  "PaymentConfirm",
+  "PaymentSuccess",
+  "Chat",
+  "Policies",
+  "PolicyDetail",
+  "MapScreen",
 ];
 
 // Default tab bar style
 const defaultTabBarStyle = {
-  backgroundColor: '#1C1C1E',
+  backgroundColor: "#1C1C1E",
   borderTopWidth: 0,
   elevation: 0,
   height: 60,
@@ -73,8 +78,14 @@ const HomeStack = () => {
       <Stack.Screen name="HomeScreen" component={HomeScreen} />
       <Stack.Screen name="SearchScreen" component={SearchScreen} />
       <Stack.Screen name="SearchResult" component={SearchResult} />
-      <Stack.Screen name="DetailRentalLocation" component={DetailRentalLocationScreen} />
-      <Stack.Screen name="DetailAccomodation" component={AccomodationDetailScreen} />
+      <Stack.Screen
+        name="DetailRentalLocation"
+        component={DetailRentalLocationScreen}
+      />
+      <Stack.Screen
+        name="DetailAccomodation"
+        component={AccomodationDetailScreen}
+      />
       <Stack.Screen name="Policies" component={PolicyScreen} />
       <Stack.Screen name="PolicyDetail" component={PolicyDetailScreen} />
       <Stack.Screen name="ConfirmBooking" component={ConfirmBooking} />
@@ -91,13 +102,13 @@ const HomeStack = () => {
 const MessageStack = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen 
-        name="MessagesScreen" 
+      <Stack.Screen
+        name="MessagesScreen"
         component={MessagesScreen}
         options={{ title: "Nhắn tin" }}
       />
-      <Stack.Screen 
-        name="Chat" 
+      <Stack.Screen
+        name="Chat"
         component={ChatScreen}
         options={{ headerShown: false }}
       />
@@ -110,8 +121,8 @@ const TabBarAdvancedButton = ({ bgColor, ...props }) => (
   <View
     style={{
       top: -20,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
     }}
   >
     <TouchableOpacity
@@ -120,12 +131,12 @@ const TabBarAdvancedButton = ({ bgColor, ...props }) => (
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: '#4B7BF5',
-        justifyContent: 'center',
-        alignItems: 'center',
+        backgroundColor: "#4B7BF5",
+        justifyContent: "center",
+        alignItems: "center",
         borderWidth: 4,
         borderColor: bgColor,
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: {
           width: 0,
           height: 2,
@@ -146,27 +157,27 @@ const TabNavigator = () => {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarStyle: (() => {
-          const routeName = getFocusedRouteNameFromRoute(route) ?? '';
+          const routeName = getFocusedRouteNameFromRoute(route) ?? "";
           if (hideTabBarScreens.includes(routeName)) {
-            return { display: 'none' };
+            return { display: "none" };
           }
           return {
-            position: 'absolute',
+            position: "absolute",
             bottom: 40,
             left: 20,
             right: 20,
-            backgroundColor: '#1C1C1E',
+            backgroundColor: "#1C1C1E",
             borderRadius: 30,
             height: 60,
             paddingHorizontal: 20,
             paddingVertical: 20,
             borderTopWidth: 0,
             elevation: 0,
-            marginHorizontal: 20
+            marginHorizontal: 20,
           };
         })(),
-        tabBarActiveTintColor: '#FFFFFF',
-        tabBarInactiveTintColor: '#8E8E93',
+        tabBarActiveTintColor: "#FFFFFF",
+        tabBarInactiveTintColor: "#8E8E93",
         headerShown: false,
         tabBarHideOnKeyboard: true,
         tabBarItemStyle: {
@@ -179,8 +190,8 @@ const TabNavigator = () => {
           marginTop: 4,
         },
         tabBarLabelStyle: {
-          display: 'none'
-        }
+          display: "none",
+        },
       })}
     >
       <Tab.Screen
@@ -209,27 +220,29 @@ const TabNavigator = () => {
             <Ionicons name="map" size={28} color="#FFFFFF" />
           ),
           tabBarButton: (props) => (
-            <View style={{ 
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
+            <View
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <TouchableOpacity
                 {...props}
                 style={{
-                  position: 'absolute',
+                  position: "absolute",
                   bottom: -30,
                   height: 70,
                   width: 70,
                   borderRadius: 35,
-                  backgroundColor: '#4B7BF5',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  shadowColor: '#000',
+                  backgroundColor: "#4B7BF5",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  shadowColor: "#000",
                   shadowOpacity: 0.3,
                   shadowRadius: 10,
                   elevation: 5,
                   borderWidth: 4,
-                  borderColor: '#FFFFFF',
+                  borderColor: "#FFFFFF",
                 }}
               >
                 <Ionicons name="map" size={28} color="#FFFFFF" />
@@ -265,14 +278,18 @@ const AppStack = () => {
   const [initialRoute, setInitialRoute] = useState(null);
 
   useEffect(() => {
+    // const checkAppState = async () => {
+    //   try {
+    //     const userToken = await AsyncStorage.getItem("userToken");
+    //     setInitialRoute(userToken ? "MainTabs" : "Login");
+    //   } catch (error) {
+    //     console.error("Error loading app state:", error);
+    //     setInitialRoute("Login");
+    //   }
+    // };
+
     const checkAppState = async () => {
-      try {
-        const userToken = await AsyncStorage.getItem("userToken");
-        setInitialRoute(userToken ? "MainTabs" : "Login");
-      } catch (error) {
-        console.error("Error loading app state:", error);
-        setInitialRoute("Login");
-      }
+      setInitialRoute("MainTabs"); // Mặc định vào trang Home
     };
 
     checkAppState();

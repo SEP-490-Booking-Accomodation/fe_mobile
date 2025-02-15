@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,36 +8,67 @@ import {
   StyleSheet,
   TouchableOpacity,
   ImageBackground,
-  Dimensions
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import CustomButton from '../../components/buttons/Button';
-import CustomInput from '../../components/TextInput';
+  Dimensions,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import CustomButton from "../../components/buttons/Button";
+import CustomInput from "../../components/TextInput";
 
-const { height } = Dimensions.get('window');
+const { height } = Dimensions.get("window");
 
 const LoginScreen = () => {
   const navigation = useNavigation();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      navigation.replace('MainTabs');
-    }, 1500);
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const authData = await AsyncStorage.getItem("authData");
+        if (authData) {
+          const { userId, token } = JSON.parse(authData);
+          dispatch(loginSuccess({ userId, token }));
+          navigation.replace("MainTabs");
+        }
+      } catch (error) {
+        console.log("Lỗi khi lấy dữ liệu đăng nhập:", error);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  const handleLogin = async () => {
+    try {
+      const response = await login({ email, password }).unwrap();
+      const { userId, token } = response.data;
+      console.log(response);
+
+      // Lưu vào Redux và AsyncStorage
+      dispatch(loginSuccess({ userId, token }));
+      await AsyncStorage.setItem("authData", JSON.stringify({ userId, token }));
+
+      navigation.replace("MainTabs");
+    } catch (error) {
+      console.log("Login error:", error);
+      Alert.alert(
+        "Đăng nhập thất bại",
+        error?.data?.message || "Vui lòng kiểm tra lại thông tin đăng nhập"
+      );
+    }
   };
+
+
 
   return (
     <ImageBackground
-      source={require('../../assets/images/bg_login.png')}
+      source={require("../../assets/images/bg_login.png")}
       style={styles.backgroundImage}
     >
       <View style={styles.safeArea}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.keyboardAvoid}
         >
           <View style={styles.contentContainer}>
@@ -72,11 +103,9 @@ const LoginScreen = () => {
                 />
                 <TouchableOpacity
                   style={styles.forgotPasswordButton}
-                  onPress={() => navigation.navigate('ForgotPassword')}
+                  onPress={() => navigation.navigate("ForgotPassword")}
                 >
-                  <Text style={styles.forgotPasswordText}>
-                    Quên Mật khẩu?
-                  </Text>
+                  <Text style={styles.forgotPasswordText}>Quên Mật khẩu?</Text>
                 </TouchableOpacity>
                 <CustomButton
                   title="Đăng nhập"
@@ -90,13 +119,11 @@ const LoginScreen = () => {
                   onPress={handleLogin}
                 />
                 <View style={styles.signupContainer}>
-                  <Text style={styles.signupText}>
-                    Chưa có tài khoản?{' '}
-                  </Text>
-                  <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                    <Text style={styles.signupButtonText}>
-                      Đăng ký ngay
-                    </Text>
+                  <Text style={styles.signupText}>Chưa có tài khoản? </Text>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate("Register")}
+                  >
+                    <Text style={styles.signupButtonText}>Đăng ký ngay</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -114,7 +141,7 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     flex: 1,
-    resizeMode: 'cover', 
+    resizeMode: "cover",
   },
   safeArea: {
     flex: 1,
@@ -124,7 +151,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   header: {
     paddingHorizontal: 24,
@@ -132,69 +159,68 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    fontWeight: "bold",
+    color: "#FFFFFF",
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 16,
-    color: '#EFF6FF',
+    color: "#EFF6FF",
     lineHeight: 24,
   },
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: 32,
   },
   formContainer: {
     paddingHorizontal: 24,
-    paddingBottom: Platform.OS === 'ios' ? 50 : 24, 
+    paddingBottom: Platform.OS === "ios" ? 50 : 24,
   },
   dot: {
     width: 48,
     height: 6,
     borderRadius: 4,
-    backgroundColor: '#EBEBEB',
-    alignSelf: 'center',
-    marginBottom: 24, 
-  },  
+    backgroundColor: "#EBEBEB",
+    alignSelf: "center",
+    marginBottom: 24,
+  },
   inputContainer: {
     marginBottom: 24,
   },
   input: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: "#F8FAFC",
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: "#E2E8F0",
   },
   forgotPasswordButton: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     marginTop: -8,
     marginBottom: 32,
   },
   forgotPasswordText: {
-    color: '#4E72E3',
+    color: "#4E72E3",
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   loginButton: {
     marginBottom: 24,
   },
   signupContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   signupText: {
-    color: '#94A3B8',
+    color: "#94A3B8",
     fontSize: 14,
   },
   signupButtonText: {
-    color: '#4E72E3',
+    color: "#4E72E3",
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });
-
 
 export default LoginScreen;
