@@ -42,7 +42,7 @@ const PaymentSuccess = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity style={styles.closeButton} onPress={() => navigation.navigate("Home")}>
+      <TouchableOpacity style={styles.closeButton} onPress={() => navigation.navigate("MainTabs")}>
         <Text style={styles.closeButtonText}>✕</Text>
       </TouchableOpacity>
 

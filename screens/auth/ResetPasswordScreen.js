@@ -32,7 +32,7 @@ const ResetPasswordScreen = () => {
         setLoading(true);
         setTimeout(() => {
             setLoading(false);
-            navigation.replace('Home');
+            navigation.replace('MainTabs');
         }, 1500);
     };
 
