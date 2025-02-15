@@ -27,6 +27,8 @@ import WalletScreen from "../screens/wallet/WalletScreen";
 import PaymentMethod from "../screens/payment/PaymentMethod";
 import NotificationScreen from "../screens/notification/Notification";
 import SettingList from "../screens/setting/SettingList";
+import ProfileScreen from "../screens/profile/ProfileScreen";
+import EditInfo from "../screens/profile/childPage/EditInfo";
 
 const Stack = createNativeStackNavigator();
 
@@ -194,7 +196,21 @@ const AppStack = () => {
           component={SettingList}
           options={{ headerShown: false}}
         />
+        <Stack.Screen
+          name="ProfileScreen"
+          component={ProfileScreen}
+          options={{ headerShown: false}}
+        />
+        <Stack.Screen
+          name="EditInfo"
+          component={EditInfo}  
+          options={{ headerShown: false}} 
+        />
       </Stack.Navigator>
+
+
+
+
     </>
   );
 };
