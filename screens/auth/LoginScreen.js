@@ -1,26 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  SafeAreaView,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   TouchableOpacity,
   ImageBackground,
-  Dimensions,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { useDispatch } from "react-redux";
 import CustomButton from "../../components/buttons/Button";
 import CustomInput from "../../components/TextInput";
-
-const { height } = Dimensions.get("window");
+import { useLoginMutation } from "../../api/authApi";
+import { loginSuccess } from "../../redux/authSlice";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [login, { isLoading }] = useLoginMutation();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -42,12 +44,21 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     try {
       const response = await login({ email, password }).unwrap();
-      const { userId, token } = response.data;
-      console.log(response);
 
-      // Lưu vào Redux và AsyncStorage
-      dispatch(loginSuccess({ userId, token }));
-      await AsyncStorage.setItem("authData", JSON.stringify({ userId, token }));
+      console.log("Full login response:", response); // Kiểm tra toàn bộ response
+
+      // Nếu API trả về trực tiếp mà không có .data
+      const { _id, accessToken } = response;
+
+      if (!_id || !accessToken) {
+        throw new Error("Dữ liệu trả về không hợp lệ");
+      }
+
+      dispatch(loginSuccess({ userId: _id, token: accessToken }));
+      await AsyncStorage.setItem(
+        "authData",
+        JSON.stringify({ userId: _id, token: accessToken })
+      );
 
       navigation.replace("MainTabs");
     } catch (error) {
@@ -58,8 +69,27 @@ const LoginScreen = () => {
       );
     }
   };
+  // const handleLogin = async () => {
+  //   // console.log("API URL:", process.env.EXPO_PUBLIC_API_URL);
 
+  //   console.log("Đang gọi API login...");
+  //   try {
+  //     const response = await login({ email, password }).unwrap();
+  //     console.log("Login response:", response);
 
+  //     dispatch(
+  //       loginSuccess({ userId: response.userId, token: response.token })
+  //     );
+
+  //     navigation.replace("MainTabs");
+  //   } catch (error) {
+  //     console.log("Login error:", error);
+  //     Alert.alert(
+  //       "Đăng nhập thất bại",
+  //       error?.data?.message || "Có lỗi xảy ra"
+  //     );
+  //   }
+  // };
 
   return (
     <ImageBackground
@@ -80,7 +110,6 @@ const LoginScreen = () => {
             </View>
             <View style={styles.card}>
               <View style={styles.formContainer}>
-                <View style={styles.dot} />
                 <CustomInput
                   label="Email hoặc Số điện thoại"
                   placeholder="Nhập email hoặc số điện thoại"
@@ -88,8 +117,6 @@ const LoginScreen = () => {
                   onChangeText={setEmail}
                   autoCapitalize="none"
                   keyboardType="email-address"
-                  containerStyle={styles.inputContainer}
-                  inputContainerStyle={styles.input}
                 />
                 <CustomInput
                   label="Mật khẩu"
@@ -97,9 +124,6 @@ const LoginScreen = () => {
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry
-                  containerStyle={styles.inputContainer}
-                  inputContainerStyle={styles.input}
-                  passwordIconColor="#6B7280"
                 />
                 <TouchableOpacity
                   style={styles.forgotPasswordButton}
@@ -113,9 +137,8 @@ const LoginScreen = () => {
                   disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
                   titleColor="#FFFFFF"
                   disabledTitleColor="#FFFFFF"
-                  loading={loading}
+                  loading={isLoading}
                   disabled={!email || !password}
-                  style={styles.loginButton}
                   onPress={handleLogin}
                 />
                 <View style={styles.signupContainer}>
@@ -136,9 +159,6 @@ const LoginScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   backgroundImage: {
     flex: 1,
     resizeMode: "cover",
@@ -166,7 +186,6 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: "#EFF6FF",
-    lineHeight: 24,
   },
   card: {
     backgroundColor: "#FFFFFF",
@@ -178,22 +197,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: Platform.OS === "ios" ? 50 : 24,
   },
-  dot: {
-    width: 48,
-    height: 6,
-    borderRadius: 4,
-    backgroundColor: "#EBEBEB",
-    alignSelf: "center",
-    marginBottom: 24,
-  },
-  inputContainer: {
-    marginBottom: 24,
-  },
-  input: {
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
   forgotPasswordButton: {
     alignSelf: "flex-end",
     marginTop: -8,
@@ -203,9 +206,6 @@ const styles = StyleSheet.create({
     color: "#4E72E3",
     fontSize: 14,
     fontWeight: "500",
-  },
-  loginButton: {
-    marginBottom: 24,
   },
   signupContainer: {
     flexDirection: "row",
