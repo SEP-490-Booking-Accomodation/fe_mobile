@@ -306,7 +306,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
       </View>
       <View style={styles.footer}>
         <CustomButton
-          onPress={handleBookNow(room)}
+          onPress={() => handleBookNow(room)}
           title="Đặt ngay"
           style={styles.bookButton}
           backgroundColor="#101828"

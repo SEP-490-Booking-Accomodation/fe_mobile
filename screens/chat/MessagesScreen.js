@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   TextInput,
 } from "react-native";
-import BottomTabs from "../../components/BottomTabs";
+// import BottomTabs from "../../components/BottomTabs";
 import Icon from "react-native-vector-icons/Ionicons";
 
 const messagesData = [
@@ -128,7 +128,7 @@ export default function MessagesScreen({ navigation }) {
           right: 0,
         }}
       >
-        <BottomTabs navigation={navigation} />
+        {/* <BottomTabs navigation={navigation} /> */}
       </View>
     </View>
   );

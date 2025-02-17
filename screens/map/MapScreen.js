@@ -81,9 +81,12 @@ const MapScreen = ({ navigation }) => {
   };
 
   const handleCardPress = (location) => {
-    navigation.navigate('DetailRentalLocation', { 
-      destination: location.destination,
-      previousScreen: 'Map'
+    navigation.navigate('HomeTab', { 
+      screen: 'DetailRentalLocation',
+      params: {
+        destination: location.destination,
+        previousScreen: 'Map'
+      }
     });
   };
 
