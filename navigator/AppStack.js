@@ -43,6 +43,8 @@ import NotificationScreen from "../screens/notification/Notification";
 import SettingList from "../screens/setting/SettingList";
 import ProfileScreen from "../screens/profile/ProfileScreen";
 import EditInfo from "../screens/profile/childPage/EditInfo";
+import ChangePassword from "../screens/profile/childPage/ChangePassword";
+import FavouriteList from "../screens/profile/childPage/FavouriteList";
 // import ActivitiesScreen from "../screens/activities/ActivitiesScreen";
 
 const Stack = createNativeStackNavigator();
@@ -402,6 +404,16 @@ const AppStack = () => {
           name="EditInfo"
           component={EditInfo}  
           options={{ headerShown: false}} 
+        />
+        <Stack.Screen
+          name="ChangePassword"
+          component={ChangePassword}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="FavouriteList"
+          component={FavouriteList}
+          options={{headerShown: false}}
         />
       </Stack.Navigator>
 
