@@ -37,7 +37,7 @@ import ChatScreen from "../screens/chat/ChatScreen";
 import ConfirmBooking from "../screens/booking/ConfirmBooking";
 import PaymentConfirm from "../screens/payment/PaymentConfirm";
 import PaymentSuccess from "../screens/payment/PaymentSuccess";
-import WalletScreen from "../screens/wallet/WalletScreen";
+import WalletScreen from "../screens/profile/childPage/WalletScreen";
 import PaymentMethod from "../screens/payment/PaymentMethod";
 import NotificationScreen from "../screens/notification/Notification";
 import SettingList from "../screens/setting/SettingList";
@@ -45,6 +45,8 @@ import ProfileScreen from "../screens/profile/ProfileScreen";
 import EditInfo from "../screens/profile/childPage/EditInfo";
 import ChangePassword from "../screens/profile/childPage/ChangePassword";
 import FavouriteList from "../screens/profile/childPage/FavouriteList";
+import HistoryScreen from "../screens/profile/childPage/HistoryScreen";
+import RatingHistory from "../screens/profile/childPage/RatingHistory";
 // import ActivitiesScreen from "../screens/activities/ActivitiesScreen";
 
 const Stack = createNativeStackNavigator();
@@ -388,38 +390,44 @@ const AppStack = () => {
         <Stack.Screen
           name="NotificationScreen"
           component={NotificationScreen}
-          options={{ headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="SettingList"
           component={SettingList}
-          options={{ headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="ProfileScreen"
           component={ProfileScreen}
-          options={{ headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="EditInfo"
-          component={EditInfo}  
-          options={{ headerShown: false}} 
+          component={EditInfo}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="ChangePassword"
           component={ChangePassword}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="FavouriteList"
           component={FavouriteList}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="HistoryScreen"
+          component={HistoryScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="RatingHistory"
+          component={RatingHistory}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
-
-
-
-
     </>
   );
 };
