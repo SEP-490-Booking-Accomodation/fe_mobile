@@ -126,7 +126,7 @@ export default function ProfileScreen() {
   };
 
   const handleLogout = () => {
-    console.log("Logout confirmed"); // Debugging line
+    
     setShowLogoutModal(false);
     // Add your logout logic here
     // For example: 
