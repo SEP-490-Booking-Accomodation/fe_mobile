@@ -47,6 +47,7 @@ import ChangePassword from "../screens/profile/childPage/ChangePassword";
 import FavouriteList from "../screens/profile/childPage/FavouriteList";
 import HistoryScreen from "../screens/profile/childPage/HistoryScreen";
 import RatingHistory from "../screens/profile/childPage/RatingHistory";
+import TicketList from "../screens/ticket/TicketList";
 // import ActivitiesScreen from "../screens/activities/ActivitiesScreen";
 
 const Stack = createNativeStackNavigator();
@@ -65,6 +66,7 @@ const hideTabBarScreens = [
   "Policies",
   "PolicyDetail",
   "MapScreen",
+  "TicketList"
 ];
 
 // Default tab bar style
@@ -259,7 +261,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Activities"
-        component={SettingList}
+        component={TicketList}
         options={{
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="local-activity" size={24} color={color} />
