@@ -1,5 +1,6 @@
 import { useState, useRef } from "react"
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Image, SafeAreaView, Dimensions } from "react-native"
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 const { width } = Dimensions.get("window")
 const cardWidth = width * 0.9
@@ -42,8 +43,8 @@ const PaymentSuccess = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity style={styles.closeButton} onPress={() => navigation.navigate("MainTabs")}>
-        <Text style={styles.closeButtonText}>✕</Text>
+      <TouchableOpacity style={styles.closeButton} onPress={() => navigation.navigate("HomeScreen")}>
+        <Text style={styles.closeButtonText}><Ionicons name="close-circle-outline" size={24} color="white" /></Text>
       </TouchableOpacity>
 
       <View style={styles.mainContainer}>
@@ -86,9 +87,10 @@ const PaymentSuccess = ({ route, navigation }) => {
               <View style={styles.amountSection}>
                 <Text style={styles.amountLabel}>Số tiền chuyển khoản</Text>
                 <Text style={styles.amount}>550.000đ</Text>
+                <Text style={styles.timestamp}>30/12/2024 — 9.41 am</Text>
               </View>
 
-              <Text style={styles.timestamp}>30/12/2024 — 9.41 am</Text>
+              <Text style={styles.timestamp}>30/12/2024 — 9.41</Text>
 
               <TouchableOpacity style={styles.detailButton} onPress={flipCard}>
                 <Text style={styles.detailButtonText}>Xem chi tiết</Text>
