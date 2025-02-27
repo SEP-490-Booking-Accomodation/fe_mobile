@@ -206,6 +206,6 @@ const styles = StyleSheet.create({
   buttonNav : {
     borderWidth: 1,
     borderColor: "#4E72E3",
-
+    paddingVertical: 10,
   }
 });

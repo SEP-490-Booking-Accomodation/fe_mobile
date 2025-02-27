@@ -106,7 +106,7 @@ export default function CardInMyTicket(props) {
                 disabledTitleColor="#FFFFFF"
                 loading={loading}
                 disabled={""}
-                style={{ minWidth: "45%" }}
+                style={{  minWidth: "45%" , paddingVertical: 10}}
                 onPress={onCancelAction}
               />
             ) : null}
@@ -127,9 +127,9 @@ export default function CardInMyTicket(props) {
               disabled={false} // Changed from empty string to boolean
               style={
                 status === "-1" || status === "0"
-                  ? {}
+                  ? { minWidth: "45%"  , paddingVertical: 10}
                   : status === "1"
-                  ? { minWidth: "100%" }
+                  ? { minWidth: "100%" , paddingVertical: 10}
                   : {}
               } // Fixed style object syntax
               onPress={
