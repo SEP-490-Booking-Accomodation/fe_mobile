@@ -8,8 +8,9 @@ import {
   TouchableOpacity,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons, Feather, AntDesign } from "@expo/vector-icons";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 // Begin Screens
 import SplashScreen from "../screens/begin/SplashScreen";
@@ -48,12 +49,9 @@ import FavouriteList from "../screens/profile/childPage/FavouriteList";
 import HistoryScreen from "../screens/profile/childPage/HistoryScreen";
 import RatingHistory from "../screens/profile/childPage/RatingHistory";
 import TicketList from "../screens/ticket/TicketList";
-// import ActivitiesScreen from "../screens/activities/ActivitiesScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
-
-// Screens where we want to hide the tab bar
 const hideTabBarScreens = [
   "SearchScreen",
   "SearchResult",
@@ -66,20 +64,10 @@ const hideTabBarScreens = [
   "Policies",
   "PolicyDetail",
   "MapScreen",
-  "TicketList"
+  "TicketList",
+  "HistoryScreen",
 ];
 
-// Default tab bar style
-const defaultTabBarStyle = {
-  backgroundColor: "#1C1C1E",
-  borderTopWidth: 0,
-  elevation: 0,
-  height: 60,
-  paddingBottom: 8,
-  paddingTop: 8,
-};
-
-// Home Stack Navigator
 const HomeStack = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -106,7 +94,6 @@ const HomeStack = () => {
   );
 };
 
-// Messages Stack Navigator
 const MessageStack = () => {
   return (
     <Stack.Navigator>
@@ -124,43 +111,116 @@ const MessageStack = () => {
   );
 };
 
-// Custom Tab Button Component for Map
-const TabBarAdvancedButton = ({ bgColor, ...props }) => (
+const TabsContext = React.createContext();
+
+export const useTabsContext = () => React.useContext(TabsContext);
+
+const TabsProvider = ({ children }) => {
+  const [currentLayout, setCurrentLayout] = useState("default");
+
+  return (
+    <TabsContext.Provider value={{ currentLayout, setCurrentLayout }}>
+      {children}
+    </TabsContext.Provider>
+  );
+};
+
+const tabLayouts = {
+  // Home screen tabs
+  home: [
+    {
+      name: "Home",
+      component: HomeScreen,
+      icon: (color) => <Ionicons name="home" size={24} color={color} />,
+    },
+    {
+      name: "Favourite",
+      component: FavouriteList,
+      icon: (color) => <AntDesign name="heart" size={24} color={color} />,
+    },
+    {
+      name: "Map",
+      component: MapScreen,
+      icon: (color) => <Ionicons name="map" size={24} color={color} />,
+      isMiddleButton: true,
+    },
+    {
+      name: "Activities",
+      component: TicketList,
+      icon: (color) => <MaterialIcons name="local-activity" size={24} color={color} />,
+    },
+    {
+      name: "Settings",
+      component: SettingList,
+      icon: (color) => <Feather name="settings" size={24} color={color} />,
+    },
+  ],
+  default: [
+    {
+      name: "Home",
+      component: HomeScreen,
+      icon: (color) => <Ionicons name="home" size={24} color={color} />,
+    },
+    {
+      name: "Messages",
+      component: MessagesScreen,
+      icon: (color) => <Ionicons name="chatbubble-outline" size={24} color={color} />,
+    },
+    {
+      name: "Map",
+      component: MapScreen,
+      icon: (color) => <Ionicons name="map" size={24} color={color} />,
+      isMiddleButton: true,
+    },
+    {
+      name: "Activities",
+      component: TicketList,
+      icon: (color) => <MaterialIcons name="local-activity" size={24} color={color} />,
+    },
+    {
+      name: "Settings",
+      component: SettingList,
+      icon: (color) => <Feather name="settings" size={24} color={color} />,
+    },
+  ],
+};
+
+// Custom Middle Button Component
+const MiddleButton = ({ item, color, onPress }) => (
   <View
     style={{
-      top: -20,
-      justifyContent: "center",
       alignItems: "center",
+      justifyContent: "center",
     }}
   >
     <TouchableOpacity
-      {...props}
+      onPress={onPress}
       style={{
-        width: 60,
-        height: 60,
-        borderRadius: 30,
+        position: "absolute",
+        bottom: -30,
+        height: 70,
+        width: 70,
+        borderRadius: 35,
         backgroundColor: "#4B7BF5",
-        justifyContent: "center",
         alignItems: "center",
-        borderWidth: 4,
-        borderColor: bgColor,
+        justifyContent: "center",
         shadowColor: "#000",
-        shadowOffset: {
-          width: 0,
-          height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
         elevation: 5,
+        borderWidth: 4,
+        borderColor: "#FFFFFF",
       }}
     >
-      <Ionicons name="map" size={28} color="#FFFFFF" />
+      {item.icon("#FFFFFF")}
     </TouchableOpacity>
   </View>
 );
 
-// Bottom Tab Navigator
-const TabNavigator = () => {
+const FlexibleTabNavigator = ({ layout = "default" }) => {
+  const tabs = tabLayouts[layout] || tabLayouts.default;
+  const navigation = useNavigation();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -169,6 +229,7 @@ const TabNavigator = () => {
           if (hideTabBarScreens.includes(routeName)) {
             return { display: "none" };
           }
+
           return {
             position: "absolute",
             bottom: 40,
@@ -202,83 +263,47 @@ const TabNavigator = () => {
         },
       })}
     >
-      <Tab.Screen
-        name="HomeTab"
-        component={HomeStack}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Messages"
-        component={MessageStack}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbubble-outline" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Map"
-        component={MapScreen}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="map" size={28} color="#FFFFFF" />
-          ),
-          tabBarButton: (props) => (
-            <View
-              style={{
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <TouchableOpacity
-                {...props}
-                style={{
-                  position: "absolute",
-                  bottom: -30,
-                  height: 70,
-                  width: 70,
-                  borderRadius: 35,
-                  backgroundColor: "#4B7BF5",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  shadowColor: "#000",
-                  shadowOpacity: 0.3,
-                  shadowRadius: 10,
-                  elevation: 5,
-                  borderWidth: 4,
-                  borderColor: "#FFFFFF",
-                }}
-              >
-                <Ionicons name="map" size={28} color="#FFFFFF" />
-              </TouchableOpacity>
-            </View>
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Activities"
-        component={TicketList}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="local-activity" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Settings"
-        component={SettingList}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <Feather name="settings" size={24} color={color} />
-          ),
-        }}
-      />
+      {tabs.map((item) => (
+        <Tab.Screen
+          key={item.name}
+          name={item.name}
+          component={item.component}
+          options={{
+            tabBarIcon: ({ color }) => item.icon(color),
+            tabBarButton: item.isMiddleButton
+              ? (props) => (
+                <MiddleButton
+                  {...props}
+                  item={item}
+                  onPress={() => navigation.navigate(item.name)}
+                />
+              )
+              : undefined,
+          }}
+        />
+      ))}
     </Tab.Navigator>
   );
+};
+
+
+const MainTabsScreen = () => {
+  const { currentLayout, setCurrentLayout } = useTabsContext();
+  const route = useRoute();
+
+  useEffect(() => {
+    const routeName = getFocusedRouteNameFromRoute(route) ?? "Home";
+
+    if (routeName === "Home" || routeName === "HomeScreen") {
+      setCurrentLayout("home");
+    } else if (routeName === "Profile" || routeName === "ProfileScreen") {
+      setCurrentLayout("profile");
+    } else {
+      setCurrentLayout("default");
+    }
+  }, [route, setCurrentLayout]);
+
+  return <FlexibleTabNavigator layout={currentLayout} />;
 };
 
 // Main App Stack
@@ -286,18 +311,8 @@ const AppStack = () => {
   const [initialRoute, setInitialRoute] = useState(null);
 
   useEffect(() => {
-    // const checkAppState = async () => {
-    //   try {
-    //     const userToken = await AsyncStorage.getItem("userToken");
-    //     setInitialRoute(userToken ? "MainTabs" : "Login");
-    //   } catch (error) {
-    //     console.error("Error loading app state:", error);
-    //     setInitialRoute("Login");
-    //   }
-    // };
-
     const checkAppState = async () => {
-      setInitialRoute("MainTabs"); // Mặc định vào trang Home
+      setInitialRoute("MainTabs");
     };
 
     checkAppState();
@@ -312,7 +327,7 @@ const AppStack = () => {
   }
 
   return (
-    <>
+    <TabsProvider>
       <StatusBar animated={true} />
       <Stack.Navigator
         initialRouteName={initialRoute}
@@ -365,7 +380,7 @@ const AppStack = () => {
         {/* Main Tab Navigation */}
         <Stack.Screen
           name="MainTabs"
-          component={TabNavigator}
+          component={MainTabsScreen}
           options={{ headerShown: false }}
         />
 
@@ -429,8 +444,18 @@ const AppStack = () => {
           component={RatingHistory}
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="Map"
+          component={MapScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="DetailRentalLocation"
+          component={DetailRentalLocationScreen}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
-    </>
+    </TabsProvider>
   );
 };
 

@@ -3,36 +3,30 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 
 const HeaderLNA = ({
-  location = "Your Location",
+  location = "Chọn thành phố",
   onNotificationPress,
   onAvatarPress,
+  onLocationPress,
   avatarSource,
-  notificationCount = 0, // Số lượng thông báo
+  notificationCount = 0,
 }) => {
   return (
     <View style={styles.headerContainer}>
-      {/* Location */}
-      <View style={styles.locationContainer}>
+      <TouchableOpacity onPress={onLocationPress} style={styles.locationContainer}>
         <Icon name="location-outline" size={24} color="#4E72E3" />
         <Text
-          numberOfLines={1} // Giới hạn chỉ hiển thị 1 dòng
-          ellipsizeMode="tail" // Hiển thị dấu ba chấm ở cuối nếu quá dài
+          numberOfLines={1}
+          ellipsizeMode="tail"
           style={styles.locationText}
         >
           {location || "Đang tải..."}
         </Text>
-      </View>
+      </TouchableOpacity>
 
-      {/* Right Side (Notification + Avatar) */}
       <View style={styles.rightContainer}>
-        {/* Notification Icon with badge */}
-        <TouchableOpacity
-          onPress={onNotificationPress}
-          style={styles.iconButton}
-        >
+        <TouchableOpacity onPress={onNotificationPress} style={styles.iconButton}>
           <View style={styles.notificationContainer}>
             <Icon name="notifications-outline" size={24} color="#333" />
-            {/* Thêm chấm đỏ hoặc số lượng thông báo */}
             {notificationCount > 0 && (
               <View style={styles.notificationBadge}>
                 <Text style={styles.notificationBadgeText}>
@@ -43,12 +37,11 @@ const HeaderLNA = ({
           </View>
         </TouchableOpacity>
 
-        {/* Avatar Icon */}
         <TouchableOpacity onPress={onAvatarPress} style={styles.iconButton}>
           {avatarSource ? (
             <Image source={{ uri: avatarSource }} style={styles.avatar} />
           ) : (
-            <Icon name="person-circle-outline" size={24} color="#000000" />
+            <Icon name="person-circle-outline" size={30} color="#000" />
           )}
         </TouchableOpacity>
       </View>
@@ -63,6 +56,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 8,
+    backgroundColor: "#fff",
   },
   locationContainer: {
     flexDirection: "row",
@@ -70,12 +64,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   locationText: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "500",
     color: "#4E72E3",
     marginLeft: 10,
-    maxWidth: "100%", // Đảm bảo giới hạn chiều rộng
-    overflow: "hidden", // Ẩn nội dung thừa
+    maxWidth: "80%",
+    overflow: "hidden",
   },
   rightContainer: {
     flexDirection: "row",

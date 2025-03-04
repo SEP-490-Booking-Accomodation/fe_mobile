@@ -68,7 +68,6 @@ export default function CardInMyTicket(props) {
         <View style={styles.rightContainer}>
           <View style={styles.detailsContainer}>
             <Text style={styles.title}>{nameRoom}</Text>
-            //Wait tag to add
             <View style={styles.tagContainer}>
               <Text style={styles.tagText}>Imperial</Text>
             </View>
@@ -94,7 +93,7 @@ export default function CardInMyTicket(props) {
                 disabledTitleColor="#FFFFFF"
                 loading={loading}
                 style={{ minWidth: "45%" }}
-                disabled={""}
+                disabled={false}
                 onPress={onReviewAction}
               />
             ) : status === "0" ? (
@@ -105,8 +104,8 @@ export default function CardInMyTicket(props) {
                 titleColor="#101828"
                 disabledTitleColor="#FFFFFF"
                 loading={loading}
-                disabled={""}
-                style={{  minWidth: "45%" , paddingVertical: 10}}
+                disabled={false}
+                style={{ minWidth: "45%", paddingVertical: 10 }}
                 onPress={onCancelAction}
               />
             ) : null}
@@ -124,14 +123,14 @@ export default function CardInMyTicket(props) {
               titleColor="#ffffff"
               disabledTitleColor="#FFFFFF"
               loading={loading}
-              disabled={false} // Changed from empty string to boolean
+              disabled={false}
               style={
                 status === "-1" || status === "0"
-                  ? { minWidth: "45%"  , paddingVertical: 10}
+                  ? { minWidth: "45%", paddingVertical: 10 }
                   : status === "1"
-                  ? { minWidth: "100%" , paddingVertical: 10}
+                  ? { minWidth: "100%", paddingVertical: 10 }
                   : {}
-              } // Fixed style object syntax
+              }
               onPress={
                 status === "-1"
                   ? onViewDetail
@@ -176,8 +175,8 @@ const styles = StyleSheet.create({
   },
   rightContainer: {
     flex: 1,
-    justifyContent: "space-between", // This helps distribute space evenly
-    minHeight: 130, // Slightly less than contentRow to maintain padding
+    justifyContent: "space-between", 
+    minHeight: 130,
   },
   detailsContainer: {
     gap: 4,
@@ -229,9 +228,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     marginTop: 8,
-    // justifyContent: 'space-between'
   },
-
   detailsButton: {
     flex: 1,
     backgroundColor: "#1A1A1A",
