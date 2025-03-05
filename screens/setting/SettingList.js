@@ -42,7 +42,11 @@ export default function SettingList({ navigation }) {
       </View>
 
       <View style={styles.content}>
-        <SearchField style={styles.searchBox} placeholder="Tìm kiếm cài đặt" />
+        <SearchField
+          style={styles.searchBox}
+          placeholder="Tìm kiếm cài đặt"
+          backIcon={false}
+          filterIcon={false} />
 
         <View style={styles.userInfo}>
           <View style={styles.userContainer}>

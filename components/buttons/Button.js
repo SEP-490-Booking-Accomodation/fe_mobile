@@ -12,7 +12,7 @@ const CustomButton = ({
   disabledTitleStyle,
   style,
   disabledStyle,
-  backgroundColor = '#1E293B',
+  backgroundColor = '#4E72E3',
   disabledBackgroundColor = '#E5E7EB',
   titleColor = '#FFFFFF',
   disabledTitleColor = '#9CA3AF',
@@ -42,19 +42,22 @@ const CustomButton = ({
   };
   const sizes = {
     small: {
-      paddingVertical: 8,
+      paddingVertical: 6,
       paddingHorizontal: 16,
       minHeight: 32,
+      minWidth: 90,
     },
     medium: {
-      paddingVertical: 12,
+      paddingVertical: 10,
       paddingHorizontal: 20,
-      minHeight: 48,
+      minHeight: 40,
+      minWidth: 110,
     },
     large: {
-      paddingVertical: 16,
+      paddingVertical: 14,
       paddingHorizontal: 24,
-      minHeight: 56,
+      minHeight: 48,
+      minWidth: 130,
     },
   };
 
@@ -112,18 +115,18 @@ const CustomButton = ({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 20,
+    borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
   },
   text: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '500',
     textAlign: 'center',
   },
   disabled: {
-    opacity: 1, 
+    opacity: 1,
   },
 });
 
