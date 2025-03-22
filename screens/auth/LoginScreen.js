@@ -16,10 +16,13 @@ import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import CustomButton from "../../components/buttons/Button";
 import CustomInput from "../../components/TextInput";
-import { useLazyGetUserQuery, useLoginMutation } from "../../api/authApi";
+import {
+  useLazyGetUserQuery,
+  useLoginMutation,
+  useSendOtpMutation,
+} from "../../api/authApi";
 import { loginSuccess, logout } from "../../redux/authSlice";
 import { useLazyGetRoleByIdQuery } from "../../api/roleApi";
-import { Button } from "react-native-elements";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -30,6 +33,7 @@ const LoginScreen = () => {
   const [login] = useLoginMutation();
   const [isLoading, setIsLoading] = useState(false);
   const [getRoleById] = useLazyGetRoleByIdQuery();
+  const [sendOtp] = useSendOtpMutation();
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -87,6 +91,14 @@ const LoginScreen = () => {
             token: response.accessToken,
           })
         );
+        return;
+      }
+      if (userData.isVerifiedEmail === false) {
+        const dataSendOtp = { email: userData.email };
+        const resSendOtp = await sendOtp({ data: dataSendOtp }).unwrap();
+        console.log("Send OTP response:", resSendOtp);
+        setIsLoading(false);
+        navigation.navigate("OTPVerification", { email: userData.email });
         return;
       }
 
