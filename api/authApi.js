@@ -10,6 +10,13 @@ export const authApi = baseApi.injectEndpoints({
         body: credentials,
       }),
     }),
+    register: builder.mutation({
+      query: ({ data }) => ({
+        url: "/user/register",
+        method: "POST",
+        body: data,
+      }),
+    }),
     forgetPasswordToken: builder.mutation({
       query: (credentials) => ({
         url: "/user/forgot-password-token",
@@ -60,4 +67,5 @@ export const {
   useForgetPasswordTokenMutation,
   useResetPasswordTokenMutation,
   useGetUserQuery,
+  useRegisterMutation,
 } = authApi;

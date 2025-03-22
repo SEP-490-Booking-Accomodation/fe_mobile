@@ -10,11 +10,13 @@ import {
   ImageBackground,
   Dimensions,
   Modal,
+  ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CustomButton from "../../components/buttons/Button";
 import CustomInput from "../../components/TextInput";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useRegisterMutation } from "../../api/authApi";
 
 const { height } = Dimensions.get("window");
 
@@ -28,17 +30,68 @@ const RegisterScreen = () => {
   const [dob, setDob] = useState(new Date());
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [register] = useRegisterMutation();
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
+    if (!fullName || !phone || !email || !password || !confirmPassword) {
+      alert("Vui lòng nhập đầy đủ thông tin!");
+      return;
+    }
+    if (!/^\d{10}$/.test(phone)) {
+      alert("Số điện thoại không hợp lệ!");
+      return;
+    }
+    if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+      alert("Email không hợp lệ!");
+      return;
+    }
+    if (password.length < 8) {
+      alert("Mật khẩu phải chứa ít nhất 8 ký tự!");
+      return;
+    }
+
+    const ageDiff = new Date().getFullYear() - dob.getFullYear();
+    if (
+      ageDiff < 16 ||
+      (ageDiff === 16 &&
+        new Date() < new Date(dob.setFullYear(dob.getFullYear() + 16)))
+    ) {
+      alert("Bạn phải trên 16 tuổi để đăng ký!");
+      return;
+    }
+
+    if (dob > new Date()) {
+      alert("Ngày sinh không hợp lệ!");
+      return;
+    }
+
     if (password !== confirmPassword) {
       alert("Mật khẩu và xác nhận mật khẩu không khớp!");
       return;
     }
+
     setLoading(true);
-    setTimeout(() => {
+
+    try {
+      const data = {
+        fullName,
+        phone,
+        email,
+        password,
+        doB: dob,
+        avatarUrl: null,
+        roleID: "67927ffda0a58ce4f7e8e840",
+      };
+      const response = await register({ data: data }).unwrap();
+      console.log("Register response:", response);
+      alert("Đăng ký thành công!");
+      // navigation.navigate("Login");
+    } catch (error) {
+      console.log("Register error:", error);
+      alert("Đăng ký thất bại!");
+    } finally {
       setLoading(false);
-      navigation.replace("VerifyBy");
-    }, 1500);
+    }
   };
 
   const formatDate = (date) => {
@@ -72,7 +125,11 @@ const RegisterScreen = () => {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.keyboardAvoid}
         >
-          <View style={styles.contentContainer}>
+          <ScrollView
+            style={styles.contentContainer}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+          >
             <View style={styles.header}>
               <Text style={styles.title}>Đăng ký</Text>
               <Text style={styles.subtitle}>
@@ -81,7 +138,7 @@ const RegisterScreen = () => {
             </View>
             <View style={styles.card}>
               <View style={styles.formContainer}>
-                <View style={styles.dot} />
+                {/* <View style={styles.dot} /> */}
                 <CustomInput
                   label="Họ và tên"
                   placeholder="Nhập họ và tên"
@@ -170,9 +227,10 @@ const RegisterScreen = () => {
                 </View>
               </View>
             </View>
-          </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </View>
+
       <Modal visible={isModalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -199,7 +257,7 @@ const RegisterScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
   },
   backgroundImage: {
     flex: 1,
@@ -207,17 +265,20 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+    marginTop: 50,
   },
   keyboardAvoid: {
     flex: 1,
   },
   contentContainer: {
     flex: 1,
-    justifyContent: "space-between",
+
+    // justifyContent: "space-between",
   },
   header: {
     paddingHorizontal: 24,
     paddingTop: 70,
+    marginBottom: 40,
   },
   title: {
     fontSize: 32,
@@ -274,8 +335,10 @@ const styles = StyleSheet.create({
   },
 
   dateInput: {
-    height: 50,
     justifyContent: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 20,
   },
   inputLabel: {
     marginBottom: 8,

@@ -8,15 +8,22 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { logout } from "../../redux/authSlice";
+import { useEffect, useState } from "react";
 
 const UserProfile = ({ user, isLoading, navigation }) => {
   const dispatch = useDispatch();
   const storedToken = useSelector((state) => state.auth.token);
+  const [currentUser, setCurrentUser] = useState(user);
+
+  useEffect(() => {
+    setCurrentUser(user);
+  }, [user]);
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem("authData");
     dispatch(logout());
-    navigation.navigate("Auth"); // Chuyển hướng về màn hình login
+    setCurrentUser(null); // Xóa dữ liệu user để hiển thị lại nút đăng nhập
+    // navigation.replace("SettingList"); // Tải lại trang
   };
 
   if (isLoading) {
@@ -25,16 +32,16 @@ const UserProfile = ({ user, isLoading, navigation }) => {
 
   return (
     <View style={styles.userInfo}>
-      {user ? (
+      {currentUser ? (
         <View style={styles.userContainer}>
-          <Image source={{ uri: user.avatar }} style={styles.avatar} />
+          <Image source={{ uri: currentUser.avatar }} style={styles.avatar} />
           <View style={{ marginLeft: 12 }}>
-            <Text style={styles.username}>{user.name}</Text>
-            <Text style={styles.email}>{user.email}</Text>
+            <Text style={styles.username}>{currentUser.name}</Text>
+            <Text style={styles.email}>{currentUser.email}</Text>
           </View>
         </View>
       ) : null}
-      {storedToken ? (
+      {storedToken && currentUser ? (
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutText}>Đăng xuất</Text>
         </TouchableOpacity>

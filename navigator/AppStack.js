@@ -189,7 +189,11 @@ const MessageStack = () => (
 //Setting Stack
 const SettingStack = () => (
   <Stack.Navigator>
-    <Stack.Screen name="Setting" component={SettingList} />
+    <Stack.Screen
+      name="SettingList"
+      component={SettingList}
+      options={{ headerShown: false }}
+    />
   </Stack.Navigator>
 );
 

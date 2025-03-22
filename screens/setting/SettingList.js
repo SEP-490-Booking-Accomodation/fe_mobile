@@ -27,16 +27,12 @@ export default function SettingList({ navigation }) {
       });
     }
   }, [user]);
-  const handleLogout = async () => {
-    await AsyncStorage.removeItem("authData");
-    dispatch(logout());
-    navigation.replace("Login");
-  };
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* <View style={styles.header}>
+      <View style={styles.header}>
         <Text style={styles.textHeader}>Cài đặt</Text>
-      </View> */}
+      </View>
 
       <View style={styles.content}>
         {/* <SearchField
