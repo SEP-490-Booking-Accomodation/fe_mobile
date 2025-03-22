@@ -108,14 +108,35 @@ const HomeStack = () => (
     <Stack.Screen
       name="DetailAccomodation"
       component={AccomodationDetailScreen}
+      options={{ headerShown: false }}
     />
-    <Stack.Screen name="Policies" component={PolicyScreen} />
+    <Stack.Screen
+      name="Policies"
+      component={PolicyScreen}
+      options={{ headerShown: false }}
+    />
     <Stack.Screen name="PolicyDetail" component={PolicyDetailScreen} />
-    <Stack.Screen name="ConfirmBooking" component={ConfirmBooking} />
+    <Stack.Screen
+      name="ConfirmBooking"
+      component={ConfirmBooking}
+      options={{ headerShown: false }}
+    />
     <Stack.Screen name="PaymentConfirm" component={PaymentConfirm} />
-    <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
-    <Stack.Screen name="FavouriteList" component={FavouriteList} />
-    <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
+    <Stack.Screen
+      name="PaymentSuccess"
+      component={PaymentSuccess}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="FavouriteList"
+      component={FavouriteList}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="NotificationScreen"
+      component={NotificationScreen}
+      options={{ headerShown: false }}
+    />
     <Stack.Screen
       name="ProfileScreen"
       component={ProfileScreen}
@@ -146,9 +167,17 @@ const MessageStack = () => (
   </Stack.Navigator>
 );
 
+//Setting Stack
 const SettingStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="Setting" component={SettingList} />
+  </Stack.Navigator>
+);
+
+//TicketList
+const TicketStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="TicketList" component={TicketList} />
   </Stack.Navigator>
 );
 
@@ -266,9 +295,10 @@ const MainTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Activities"
-        component={TicketList}
+        name="Ticket"
+        component={TicketStack}
         options={{
+          headerShown: false,
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="local-activity" size={24} color={color} />
           ),
