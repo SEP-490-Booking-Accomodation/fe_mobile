@@ -8,16 +8,21 @@ import {
   StyleSheet,
   TouchableOpacity,
   ImageBackground,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import CustomButton from "../../components/buttons/Button";
 import CustomInput from "../../components/TextInput";
-import { useLazyGetUserQuery, useLoginMutation } from "../../api/authApi";
-import { loginSuccess } from "../../redux/authSlice";
+import {
+  useLazyGetUserQuery,
+  useLoginMutation,
+  useSendOtpMutation,
+} from "../../api/authApi";
+import { loginSuccess, logout } from "../../redux/authSlice";
 import { useLazyGetRoleByIdQuery } from "../../api/roleApi";
-import { Button } from "react-native-elements";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -27,7 +32,8 @@ const LoginScreen = () => {
   const [getUserById] = useLazyGetUserQuery();
   const [login] = useLoginMutation();
   const [isLoading, setIsLoading] = useState(false);
-  // const [getRoleById] = useLazyGetRoleByIdQuery();
+  const [getRoleById] = useLazyGetRoleByIdQuery();
+  const [sendOtp] = useSendOtpMutation();
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -51,12 +57,13 @@ const LoginScreen = () => {
 
     try {
       const response = await login({ email, password }).unwrap();
-      console.log("Full login response:", response);
       dispatch(
         loginSuccess({
           token: response.accessToken,
         })
       );
+      console.log("Full login response:", response);
+
       // Lấy thông tin người dùng từ API
       const resGetUser = await getUserById(response._id).unwrap();
       const userData = resGetUser.getUser;
@@ -69,6 +76,29 @@ const LoginScreen = () => {
           description: "Vui lòng liên hệ quản trị viên để biết thêm chi tiết.",
         });
         setIsLoading(false);
+        return;
+      }
+
+      // Kiểm tra role của user
+      const roleData = await getRoleById(userData.roleID).unwrap();
+      console.log("Role Data:", roleData);
+
+      if (roleData.roleName !== "Customer") {
+        Alert.alert("Lỗi đăng nhập", "Bạn không phải khách hàng!");
+        setIsLoading(false);
+        dispatch(
+          loginSuccess({
+            token: response.accessToken,
+          })
+        );
+        return;
+      }
+      if (userData.isVerifiedEmail === false) {
+        const dataSendOtp = { email: userData.email };
+        const resSendOtp = await sendOtp({ data: dataSendOtp }).unwrap();
+        console.log("Send OTP response:", resSendOtp);
+        setIsLoading(false);
+        navigation.navigate("OTPVerification", { email: userData.email });
         return;
       }
 
@@ -91,6 +121,7 @@ const LoginScreen = () => {
         })
       );
 
+      // Chuyển hướng vào trang chính
       navigation.replace("MainTabs");
     } catch (error) {
       console.log("Login error:", error);
@@ -108,66 +139,72 @@ const LoginScreen = () => {
       source={require("../../assets/images/bg_login.png")}
       style={styles.backgroundImage}
     >
-      <View style={styles.safeArea}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.keyboardAvoid}
-        >
-          <View style={styles.contentContainer}>
-            <View style={styles.header}>
-              {/* <Button title="Back" onPress={() => navigation.goBack()} /> */}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.safeArea}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.keyboardAvoid}
+          >
+            <View style={styles.contentContainer}>
+              <View style={styles.header}>
+                {/* <Button title="Back" onPress={() => navigation.goBack()} /> */}
 
-              <Text style={styles.title}>Đăng nhập</Text>
-              <Text style={styles.subtitle}>
-                Bắt đầu hành trình của bạn: Đăng nhập để khám phá
-              </Text>
-            </View>
-            <View style={styles.card}>
-              <View style={styles.formContainer}>
-                <CustomInput
-                  label="Email hoặc Số điện thoại"
-                  placeholder="Nhập email hoặc số điện thoại"
-                  value={email}
-                  onChangeText={setEmail}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                />
-                <CustomInput
-                  label="Mật khẩu"
-                  placeholder="Nhập mật khẩu"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                />
-                <TouchableOpacity
-                  style={styles.forgotPasswordButton}
-                  onPress={() => navigation.navigate("ForgotPassword")}
-                >
-                  <Text style={styles.forgotPasswordText}>Quên Mật khẩu?</Text>
-                </TouchableOpacity>
-                <CustomButton
-                  title="Đăng nhập"
-                  backgroundColor="#1A2741"
-                  disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
-                  titleColor="#FFFFFF"
-                  disabledTitleColor="#FFFFFF"
-                  loading={isLoading}
-                  disabled={!email || !password}
-                  onPress={handleLogin}
-                />
-                <View style={styles.signupContainer}>
-                  <Text style={styles.signupText}>Chưa có tài khoản? </Text>
+                <Text style={styles.title}>Đăng nhập</Text>
+                <Text style={styles.subtitle}>
+                  Bắt đầu hành trình của bạn: Đăng nhập để khám phá
+                </Text>
+              </View>
+              <View style={styles.card}>
+                <View style={styles.formContainer}>
+                  <CustomInput
+                    // label="Email hoặc Số điện thoại"
+                    // placeholder="Nhập email hoặc số điện thoại"
+                    label="Email"
+                    placeholder="Nhập email"
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                  />
+                  <CustomInput
+                    label="Mật khẩu"
+                    placeholder="Nhập mật khẩu"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                  />
                   <TouchableOpacity
-                    onPress={() => navigation.navigate("Register")}
+                    style={styles.forgotPasswordButton}
+                    onPress={() => navigation.navigate("ForgotPassword")}
                   >
-                    <Text style={styles.signupButtonText}>Đăng ký ngay</Text>
+                    <Text style={styles.forgotPasswordText}>
+                      Quên Mật khẩu?
+                    </Text>
                   </TouchableOpacity>
+                  <CustomButton
+                    title="Đăng nhập"
+                    backgroundColor="#1A2741"
+                    disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
+                    titleColor="#FFFFFF"
+                    disabledTitleColor="#FFFFFF"
+                    loading={isLoading}
+                    disabled={!email || !password}
+                    onPress={handleLogin}
+                  />
+                  <View style={styles.signupContainer}>
+                    <Text style={styles.signupText}>Chưa có tài khoản? </Text>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate("Register")}
+                    >
+                      <Text style={styles.signupButtonText}>Đăng ký ngay</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
-        </KeyboardAvoidingView>
-      </View>
+          </KeyboardAvoidingView>
+        </View>
+      </TouchableWithoutFeedback>
     </ImageBackground>
   );
 };
@@ -218,10 +255,12 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     color: "#4E72E3",
+    marginTop: 20,
     fontSize: 14,
     fontWeight: "500",
   },
   signupContainer: {
+    marginTop: 24,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

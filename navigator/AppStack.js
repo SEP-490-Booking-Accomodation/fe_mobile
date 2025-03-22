@@ -9,7 +9,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   Ionicons,
   MaterialIcons,
@@ -81,8 +80,20 @@ const hideTabBarScreens = [
 
 // AUTH STACK
 const AuthStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="Login" component={LoginScreen} />
+  <Stack.Navigator
+    initialRouteName="Login"
+    screenOptions={{
+      headerShown: false,
+    }}
+  >
+    <Stack.Screen
+      name="Login"
+      component={LoginScreen}
+      options={{
+        headerShown: false, // Ẩn header
+      }}
+    />
+
     <Stack.Screen name="Register" component={RegisterScreen} />
     <Stack.Screen name="VerifyBy" component={VerifyByScreen} />
     <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
@@ -99,8 +110,16 @@ const HomeStack = () => (
       component={HomeScreen}
       options={{ headerShown: false }}
     />
-    <Stack.Screen name="SearchScreen" component={SearchScreen} />
-    <Stack.Screen name="SearchResult" component={SearchResult} />
+    <Stack.Screen
+      name="SearchScreen"
+      component={SearchScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="SearchResult"
+      component={SearchResult}
+      options={{ headerShown: false }}
+    />
     <Stack.Screen
       name="DetailRentalLocation"
       component={DetailRentalLocationScreen}
@@ -169,12 +188,16 @@ const MessageStack = () => (
 
 //Setting Stack
 const SettingStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="Setting" component={SettingList} />
+  <Stack.Navigator>
+    <Stack.Screen
+      name="SettingList"
+      component={SettingList}
+      options={{ headerShown: false }}
+    />
   </Stack.Navigator>
 );
 
-//TicketList
+//TicketStack
 const TicketStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="TicketList" component={TicketList} />
@@ -328,7 +351,6 @@ const AppStack = () => {
   useEffect(() => {
     const checkAppState = async () => {
       try {
-        // Thay đổi từ DrawerNavigation sang MainTabs
         setInitialRoute("MainTabs");
       } catch (e) {
         console.error("Failed to load app state", e);
