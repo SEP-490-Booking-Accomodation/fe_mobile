@@ -1,18 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import React, { useEffect, useState, createContext, useContext } from "react";
 import {
   StatusBar,
   ActivityIndicator,
   View,
   TouchableOpacity,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons, MaterialIcons, Feather, AntDesign } from "@expo/vector-icons";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  Ionicons,
+  MaterialIcons,
+  Feather,
+  AntDesign,
+} from "@expo/vector-icons";
 
-// Begin Screens
+// Import screens
 import SplashScreen from "../screens/begin/SplashScreen";
 import OnboardingScreen from "../screens/begin/OnboardingScreen";
 
@@ -52,6 +57,12 @@ import TicketList from "../screens/ticket/TicketList";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+
+// Navigation context
+const NavigationContext = createContext();
+export const useNavigationContext = () => useContext(NavigationContext);
+
+// Hidden tab bar screens
 const hideTabBarScreens = [
   "SearchScreen",
   "SearchResult",
@@ -68,131 +79,82 @@ const hideTabBarScreens = [
   "HistoryScreen",
 ];
 
-const HomeStack = () => {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="HomeScreen" component={HomeScreen} />
-      <Stack.Screen name="SearchScreen" component={SearchScreen} />
-      <Stack.Screen name="SearchResult" component={SearchResult} />
-      <Stack.Screen
-        name="DetailRentalLocation"
-        component={DetailRentalLocationScreen}
-      />
-      <Stack.Screen
-        name="DetailAccomodation"
-        component={AccomodationDetailScreen}
-      />
-      <Stack.Screen name="Policies" component={PolicyScreen} />
-      <Stack.Screen name="PolicyDetail" component={PolicyDetailScreen} />
-      <Stack.Screen name="ConfirmBooking" component={ConfirmBooking} />
-      <Stack.Screen name="PaymentConfirm" component={PaymentConfirm} />
-      <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
-      <Stack.Screen name="Wallet" component={WalletScreen} />
-      <Stack.Screen name="PaymentMethod" component={PaymentMethod} />
-      <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
-    </Stack.Navigator>
-  );
-};
+// AUTH STACK
+const AuthStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Login" component={LoginScreen} />
+    <Stack.Screen name="Register" component={RegisterScreen} />
+    <Stack.Screen name="VerifyBy" component={VerifyByScreen} />
+    <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
+    <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+    <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+  </Stack.Navigator>
+);
 
-const MessageStack = () => {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="MessagesScreen"
-        component={MessagesScreen}
-        options={{ title: "Nhắn tin" }}
-      />
-      <Stack.Screen
-        name="Chat"
-        component={ChatScreen}
-        options={{ headerShown: false }}
-      />
-    </Stack.Navigator>
-  );
-};
+// HOME STACK
+const HomeStack = () => (
+  <Stack.Navigator>
+    <Stack.Screen
+      name="HomeScreen"
+      component={HomeScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen name="SearchScreen" component={SearchScreen} />
+    <Stack.Screen name="SearchResult" component={SearchResult} />
+    <Stack.Screen
+      name="DetailRentalLocation"
+      component={DetailRentalLocationScreen}
+    />
+    <Stack.Screen
+      name="DetailAccomodation"
+      component={AccomodationDetailScreen}
+    />
+    <Stack.Screen name="Policies" component={PolicyScreen} />
+    <Stack.Screen name="PolicyDetail" component={PolicyDetailScreen} />
+    <Stack.Screen name="ConfirmBooking" component={ConfirmBooking} />
+    <Stack.Screen name="PaymentConfirm" component={PaymentConfirm} />
+    <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
+    <Stack.Screen name="FavouriteList" component={FavouriteList} />
+    <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
+    <Stack.Screen
+      name="ProfileScreen"
+      component={ProfileScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen name="EditInfo" component={EditInfo} />
+    <Stack.Screen name="ChangePassword" component={ChangePassword} />
+    <Stack.Screen name="RatingHistory" component={RatingHistory} />
+    <Stack.Screen name="Wallet" component={WalletScreen} />
+    <Stack.Screen name="PaymentMethod" component={PaymentMethod} />
+    <Stack.Screen name="HistoryScreen" component={HistoryScreen} />
+  </Stack.Navigator>
+);
 
-const TabsContext = React.createContext();
+// MESSAGE STACK
+const MessageStack = () => (
+  <Stack.Navigator>
+    <Stack.Screen
+      name="MessagesScreen"
+      component={MessagesScreen}
+      options={{ title: "Nhắn tin" }}
+    />
+    <Stack.Screen
+      name="Chat"
+      component={ChatScreen}
+      options={{ headerShown: false }}
+    />
+  </Stack.Navigator>
+);
 
-export const useTabsContext = () => React.useContext(TabsContext);
-
-const TabsProvider = ({ children }) => {
-  const [currentLayout, setCurrentLayout] = useState("default");
-
-  return (
-    <TabsContext.Provider value={{ currentLayout, setCurrentLayout }}>
-      {children}
-    </TabsContext.Provider>
-  );
-};
-
-const tabLayouts = {
-  // Home screen tabs
-  home: [
-    {
-      name: "Home",
-      component: HomeScreen,
-      icon: (color) => <Ionicons name="home" size={24} color={color} />,
-    },
-    {
-      name: "Favourite",
-      component: FavouriteList,
-      icon: (color) => <AntDesign name="heart" size={24} color={color} />,
-    },
-    {
-      name: "Map",
-      component: MapScreen,
-      icon: (color) => <Ionicons name="map" size={24} color={color} />,
-      isMiddleButton: true,
-    },
-    {
-      name: "Activities",
-      component: TicketList,
-      icon: (color) => <MaterialIcons name="local-activity" size={24} color={color} />,
-    },
-    {
-      name: "Settings",
-      component: SettingList,
-      icon: (color) => <Feather name="settings" size={24} color={color} />,
-    },
-  ],
-  default: [
-    {
-      name: "Home",
-      component: HomeScreen,
-      icon: (color) => <Ionicons name="home" size={24} color={color} />,
-    },
-    {
-      name: "Messages",
-      component: MessagesScreen,
-      icon: (color) => <Ionicons name="chatbubble-outline" size={24} color={color} />,
-    },
-    {
-      name: "Map",
-      component: MapScreen,
-      icon: (color) => <Ionicons name="map" size={24} color={color} />,
-      isMiddleButton: true,
-    },
-    {
-      name: "Activities",
-      component: TicketList,
-      icon: (color) => <MaterialIcons name="local-activity" size={24} color={color} />,
-    },
-    {
-      name: "Settings",
-      component: SettingList,
-      icon: (color) => <Feather name="settings" size={24} color={color} />,
-    },
-  ],
-};
+const SettingStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Setting" component={SettingList} />
+  </Stack.Navigator>
+);
 
 // Custom Middle Button Component
-const MiddleButton = ({ item, color, onPress }) => (
-  <View
-    style={{
-      alignItems: "center",
-      justifyContent: "center",
-    }}
-  >
+const MiddleButton = ({ item, onPress }) => (
+  <View style={{ alignItems: "center", justifyContent: "center" }}>
     <TouchableOpacity
       onPress={onPress}
       style={{
@@ -217,8 +179,8 @@ const MiddleButton = ({ item, color, onPress }) => (
   </View>
 );
 
-const FlexibleTabNavigator = ({ layout = "default" }) => {
-  const tabs = tabLayouts[layout] || tabLayouts.default;
+// Main Tab Navigator
+const MainTabNavigator = () => {
   const navigation = useNavigation();
 
   return (
@@ -247,7 +209,6 @@ const FlexibleTabNavigator = ({ layout = "default" }) => {
         })(),
         tabBarActiveTintColor: "#FFFFFF",
         tabBarInactiveTintColor: "#8E8E93",
-        headerShown: false,
         tabBarHideOnKeyboard: true,
         tabBarItemStyle: {
           height: 40,
@@ -263,56 +224,86 @@ const FlexibleTabNavigator = ({ layout = "default" }) => {
         },
       })}
     >
-      {tabs.map((item) => (
-        <Tab.Screen
-          key={item.name}
-          name={item.name}
-          component={item.component}
-          options={{
-            tabBarIcon: ({ color }) => item.icon(color),
-            tabBarButton: item.isMiddleButton
-              ? (props) => (
-                <MiddleButton
-                  {...props}
-                  item={item}
-                  onPress={() => navigation.navigate(item.name)}
-                />
-              )
-              : undefined,
-          }}
-        />
-      ))}
+      <Tab.Screen
+        name="Home"
+        component={HomeStack}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="home" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Messages"
+        component={MessageStack}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="chatbubble-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Map"
+        component={MapScreen}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="map" size={24} color={color} />
+          ),
+          tabBarButton: (props) => (
+            <MiddleButton
+              {...props}
+              item={{
+                icon: (color) => (
+                  <Ionicons name="map" size={24} color={color} />
+                ),
+              }}
+              onPress={() => navigation.navigate("Map")}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Activities"
+        component={TicketList}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="local-activity" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Setting"
+        component={SettingStack}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <Feather name="user" size={24} color={color} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 };
 
-
-const MainTabsScreen = () => {
-  const { currentLayout, setCurrentLayout } = useTabsContext();
-  const route = useRoute();
-
-  useEffect(() => {
-    const routeName = getFocusedRouteNameFromRoute(route) ?? "Home";
-
-    if (routeName === "Home" || routeName === "HomeScreen") {
-      setCurrentLayout("home");
-    } else if (routeName === "Profile" || routeName === "ProfileScreen") {
-      setCurrentLayout("profile");
-    } else {
-      setCurrentLayout("default");
-    }
-  }, [route, setCurrentLayout]);
-
-  return <FlexibleTabNavigator layout={currentLayout} />;
-};
-
-// Main App Stack
+// Initial Navigation Flow
 const AppStack = () => {
   const [initialRoute, setInitialRoute] = useState(null);
+  const [navigationState, setNavigationState] = useState({
+    currentLayout: "default",
+  });
 
   useEffect(() => {
     const checkAppState = async () => {
-      setInitialRoute("MainTabs");
+      try {
+        // Thay đổi từ DrawerNavigation sang MainTabs
+        setInitialRoute("MainTabs");
+      } catch (e) {
+        console.error("Failed to load app state", e);
+        setInitialRoute("Splash");
+      }
     };
 
     checkAppState();
@@ -327,135 +318,29 @@ const AppStack = () => {
   }
 
   return (
-    <TabsProvider>
+    <NavigationContext.Provider
+      value={{
+        ...navigationState,
+        updateState: (newState) =>
+          setNavigationState({ ...navigationState, ...newState }),
+      }}
+    >
       <StatusBar animated={true} />
       <Stack.Navigator
         initialRouteName={initialRoute}
-        screenOptions={{ gestureEnabled: true }}
+        screenOptions={{ gestureEnabled: true, headerShown: false }}
       >
-        {/* Begin Screens */}
-        <Stack.Screen
-          name="Splash"
-          component={SplashScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Onboarding"
-          component={OnboardingScreen}
-          options={{ headerShown: false }}
-        />
+        {/* Onboarding & Splash */}
+        <Stack.Screen name="Splash" component={SplashScreen} />
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
 
-        {/* Auth Screens */}
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Register"
-          component={RegisterScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="VerifyBy"
-          component={VerifyByScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="OTPVerification"
-          component={OTPVerificationScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="ForgotPassword"
-          component={ForgotPasswordScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="ResetPassword"
-          component={ResetPasswordScreen}
-          options={{ headerShown: false }}
-        />
+        {/* Auth Flow */}
+        <Stack.Screen name="Auth" component={AuthStack} />
 
-        {/* Main Tab Navigation */}
-        <Stack.Screen
-          name="MainTabs"
-          component={MainTabsScreen}
-          options={{ headerShown: false }}
-        />
-
-        <Stack.Screen
-          name="Messages"
-          component={MessagesScreen}
-          options={{ headerShown: true, title: "Nhắn tin" }}
-        />
-        <Stack.Screen
-          name="Chat"
-          component={ChatScreen}
-          options={{ headerShown: false, title: "Tin nhắn" }}
-        />
-        <Stack.Screen
-          name="Wallet"
-          component={WalletScreen}
-          options={{ headerShown: true, title: "Ví Mean" }}
-        />
-        <Stack.Screen
-          name="PaymentMethod"
-          component={PaymentMethod}
-          options={{ headerShown: true, title: "Payment Method" }}
-        />
-        <Stack.Screen
-          name="NotificationScreen"
-          component={NotificationScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="SettingList"
-          component={SettingList}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="ProfileScreen"
-          component={ProfileScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="EditInfo"
-          component={EditInfo}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="ChangePassword"
-          component={ChangePassword}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="FavouriteList"
-          component={FavouriteList}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="HistoryScreen"
-          component={HistoryScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="RatingHistory"
-          component={RatingHistory}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Map"
-          component={MapScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="DetailRentalLocation"
-          component={DetailRentalLocationScreen}
-          options={{ headerShown: false }}
-        />
+        {/* Main App Flow - Thay DrawerNavigator bằng MainTabNavigator */}
+        <Stack.Screen name="MainTabs" component={MainTabNavigator} />
       </Stack.Navigator>
-    </TabsProvider>
+    </NavigationContext.Provider>
   );
 };
 

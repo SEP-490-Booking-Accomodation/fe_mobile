@@ -7,13 +7,15 @@ const authSlice = createSlice({
     isAuthen: false,
     userId: null,
     token: null,
+    userData: null,
   },
   reducers: {
     loginSuccess: (state, action) => {
-      const { userId, token } = action.payload;
+      const { userId, token, userData } = action.payload;
       state.isAuthen = true;
       state.userId = userId;
       state.token = token;
+      state.userData = userData;
 
       // Lưu vào AsyncStorage
       AsyncStorage.setItem("authData", JSON.stringify({ userId, token }));
@@ -22,6 +24,7 @@ const authSlice = createSlice({
       state.isAuthen = false;
       state.userId = null;
       state.token = null;
+      state.userData = null;
 
       // Xóa dữ liệu khỏi AsyncStorage
       AsyncStorage.removeItem("authData");
@@ -31,6 +34,7 @@ const authSlice = createSlice({
       state.isAuthen = true;
       state.userId = userId;
       state.token = token;
+      
     },
   },
 });

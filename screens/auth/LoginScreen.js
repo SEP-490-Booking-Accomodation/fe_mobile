@@ -14,16 +14,20 @@ import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import CustomButton from "../../components/buttons/Button";
 import CustomInput from "../../components/TextInput";
-import { useLoginMutation } from "../../api/authApi";
+import { useLazyGetUserQuery, useLoginMutation } from "../../api/authApi";
 import { loginSuccess } from "../../redux/authSlice";
+import { useLazyGetRoleByIdQuery } from "../../api/roleApi";
+import { Button } from "react-native-elements";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [login, { isLoading }] = useLoginMutation();
-
+  const [getUserById] = useLazyGetUserQuery();
+  const [login] = useLoginMutation();
+  const [isLoading, setIsLoading] = useState(false);
+  // const [getRoleById] = useLazyGetRoleByIdQuery();
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -42,22 +46,49 @@ const LoginScreen = () => {
   }, []);
 
   const handleLogin = async () => {
+    console.log("Đang gọi API login...");
+    setIsLoading(true);
+
     try {
       const response = await login({ email, password }).unwrap();
+      console.log("Full login response:", response);
+      dispatch(
+        loginSuccess({
+          token: response.accessToken,
+        })
+      );
+      // Lấy thông tin người dùng từ API
+      const resGetUser = await getUserById(response._id).unwrap();
+      const userData = resGetUser.getUser;
+      console.log("User Data:", userData);
 
-      console.log("Full login response:", response); // Kiểm tra toàn bộ response
-
-      // Nếu API trả về trực tiếp mà không có .data
-      const { _id, accessToken } = response;
-
-      if (!_id || !accessToken) {
-        throw new Error("Dữ liệu trả về không hợp lệ");
+      // Kiểm tra tài khoản có bị khóa không
+      if (!userData?.isActive) {
+        notification.error({
+          message: "Tài khoản bị khóa",
+          description: "Vui lòng liên hệ quản trị viên để biết thêm chi tiết.",
+        });
+        setIsLoading(false);
+        return;
       }
 
-      dispatch(loginSuccess({ userId: _id, token: accessToken }));
+      // Lưu token vào Redux
+      dispatch(
+        loginSuccess({
+          userId: response._id,
+          token: response.accessToken,
+          userData: userData,
+        })
+      );
+
+      // Lưu token vào AsyncStorage
       await AsyncStorage.setItem(
         "authData",
-        JSON.stringify({ userId: _id, token: accessToken })
+        JSON.stringify({
+          userId: response._id,
+          token: response.accessToken,
+          userData: userData,
+        })
       );
 
       navigation.replace("MainTabs");
@@ -67,29 +98,10 @@ const LoginScreen = () => {
         "Đăng nhập thất bại",
         error?.data?.message || "Vui lòng kiểm tra lại thông tin đăng nhập"
       );
+    } finally {
+      setIsLoading(false);
     }
   };
-  // const handleLogin = async () => {
-  //   // console.log("API URL:", process.env.EXPO_PUBLIC_API_URL);
-
-  //   console.log("Đang gọi API login...");
-  //   try {
-  //     const response = await login({ email, password }).unwrap();
-  //     console.log("Login response:", response);
-
-  //     dispatch(
-  //       loginSuccess({ userId: response.userId, token: response.token })
-  //     );
-
-  //     navigation.replace("MainTabs");
-  //   } catch (error) {
-  //     console.log("Login error:", error);
-  //     Alert.alert(
-  //       "Đăng nhập thất bại",
-  //       error?.data?.message || "Có lỗi xảy ra"
-  //     );
-  //   }
-  // };
 
   return (
     <ImageBackground
@@ -103,6 +115,8 @@ const LoginScreen = () => {
         >
           <View style={styles.contentContainer}>
             <View style={styles.header}>
+              {/* <Button title="Back" onPress={() => navigation.goBack()} /> */}
+
               <Text style={styles.title}>Đăng nhập</Text>
               <Text style={styles.subtitle}>
                 Bắt đầu hành trình của bạn: Đăng nhập để khám phá

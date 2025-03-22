@@ -29,7 +29,7 @@ const cities = [
   "Phan Thiết",
   "Hạ Long",
   "Vinh",
-  "Pleiku"
+  "Pleiku",
 ];
 
 export default function HomeScreen() {
@@ -111,7 +111,7 @@ export default function HomeScreen() {
                   key={index}
                   style={[
                     styles.cityOption,
-                    { borderBottomWidth: index === cities.length - 1 ? 0 : 1 }
+                    { borderBottomWidth: index === cities.length - 1 ? 0 : 1 },
                   ]}
                   activeOpacity={0.6}
                   onPress={() => handleSelectCity(city)}
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   cityListContainer: {
-    maxHeight: 300, 
+    maxHeight: 300,
   },
   cityOption: {
     paddingVertical: 14,
@@ -202,5 +202,3 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 });
-
-

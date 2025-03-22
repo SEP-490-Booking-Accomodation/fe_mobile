@@ -6,9 +6,10 @@ export const baseApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl:
       // process.env.EXPO_PUBLIC_API_URL ||
-      "http://192.168.1.11:5000/api/",
+      "http://192.168.1.23:5000/api/",
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth.token;
+      console.log("Current Token:", token); // Kiểm tra token có hay không
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
