@@ -16,7 +16,7 @@ const UserProfile = ({ user, isLoading, navigation }) => {
   const handleLogout = async () => {
     await AsyncStorage.removeItem("authData");
     dispatch(logout());
-    navigation.replace("Login");
+    navigation.navigate("Auth"); // Chuyển hướng về màn hình login
   };
 
   if (isLoading) {
@@ -41,7 +41,7 @@ const UserProfile = ({ user, isLoading, navigation }) => {
       ) : (
         <TouchableOpacity
           style={styles.loginButton}
-          onPress={() => navigation.navigate("Login")}
+          onPress={() => navigation.navigate("Auth")}
         >
           <Text style={styles.loginText}>Đăng nhập</Text>
         </TouchableOpacity>
