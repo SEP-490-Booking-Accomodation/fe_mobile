@@ -53,9 +53,9 @@ const UserProfile = ({ user, isLoading, navigation }) => {
           <Text style={styles.loginText}>Đăng nhập</Text>
         </TouchableOpacity>
       )}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+      {/* <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Đăng xuất</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };
