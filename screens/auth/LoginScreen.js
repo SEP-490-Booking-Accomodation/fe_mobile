@@ -34,22 +34,22 @@ const LoginScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [getRoleById] = useLazyGetRoleByIdQuery();
   const [sendOtp] = useSendOtpMutation();
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const authData = await AsyncStorage.getItem("authData");
-        if (authData) {
-          const { userId, token } = JSON.parse(authData);
-          dispatch(loginSuccess({ userId, token }));
-          navigation.replace("MainTabs");
-        }
-      } catch (error) {
-        console.log("Lỗi khi lấy dữ liệu đăng nhập:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const checkAuth = async () => {
+  //     try {
+  //       const authData = await AsyncStorage.getItem("authData");
+  //       if (authData) {
+  //         const { userId, token } = JSON.parse(authData);
+  //         dispatch(loginSuccess({ userId, token }));
+  //         navigation.replace("MainTabs");
+  //       }
+  //     } catch (error) {
+  //       console.log("Lỗi khi lấy dữ liệu đăng nhập:", error);
+  //     }
+  //   };
 
-    checkAuth();
-  }, []);
+  //   checkAuth();
+  // }, []);
 
   const handleLogin = async () => {
     console.log("Đang gọi API login...");
@@ -94,11 +94,16 @@ const LoginScreen = () => {
         return;
       }
       if (userData.isVerifiedEmail === false) {
-        const dataSendOtp = { email: userData.email };
-        const resSendOtp = await sendOtp({ data: dataSendOtp }).unwrap();
-        console.log("Send OTP response:", resSendOtp);
-        setIsLoading(false);
-        navigation.navigate("OTPVerification", { email: userData.email });
+        // const dataSendOtp = { email: userData.email };
+        // const resSendOtp = await sendOtp({ data: dataSendOtp }).unwrap();
+        // console.log("Send OTP response:", resSendOtp);
+        // setIsLoading(false);
+        navigation.navigate("OTPVerification", {
+          id: response._id,
+          email: email,
+          token: response.accessToken,
+          userData: userData,
+        });
         return;
       }
 
@@ -108,20 +113,10 @@ const LoginScreen = () => {
           userId: response._id,
           token: response.accessToken,
           userData: userData,
+          isAuth: true,
         })
       );
 
-      // Lưu token vào AsyncStorage
-      await AsyncStorage.setItem(
-        "authData",
-        JSON.stringify({
-          userId: response._id,
-          token: response.accessToken,
-          userData: userData,
-        })
-      );
-
-      // Chuyển hướng vào trang chính
       navigation.replace("MainTabs");
     } catch (error) {
       console.log("Login error:", error);
