@@ -13,6 +13,8 @@ import * as Location from "expo-location";
 import LocationList from "./LocationList";
 import SearchField from "./SearchField";
 import HeaderLNA from "../../components/HeaderLNA";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../redux/authSlice";
 
 const cities = [
   "Hà Nội",
@@ -39,6 +41,13 @@ export default function HomeScreen() {
   const [errorMsg, setErrorMsg] = useState(null);
   const [manualCity, setManualCity] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const { isAuth } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+
+  // if (!isAuth) {
+  //   dispatch(logout());
+  //   console.log("Đã đăng xuất");
+  // }
 
   useEffect(() => {
     const getLocation = async () => {

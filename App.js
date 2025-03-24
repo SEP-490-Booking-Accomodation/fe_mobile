@@ -7,7 +7,7 @@ import AppStack from "./navigator/AppStack";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { STRIPE_PUBLIC_KEY } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { restoreAuth } from "./redux/authSlice";
+import { logout, restoreAuth } from "./redux/authSlice";
 import store from "./redux/store";
 
 const AuthLoader = () => {
@@ -16,9 +16,13 @@ const AuthLoader = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const authData = await AsyncStorage.getItem("authData");
-      if (authData) {
-        const { userId, token } = JSON.parse(authData);
-        dispatch(restoreAuth({ userId, token }));
+      const isAuth = authData || false;
+      if (isAuth === false) {
+        dispatch(logout());
+        console.log("Đã đăng xuất");
+      } else if (authData) {
+        const { userId, token, isAuth, userData } = JSON.parse(authData);
+        dispatch(restoreAuth({ userId, token, isAuth, userData }));
       }
     };
     checkAuth();

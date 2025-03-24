@@ -4,24 +4,27 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    isAuthen: false,
+    isAuth: false,
     userId: null,
     token: null,
     userData: null,
   },
   reducers: {
     loginSuccess: (state, action) => {
-      const { userId, token, userData } = action.payload;
-      state.isAuthen = true;
+      const { isAuth, userId, token, userData } = action.payload;
+      state.isAuth = isAuth;
       state.userId = userId;
       state.token = token;
       state.userData = userData;
 
       // Lưu vào AsyncStorage
-      AsyncStorage.setItem("authData", JSON.stringify({ userId, token }));
+      AsyncStorage.setItem(
+        "authData",
+        JSON.stringify({ isAuth, userId, token, userData })
+      );
     },
     logout: (state) => {
-      state.isAuthen = false;
+      state.isAuth = false;
       state.userId = null;
       state.token = null;
       state.userData = null;
@@ -30,11 +33,11 @@ const authSlice = createSlice({
       AsyncStorage.removeItem("authData");
     },
     restoreAuth: (state, action) => {
-      const { userId, token } = action.payload;
-      state.isAuthen = true;
+      const { isAuth, userId, token, userData } = action.payload;
+      state.isAuth = true;
       state.userId = userId;
       state.token = token;
-      
+      state.userData = userData;
     },
   },
 });
