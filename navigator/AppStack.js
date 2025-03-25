@@ -130,12 +130,6 @@ const HomeStack = () => (
       options={{ headerShown: false }}
     />
     <Stack.Screen
-      name="Policies"
-      component={PolicyScreen}
-      options={{ headerShown: false }}
-    />
-    <Stack.Screen name="PolicyDetail" component={PolicyDetailScreen} />
-    <Stack.Screen
       name="ConfirmBooking"
       component={ConfirmBooking}
       options={{ headerShown: false }}
@@ -194,6 +188,14 @@ const SettingStack = () => (
       component={SettingList}
       options={{ headerShown: false }}
     />
+
+    <Stack.Screen
+      name="Policies"
+      component={PolicyScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen name="PolicyDetail" component={PolicyDetailScreen}
+    options={{ headerShown: false }} />
   </Stack.Navigator>
 );
 
