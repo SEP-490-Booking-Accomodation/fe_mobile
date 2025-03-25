@@ -3,83 +3,111 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { mockPolicies } from "../../data/mockData";
 import { MaterialIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { useGetPolicyByIdQuery } from "../../api/policySystemApi";
 const PolicyDetailScreen = ({ route, navigation }) => {
-    const { policyId } = route.params;
-    const policy = mockPolicies.find((item) => item.id === policyId);
-
-    if (!policy) {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.errorText}>Policy not found</Text>
-            </View>
-        );
-    }
-
+  const { policyId } = route.params;
+  const { data, error, isLoading } = useGetPolicyByIdQuery(policyId);
+  const policy = data;
+  if (isLoading) {
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.headerContainer}>
-                <MaterialIcons
-                    name="arrow-back"
-                    size={24}
-                    color="#4E72E3"
-                    onPress={() => navigation.goBack()}
-                />
-                <Text style={styles.headerText}>{policy.title}</Text>
-            </View>
-            <ScrollView style={styles.contentContainer}>
-                <Text style={styles.lastUpdate}>Last update: {policy.date}</Text>
-                <Text style={styles.policyDescription}>{policy.description}</Text>
-            </ScrollView>
-        </SafeAreaView>
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
     );
+  }
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Error: {error.data}</Text>
+      </View>
+    );
+  }
+
+  if (!policy) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Policy not found</Text>
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.headerContainer}>
+        <MaterialIcons
+          name="arrow-back"
+          size={24}
+          color="#4E72E3"
+          onPress={() => navigation.goBack()}
+        />
+        <Text style={styles.headerText}>{policy.name}</Text>
+      </View>
+      <ScrollView style={styles.contentContainer}>
+        <Text style={styles.policyDescription}>
+          <Text style={styles.headline}>Loại chính sách:</Text>{" "}
+          {policy?.policySystemCategoryId?.categoryName}
+        </Text>
+        <Text style={styles.policyDescription}>
+          <Text style={styles.headline}>Mô tả:</Text> {policy.description}
+        </Text>
+
+        <Text style={styles.lastUpdate}>
+          Lần cuối cập nhật vào: {policy.updatedAt}
+        </Text>
+      </ScrollView>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#fff",
-    },
-    headerContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: "#E5E7EB",
-    },
-    headerText: {
-        fontSize: 20,
-        fontWeight: "600",
-        color: "#1E293B",
-        marginLeft: 12,
-        flexShrink: 1,
-    },
-    contentContainer: {
-        flex: 1,
-        padding: 16,
-    },
-    lastUpdate: {
-        fontSize: 14,
-        color: "#6B7280",
-        marginBottom: 8,
-    },
-    policyTitle: {
-        fontSize: 24,
-        fontWeight: "bold",
-        color: "#111827",
-        marginBottom: 16,
-    },
-    policyDescription: {
-        fontSize: 16,
-        lineHeight: 24,
-        color: "#374151",
-    },
-    errorText: {
-        fontSize: 16,
-        color: "red",
-        textAlign: "center",
-        marginTop: 20,
-    },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#1E293B",
+    marginLeft: 12,
+    flexShrink: 1,
+  },
+  contentContainer: {
+    flex: 1,
+    padding: 16,
+  },
+  lastUpdate: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginBottom: 8,
+    fontStyle: "italic",
+  },
+  policyTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#111827",
+    marginBottom: 16,
+  },
+  policyDescription: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: "#374151",
+  },
+  errorText: {
+    fontSize: 16,
+    color: "red",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  headline: {
+    fontWeight: "bold",
+  },
 });
 
 export default PolicyDetailScreen;
