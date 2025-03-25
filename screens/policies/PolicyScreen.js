@@ -1,13 +1,18 @@
-import React from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import React, { useEffect } from "react";
+import { View, Text, StyleSheet, FlatList, ActivityIndicator } from "react-native";
 import PolicyItem from "../../components/policies/PolicyItem";
 import { useNavigation } from "@react-navigation/native";
-import { mockPolicies } from "../../data/mockData";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useLazyGetAllPoliciesQuery } from "../../api/policySystemApi";
 
 const PolicyScreen = () => {
     const navigation = useNavigation();
+    const [getAllPolicies, { isLoading, error, data }] = useLazyGetAllPoliciesQuery();
+
+    useEffect(() => {
+        getAllPolicies(); // Fetch data when component mounts
+    }, []);
 
     const handlePress = (policy) => {
         navigation.navigate("PolicyDetail", { policyId: policy.id });
@@ -24,20 +29,27 @@ const PolicyScreen = () => {
                 />
                 <Text style={styles.header}>Chính sách</Text>
             </View>
-            <FlatList
-                data={mockPolicies}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <PolicyItem
-                        iconName="notifications"
-                        title={item.title}
-                        time={item.date}
-                        message={item.description}
-                        onPress={() => handlePress(item)}
-                    />
-                )}
-                contentContainerStyle={styles.listContainer}
-            />
+
+            {isLoading ? (
+                <ActivityIndicator size="large" color="#4E72E3" />
+            ) : error ? (
+                <Text style={styles.errorText}>Lỗi khi tải dữ liệu</Text>
+            ) : (
+                <FlatList
+                    data={data || []}
+                    keyExtractor={(item) => item?.id.toString()}
+                    renderItem={({ item }) => (
+                        <PolicyItem
+                            iconName="notifications"
+                            title={item.name}
+                            time={item.createdAt}
+                            message={item.description}
+                            onPress={() => handlePress(item)}
+                        />
+                    )}
+                    contentContainerStyle={styles.listContainer}
+                />
+            )}
         </SafeAreaView>
     );
 };
@@ -59,7 +71,11 @@ const styles = StyleSheet.create({
         color: "#1E293B",
         marginLeft: 12,
     },
-
+    errorText: {
+        textAlign: "center",
+        color: "red",
+        marginTop: 20,
+    },
 });
 
 export default PolicyScreen;

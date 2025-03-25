@@ -11,8 +11,10 @@ import { useSelector } from "react-redux";
 import SearchField from "../../components/SearchField";
 import { useGetUserQuery } from "../../api/authApi";
 import UserProfile from "./UserProfile";
+import { useNavigation } from "@react-navigation/native";
 
-export default function SettingList({ navigation }) {
+export default function SettingList() {
+  const navigation = useNavigation();
   const userId = useSelector((state) => state.auth.userId);
   const { data: user, isLoading } = useGetUserQuery(userId);
 
@@ -29,6 +31,10 @@ export default function SettingList({ navigation }) {
       });
     }
   }, [user]);
+
+  const handlePolicyPress = () => {
+    navigation.navigate('Policies');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -52,10 +58,10 @@ export default function SettingList({ navigation }) {
         />
 
         <View style={styles.itemList}>
-          {renderItem("flag-outline", "Đổi ngôn ngữ")}
+          {renderItem("earth-outline", "Đổi ngôn ngữ")}
           {renderItem("help-outline", "Trợ giúp và hỗ trợ")}
           {renderItem("information-circle-outline", "Về chúng tôi")}
-          {renderItem("lock-closed-outline", "Chính sách bảo mật")}
+          {renderItem("lock-closed-outline", "Chính sách bảo mật", handlePolicyPress)}
           {renderItem("headset-outline", "Chăm sóc khách hàng")}
         </View>
       </View>
@@ -63,8 +69,8 @@ export default function SettingList({ navigation }) {
   );
 }
 
-const renderItem = (icon, title) => (
-  <TouchableOpacity style={styles.itemSelect}>
+const renderItem = (icon, title, onPress) => (
+  <TouchableOpacity style={styles.itemSelect} onPress={onPress}>
     <Ionicons name={icon} size={24} style={{ marginRight: 20 }} color="black" />
     <Text style={{ fontSize: 14 }}>{title}</Text>
     <Ionicons
