@@ -16,6 +16,7 @@ const AuthLoader = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const authData = await AsyncStorage.getItem("authData");
+      console.log("authData", authData);
       const isAuth = authData || false;
       if (isAuth === false) {
         dispatch(logout());

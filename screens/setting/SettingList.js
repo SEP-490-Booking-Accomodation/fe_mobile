@@ -25,7 +25,9 @@ export default function SettingList() {
       setDisplayUser({
         name: user.getUser.fullName || "Guest",
         email: user.getUser.email || "guest@example.com",
-        avatar: user.getUser.avatarUrl?.[0] || "https://via.placeholder.com/50",
+        avatar:
+          user.getUser.avatarUrl?.[0] ||
+          `https://ui-avatars.com/api/?name=${user.getUser.fullName}&background=random`,
       });
     }
   }, [user]);
