@@ -26,7 +26,7 @@ const OTPVerificationScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const dispatch = useDispatch();
-  const { email, userData, id, token } = route.params || {};
+  const { email, userData, id, token, refreshToken } = route.params || {};
   const [loading, setLoading] = useState(false);
   const [sendOtp] = useSendOtpMutation();
   const [verifyEmailOtp] = useVerifyEmailOtpMutation();
@@ -90,6 +90,7 @@ const OTPVerificationScreen = () => {
           token: token,
           userData: userData,
           isAuth: true,
+          refreshToken: refreshToken,
         })
       );
       navigation.replace("MainTabs");

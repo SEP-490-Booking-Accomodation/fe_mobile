@@ -8,19 +8,21 @@ const authSlice = createSlice({
     userId: null,
     token: null,
     userData: null,
+    refreshToken: null,
   },
   reducers: {
     loginSuccess: (state, action) => {
-      const { isAuth, userId, token, userData } = action.payload;
+      const { isAuth, userId, token, userData, refreshToken } = action.payload;
       state.isAuth = isAuth;
       state.userId = userId;
       state.token = token;
       state.userData = userData;
+      state.refreshToken = refreshToken;
 
       // Lưu vào AsyncStorage
       AsyncStorage.setItem(
         "authData",
-        JSON.stringify({ isAuth, userId, token, userData })
+        JSON.stringify({ isAuth, userId, token, userData, refreshToken })
       );
     },
     logout: (state) => {
@@ -28,16 +30,18 @@ const authSlice = createSlice({
       state.userId = null;
       state.token = null;
       state.userData = null;
+      state.refreshToken = null;
 
       // Xóa dữ liệu khỏi AsyncStorage
       AsyncStorage.removeItem("authData");
     },
     restoreAuth: (state, action) => {
-      const { isAuth, userId, token, userData } = action.payload;
+      const { isAuth, userId, token, userData, refreshToken } = action.payload;
       state.isAuth = true;
       state.userId = userId;
       state.token = token;
       state.userData = userData;
+      state.refreshToken = refreshToken;
     },
   },
 });

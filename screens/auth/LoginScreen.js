@@ -23,6 +23,7 @@ import {
 } from "../../api/authApi";
 import { loginSuccess, logout } from "../../redux/authSlice";
 import { useLazyGetRoleByIdQuery } from "../../api/roleApi";
+import { RefreshControl } from "react-native-gesture-handler";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -67,7 +68,7 @@ const LoginScreen = () => {
       // Lấy thông tin người dùng từ API
       const resGetUser = await getUserById(response._id).unwrap();
       const userData = resGetUser.getUser;
-      console.log("User Data:", userData);
+      // console.log("User Data:", userData);
 
       // Kiểm tra tài khoản có bị khóa không
       if (!userData?.isActive) {
@@ -81,7 +82,7 @@ const LoginScreen = () => {
 
       // Kiểm tra role của user
       const roleData = await getRoleById(userData.roleID).unwrap();
-      console.log("Role Data:", roleData);
+      // console.log("Role Data:", roleData);
 
       if (roleData.roleName !== "Customer") {
         Alert.alert("Lỗi đăng nhập", "Bạn không phải khách hàng!");
@@ -103,6 +104,7 @@ const LoginScreen = () => {
           email: email,
           token: response.accessToken,
           userData: userData,
+          refreshToken: response.refreshToken,
         });
         return;
       }
@@ -114,6 +116,7 @@ const LoginScreen = () => {
           token: response.accessToken,
           userData: userData,
           isAuth: true,
+          refreshToken: response.refreshToken,
         })
       );
 
