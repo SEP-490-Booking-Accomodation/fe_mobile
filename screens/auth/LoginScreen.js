@@ -16,11 +16,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import CustomButton from "../../components/buttons/Button";
 import CustomInput from "../../components/TextInput";
-import {
-  useLazyGetUserQuery,
-  useLoginMutation,
-  useSendOtpMutation,
-} from "../../api/authApi";
+import { useLazyGetUserQuery, useLoginMutation } from "../../api/authApi";
 import { loginSuccess, logout } from "../../redux/authSlice";
 import { useLazyGetRoleByIdQuery } from "../../api/roleApi";
 
@@ -33,23 +29,6 @@ const LoginScreen = () => {
   const [login] = useLoginMutation();
   const [isLoading, setIsLoading] = useState(false);
   const [getRoleById] = useLazyGetRoleByIdQuery();
-  const [sendOtp] = useSendOtpMutation();
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     try {
-  //       const authData = await AsyncStorage.getItem("authData");
-  //       if (authData) {
-  //         const { userId, token } = JSON.parse(authData);
-  //         dispatch(loginSuccess({ userId, token }));
-  //         navigation.replace("MainTabs");
-  //       }
-  //     } catch (error) {
-  //       console.log("Lỗi khi lấy dữ liệu đăng nhập:", error);
-  //     }
-  //   };
-
-  //   checkAuth();
-  // }, []);
 
   const handleLogin = async () => {
     console.log("Đang gọi API login...");
@@ -67,7 +46,7 @@ const LoginScreen = () => {
       // Lấy thông tin người dùng từ API
       const resGetUser = await getUserById(response._id).unwrap();
       const userData = resGetUser.getUser;
-      console.log("User Data:", userData);
+      // console.log("User Data:", userData);
 
       // Kiểm tra tài khoản có bị khóa không
       if (!userData?.isActive) {
@@ -81,7 +60,7 @@ const LoginScreen = () => {
 
       // Kiểm tra role của user
       const roleData = await getRoleById(userData.roleID).unwrap();
-      console.log("Role Data:", roleData);
+      // console.log("Role Data:", roleData);
 
       if (roleData.roleName !== "Customer") {
         Alert.alert("Lỗi đăng nhập", "Bạn không phải khách hàng!");
@@ -103,6 +82,7 @@ const LoginScreen = () => {
           email: email,
           token: response.accessToken,
           userData: userData,
+          refreshToken: response.refreshToken,
         });
         return;
       }
@@ -114,6 +94,7 @@ const LoginScreen = () => {
           token: response.accessToken,
           userData: userData,
           isAuth: true,
+          refreshToken: response.refreshToken,
         })
       );
 
