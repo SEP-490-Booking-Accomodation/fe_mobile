@@ -12,9 +12,10 @@ import { useNavigation } from "@react-navigation/native";
 import * as Location from "expo-location";
 import LocationList from "./LocationList";
 import SearchField from "./SearchField";
-import HeaderLNA from "../../components/HeaderLNA";
+import HeaderLNA from "./HeaderLNA";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/authSlice";
+import { useGetUserQuery } from "../../api/authApi";
 
 const cities = [
   "Hà Nội",
@@ -40,14 +41,25 @@ export default function HomeScreen() {
   const [address, setAddress] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [manualCity, setManualCity] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const { isAuth } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
+  // const [modalVisible, setModalVisible] = useState(false);
+  const authData = useSelector((state) => state.auth);
+  const userId = authData.userId;
+  const { data: user, isLoading } = useGetUserQuery(userId);
+  const [displayUser, setDisplayUser] = useState(null);
 
-  // if (!isAuth) {
-  //   dispatch(logout());
-  //   console.log("Đã đăng xuất");
-  // }
+  console.log(user);
+
+  useEffect(() => {
+    if (user) {
+      setDisplayUser({
+        name: user.getUser.fullName || "Guest",
+        email: user.getUser.email || "guest@example.com",
+        avatar:
+          user.getUser.avatarUrl?.[0] ||
+          `https://ui-avatars.com/api/?name=${user.getUser.fullName}&background=random`,
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     const getLocation = async () => {
@@ -78,10 +90,10 @@ export default function HomeScreen() {
     getLocation();
   }, []);
 
-  const handleSelectCity = (city) => {
-    setManualCity(city);
-    setModalVisible(false);
-  };
+  // const handleSelectCity = (city) => {
+  //   setManualCity(city);
+  //   setModalVisible(false);
+  // };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -93,7 +105,10 @@ export default function HomeScreen() {
         avatarSource={
           "https://i.pinimg.com/236x/0d/85/e4/0d85e4a8cd465ac49c265e29af5e53e8.jpg"
         }
-        onLocationPress={() => setModalVisible(true)}
+        authData={authData}
+        onLoginPress={() => navigation.navigate("Auth")}
+        displayUser={displayUser}
+        // onLocationPress={() => setModalVisible(true)}
       />
 
       <ScrollView style={styles.paddingVertical}>
@@ -109,7 +124,7 @@ export default function HomeScreen() {
         <LocationList />
       </ScrollView>
 
-      <Modal transparent={true} visible={modalVisible} animationType="slide">
+      {/* <Modal transparent={true} visible={modalVisible} animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Chọn thành phố</Text>
@@ -138,7 +153,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </Modal>
+      </Modal> */}
     </SafeAreaView>
   );
 }

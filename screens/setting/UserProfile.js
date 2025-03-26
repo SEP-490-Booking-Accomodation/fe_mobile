@@ -20,10 +20,9 @@ const UserProfile = ({ user, isLoading, navigation }) => {
   }, [user]);
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("authData");
     dispatch(logout());
-    setCurrentUser(null); // Xóa dữ liệu user để hiển thị lại nút đăng nhập
-    // navigation.replace("SettingList"); // Tải lại trang
+    setCurrentUser(null);
+    // navigation.replace("SettingList");
   };
 
   if (isLoading) {
