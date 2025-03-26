@@ -38,21 +38,13 @@ export const authApi = baseApi.injectEndpoints({
         body: data,
       }),
     }),
-    resetPasswordToken: builder.mutation({
-      query: (credentials) => ({
-        url: `/user/reset-password/${credentials.token}`, // Sửa lại để token là động
-        method: "PUT",
-        body: credentials,
+    refreshTokenWithParam: builder.mutation({
+      query: ({ data }) => ({
+        url: "/user/refresh-token-with-param",
+        method: "POST",
+        body: data,
       }),
     }),
-    refreshToken: builder.query({
-      query: () => ({
-        url: "/user/refresh",
-        method: "GET",
-        credentials: "include",
-      }),
-    }),
-
     getUser: builder.query({
       query: (id) => `/user/${id}`,
       // providesTags: ["User"],
@@ -77,11 +69,10 @@ export const {
   useLogoutQuery,
   useLazyGetUserQuery,
   useLazyGetRoleByIdQuery,
-  useLazyRefreshTokenQuery,
   useForgetPasswordTokenMutation,
-  useResetPasswordTokenMutation,
   useGetUserQuery,
   useRegisterMutation,
   useSendOtpMutation,
   useVerifyEmailOtpMutation,
+  useRefreshTokenWithParamMutation,
 } = authApi;

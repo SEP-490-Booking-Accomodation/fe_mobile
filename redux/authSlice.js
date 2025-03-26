@@ -36,15 +36,27 @@ const authSlice = createSlice({
       AsyncStorage.removeItem("authData");
     },
     restoreAuth: (state, action) => {
-      const { isAuth, userId, token, userData, refreshToken } = action.payload;
+      const { userId, token, userData, refreshToken } = action.payload;
       state.isAuth = true;
       state.userId = userId;
       state.token = token;
       state.userData = userData;
       state.refreshToken = refreshToken;
     },
+    refreshToken: (state, action) => {
+      state.token = action.payload;
+      // Update token in AsyncStorage
+      AsyncStorage.getItem("authData").then((data) => {
+        if (data) {
+          const authData = JSON.parse(data);
+          authData.token = action.payload;
+          AsyncStorage.setItem("authData", JSON.stringify(authData));
+        }
+      });
+    },
   },
 });
 
-export const { loginSuccess, logout, restoreAuth } = authSlice.actions;
+export const { loginSuccess, logout, restoreAuth, refreshToken } =
+  authSlice.actions;
 export default authSlice.reducer;

@@ -16,14 +16,9 @@ import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import CustomButton from "../../components/buttons/Button";
 import CustomInput from "../../components/TextInput";
-import {
-  useLazyGetUserQuery,
-  useLoginMutation,
-  useSendOtpMutation,
-} from "../../api/authApi";
+import { useLazyGetUserQuery, useLoginMutation } from "../../api/authApi";
 import { loginSuccess, logout } from "../../redux/authSlice";
 import { useLazyGetRoleByIdQuery } from "../../api/roleApi";
-import { RefreshControl } from "react-native-gesture-handler";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -34,23 +29,6 @@ const LoginScreen = () => {
   const [login] = useLoginMutation();
   const [isLoading, setIsLoading] = useState(false);
   const [getRoleById] = useLazyGetRoleByIdQuery();
-  const [sendOtp] = useSendOtpMutation();
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     try {
-  //       const authData = await AsyncStorage.getItem("authData");
-  //       if (authData) {
-  //         const { userId, token } = JSON.parse(authData);
-  //         dispatch(loginSuccess({ userId, token }));
-  //         navigation.replace("MainTabs");
-  //       }
-  //     } catch (error) {
-  //       console.log("Lỗi khi lấy dữ liệu đăng nhập:", error);
-  //     }
-  //   };
-
-  //   checkAuth();
-  // }, []);
 
   const handleLogin = async () => {
     console.log("Đang gọi API login...");
