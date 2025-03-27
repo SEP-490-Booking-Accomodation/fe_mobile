@@ -5,11 +5,26 @@ import Dropdown from "../../components/DropDown";
 import VerticalCard from "../../components/cards/VerticalCard";
 import Filter from "../../components/Filter"; // Import Filter component
 import { dataCC } from "./data";
+import { useGetAllRentalQuery } from "../../api/rentalLocationApi";
 // import BottomTabs from "../../components/BottomTabs";
 
 const SearchResult = ({ route, navigation }) => {
-  const { query } = route.params;
+  const query = route?.params?.query || "";
   const [data, setData] = useState(dataCC);
+  const { data: rental, refetch: refetchRental } = useGetAllRentalQuery();
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = async () => {
+    setRefreshing(true); // Bắt đầu trạng thái tải lại
+    try {
+      // await refetchUser(); // Gọi lại API user
+      await refetchRental(); // Gọi lại API rental
+    } catch (error) {
+      console.error("Lỗi tải lại dữ liệu:", error);
+    }
+
+    setRefreshing(false); // Kết thúc trạng thái tải lại
+  };
+
   const [sortedData, setSortedData] = useState([]);
   const [selectedSortOption, setSelectedSortOption] = useState(
     "Giá từ thấp đến cao"
@@ -24,7 +39,8 @@ const SearchResult = ({ route, navigation }) => {
 
   useEffect(() => {
     const filterData = () => {
-      const filtered = data.filter((item) => {
+      if (!query) return data; // Nếu query rỗng hoặc null, hiển thị toàn bộ dữ liệu
+      return data.filter((item) => {
         const matchesQuery =
           item.placeName.toLowerCase().includes(query.toLowerCase()) ||
           item.location.toLowerCase().includes(query.toLowerCase());
@@ -47,17 +63,10 @@ const SearchResult = ({ route, navigation }) => {
           matchesQuery && matchesPrice && matchesRating && matchesAmenities
         );
       });
-
-      return filtered;
     };
 
     const filteredData = filterData();
-    if (filteredData.length === 0) {
-      setIsNoResult(true);
-    } else {
-      setIsNoResult(false);
-    }
-
+    setIsNoResult(filteredData.length === 0 && query); // Chỉ báo "Không có kết quả" nếu query có giá trị
     const sorted = filteredData.sort((a, b) =>
       selectedSortOption === "Giá từ thấp đến cao"
         ? a.minPrice - b.minPrice

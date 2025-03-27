@@ -6,15 +6,18 @@ import {
   ScrollView,
   Modal,
   TouchableOpacity,
+  RefreshControl,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import * as Location from "expo-location";
 import LocationList from "./LocationList";
 import SearchField from "./SearchField";
-import HeaderLNA from "../../components/HeaderLNA";
+import HeaderLNA from "./HeaderLNA";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/authSlice";
+import { useGetUserQuery } from "../../api/authApi";
+import { useGetAllRentalQuery } from "../../api/rentalLocationApi";
 
 const cities = [
   "Hà Nội",
@@ -36,18 +39,30 @@ const cities = [
 
 export default function HomeScreen() {
   const navigation = useNavigation();
-  const [location, setLocation] = useState(null);
+  const [location, setLocation] = useState("Đang lấy vị trí");
   const [address, setAddress] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [manualCity, setManualCity] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const { isAuth } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
+  // const [modalVisible, setModalVisible] = useState(false);
+  const authData = useSelector((state) => state.auth);
+  const userId = authData.userId;
+  const { data: user, refetch: refetchUser } = useGetUserQuery(userId);
+  const { data: rental, refetch: refetchRental } = useGetAllRentalQuery();
+  const [displayUser, setDisplayUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // if (!isAuth) {
-  //   dispatch(logout());
-  //   console.log("Đã đăng xuất");
-  // }
+  const onRefresh = async () => {
+    setRefreshing(true); // Bắt đầu trạng thái tải lại
+    try {
+      await refetchUser(); // Gọi lại API user
+      await refetchRental(); // Gọi lại API rental
+    } catch (error) {
+      console.error("Lỗi tải lại dữ liệu:", error);
+    }
+
+    setRefreshing(false); // Kết thúc trạng thái tải lại
+  };
 
   useEffect(() => {
     const getLocation = async () => {
@@ -78,38 +93,76 @@ export default function HomeScreen() {
     getLocation();
   }, []);
 
-  const handleSelectCity = (city) => {
-    setManualCity(city);
-    setModalVisible(false);
-  };
+  useEffect(() => {
+    if (user && rental) {
+      setLoading(false);
+      setDisplayUser({
+        name: user.getUser.fullName || "Guest",
+        email: user.getUser.email || "guest@example.com",
+        avatar:
+          user.getUser.avatarUrl?.[0] ||
+          `https://ui-avatars.com/api/?name=${user.getUser.fullName}&background=random`,
+      });
+    } else {
+      setLoading(true);
+    }
+  }, [user, rental]);
+
+  // const handleSelectCity = (city) => {
+  //   setManualCity(city);
+  //   setModalVisible(false);
+  // };
 
   return (
     <SafeAreaView style={styles.container}>
-      <HeaderLNA
-        location={manualCity || address || "Chọn thành phố"}
-        onNotificationPress={() => navigation.navigate("NotificationScreen")}
-        onAvatarPress={() => navigation.navigate("ProfileScreen")}
-        notificationCount={2}
-        avatarSource={
-          "https://i.pinimg.com/236x/0d/85/e4/0d85e4a8cd465ac49c265e29af5e53e8.jpg"
-        }
-        onLocationPress={() => setModalVisible(true)}
-      />
-
-      <ScrollView style={styles.paddingVertical}>
-        <Text style={styles.textWelcome}>
-          Chúc bạn có một chuyến đi vui vẻ trong kỳ nghỉ tuyệt vời!
-        </Text>
-        <SearchField
-          style={styles.mh}
-          placeholder="Tìm kiếm điểm đến của bạn"
-          backIcon={false}
-          filterIcon={false}
+      <>
+        <HeaderLNA
+          location={manualCity || address || "Chọn thành phố"}
+          onNotificationPress={() => navigation.navigate("NotificationScreen")}
+          onAvatarPress={() => navigation.navigate("ProfileScreen")}
+          notificationCount={2}
+          avatarSource={
+            "https://i.pinimg.com/236x/0d/85/e4/0d85e4a8cd465ac49c265e29af5e53e8.jpg"
+          }
+          authData={authData}
+          onLoginPress={() => navigation.navigate("Auth")}
+          displayUser={displayUser}
+          // onLocationPress={() => setModalVisible(true)}
         />
-        <LocationList />
-      </ScrollView>
 
-      <Modal transparent={true} visible={modalVisible} animationType="slide">
+        <ScrollView
+          // style={styles.paddingVertical}
+          refreshControl={
+            <RefreshControl
+              colors={["#FF5733", "#33FF57", "#3357FF"]} // Danh sách màu khi xoay
+              tintColor="#3357FF" // Màu spinner trên iOS
+              title="Loading..." // Văn bản hiển thị trên iOS
+              titleColor="#3357FF" // Màu văn bản trên iOS
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+            />
+          }
+        >
+          <Text style={[styles.textWelcome, styles.paddingVertical]}>
+            Chúc bạn có một chuyến đi vui vẻ trong kỳ nghỉ tuyệt vời!
+          </Text>
+          <SearchField
+            style={[styles.mh, styles.paddingVertical]}
+            placeholder="Tìm kiếm điểm đến của bạn"
+            backIcon={false}
+            filterIcon={false}
+          />
+          {loading ? (
+            <Text>Loading</Text>
+          ) : (
+            <LocationList
+              rentalData={rental}
+              onViewAllPress={() => navigation.navigate("SearchResult")}
+            />
+          )}
+        </ScrollView>
+      </>
+      {/* <Modal transparent={true} visible={modalVisible} animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Chọn thành phố</Text>
@@ -138,7 +191,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </Modal>
+      </Modal> */}
     </SafeAreaView>
   );
 }

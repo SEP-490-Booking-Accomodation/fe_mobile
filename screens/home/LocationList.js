@@ -11,45 +11,33 @@ import ButtonGroup from "../../components/buttons/ButtonGroup"; // Import Button
 
 const filters = ["Tất cả", "Gợi ý ", "Yêu thích ", "Phổ biến ", "Gần bạn "];
 
-const locations = [
-  {
-    id: 1,
-    imageUrl:
-      "https://media.vneconomy.vn/w800/images/upload/2021/10/10/bds5.png",
-    openHour: "3:00",
-    closeHour: "20:00",
-    placeName: "Nhà con nhộng Bình Thạnh giá rẻ",
-    minPrice: "300.000",
-    maxPrice: "1.200.000",
-    location: "Bình Thạnh, HCM",
-    ratingPoint: "5",
-    numberOfReview: "3.5k",
-    initFavourite: false,
-  },
-  {
-    id: 2,
-    imageUrl:
-      "https://media.vneconomy.vn/w800/images/upload/2021/10/10/bds5.png",
-    openHour: "5:00",
-    closeHour: "22:00",
-    placeName: "Khách sạn view biển đẹp",
-    minPrice: "500.000",
-    maxPrice: "2.000.000",
-    location: "Vũng Tàu",
-    ratingPoint: "4.7",
-    numberOfReview: "1.2k",
-    initFavourite: true,
-  },
-];
-
-export default function LocationList() {
+export default function LocationList({ rentalData, onViewAllPress }) {
   const [selectedFilterIndex, setSelectedFilterIndex] = useState(0);
+  // console.log(rentalData);
+
+  const rentalDisplay = rentalData.data.map((item) => ({
+    id: item._id,
+    imageUrl:
+      item.image?.[0] ||
+      `https://ui-avatars.com/api/?name=${item.name}&background=random`,
+    openHour: item.openHour,
+    closeHour: item.closeHour,
+    placeName: item.name,
+    isOverNight: item.isOverNight,
+    minPrice: item.minPrice,
+    maxPrice: item.maxPrice,
+    address: item.address,
+    ward: item.ward,
+    district: item.district,
+    city: item.city,
+    location: `${item.address}, ${item.ward}, ${item.district}, ${item.city}`,
+  }));
 
   return (
     <View style={styles.container}>
-      <View style={styles.jusSpace}>
+      <View style={[styles.jusSpace, styles.paddingVertical]}>
         <Text style={styles.h4}>Khám phá các thành phố</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={onViewAllPress}>
           <Text style={styles.viewAllText}>Xem tất cả</Text>
         </TouchableOpacity>
       </View>
@@ -69,8 +57,8 @@ export default function LocationList() {
       />
 
       {/* Danh sách địa điểm */}
-      <ScrollView style={{ marginTop: 10 }}>
-        {locations.map((item) => (
+      <ScrollView style={styles.paddingVerticalCard}>
+        {rentalDisplay.map((item) => (
           <VerticalCard
             key={item.id}
             {...item}
@@ -108,6 +96,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#3B82F6",
     borderColor: "transparent",
   },
+  paddingVertical: { paddingHorizontal: 20 },
+  paddingVerticalCard: { paddingHorizontal: 5 },
   unselectedFilter: {
     backgroundColor: "white",
     borderColor: "#E5E7EB",

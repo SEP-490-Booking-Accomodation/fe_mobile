@@ -33,7 +33,7 @@ export default function SettingList() {
   }, [user]);
 
   const handlePolicyPress = () => {
-    navigation.navigate('Policies');
+    navigation.navigate("Policies");
   };
 
   return (
@@ -61,7 +61,11 @@ export default function SettingList() {
           {renderItem("earth-outline", "Đổi ngôn ngữ")}
           {renderItem("help-outline", "Trợ giúp và hỗ trợ")}
           {renderItem("information-circle-outline", "Về chúng tôi")}
-          {renderItem("lock-closed-outline", "Chính sách bảo mật", handlePolicyPress)}
+          {renderItem(
+            "lock-closed-outline",
+            "Chính sách bảo mật",
+            handlePolicyPress
+          )}
           {renderItem("headset-outline", "Chăm sóc khách hàng")}
         </View>
       </View>
