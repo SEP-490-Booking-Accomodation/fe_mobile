@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -10,24 +10,24 @@ import {
   ScrollView,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { ArrowLeft } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
 import CustomButton from "../../../components/buttons/Button";
 import CustomInput from "../../../components/TextInput";
+import { useUpdateUserMutation } from "../../../api/profileApi";
+import { useSelector } from "react-redux";
+
 const AvatarUpload = ({ currentImage, onImageChange }) => {
   const pickImage = async () => {
-    console.log('pickImage function called');
-
     try {
-      if (Platform.OS !== 'web') {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-          alert('Sorry, we need camera roll permissions to make this work!');
+      if (Platform.OS !== "web") {
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+          alert("Xin lỗi, bạn cần cấp quyền để tiếp tục!");
           return;
         }
       }
 
-      console.log('Launching image picker');
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -35,28 +35,21 @@ const AvatarUpload = ({ currentImage, onImageChange }) => {
         quality: 1,
       });
 
-      console.log('Image picker result:', result);
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        console.log('New image selected:', result.assets[0].uri);
+      if (!result.canceled && result.assets.length > 0) {
         onImageChange(result.assets[0].uri);
       }
     } catch (error) {
-      console.error('Error picking image:', error);
-      alert('An error occurred while picking the image. Please try again.');
+      console.error("Lỗi khi chọn ảnh:", error);
+      alert("Đã xảy ra lỗi, vui lòng thử lại.");
     }
   };
 
   return (
     <View style={styles.avatarContainer}>
-      <TouchableOpacity onPress={() => setTimeout(pickImage, 100)}>
+      <TouchableOpacity onPress={pickImage}>
         <View style={styles.avatarWrapper}>
           {currentImage ? (
-            <Image 
-              source={{ uri: currentImage }} 
-              style={styles.avatar} 
-              onError={(e) => console.log('Error loading image:', e.nativeEvent.error)}
-            />
+            <Image source={{ uri: currentImage }} style={styles.avatar} />
           ) : (
             <View style={[styles.avatar, styles.placeholder]} />
           )}
@@ -67,45 +60,61 @@ const AvatarUpload = ({ currentImage, onImageChange }) => {
 };
 
 export default function EditInfo({ route, navigation }) {
-  const [dataUser, setDataUser] = useState(route.params.datainfo);
+  const userId = useSelector((state) => state.auth.userId);
+  const [updateUserApi] = useUpdateUserMutation();
+
+  const [dataUser, setDataUser] = useState(route.params?.data);
+  const [image, setImage] = useState(dataUser?.userId?.avatarUrl || "");
+  const [fullName, setFullName] = useState(dataUser?.userId?.fullName || "");
+  const [email, setEmail] = useState(dataUser?.userId?.email || "");
+  const [phone, setPhone] = useState(dataUser?.userId?.phone || "");
+  const [isButtonSaveActive, setIsButtonSaveActive] = useState(false);
+
+  useEffect(() => {
+    if (
+      email.trim() !== (dataUser?.userId?.email || "") ||
+      fullName.trim() !== (dataUser?.userId?.fullName || "") ||
+      phone.trim() !== (dataUser?.userId?.phone || "") ||
+      image !== (dataUser?.userId?.avatarUrl || "")
+    ) {
+      setIsButtonSaveActive(true);
+    } else {
+      setIsButtonSaveActive(false);
+    }
+  }, [email, fullName, phone, image, dataUser]);
 
   const handleImageChange = (newImageUri) => {
-    setDataUser((prevData) => {
-      const newData = {
-        ...prevData,
-        imgUrl: newImageUri,
-      };
+    setImage(newImageUri);
+    setIsButtonSaveActive(true);
+  };
 
-      return newData;
-    });
-    // Here you can also call an API to update the image on your server
-    // updateUserImageOnServer(newImageUri);
+  const handleUpdateInfo = async () => {
+    if (!userId) {
+      console.error("User ID is missing!");
+      return;
+    }
+
+    try {
+      await updateUserApi({
+        id: userId,
+        updatedUser: { fullName, email, phone, avatarUrl: image },
+      }).unwrap();
+
+      console.log("Cập nhật thành công");
+      setIsButtonSaveActive(false);
+      navigation.navigate("ProfileScreen");
+    } catch (error) {
+      alert("Đã xảy ra lỗi, vui lòng thử lại.");
+      console.error("Lỗi khi cập nhật thông tin:", error);  
+    }
   };
 
   const renderHeader = () => (
     <View style={styles.header}>
-      <TouchableOpacity
-        style={styles.arrowBack}
-        onPress={() => navigation.goBack()}
-      >
+      <TouchableOpacity onPress={() => navigation.goBack()}>
         <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
       </TouchableOpacity>
       <Text style={styles.textHeader}>Chỉnh sửa hồ sơ</Text>
-    </View>
-  );
-  const renderFooter = () => (
-    <View style={styles.footer}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
-        <ArrowLeft size={24} color="#4E72E3" />
-      </TouchableOpacity>
-      <CustomButton
-        style={{ width: "85%" }}
-        title="Cập nhật"
-        onPress={() => navigation.navigate("ProfileScreen")}
-      />
     </View>
   );
 
@@ -114,25 +123,25 @@ export default function EditInfo({ route, navigation }) {
       {renderHeader()}
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.imageContainer}>
-          <AvatarUpload
-            currentImage={dataUser.imgUrl}
-            onImageChange={handleImageChange}
-          />
+          <AvatarUpload currentImage={image} onImageChange={handleImageChange} />
         </View>
-
         <View style={styles.infoContainer}>
           <Text style={styles.label}>Họ tên</Text>
-          <CustomInput placeholder={dataUser.name}></CustomInput>
-          <View style={styles.spacing}/>
+          <CustomInput value={fullName} onChangeText={setFullName} />
+          <View style={styles.spacing} />
           <Text style={styles.label}>Email</Text>
-          <CustomInput placeholder={dataUser.email}></CustomInput>
-          <View style={styles.spacing}/>
+          <CustomInput value={email} onChangeText={setEmail} />
+          <View style={styles.spacing} />
           <Text style={styles.label}>Số điện thoại</Text>
-          <View style={styles.spacing}/>
-          <CustomInput placeholder={dataUser.phone}></CustomInput>
+          <CustomInput value={phone} onChangeText={setPhone} />
         </View>
+        //TODO:  Chỗ này sau khi tắt bottom tab thì sễ để dưới dạng bottom bar ở dưới như header đang style hiện tại 
+        <CustomButton
+          title="Cập nhật thông tin"
+          disabled={!isButtonSaveActive}
+          onPress={handleUpdateInfo}
+        />
       </ScrollView>
-      {renderFooter()}
     </SafeAreaView>
   );
 }
@@ -142,20 +151,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  arrowBack: {
-    marginRight: 10,
-    color: "#4E72E3",
-  },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
     padding: 20,
+    backgroundColor: "#fff",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 1.32,
     elevation: 5,
@@ -163,6 +165,7 @@ const styles = StyleSheet.create({
   textHeader: {
     fontSize: 20,
     fontWeight: "600",
+    marginLeft: 10,
   },
   content: {
     padding: 24,
@@ -186,32 +189,15 @@ const styles = StyleSheet.create({
   imageContainer: {
     padding: 24,
   },
-  infoContainer: {},
+  infoContainer: {
+    paddingBottom: 24,
+  },
   label: {
     fontSize: 16,
-    fontWeight: 500,
+    fontWeight: "500",
     paddingVertical: 8,
   },
-  footer: {
-    padding: 20,
-    backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderColor: "#4E72E3",
-    borderWidth: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-  },
   spacing: {
-    padding:8
-  }
+    padding: 4,
+  },
 });

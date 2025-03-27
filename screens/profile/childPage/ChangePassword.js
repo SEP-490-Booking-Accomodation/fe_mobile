@@ -7,6 +7,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Alert
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ArrowLeft } from "lucide-react-native";
@@ -14,7 +15,7 @@ import { useState, useEffect } from "react";
 import CustomInput from "../../../components/TextInput";
 import CustomButton from "../../../components/buttons/Button";
 import { useNavigation } from "@react-navigation/native";
-import bcrypt from "react-native-bcrypt";
+import {useUpdatePasswordMutation} from "../../../api/profileApi";
 
 export default function ChangePassword({ route }) {
 
@@ -24,14 +25,27 @@ export default function ChangePassword({ route }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
+  const [updatePasswordApi] = useUpdatePasswordMutation();
   // State for error messages
   const [currentPasswordError, setCurrentPasswordError] = useState("");
   const [newPasswordError, setNewPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
-  const handlePasswordChange = () => {
-    
+  const handlePasswordChange = async () => {
+    try {
+     const response = await updatePasswordApi({updatedPassword: {currentPassword, newPassword}});
+     console.log("Change password response:", response);
+     if (response.data) {
+       Alert.alert("Thành công","Đổi mật khẩu thành công!");
+       navigation.goBack();
+     }
+     else {
+      Alert.alert("Thất bại",response.error?.data?.message);
+     }
+    } catch (error) {
+      console.error("Error changing password:", error); 
+      alert("Đã xảy ra lỗi không mong muốn, vui lòng thử lại.");
+    }
   };
 
   const renderHeader = () => (
@@ -101,9 +115,11 @@ export default function ChangePassword({ route }) {
                 secureTextEntry
               />
               {confirmPasswordError ? <Text style={styles.errorText}>{confirmPasswordError}</Text> : null}
-
+              
               <View style={styles.spacing} />
             </View>
+            //TODO:  Chỗ này sau khi tắt bottom tab thì sễ để dưới dạng bottom bar ở dưới như header đang style hiện tại
+            <CustomButton title="Cập nhật" onPress={handlePasswordChange} />
           </ScrollView>
         </KeyboardAvoidingView>
       </View>

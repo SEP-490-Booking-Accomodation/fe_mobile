@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,23 +8,24 @@ import {
   ScrollView,
   Image,
   Modal,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import Ionicons from '@expo/vector-icons/Ionicons';
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
+import { useGetCustomerDetailByIdQuery } from "../../api/profileApi";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { logout } from "../../redux/authSlice";
+
 
 export default function ProfileScreen() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-
-  const datainfo = {
-    name: "Zane Phạm",
-    email: "zanepham101@gmail.com",
-    phone: "0334474412",
-    imgUrl: "https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    password: "$2b$10$nLjuDz5NxfLnoMzH8d/L.Orj56gV1/yyS0X5Y7YzV4UJyffjnVyF."
-  }
+  const userId = useSelector((state) => state.auth?.userId);
+  const { data, isLoading, error } = useGetCustomerDetailByIdQuery(userId);
+  const defaultAvatar = require("../../assets/images/man.jpg");
+  const dispatch = useDispatch();
 
   const navigation = useNavigation();
 
@@ -44,13 +45,13 @@ export default function ProfileScreen() {
                 Bạn có chắc chắn muốn đăng xuất tài khoản này không?
               </Text>
               <View style={styles.modalButtonContainer}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.modalButton, styles.cancelButton]}
                   onPress={() => setShowLogoutModal(false)}
                 >
                   <Text style={styles.cancelButtonText}>Hủy</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.modalButton, styles.logoutButton]}
                   onPress={handleLogout}
                 >
@@ -84,7 +85,13 @@ export default function ProfileScreen() {
         style={{ marginRight: 20, fontWeight: isDanger ? "bold" : "normal" }}
         color={isDanger ? "#FF4B26" : "black"}
       />
-      <Text style={{ fontSize: 14, color: isDanger ? "#FF4B26" : "#000", fontWeight: isDanger ? "bold" : "normal" }}>
+      <Text
+        style={{
+          fontSize: 14,
+          color: isDanger ? "#FF4B26" : "#000",
+          fontWeight: isDanger ? "bold" : "normal",
+        }}
+      >
         {title}
       </Text>
       <Ionicons
@@ -97,11 +104,11 @@ export default function ProfileScreen() {
   );
 
   const handleNavigateEditInfo = () => {
-    navigation.navigate("EditInfo", { datainfo });
+    navigation.navigate("EditInfo", { data });
   };
 
   const handleNavigateChangePassword = () => {
-    navigation.navigate("ChangePassword", { datainfo });
+    navigation.navigate("ChangePassword", { data });
   };
 
   const handleNavigateFavouriteList = () => {
@@ -121,17 +128,14 @@ export default function ProfileScreen() {
   };
 
   const handleNavigateLogout = () => {
-
     setShowLogoutModal(true);
   };
 
   const handleLogout = () => {
-    
     setShowLogoutModal(false);
-    // Add your logout logic here
-    // For example: 
-    // auth.signOut();
-    // navigation.navigate('Login');
+    dispatch(logout());
+    navigation.replace("HomeScreen"); // Tải lại trang
+
   };
 
   return (
@@ -144,13 +148,21 @@ export default function ProfileScreen() {
             style={styles.card}
           >
             <Image
-              source={{ uri: datainfo.imgUrl }}
+              source={
+                data?.userId?.avatarUrl
+                  ? { uri: data?.userId?.avatarUrl[0] } // Remote URL
+                  : defaultAvatar // Local image (require statement)
+              }
               style={styles.avatar}
             />
-            <Text style={styles.name}>{datainfo.name}</Text>
-            <Text style={styles.email}>{datainfo.email}</Text>
-            <TouchableOpacity style={styles.button} onPress={handleNavigateEditInfo}>
-              <Text style={styles.buttonText}>Chỉnh sửa   </Text>
+
+            <Text style={styles.name}>{data?.userId?.fullName}</Text>
+            <Text style={styles.email}>{data?.userId?.email}</Text>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleNavigateEditInfo}
+            >
+              <Text style={styles.buttonText}>Chỉnh sửa </Text>
               <Ionicons name="pencil-outline" size={16} color="white" />
             </TouchableOpacity>
           </LinearGradient>
@@ -159,11 +171,36 @@ export default function ProfileScreen() {
         <View style={styles.informationSection}>
           <Text style={styles.sectionHeader}>Thông tin của tôi</Text>
           <View style={styles.itemList}>
-            {renderItem("key-outline", "Đổi mật khẩu", false, handleNavigateChangePassword)}
-            {renderItem("heart-outline", "Danh sách yêu thích", false, handleNavigateFavouriteList)}
-            {renderItem("wallet-outline", "Ví của tôi", false, handleNavigateWalletScreen)}
-            {renderItem("newspaper-outline", "Lịch sử", false, handleNavigateHistory)}
-            {renderItem("star-outline", "Đánh giá của tôi", false, handleNavigateRatingHistory)}
+            {renderItem(
+              "key-outline",
+              "Đổi mật khẩu",
+              false,
+              handleNavigateChangePassword
+            )}
+            {renderItem(
+              "heart-outline",
+              "Danh sách yêu thích",
+              false,
+              handleNavigateFavouriteList
+            )}
+            {renderItem(
+              "wallet-outline",
+              "Ví của tôi",
+              false,
+              handleNavigateWalletScreen
+            )}
+            {renderItem(
+              "newspaper-outline",
+              "Lịch sử",
+              false,
+              handleNavigateHistory
+            )}
+            {renderItem(
+              "star-outline",
+              "Đánh giá của tôi",
+              false,
+              handleNavigateRatingHistory
+            )}
             {renderItem("power", "Đăng xuất", true, handleNavigateLogout)}
           </View>
         </View>
@@ -200,7 +237,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   itemList: {
-    paddingVertical: 10
+    paddingVertical: 10,
   },
   itemSelect: {
     flexDirection: "row",
@@ -220,7 +257,7 @@ const styles = StyleSheet.create({
   cardProfile: {
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 24
+    marginBottom: 24,
   },
   card: {
     width: "100%",
@@ -263,56 +300,56 @@ const styles = StyleSheet.create({
   // Modal styles
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 20,
     padding: 24,
-    width: '85%',
-    alignItems: 'center',
+    width: "85%",
+    alignItems: "center",
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 12,
   },
   modalMessage: {
     fontSize: 16,
-    textAlign: 'center',
-    color: '#4B5563',
+    textAlign: "center",
+    color: "#4B5563",
     marginBottom: 24,
   },
   modalButtonContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
-    width: '100%',
+    width: "100%",
   },
   modalButton: {
     flex: 1,
     paddingVertical: 12,
     borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   cancelButton: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderWidth: 1,
-    borderColor: '#6B7280',
+    borderColor: "#6B7280",
   },
   logoutButton: {
-    backgroundColor: '#FF4B26',
+    backgroundColor: "#FF4B26",
   },
   cancelButtonText: {
-    color: '#6B7280',
+    color: "#6B7280",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   logoutButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
