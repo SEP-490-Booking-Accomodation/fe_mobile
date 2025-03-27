@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -12,6 +11,7 @@ export default function VerticalCard({
   minPrice = "0",
   maxPrice = "0",
   location = "Không rõ",
+  isOverNight = false,
   ratingPoint = "0",
   numberOfReview = "0",
   initFavourite = false,
@@ -63,14 +63,23 @@ export default function VerticalCard({
 
       {/* Content Section */}
       <View style={styles.contentContainer}>
-        <Text style={styles.title}>{placeName}</Text>
+        <View style={styles.nameContainer}>
+          <Text style={styles.title}>{placeName}</Text>
+          {isOverNight ? <Text style={styles.isOverNight}>Qua đêm</Text> : null}
+        </View>
         <Text style={styles.priceRange}>
-          {minPrice}đ - {maxPrice}đ
+          {minPrice} - {maxPrice} đ/h
         </Text>
 
         <View style={styles.locationContainer}>
           <Icon name="location-on" size={20} color={"#4e72e3"} />
-          <Text style={styles.locationText}>{location}</Text>
+          <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={styles.locationText}
+          >
+            {location}
+          </Text>
         </View>
 
         <View style={styles.ratingContainer}>
@@ -104,18 +113,28 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "white",
     borderRadius: 20,
-    marginVertical: 16,
-    shadowColor: "#000",
+    marginVertical: 10,
+    // shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
-    shadowRadius: 3.84,
-    elevation: 5,
+    borderWidth: 1,
+    borderColor: "rgba(51, 51, 51, 0.1)",
+    // shadowRadius: 3.84,
+    // elevation: 5,
+  },
+  isOverNight: {
+    padding: 6,
+    borderRadius: 20,
+    color: "#fff",
+    fontSize: 10,
+    backgroundColor: "#666",
+    fontWeight: 700,
   },
   imageContainer: {
     position: "relative",
     height: 200,
     borderRadius: 16,
-    margin: 16,
+    // margin: 1,
   },
   image: {
     width: "100%",
@@ -151,29 +170,42 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 16,
   },
+
   contentContainer: {
-    padding: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  nameContainer: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 10,
   },
   title: {
     color: "#101828",
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 8,
+    // marginBottom: 8,
   },
   priceRange: {
     fontSize: 13,
     color: "#4e72e3",
     marginBottom: 8,
+    paddingHorizontal: 10,
   },
   locationContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     marginBottom: 8,
+    // paddingHorizontal: 16,
   },
   locationText: {
     marginLeft: 8,
-    fontSize: 12,
-    color: "#00000061",
+    marginRight: 20,
+    fontSize: 14,
+    fontWeight: 400,
+    color: "rgb(60, 60, 60)",
   },
   ratingContainer: {
     flexDirection: "row",

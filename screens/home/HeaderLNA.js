@@ -58,7 +58,7 @@ const HeaderLNA = ({
           <TouchableOpacity onPress={onAvatarPress} style={styles.iconButton}>
             {avatarSource ? (
               <Image
-                source={{ uri: displayUser.avatar }}
+                source={{ uri: displayUser?.avatar }}
                 style={styles.avatar}
               />
             ) : (

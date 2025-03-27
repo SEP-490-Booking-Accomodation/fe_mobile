@@ -1,70 +1,68 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
-
 const AsyncStorageContext = createContext();
-
 export const useAsyncStorage = () => {
   return useContext(AsyncStorageContext);
 };
-
 export const AsyncStorageProvider = ({ children }) => {
   const navigation = useNavigation();
-
-  const [data, setData] = useState(null);
+  // const [data, setData] = useState(null);
   const [searchHistory, setSearchHistory] = useState([]);
-
-  const loadData = async () => {
-    try {
-      const storedData = await AsyncStorage.getItem("your_key");
-      if (storedData) {
-        setData(JSON.parse(storedData));
-      }
-    } catch (error) {
-      console.error("Failed to load data from AsyncStorage:", error);
-    }
-  };
-
-  const saveData = async (value) => {
-    try {
-      await AsyncStorage.setItem("your_key", JSON.stringify(value));
-      setData(value);
-    } catch (error) {
-      console.error("Failed to save data to AsyncStorage:", error);
-    }
-  };
-
-  const removeItems = async (itemIds) => {
-    try {
-      const currentData = await AsyncStorage.getItem("your_key");
-      if (currentData) {
-        const parsedData = JSON.parse(currentData);
-        const updatedData = parsedData.filter(
-          (item) => !itemIds.includes(item._id)
-        );
-        await AsyncStorage.setItem("your_key", JSON.stringify(updatedData));
-        setData(updatedData);
-      }
-    } catch (error) {
-      console.error("Failed to remove items from AsyncStorage:", error);
-    }
-  };
+  const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
-    loadData();
+    // loadData();
+    loadFavorites();
     loadSearchHistory();
   }, []);
+  // const loadData = async () => {
+  //   try {
+  //     const storedData = await AsyncStorage.getItem("your_key");
+  //     if (storedData) {
+  //       setData(JSON.parse(storedData));
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to load data from AsyncStorage:", error);
+  //   }
+  // };
 
-  const logout = async () => {
-    try {
-      await AsyncStorage.removeItem("token");
-      await AsyncStorage.removeItem("expToken");
-      navigation.navigate("Login");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
+  // const saveData = async (value) => {
+  //   try {
+  //     await AsyncStorage.setItem("your_key", JSON.stringify(value));
+  //     setData(value);
+  //   } catch (error) {
+  //     console.error("Failed to save data to AsyncStorage:", error);
+  //   }
+  // };
 
+  // const removeItems = async (itemIds) => {
+  //   try {
+  //     const currentData = await AsyncStorage.getItem("your_key");
+  //     if (currentData) {
+  //       const parsedData = JSON.parse(currentData);
+  //       const updatedData = parsedData.filter(
+  //         (item) => !itemIds.includes(item._id)
+  //       );
+  //       await AsyncStorage.setItem("your_key", JSON.stringify(updatedData));
+  //       setData(updatedData);
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to remove items from AsyncStorage:", error);
+  //   }
+  // };
+
+  // const logout = async () => {
+  //   try {
+  //     await AsyncStorage.removeItem("token");
+  //     await AsyncStorage.removeItem("expToken");
+  //     navigation.navigate("Login");
+  //   } catch (error) {
+  //     console.error("Logout failed:", error);
+  //   }
+  // };
+  //====================================================================
+  //Search History
   const loadSearchHistory = async () => {
     try {
       const history = await AsyncStorage.getItem("search_history");
@@ -111,18 +109,72 @@ export const AsyncStorageProvider = ({ children }) => {
       console.error("Failed to remove search term:", error);
     }
   };
+  //========================================================================
+  //Favorite
+  const loadFavorites = async () => {
+    try {
+      const storedFavorites = await AsyncStorage.getItem("favorites");
+      if (storedFavorites) {
+        setFavorites(JSON.parse(storedFavorites));
+      }
+    } catch (error) {
+      console.error("Failed to load favorites:", error);
+    }
+  };
+
+  const addFavorite = async (item) => {
+    try {
+      const updatedFavorites = [...favorites];
+      const existingIndex = updatedFavorites.findIndex(
+        (fav) => fav._id === item._id
+      );
+
+      if (existingIndex === -1) {
+        updatedFavorites.push(item);
+        setFavorites(updatedFavorites);
+        await AsyncStorage.setItem(
+          "favorites",
+          JSON.stringify(updatedFavorites)
+        );
+      }
+    } catch (error) {
+      console.error("Failed to add favorite:", error);
+    }
+  };
+
+  const removeFavorite = async (itemId) => {
+    try {
+      const updatedFavorites = favorites.filter((item) => item._id !== itemId);
+      setFavorites(updatedFavorites);
+      await AsyncStorage.setItem("favorites", JSON.stringify(updatedFavorites));
+    } catch (error) {
+      console.error("Failed to remove favorite:", error);
+    }
+  };
+
+  const isFavorite = (itemId) => {
+    return favorites.some((item) => item._id === itemId);
+  };
 
   return (
     <AsyncStorageContext.Provider
       value={{
-        data,
-        saveData,
-        removeItems,
-        logout,
+        //GIữ lại xem thử nếu bị ảnh hưởng mở ra
+        // data,
+        // saveData,
+        // removeItems,
+        // logout,
+
+        //Search Provider
         searchHistory,
         addSearchTerm,
         clearSearchHistory,
         removeSearchTerm,
+
+        //Favorite Provider
+        favorites,
+        addFavorite,
+        removeFavorite,
       }}
     >
       {children}

@@ -194,8 +194,11 @@ const SettingStack = () => (
       component={PolicyScreen}
       options={{ headerShown: false }}
     />
-    <Stack.Screen name="PolicyDetail" component={PolicyDetailScreen}
-    options={{ headerShown: false }} />
+    <Stack.Screen
+      name="PolicyDetail"
+      component={PolicyDetailScreen}
+      options={{ headerShown: false }}
+    />
   </Stack.Navigator>
 );
 
