@@ -8,58 +8,69 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import HorizontalCardWishlist from "../../../components/cards/HorizontalCardWishlist";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useState } from "react";
+import { useAsyncStorage } from "../../../context/AsyncStorageContext";
 export default function FavouriteList({ route, navigation }) {
 
-  const dataFavourite = [
-    {
-      imageUrl: require("../../../assets/images/horizontalCardImage.jpeg"),
-      placeName: "Nhà con nhộng giá rẻ Bình Tân",
-      openHour: "3:00",
-      closeHour: "23:00",
-      minPrice: "120.000",
-      maxPrice: "1.400.000",
-      location: "Bình Tân, HCM",
-      rating: "5",
-      numOfReviews: "12.5k",
-      initFavourite: true,
-    },
-    {
-      imageUrl: require("../../../assets/images/horizontalCardImage.jpeg"),
-      placeName: "Nhà con nhộng giá rẻ Bình Tân",
-      openHour: "3:00",
-      closeHour: "23:00",
-      minPrice: "120.000",
-      maxPrice: "1.400.000",
-      location: "Bình Tân, HCM",
-      rating: "5",
-      numOfReviews: "12.5k",
-      initFavourite: true,
-    },
-    {
-      imageUrl: require("../../../assets/images/horizontalCardImage.jpeg"),
-      placeName: "Nhà con nhộng giá rẻ Bình Tân",
-      openHour: "3:00",
-      closeHour: "23:00",
-      minPrice: "120.000",
-      maxPrice: "1.400.000",
-      location: "Bình Tân, HCM",
-      rating: "5",
-      numOfReviews: "12.5k",
-      initFavourite: true,
-    },
-    {
-      imageUrl: require("../../../assets/images/horizontalCardImage.jpeg"),
-      placeName: "Nhà con nhộng giá rẻ Bình Tân",
-      openHour: "3:00",
-      closeHour: "23:00",
-      minPrice: "120.000",
-      maxPrice: "1.400.000",
-      location: "Bình Tân, HCM",
-      rating: "5",
-      numOfReviews: "12.5k",
-      initFavourite: true,
-    },
-  ];
+  const { favorites, setFavorites } = useAsyncStorage();
+  const [dataFavourite, setDataFavourite] = useState([]);
+  useEffect(() => {
+    setDataFavourite(favorites);
+  }, [favorites]);  
+  console.log(dataFavourite);
+  
+
+  // const dataFavourite = [
+  //   {
+  //     imageUrl: require("../../../assets/images/horizontalCardImage.jpeg"),
+  //     placeName: "Nhà con nhộng giá rẻ Bình Tân",
+  //     openHour: "3:00",
+  //     closeHour: "23:00",
+  //     minPrice: "120.000",
+  //     maxPrice: "1.400.000",
+  //     location: "Bình Tân, HCM",
+  //     rating: "5",
+  //     numOfReviews: "12.5k",
+  //     initFavourite: true,
+  //   },
+  //   {
+  //     imageUrl: require("../../../assets/images/horizontalCardImage.jpeg"),
+  //     placeName: "Nhà con nhộng giá rẻ Bình Tân",
+  //     openHour: "3:00",
+  //     closeHour: "23:00",
+  //     minPrice: "120.000",
+  //     maxPrice: "1.400.000",
+  //     location: "Bình Tân, HCM",
+  //     rating: "5",
+  //     numOfReviews: "12.5k",
+  //     initFavourite: true,
+  //   },
+  //   {
+  //     imageUrl: require("../../../assets/images/horizontalCardImage.jpeg"),
+  //     placeName: "Nhà con nhộng giá rẻ Bình Tân",
+  //     openHour: "3:00",
+  //     closeHour: "23:00",
+  //     minPrice: "120.000",
+  //     maxPrice: "1.400.000",
+  //     location: "Bình Tân, HCM",
+  //     rating: "5",
+  //     numOfReviews: "12.5k",
+  //     initFavourite: true,
+  //   },
+  //   {
+  //     imageUrl: require("../../../assets/images/horizontalCardImage.jpeg"),
+  //     placeName: "Nhà con nhộng giá rẻ Bình Tân",
+  //     openHour: "3:00",
+  //     closeHour: "23:00",
+  //     minPrice: "120.000",
+  //     maxPrice: "1.400.000",
+  //     location: "Bình Tân, HCM",
+  //     rating: "5",
+  //     numOfReviews: "12.5k",
+  //     initFavourite: true,
+  //   },
+  // ];
   
   const renderHeader = () => (
     <View style={styles.header}>

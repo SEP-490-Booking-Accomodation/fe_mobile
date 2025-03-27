@@ -155,12 +155,12 @@ const HomeStack = () => (
       component={ProfileScreen}
       options={{ headerShown: false }}
     />
-    <Stack.Screen name="EditInfo" component={EditInfo} />
-    <Stack.Screen name="ChangePassword" component={ChangePassword} />
+    <Stack.Screen name="EditInfo" component={EditInfo} options={{ headerShown: false }}/>
+    <Stack.Screen name="ChangePassword" component={ChangePassword} options={{ headerShown: false }} />
     <Stack.Screen name="RatingHistory" component={RatingHistory} />
     <Stack.Screen name="Wallet" component={WalletScreen} />
     <Stack.Screen name="PaymentMethod" component={PaymentMethod} />
-    <Stack.Screen name="HistoryScreen" component={HistoryScreen} />
+    <Stack.Screen name="HistoryScreen" component={HistoryScreen} options={{headerShown: false}}/>
   </Stack.Navigator>
 );
 
@@ -194,11 +194,8 @@ const SettingStack = () => (
       component={PolicyScreen}
       options={{ headerShown: false }}
     />
-    <Stack.Screen
-      name="PolicyDetail"
-      component={PolicyDetailScreen}
-      options={{ headerShown: false }}
-    />
+    <Stack.Screen name="PolicyDetail" component={PolicyDetailScreen}
+    options={{ headerShown: false }} />
   </Stack.Navigator>
 );
 
