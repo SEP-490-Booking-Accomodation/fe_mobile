@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import PropTypes from "prop-types";
+import { useNavigation } from "@react-navigation/native";
 
 export default function VerticalCard({
+  id,
   imageUrl,
   openHour = "00:00",
   closeHour = "23:59",
@@ -17,16 +19,19 @@ export default function VerticalCard({
   numberOfReview = "0",
   initFavourite = false,
   onFavouritePress = () => {},
-  onCardPress = () => {},
+  // onCardPress = () => {},
 }) {
   const [isFavourite, setIsFavourite] = useState(initFavourite);
-
+  const navigate = useNavigation();
   const handleFavouritePress = () => {
     const newValue = !isFavourite;
     setIsFavourite(newValue);
     if (onFavouritePress) {
       onFavouritePress(newValue);
     }
+  };
+  const onCardPress = () => {
+    navigate.navigate("DetailRentalLocation", { rentalId: id });
   };
 
   return (
