@@ -24,6 +24,7 @@ export default function LocationList({ rentalData, onViewAllPress }) {
     closeHour: item.closeHour,
     placeName: item.name,
     isOverNight: item.isOverNight,
+    status: item.status,
     minPrice: item.minPrice,
     maxPrice: item.maxPrice,
     address: item.address,
