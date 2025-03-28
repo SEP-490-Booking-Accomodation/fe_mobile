@@ -7,7 +7,12 @@ export const rentalLocationApi = baseApi.injectEndpoints({
       query: () => `/rental-location/all-rental-location`,
       providesTags: ["RentalLocation"],
     }),
+    getRentalById: builder.query({
+      query: (id) => `/rental-location/${id}`,
+      providesTags: ["RentalLocation"],
+    }),
   }),
 });
 
-export const { useGetAllRentalQuery } = rentalLocationApi;
+export const { useGetAllRentalQuery, useGetRentalByIdQuery } =
+  rentalLocationApi;

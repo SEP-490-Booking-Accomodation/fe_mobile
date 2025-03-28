@@ -24,6 +24,7 @@ export default function LocationList({ rentalData, onViewAllPress }) {
     closeHour: item.closeHour,
     placeName: item.name,
     isOverNight: item.isOverNight,
+    status: item.status,
     minPrice: item.minPrice,
     maxPrice: item.maxPrice,
     address: item.address,
@@ -41,7 +42,6 @@ export default function LocationList({ rentalData, onViewAllPress }) {
           <Text style={styles.viewAllText}>Xem tất cả</Text>
         </TouchableOpacity>
       </View>
-
       {/* ButtonGroup thay thế ScrollView filter */}
       <ButtonGroup
         items={filters}
@@ -55,10 +55,9 @@ export default function LocationList({ rentalData, onViewAllPress }) {
         activeTextStyle={styles.selectedText}
         inactiveTextStyle={styles.unselectedText}
       />
-//TODO: 1. Lấy list yêu thích từ async storage
-//Get list trong async storage rồi check lại với rentalData nếu rentalData có tồn tại trong async thì set initFavourite = true
-//Nếu không thì set initFavourite = false
-
+      {/* //TODO: 1. Lấy list yêu thích từ async storage //Get list trong async
+      storage rồi check lại với rentalData nếu rentalData có tồn tại trong async
+      thì set initFavourite = true //Nếu không thì set initFavourite = false */}
       {/* Danh sách địa điểm */}
       <ScrollView style={styles.paddingVerticalCard}>
         {rentalDisplay.map((item) => (

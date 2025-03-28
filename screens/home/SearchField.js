@@ -31,18 +31,19 @@ const SearchField = ({
 
   return (
     // <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-    <View style={[styles.wrapper, style]}>
-      {backIcon && (
-        <TouchableOpacity
-          onPress={onPressBackIcon}
-          style={styles.iconBackContainer}
-        >
-          <View style={styles.iconBack}>
-            <Icon name="arrow-back-outline" size={24} color="#fff" />
-          </View>
-        </TouchableOpacity>
-      )}
-      <TouchableWithoutFeedback onPress={handleSearchPress}>
+    <TouchableOpacity activeOpacity={1} onPress={handleSearchPress}>
+      <View style={[styles.wrapper, style]}>
+        {backIcon && (
+          <TouchableOpacity
+            onPress={onPressBackIcon}
+            style={styles.iconBackContainer}
+          >
+            <View style={styles.iconBack}>
+              <Icon name="arrow-back-outline" size={24} color="#fff" />
+            </View>
+          </TouchableOpacity>
+        )}
+        {/* <TouchableWithoutFeedback onPress={handleSearchPress}> */}
         <View style={styles.searchContainer}>
           <Icon
             name="search-outline"
@@ -59,20 +60,21 @@ const SearchField = ({
             editable={false} // Ngăn không cho bàn phím mở
           />
         </View>
-      </TouchableWithoutFeedback>
+        {/* </TouchableWithoutFeedback> */}
 
-      {filterIcon && (
-        <TouchableOpacity
-          onPress={onPressFilterIcon}
-          //   style={styles.iconFilterContainer}
-        >
-          <View style={styles.iconFilter}>
-            <AntDesign name="filter" size={26} color="#fff" />
-          </View>
-        </TouchableOpacity>
-      )}
-    </View>
-    // </TouchableWithoutFeedback>
+        {filterIcon && (
+          <TouchableOpacity
+            onPress={onPressFilterIcon}
+            //   style={styles.iconFilterContainer}
+          >
+            <View style={styles.iconFilter}>
+              <AntDesign name="filter" size={26} color="#fff" />
+            </View>
+          </TouchableOpacity>
+        )}
+      </View>
+      {/* </TouchableWithoutFeedback> */}
+    </TouchableOpacity>
   );
 };
 

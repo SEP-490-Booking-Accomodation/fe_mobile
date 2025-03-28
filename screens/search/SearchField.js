@@ -17,7 +17,7 @@ const SearchField = ({
   value,
   backIcon = true,
   filterIcon = true,
-  onPressBackIcon = () => {},
+  onPressBack,
   onPressFilterIcon = () => {},
   style,
   inputStyle,
@@ -33,11 +33,7 @@ const SearchField = ({
     <View style={[styles.wrapper, style]}>
       {backIcon && (
         <TouchableOpacity
-          onPress={() => {
-            onPressBackIcon();
-            navigation.goBack(); // Pass back the search value when back is pressed
-            // navigation.navigate("SearchScreen", { searchQuery: value });
-          }}
+          onPress={onPressBack}
           style={styles.iconBackContainer}
         >
           <View style={styles.iconBack}>
@@ -45,7 +41,10 @@ const SearchField = ({
           </View>
         </TouchableOpacity>
       )}
-      <TouchableWithoutFeedback onPress={handleSearchPress}>
+      <TouchableOpacity
+        style={styles.touchSearchContainer}
+        onPress={onPressBack}
+      >
         <View style={styles.searchContainer}>
           <Icon
             name="search-outline"
@@ -62,7 +61,7 @@ const SearchField = ({
             editable={false} // Ngăn không cho bàn phím mở
           />
         </View>
-      </TouchableWithoutFeedback>
+      </TouchableOpacity>
 
       {filterIcon && (
         <TouchableOpacity onPress={onPressFilterIcon}>
@@ -77,7 +76,9 @@ const SearchField = ({
 
 const styles = StyleSheet.create({
   wrapper: {
+    // flex: 1,
     flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
   },
   searchContainer: {
@@ -90,6 +91,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#f7f7f7",
     paddingHorizontal: 18,
     paddingVertical: 10,
+  },
+  touchSearchContainer: {
+    flex: 1,
   },
   searchIcon: {
     marginRight: 8,

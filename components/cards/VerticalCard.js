@@ -2,30 +2,36 @@ import React, { useState } from "react";
 import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import PropTypes from "prop-types";
+import { useNavigation } from "@react-navigation/native";
 
 export default function VerticalCard({
+  id,
   imageUrl,
   openHour = "00:00",
   closeHour = "23:59",
   placeName = "Địa điểm chưa xác định",
   minPrice = "0",
   maxPrice = "0",
+  status = 0,
   location = "Không rõ",
   isOverNight = false,
   ratingPoint = "0",
   numberOfReview = "0",
   initFavourite = false,
   onFavouritePress = () => {},
-  onCardPress = () => {},
+  // onCardPress = () => {},
 }) {
   const [isFavourite, setIsFavourite] = useState(initFavourite);
-
+  const navigate = useNavigation();
   const handleFavouritePress = () => {
     const newValue = !isFavourite;
     setIsFavourite(newValue);
     if (onFavouritePress) {
       onFavouritePress(newValue);
     }
+  };
+  const onCardPress = () => {
+    navigate.navigate("DetailRentalLocation", { rentalId: id });
   };
 
   return (
@@ -54,11 +60,25 @@ export default function VerticalCard({
           />
         </TouchableOpacity>
         {/* Opening Hours */}
-        <View style={styles.openingHoursContainer}>
-          <Text style={styles.openHoursText}>
-            Mở cửa ({openHour} - {closeHour})
-          </Text>
-        </View>
+        {status === 2 || status === 5 || status === 1 ? (
+          <View style={styles.inactiveStatusContainer}>
+            <Text style={styles.openHoursText}>Không hoạt động</Text>
+          </View>
+        ) : status === 3 ? (
+          <View style={styles.activeStatusContainer}>
+            <Text style={styles.openHoursText}>
+              Mở cửa ({openHour} - {closeHour})
+            </Text>
+          </View>
+        ) : status === 4 ? (
+          <View style={styles.pauseStatusContainer}>
+            <Text style={styles.openHoursText}>Tạm ngưng</Text>
+          </View>
+        ) : (
+          <View style={styles.notStatusContainer}>
+            <Text style={styles.openHoursText}>Không xác định </Text>
+          </View>
+        )}
       </View>
 
       {/* Content Section */}
@@ -155,7 +175,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     zIndex: 1,
   },
-  openingHoursContainer: {
+  activeStatusContainer: {
     position: "absolute",
     bottom: 0,
     right: 0,
@@ -170,7 +190,37 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 16,
   },
-
+  inactiveStatusContainer: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "rgb(209, 57, 27)",
+    borderTopLeftRadius: 16,
+    borderBottomRightRadius: 13,
+  },
+  pauseStatusContainer: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "rgb(221, 188, 0)",
+    borderTopLeftRadius: 16,
+    borderBottomRightRadius: 13,
+  },
+  notStatusContainer: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "rgb(40, 40, 40)",
+    borderTopLeftRadius: 16,
+    borderBottomRightRadius: 13,
+  },
+  inactiveText: {
+    color: "white",
+    fontSize: 10,
+    fontWeight: "500",
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+  },
   contentContainer: {
     paddingVertical: 12,
     paddingHorizontal: 16,
