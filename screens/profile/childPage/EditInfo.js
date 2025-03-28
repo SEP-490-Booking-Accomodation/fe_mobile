@@ -64,12 +64,13 @@ export default function EditInfo({ route, navigation }) {
   const [updateUserApi] = useUpdateUserMutation();
 
   const [dataUser, setDataUser] = useState(route.params?.data);
-  const [image, setImage] = useState(dataUser?.userId?.avatarUrl || "");
+  const [image, setImage] = useState(dataUser?.userId?.avatarUrl[0] || "");
   const [fullName, setFullName] = useState(dataUser?.userId?.fullName || "");
   const [email, setEmail] = useState(dataUser?.userId?.email || "");
   const [phone, setPhone] = useState(dataUser?.userId?.phone || "");
   const [isButtonSaveActive, setIsButtonSaveActive] = useState(false);
 
+  console.log(image);
   useEffect(() => {
     if (
       email.trim() !== (dataUser?.userId?.email || "") ||
