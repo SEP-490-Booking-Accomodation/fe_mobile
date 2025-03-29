@@ -1,4 +1,3 @@
-// In DetailRentalLocationScreen.js
 import React, { useState, useEffect } from "react";
 import {
   ScrollView,
@@ -16,14 +15,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import MultiSelectButtonGroup from "../../components/buttons/MultiSelectButtonGroup";
 import Tag from "../../components/Tag";
 import SimpleVerticalCard from "../../components/cards/SimpleVerticalCard";
-import { useGetRentalByIdQuery } from "../../api/rentalLocationApi";
+import { useGetAllAccommodationTypeOfRentalLocationQuery } from "../../api/rentalLocationApi";
 import { Button } from "react-native-elements";
 
 const DetailRentalLocationScreen = ({ route, navigation }) => {
-  console.log("Route params:", route.params); 
-  const { rentalId: locationId } = route.params; 
+  console.log("Route params:", route.params);
+  const { rentalId: locationId } = route.params;
   console.log("Extracted locationId:", locationId);
-  
+
   if (!locationId) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -32,10 +31,12 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
       </View>
     );
   }
-  const { data: rentalData, isLoading, isError } = useGetRentalByIdQuery(locationId);
+
+  const { data: rentalData, isLoading, isError } = useGetAllAccommodationTypeOfRentalLocationQuery(locationId);
   const [isFavorite, setIsFavorite] = useState(false);
-  const [selectedAmenities, setSelectedAmenities] = useState([]);
+  const [selectedServices, setSelectedServices] = useState([]);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [allServices, setAllServices] = useState([]);
 
   useEffect(() => {
     const loadFavoriteStatus = async () => {
@@ -46,6 +47,20 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     };
     loadFavoriteStatus();
   }, [locationId]);
+
+  useEffect(() => {
+    if (rentalData?.data?.accommodationTypeIds?.data) {
+      const services = new Set();
+      rentalData.data.accommodationTypeIds.data.forEach(accommodation => {
+        if (accommodation.serviceIds) {
+          accommodation.serviceIds.forEach(service => {
+            services.add(service.name);
+          });
+        }
+      });
+      setAllServices(Array.from(services));
+    }
+  }, [rentalData]);
 
   const toggleFavorite = async () => {
     const newStatus = !isFavorite;
@@ -61,9 +76,11 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     ]);
   };
 
-  const handleCardPress = (room) => {
-    navigation.navigate("DetailAccomodation", { room });
-  };
+  const handleCardPress = (accommodationType) => {
+  navigation.navigate("DetailAccomodation", { 
+    accommodationTypeId: accommodationType._id 
+  });
+};
 
   if (isLoading) {
     return (
@@ -86,7 +103,15 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   }
 
   const rental = rentalData.data;
-  const rooms = []; 
+  const accommodationTypes = rental.accommodationTypeIds.data || [];
+
+  const filteredAccommodationTypes = selectedServices.length > 0
+    ? accommodationTypes.filter(accommodation =>
+      accommodation.serviceIds?.some(service =>
+        selectedServices.includes(service.name)
+      )
+    )
+    : accommodationTypes;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -133,7 +158,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               <View style={styles.ratingContainer}>
                 <Icon name="star" size={20} color="#ffc907" />
                 <Text style={styles.ratingText}>
-                  {/* You might want to add rating and reviews to your rental model */}
                   4.5 (120 Reviews)
                 </Text>
               </View>
@@ -152,27 +176,32 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               </Text>
             </View>
           </View>
-          {/* Add amenities if needed */}
-          {/* <View style={styles.multiSelectButtonGroup}>
-            <MultiSelectButtonGroup
-              items={amenities}
-              activeButtonStyle={styles.activeButton}
-              inactiveButtonStyle={styles.inactiveButton}
-              activeTextStyle={styles.activeText}
-              inactiveTextStyle={styles.inactiveText}
-              onSelect={setSelectedAmenities}
-            />
-          </View> */}
-          {rooms.map((room) => (
+          {allServices.length > 0 && (
+            <View style={styles.multiSelectButtonGroup}>
+              <MultiSelectButtonGroup
+                items={allServices}
+                selectedIndexes={allServices.map(service =>
+                  selectedServices.includes(service) ? allServices.indexOf(service) : -1
+                ).filter(index => index !== -1)}
+                onChange={(selectedIndexes) => {
+                  setSelectedServices(selectedIndexes.map(index => allServices[index]));
+                }}
+                activeButtonStyle={styles.activeButton}
+                inactiveButtonStyle={styles.inactiveButton}
+                activeTextStyle={styles.activeText}
+                inactiveTextStyle={styles.inactiveText}
+              />
+            </View>
+          )}
+
+          {filteredAccommodationTypes.map((accommodationType) => (
             <SimpleVerticalCard
-              key={room.id}
-              imageUrl={room.imageUrl}
-              placeName={room.name}
-              price={`${room.price}đ/${room.priceUnit}`}
-              location={room.location}
-              ratingPoint={room.rating}
-              numberOfReview={room.reviewCount}
-              onCardPress={() => handleCardPress(room)}
+              key={accommodationType._id}
+              imageUrl={accommodationType.image?.[0] || rental.image?.[0] || "https://via.placeholder.com/300"}
+              placeName={accommodationType.name}
+              price={`${accommodationType.basePrice}đ/giờ`}
+              location={`${rental.address}, ${rental.ward} , ${rental.district}, ${rental.city}`}
+              onCardPress={() => handleCardPress(accommodationType)}
             />
           ))}
         </ScrollView>
@@ -249,7 +278,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   locationText: {
-    marginLeft: 8,
+    marginHorizontal: 8,
     color: "#555",
   },
   readMoreText: {
@@ -296,6 +325,12 @@ const styles = StyleSheet.create({
   },
   multiSelectButtonGroup: {
     marginBottom: 16,
+  },
+  filterTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 8,
+    color: "#333",
   },
 });
 

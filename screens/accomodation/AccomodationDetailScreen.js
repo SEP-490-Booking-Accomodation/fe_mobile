@@ -10,6 +10,7 @@ import {
   FlatList,
   Dimensions,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import MapWithPopup from "../../components/MapWithPopup";
@@ -17,42 +18,79 @@ import CustomButton from "../../components/buttons/Button";
 import Tag from "../../components/Tag";
 import ImageViewing from "react-native-image-viewing";
 import MultipleButtonNoSelect from "../../components/buttons/MultipleButtonNoSelect";
+import { useGetAccommodationTypeByIdQuery } from "../../api/accommodationTypeApi";
 
 const AccomodationDetailScreen = ({ route, navigation }) => {
+  const { accommodationTypeId } = route.params;
+  const { data, isLoading, isError } = useGetAccommodationTypeByIdQuery(accommodationTypeId);
+  
   const [activeTab, setActiveTab] = useState(0);
   const [isImageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [currentImageSet, setCurrentImageSet] = useState([]);
 
-  console.log("Route params:", route?.params);
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4E72E3" />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
-  const defaultRoom = {
-    id: "default",
-    name: "Room Name",
-    location: "Location",
-    price: "0",
+  if (isError || !data?.data) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text>Error loading accommodation data</Text>
+          <CustomButton
+            title="Go Back"
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const accommodationType = data.data;
+  const rentalLocation = accommodationType.rentalLocationId || {};
+
+  const accommodationTypeData = {
+    id: accommodationType._id,
+    name: accommodationType.name,
+    location: rentalLocation.name || "Unknown location",
+    price: accommodationType.basePrice,
     priceUnit: "h",
-    rating: "0",
-    reviewCount: "0",
-    images: [],
-    amenities: [],
-    reviews: [],
+    rating: "4.5", 
+    reviewCount: "12", 
+    images: accommodationType.image?.map((img, index) => ({
+      id: `img-${index}`,
+      source: { uri: img }
+    })) || [],
+    amenities: accommodationType.serviceIds?.map(service => service.name) || [],
+    description: accommodationType.description || "No description available",
+    maxPeople: accommodationType.maxPeopleNumber,
+    reviews: [ 
+      {
+        userName: "John Doe",
+        rating: 5,
+        comment: "Great place to stay!",
+        date: "2023-05-15",
+        images: []
+      }
+    ]
   };
 
-  const room = route?.params?.room || defaultRoom;
-  const amenities = Array.isArray(room.amenities) ? room.amenities : [];
-  const galleryImages = Array.isArray(room.images) ? room.images : [];
-  const reviewImages = Array.isArray(room.reviews?.[0]?.images)
-    ? room.reviews[0].images
-    : [];
-
-  const handleBookNow = (room) => {
-    navigation.navigate("ConfirmBooking", { roomData: room });
+  const handleBookNow = (accommodationType) => {
+    navigation.navigate("ConfirmBooking", { accommodationTypeData: accommodationType });
   };
+
   const openGalleryModal = (index) => {
-    const imageSet = galleryImages
+    const imageSet = accommodationTypeData.images
       .map((img) => ({
-        uri: img?.source ? Image.resolveAssetSource(img.source).uri : "",
+        uri: img?.source ? img.source.uri : "",
       }))
       .filter((img) => img.uri);
     setCurrentImageSet(imageSet);
@@ -61,9 +99,9 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
   };
 
   const openReviewModal = (index) => {
-    const imageSet = reviewImages
+    const imageSet = accommodationTypeData.reviews[0]?.images
       .map((img) => ({
-        uri: img?.source ? Image.resolveAssetSource(img.source).uri : "",
+        uri: img?.source ? img.source.uri : "",
       }))
       .filter((img) => img.uri);
     setCurrentImageSet(imageSet);
@@ -73,7 +111,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
 
   const openSingleImageModal = (image) => {
     if (!image) return;
-    setCurrentImageSet([{ uri: Image.resolveAssetSource(image).uri }]);
+    setCurrentImageSet([{ uri: image.uri || image }]);
     setSelectedImageIndex(0);
     setImageModalVisible(true);
   };
@@ -99,34 +137,31 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
 
   const renderMainInfo = () => (
     <View style={styles.mainInfo}>
-      <TouchableOpacity
-        onPress={() =>
-          openSingleImageModal(require("../../assets/images/beach.jpg"))
-        }
-      >
+      {accommodationTypeData.images.length > 0 ? (
+        <TouchableOpacity onPress={() => openSingleImageModal(accommodationTypeData.images[0].source.uri)}>
+          <Image
+            source={{ uri: accommodationTypeData.images[0].source.uri }}
+            style={styles.mainImage}
+          />
+        </TouchableOpacity>
+      ) : (
         <Image
-          source={require("../../assets/images/beach.jpg")}
+          source={require("../../assets/images/banner.png")}
           style={styles.mainImage}
         />
-      </TouchableOpacity>
+      )}
       <View style={styles.infoContainer}>
-        <View style={styles.roomHeader}>
-          <Text style={styles.roomName}>{room.name}</Text>
-          <Tag text="Imperial" backgroundColor="#E8EDFB" textColor="#4e72e3" />
-        </View>
-        <View style={styles.locationContainer}>
-          <MaterialIcons name="location-on" size={20} color="#4e72e3" />
-          <Text style={styles.locationText}>{room.location}</Text>
+        <View style={styles.accommodationTypeHeader}>
+          <Text style={styles.accommodationTypeName}>{accommodationTypeData.name}</Text>
+          <Tag text={accommodationTypeData.location} backgroundColor="#E8EDFB" textColor="#4e72e3" />
         </View>
         <View style={styles.priceContainer}>
-          <Text
-            style={styles.priceText}
-          >{`${room.price}đ/${room.priceUnit}`}</Text>
+          <Text style={styles.priceText}>{`${accommodationTypeData.price}đ/${accommodationTypeData.priceUnit}`}</Text>
         </View>
         <View style={styles.reviewContainer}>
           <MaterialIcons name="star" size={20} color="#ffc907" />
           <Text style={styles.ratingText}>
-            {`${room.rating} (${room.reviewCount} Reviews)`}
+            {`${accommodationTypeData.rating} (${accommodationTypeData.reviewCount} Reviews)`}
           </Text>
         </View>
       </View>
@@ -136,23 +171,27 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
   const renderAmenities = () => (
     <View style={styles.amenitiesContainer}>
       <Text style={styles.sectionTitle}>Amenities</Text>
-      <MultipleButtonNoSelect
-        items={amenities}
-        containerStyle={styles.amenitiesContainer}
-        buttonStyle={styles.amenityButton}
-        textStyle={styles.amenityText}
-        spacing={8}
-        borderRadius={20}
-      />
+      {accommodationTypeData.amenities.length > 0 ? (
+        <MultipleButtonNoSelect
+          items={accommodationTypeData.amenities}
+          containerStyle={styles.amenitiesContainer}
+          buttonStyle={styles.amenityButton}
+          textStyle={styles.amenityText}
+          spacing={8}
+          borderRadius={20}
+        />
+      ) : (
+        <Text style={styles.noAmenitiesText}>No amenities listed</Text>
+      )}
     </View>
   );
 
-  const renderLocation = () => (
-    <View style={styles.locationSection}>
-      <Text style={styles.sectionTitle}>Location</Text>
-      <MapWithPopup />
-    </View>
-  );
+  // const renderLocation = () => (
+  //   <View style={styles.locationSection}>
+  //     <Text style={styles.sectionTitle}>Location</Text>
+  //     <MapWithPopup />
+  //   </View>
+  // );
 
   const renderTabs = () => {
     const tabs = ["Chi tiết", "Ảnh", "Đánh giá"];
@@ -164,12 +203,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
             style={[styles.tab, activeTab === index && styles.activeTab]}
             onPress={() => setActiveTab(index)}
           >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === index && styles.activeTabText,
-              ]}
-            >
+            <Text style={[styles.tabText, activeTab === index && styles.activeTabText]}>
               {tab}
             </Text>
           </TouchableOpacity>
@@ -179,6 +213,14 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
   };
 
   const renderPhotos = () => {
+    if (accommodationTypeData.images.length === 0) {
+      return (
+        <View style={styles.noPhotosContainer}>
+          <Text style={styles.noPhotosText}>No photos available</Text>
+        </View>
+      );
+    }
+
     const numColumns = 3;
     const spacing = 8;
     const screenWidth = Dimensions.get("window").width;
@@ -189,7 +231,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
 
     return (
       <FlatList
-        data={galleryImages}
+        data={accommodationTypeData.images}
         numColumns={numColumns}
         contentContainerStyle={styles.photosContainer}
         renderItem={({ item, index }) => (
@@ -204,11 +246,8 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
             ]}
           >
             <Image
-              source={item.source}
-              style={[
-                styles.gridImage,
-                { width: imageWidth, height: imageWidth },
-              ]}
+              source={{ uri: item.source.uri }}
+              style={[styles.gridImage, { width: imageWidth, height: imageWidth }]}
               resizeMode="cover"
             />
           </TouchableOpacity>
@@ -222,27 +261,25 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
     <View style={styles.reviewsContainer}>
       <View style={styles.ratingSummaryContainer}>
         <View style={styles.ratingAverageContainer}>
-          <Text style={styles.averageRating}>{room.rating}</Text>
-          <Text style={styles.totalReviews}>({room.reviewCount} Đánh giá)</Text>
+          <Text style={styles.averageRating}>{accommodationTypeData.rating}</Text>
+          <Text style={styles.totalReviews}>({accommodationTypeData.reviewCount} Đánh giá)</Text>
         </View>
         <View style={styles.ratingBreakdownContainer}>
-          {[5, 4, 3, 2, 1].map((rating, index) => (
+          {[5, 4, 3, 2, 1].map((rating) => (
             <View key={rating} style={styles.ratingRow}>
               <Text style={styles.ratingNumber}>{rating}</Text>
               <View style={styles.ratingBarBackground}>
-                <View
-                  style={[styles.ratingBar, { width: `${rating * 20}%` }]}
-                />
+                <View style={[styles.ratingBar, { width: `${rating * 20}%` }]} />
               </View>
             </View>
           ))}
         </View>
       </View>
-      {room.reviews?.map((review, index) => (
+      {accommodationTypeData.reviews?.map((review, index) => (
         <View key={index} style={styles.reviewCard}>
           <View style={styles.reviewHeader}>
             <Image
-              source={require("../../assets/images/beach.jpg")}
+              source={require("../../assets/images/banner.png")}
               style={styles.reviewerImage}
             />
             <View style={styles.reviewerDetails}>
@@ -250,28 +287,25 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
               <View style={styles.starContainer}>
                 {Array(review.rating)
                   .fill(null)
-                  .map((_, index) => (
-                    <MaterialIcons
-                      key={index}
-                      name="star"
-                      size={16}
-                      color="#ffc907"
-                    />
+                  .map((_, i) => (
+                    <MaterialIcons key={i} name="star" size={16} color="#ffc907" />
                   ))}
               </View>
             </View>
           </View>
           <Text style={styles.reviewText}>{review.comment}</Text>
-          <View style={styles.reviewImagesContainer}>
-            {review.images?.map((image, imgIndex) => (
-              <TouchableOpacity
-                key={image.id}
-                onPress={() => openReviewModal(imgIndex)}
-              >
-                <Image source={image.source} style={styles.reviewImage} />
-              </TouchableOpacity>
-            ))}
-          </View>
+          {review.images?.length > 0 && (
+            <View style={styles.reviewImagesContainer}>
+              {review.images.map((image, imgIndex) => (
+                <TouchableOpacity
+                  key={imgIndex}
+                  onPress={() => openReviewModal(imgIndex)}
+                >
+                  <Image source={image.source} style={styles.reviewImage} />
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
           <Text style={styles.reviewDate}>{review.date}</Text>
         </View>
       ))}
@@ -283,8 +317,9 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
       case 0:
         return (
           <ScrollView>
+            <Text style={styles.descriptionText}>{accommodationTypeData.description}</Text>
             {renderAmenities()}
-            {renderLocation()}
+            {/* {renderLocation()} */}
           </ScrollView>
         );
       case 1:
@@ -306,7 +341,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
       </View>
       <View style={styles.footer}>
         <CustomButton
-          onPress={() => handleBookNow(room)}
+          onPress={() => handleBookNow(accommodationTypeData)}
           title="Đặt ngay"
           style={styles.bookButton}
           backgroundColor="#101828"
@@ -328,6 +363,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f8f9fa",
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backButton: {
+    marginTop: 20,
+    width: 120,
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -348,12 +397,12 @@ const styles = StyleSheet.create({
   infoContainer: {
     marginTop: 16,
   },
-  roomHeader: {
+  accommodationTypeHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  roomName: {
+  accommodationTypeName: {
     fontSize: 24,
     fontWeight: "bold",
   },
@@ -385,11 +434,21 @@ const styles = StyleSheet.create({
   },
   amenitiesContainer: {
     paddingHorizontal: 16,
+    marginTop: 16,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 8,
+  },
+  noAmenitiesText: {
+    color: "#666",
+    fontStyle: "italic",
+  },
+  descriptionText: {
+    padding: 16,
+    color: "#666",
+    lineHeight: 22,
   },
   locationSection: {
     padding: 16,
@@ -417,6 +476,16 @@ const styles = StyleSheet.create({
   },
   photosContainer: {
     padding: 16,
+  },
+  noPhotosContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  noPhotosText: {
+    color: "#666",
+    fontStyle: "italic",
   },
   imageWrapper: {
     overflow: "hidden",

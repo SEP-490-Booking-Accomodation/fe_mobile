@@ -33,7 +33,6 @@ export default function HomeScreen() {
   const [address, setAddress] = useState(null)
   const [errorMsg, setErrorMsg] = useState(null)
   const [manualCity, setManualCity] = useState(null)
-  // const [modalVisible, setModalVisible] = useState(false);
   const authData = useSelector((state) => state.auth)
   const userId = authData.userId
   const { data: user, refetch: refetchUser } = useGetUserQuery(userId)
@@ -53,12 +52,23 @@ export default function HomeScreen() {
 
     setRefreshing(false)
   }
+  
   const handleLocationPress = (locationId) => {
     console.log("Navigating with locationId:", locationId)
-    navigation.navigate("DetailRentalLocation", {
-      locationId: locationId,
-    })
+    
+    // Find the rental data by locationId
+    const selectedRental = rental?.data?.find(item => item._id === locationId)
+    
+    if (selectedRental) {
+      navigation.navigate("DetailRentalLocation", {
+        rentalData: selectedRental,
+        previousScreen: "Home"
+      })
+    } else {
+      console.error("Không tìm thấy dữ liệu cho locationId:", locationId)
+    }
   }
+  
   useEffect(() => {
     const getLocation = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync()
@@ -102,11 +112,6 @@ export default function HomeScreen() {
     }
   }, [user, rental])
 
-  // const handleSelectCity = (city) => {
-  //   setManualCity(city);
-  //   setModalVisible(false);
-  // };
-
   return (
     <SafeAreaView style={styles.container}>
       <>
@@ -119,11 +124,9 @@ export default function HomeScreen() {
           authData={authData}
           onLoginPress={() => navigation.navigate("Auth")}
           displayUser={displayUser}
-          // onLocationPress={() => setModalVisible(true)}
         />
 
         <ScrollView
-          // style={styles.paddingVertical}
           refreshControl={
             <RefreshControl
               colors={["#FF5733", "#33FF57", "#3357FF"]}
@@ -155,7 +158,7 @@ export default function HomeScreen() {
           )}
         </ScrollView>
       </>
-      {/* <Modal transparent={true} visible={modalVisible} animationType="slide">
+       {/* <Modal transparent={true} visible={modalVisible} animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Chọn thành phố</Text>
@@ -257,4 +260,3 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 })
-
