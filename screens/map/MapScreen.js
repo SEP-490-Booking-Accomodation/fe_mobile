@@ -1,98 +1,235 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ScrollView, Text } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
-import * as Location from 'expo-location';
-import HorizontalCardMedium from '../../components/cards/HorizontalCardMedium';
-import SearchField from '../../components/SearchField';
-import Filter from '../../components/Filter';
-import { mockData } from '../../data/mockData';
+"use client"
+
+import { useState, useEffect, useRef } from "react"
+import { StyleSheet, View, ScrollView, Text, ActivityIndicator, Button } from "react-native"
+import MapView, { Marker } from "react-native-maps"
+import * as Location from "expo-location"
+import { FontAwesome5 } from "@expo/vector-icons"
+import HorizontalCardMedium from "../../components/cards/HorizontalCardMedium"
+import SearchField from "../../components/SearchField"
+import Filter from "../../components/Filter"
+import { useGetAllRentalQuery } from "../../api/rentalLocationApi"
 
 const MapScreen = ({ navigation }) => {
-  const [userLocation, setUserLocation] = useState(null);
-  const [searchText, setSearchText] = useState('');
-  const [locationError, setLocationError] = useState(null);
-  const [filterVisible, setFilterVisible] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState(null);
+  const mapRef = useRef(null)
+
+  const [userLocation, setUserLocation] = useState(null)
+  const [searchText, setSearchText] = useState("")
+  const [locationError, setLocationError] = useState(null)
+  const [filterVisible, setFilterVisible] = useState(false)
+  const [selectedLocation, setSelectedLocation] = useState(null)
   const [filters, setFilters] = useState({
     priceRange: [100000, 100000000],
     selectedRating: null,
     selectedAmenities: [],
-  });
+  })
+
+  const { data: rentalLocations, isLoading, error, refetch } = useGetAllRentalQuery()
 
   useEffect(() => {
     const checkLocationPermission = async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-
-      if (status !== 'granted') {
-        setLocationError('Quyền truy cập vị trí bị từ chối');
-        return;
-      }
-
       try {
-        let location = await Location.getCurrentPositionAsync({});
+        const { status } = await Location.requestForegroundPermissionsAsync()
+
+        if (status !== "granted") {
+          setLocationError("Ứng dụng cần quyền truy cập vị trí để hiển thị bản đồ")
+          return
+        }
+
+        const location = await Location.getCurrentPositionAsync({})
+        if (!location.coords) {
+          throw new Error("Không lấy được tọa độ")
+        }
+
         setUserLocation({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
           latitudeDelta: 0.05,
           longitudeDelta: 0.05,
-        });
+        })
       } catch (error) {
-        setLocationError('Không thể lấy vị trí hiện tại');
-        console.error(error);
+        console.error("Location error:", error)
+        setLocationError("Không thể xác định vị trí hiện tại")
       }
-    };
+    }
 
-    checkLocationPermission();
-  }, []);
+    checkLocationPermission()
+  }, [])
 
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const deg2rad = (deg) => deg * (Math.PI / 180)
+    const R = 6371
 
-  const nearbyLocations = mockData.destinations.map(destination => ({
-    id: destination.id,
-    coordinate: destination.coordinate || { latitude: 0, longitude: 0 },
-    title: destination.name,
-    imageUrlLogo: destination.rooms[0]?.imageUrl,
-    placeName: destination.name,
-    openHour: destination.openHours?.split(' ')[1] || '08:00',
-    closeHour: destination.openHours?.split(' ')[2] || '22:00',
-    minPrice: destination.rooms[0]?.price || '100.000',
-    maxPrice: destination.rooms[0]?.price || '500.000',
-    location: destination.location || 'Unknown location', 
-    rating: destination.rating.toString(),
-    numOfReviews: destination.reviews.toString(),
-    distance: '1',
-    destination: destination
-  }));
-  const filteredLocations = selectedLocation 
-    ? [selectedLocation] 
-    : nearbyLocations.filter((location) => {
-        const isInPriceRange =
-          parseInt(location.minPrice.replace(/\./g, '')) >= filters.priceRange[0] &&
-          parseInt(location.maxPrice.replace(/\./g, '')) <= filters.priceRange[1];
+    const dLat = deg2rad(lat2 - lat1)
+    const dLon = deg2rad(lon2 - lon1)
 
-        const isRatingMatch =
-          !filters.selectedRating || parseInt(location.rating) === filters.selectedRating;
-        const isAmenitiesMatch = true;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
 
-        return isInPriceRange && isRatingMatch && isAmenitiesMatch;
-      });
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    return R * c
+  }
+
+  const transformLocations = () => {
+    if (!rentalLocations?.data) return []
+
+    return rentalLocations.data
+      .filter((location) => {
+        return (
+          location.latitude &&
+          location.longitude &&
+          !isNaN(Number.parseFloat(location.latitude)) &&
+          !isNaN(Number.parseFloat(location.longitude))
+        )
+      })
+      .map((location) => {
+        const lat = Number.parseFloat(location.latitude)
+        const lng = Number.parseFloat(location.longitude)
+
+        return {
+          id: location._id,
+          coordinate: { latitude: lat, longitude: lng },
+          title: location.name,
+          imageUrlLogo: location.image?.[0] || "",
+          placeName: location.name,
+          openHour: location.openHour || "08:00",
+          closeHour: location.closeHour || "22:00",
+          minPrice: location.minPrice || "100.000",
+          maxPrice: location.maxPrice || "500.000",
+          location: `${location.address || ""}, ${location.ward || ""}, ${location.district || ""}, ${location.city || ""}`,
+          rating: location.rating || "4.5",
+          numOfReviews: location.numOfReviews || "10",
+          distance: userLocation
+            ? calculateDistance(userLocation.latitude, userLocation.longitude, lat, lng).toFixed(1)
+            : "N/A",
+          destination: location,
+        }
+      })
+  }
+
+  const getAllLocations = () => {
+    return transformLocations()
+  }
+
+  const getNearbyLocations = () => {
+    const locations = transformLocations()
+
+    if (selectedLocation) {
+      return [selectedLocation]
+    }
+
+    return locations
+      .filter((location) => {
+        if (searchText && searchText.length > 0) {
+          const searchLower = searchText.toLowerCase()
+          if (
+            !location.placeName.toLowerCase().includes(searchLower) &&
+            !location.location.toLowerCase().includes(searchLower)
+          ) {
+            return false
+          }
+        }
+
+        if (userLocation && location.distance && location.distance !== "N/A") {
+          const distance = Number.parseFloat(location.distance)
+          if (distance > 5) return false
+        }
+
+        const minPrice = Number.parseInt((location.minPrice || "100000").replace(/\./g, ""))
+        const maxPrice = Number.parseInt((location.maxPrice || "500000").replace(/\./g, ""))
+        const isInPriceRange = minPrice >= filters.priceRange[0] && maxPrice <= filters.priceRange[1]
+
+        const isRatingMatch = !filters.selectedRating || Number.parseFloat(location.rating) >= filters.selectedRating
+
+        return isInPriceRange && isRatingMatch
+      })
+      .sort((a, b) => {
+        if (userLocation && a.distance !== "N/A" && b.distance !== "N/A") {
+          return Number.parseFloat(a.distance) - Number.parseFloat(b.distance)
+        }
+        return 0
+      })
+  }
+
+  const allLocations = getAllLocations()
+  const nearbyLocations = getNearbyLocations()
 
   const handleMarkerPress = (location) => {
-    setSelectedLocation(location);
-  };
+    setSelectedLocation(location)
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(
+        {
+          latitude: location.coordinate.latitude,
+          longitude: location.coordinate.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        500,
+      )
+    }
+  }
+
+  const handleUserLocationPress = () => {
+    setSelectedLocation(null)
+    if (mapRef.current && userLocation) {
+      mapRef.current.animateToRegion(
+        {
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        500,
+      )
+    }
+  }
 
   const handleCardPress = (location) => {
-    navigation.navigate('DetailRentalLocation', {
-      destination: location.destination,
-      previousScreen: 'Map'
-    });
-  };
+    // Navigate to the HomeStack with a flag indicating we came from Map
+    navigation.navigate("Home", {
+      screen: "DetailRentalLocation",
+      params: {
+        rentalId: location.id,
+        previousScreen: "Map",
+      },
+    })
+  }
 
   if (locationError) {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>{locationError}</Text>
       </View>
-    );
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#4E72E3" />
+        <Text>Đang tải dữ liệu...</Text>
+      </View>
+    )
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Không thể tải dữ liệu địa điểm</Text>
+        <Text style={styles.errorSubText}>Vui lòng kiểm tra kết nối mạng và thử lại</Text>
+        <Button title="Thử lại" onPress={() => refetch()} color="#4E72E3" />
+      </View>
+    )
+  }
+
+  if (!rentalLocations?.data?.length) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Không có dữ liệu địa điểm</Text>
+        <Button title="Thử lại" onPress={() => refetch()} color="#4E72E3" />
+      </View>
+    )
   }
 
   return (
@@ -107,65 +244,82 @@ const MapScreen = ({ navigation }) => {
         onPressFilterIcon={() => setFilterVisible(true)}
         style={styles.searchContainer}
       />
+
       <MapView
+        ref={mapRef}
         style={styles.map}
         region={userLocation}
-        showsUserLocation={true}
+        showsUserLocation={false}
         followsUserLocation={true}
       >
         {userLocation && (
-          <Marker coordinate={userLocation}>
-            <View style={styles.markerContainer}>
-              <View style={styles.markerCallout}>
-                <Text style={styles.markerText}>Vị trí của bạn</Text>
+          <Marker coordinate={userLocation} onPress={handleUserLocationPress}>
+            <View style={styles.userMarkerContainer}>
+              <View style={styles.userMarkerCallout}>
+                <Text style={styles.userMarkerText}>Vị trí của bạn</Text>
               </View>
-              <View style={styles.markerIconContainer}>
-                <View style={styles.pinCircle}>
-                  <View style={styles.pinInnerCircle}></View>
+              <View style={styles.userMarkerIconContainer}>
+                <View style={styles.userPinOuter}>
+                  <View style={styles.userPinInner}>
+                    <FontAwesome5 name="user" size={12} color="#4E72E3" />
+                  </View>
                 </View>
-                <View style={styles.pinStick}></View>
-                <View style={styles.rippleEffect}></View>
+                <View style={styles.userPinTail}></View>
+                <View style={styles.userPinShadow}></View>
               </View>
             </View>
           </Marker>
         )}
 
-        {filteredLocations.map((location) => (
-          <Marker 
-            key={location.id} 
-            coordinate={location.coordinate}
-            onPress={() => handleMarkerPress(location)}
-          >
-            <View style={styles.differentMarkerIconContainer}>
-              <View style={styles.differentPinCircle}>
-                <View style={styles.differentPinInnerCircle}></View>
+        {allLocations.map((location) => (
+          <Marker key={location.id} coordinate={location.coordinate} onPress={() => handleMarkerPress(location)}>
+            <View
+              style={[
+                styles.locationMarkerContainer,
+                selectedLocation?.id === location.id && styles.selectedMarkerContainer,
+              ]}
+            >
+              {selectedLocation?.id === location.id && (
+                <View style={styles.selectedMarkerCallout}>
+                  <Text style={styles.selectedMarkerText}>{location.placeName}</Text>
+                </View>
+              )}
+              <View style={styles.locationPinOuter}>
+                <View style={styles.locationPinInner}>
+                  <FontAwesome5 name="map-pin" size={12} color="#FF6F61" />
+                </View>
               </View>
-              <View style={styles.differentPinStick}></View>
-              <View style={styles.differentRippleEffect}></View>
+              <View style={styles.locationPinTail}></View>
+              <View style={styles.locationPinShadow}></View>
             </View>
           </Marker>
         ))}
       </MapView>
+
       <View style={styles.listContainer}>
-        <Text style={styles.listTitle}>Điểm đến gần nhất</Text>
+        <Text style={styles.listTitle}>Điểm đến gần nhất (bán kính 5km)</Text>
         <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContentContainer}>
-          {filteredLocations.map((location) => (
-            <HorizontalCardMedium
-              key={location.id}
-              imageUrlLogo={location.imageUrlLogo}
-              placeName={location.placeName}
-              openHour={location.openHour}
-              closeHour={location.closeHour}
-              minPrice={location.minPrice}
-              maxPrice={location.maxPrice}
-              location={location.location}
-              rating={location.rating}
-              numOfReviews={location.numOfReviews}
-              distance={location.distance}
-              style={styles.card}
-              onPress={() => handleCardPress(location)}
-            />
-          ))}
+          {nearbyLocations.length === 0 ? (
+            <Text style={styles.noResultsText}>Không có địa điểm nào phù hợp</Text>
+          ) : (
+            nearbyLocations.map((location) => (
+              <HorizontalCardMedium
+                key={location.id}
+                imageUrlLogo={location.imageUrlLogo}
+                placeName={location.placeName}
+                openHour={location.openHour}
+                closeHour={location.closeHour}
+                minPrice={location.minPrice}
+                maxPrice={location.maxPrice}
+                location={location.location}
+                rating={location.rating}
+                numOfReviews={location.numOfReviews}
+                distance={location.distance}
+                style={styles.card}
+                onPress={() => handleCardPress(location)}
+              />
+            ))
+          )}
         </ScrollView>
       </View>
 
@@ -175,26 +329,46 @@ const MapScreen = ({ navigation }) => {
         onApply={(appliedFilters) => setFilters(appliedFilters)}
       />
     </View>
-  );
-};
+  )
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FB',
+    backgroundColor: "#F8F9FB",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F8F9FB",
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F8F9FB',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F8F9FB",
+    padding: 20,
   },
   errorText: {
-    color: 'red',
+    color: "red",
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  errorSubText: {
+    color: "#666",
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  noResultsText: {
+    textAlign: "center",
+    marginTop: 20,
+    color: "#666",
   },
   searchContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 40,
     left: 16,
     right: 16,
@@ -204,16 +378,16 @@ const styles = StyleSheet.create({
     flex: 0.6,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   listContainer: {
     flex: 0.4,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
@@ -221,8 +395,8 @@ const styles = StyleSheet.create({
   },
   listTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333333',
+    fontWeight: "600",
+    color: "#333333",
     marginBottom: 8,
   },
   scrollContainer: {
@@ -234,123 +408,155 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: 12,
   },
-  markerContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+
+  userMarkerContainer: {
+    alignItems: "center",
+    justifyContent: "center",
   },
-  markerCallout: {
-    backgroundColor: '#FFFFFF',
+  userMarkerCallout: {
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    marginBottom: 4,
-    shadowColor: '#000',
+    marginBottom: 8,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "rgba(78, 114, 227, 0.3)",
   },
-  markerText: {
-    color: '#333333',
+  userMarkerText: {
+    color: "#4E72E3",
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "600",
   },
-  markerIconContainer: {
-    alignItems: 'center',
-    position: 'relative',
+  userMarkerIconContainer: {
+    alignItems: "center",
+    position: "relative",
   },
-  pinCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#4E72E3',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2,
+  userPinOuter: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+    borderWidth: 3,
+    borderColor: "#4E72E3",
   },
-  pinInnerCircle: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#FFFFFF',
-  },
-  pinStick: {
-    width: 2,
+  userPinInner: {
+    width: 20,
     height: 20,
-    backgroundColor: '#4E72E3',
-    marginTop: -4,
-    zIndex: 1,
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  rippleEffect: {
+  userPinTail: {
+    width: 14,
+    height: 14,
+    backgroundColor: "#4E72E3",
+    transform: [{ rotate: "45deg" }],
+    marginTop: -7,
+    zIndex: 1,
+    borderBottomLeftRadius: 4,
+    borderBottomRightRadius: 4,
+    borderTopRightRadius: 4,
+  },
+  userPinShadow: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(78, 114, 227, 0.2)',
-    position: 'absolute',
-    top: 14,
+    backgroundColor: "rgba(78, 114, 227, 0.15)",
+    position: "absolute",
+    top: 16,
     zIndex: 0,
   },
-  differentMarkerIconContainer: {
-    alignItems: 'center',
-    position: 'relative',
+
+  locationMarkerContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1,
   },
-  altPinCircle: {
+  selectedMarkerContainer: {
+    zIndex: 2,
+  },
+  locationPinOuter: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#FF6F61',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+    borderWidth: 2,
+    borderColor: "#FF6F61",
   },
-  altPinInnerCircle: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#FFFFFF',
+  locationPinInner: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  altPinStick: {
-    width: 2,
-    height: 20,
-    backgroundColor: '#FF6F61',
-    marginTop: -4,
-    zIndex: 1,
-  },
-  differentMarkerIconContainer: {
-    alignItems: 'center',
-    position: 'relative',
-  },
-  differentPinCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#4E72E3',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2,
-  },
-  differentPinInnerCircle: {
+  locationPinTail: {
     width: 12,
     height: 12,
-    borderRadius: 6,
-    backgroundColor: '#FFFFFF',
-  },
-  differentPinStick: {
-    width: 2,
-    height: 20,
-    backgroundColor: '#4E72E3',
-    marginTop: -4,
+    backgroundColor: "#FF6F61",
+    transform: [{ rotate: "45deg" }],
+    marginTop: -6,
     zIndex: 1,
+    borderBottomLeftRadius: 3,
+    borderBottomRightRadius: 3,
+    borderTopRightRadius: 3,
   },
-  differentRippleEffect: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(78, 114, 227, 0.2)',
-    position: 'absolute',
+  locationPinShadow: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 111, 97, 0.15)",
+    position: "absolute",
     top: 14,
     zIndex: 0,
   },
-});
+  selectedMarkerCallout: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 16,
+    marginBottom: 8,
+    position: "absolute",
+    bottom: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(255, 111, 97, 0.3)",
+    minWidth: 100,
+  },
+  selectedMarkerText: {
+    color: "#FF6F61",
+    fontSize: 12,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+})
 
-export default MapScreen;
+export default MapScreen
+

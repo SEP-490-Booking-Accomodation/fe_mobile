@@ -62,7 +62,7 @@ export default function LocationList({ rentalData, onViewAllPress }) {
       <ScrollView style={styles.paddingVerticalCard}>
         {rentalDisplay.map((item) => (
           <VerticalCard
-            key={item.id}
+            key={item._id}
             {...item}
             onFavouritePress={(isFav) =>
               console.log(
@@ -70,7 +70,7 @@ export default function LocationList({ rentalData, onViewAllPress }) {
                 item.placeName
               )
             }
-            onCardPress={() => console.log("Đã nhấn vào card:", item.placeName)}
+            onCardPress={() => onLocationPress(item._id)} 
           />
         ))}
       </ScrollView>
