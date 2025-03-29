@@ -199,7 +199,7 @@ const MapStack = () => (
     <Stack.Screen
       name="MapScreen"
       component={MapScreen}
-      options={{ title: "Bản đồ" }}
+      options={{ headerShown: false }}
     />
   </Stack.Navigator>
 );
