@@ -21,6 +21,8 @@ export const baseApi = createApi({
     "Message",
     "PolicySystem",
     "RentalLocation",
+    "AccommodationType",
+    "Notification"
   ],
   endpoints: () => ({}),
 });

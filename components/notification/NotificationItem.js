@@ -1,34 +1,58 @@
 import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { useMarkNotificationAsReadMutation } from "../../api/notificationApi";
 
-const NotificationItem = ({ iconName, title, time, message, status }) => {
+
+const NotificationItem = ({ id, iconName, title, time, message, status }) => {
+  const [markAsRead] = useMarkNotificationAsReadMutation();
+  const handlePress = () => {
+    if (status === "unread") {
+      markAsRead(id);
+    }
+  };
   return (
-    <View
+    <TouchableOpacity
       style={[
         styles.container,
-        status === "unread" && styles.unreadNotification, // Highlight unread notifications
+        status === "unread" && styles.unreadNotification,
       ]}
+      activeOpacity={0.8}
+      onPress={handlePress}
     >
       <Icon name={iconName} size={24} color="#4E72E3" style={styles.icon} />
       <View style={styles.contentContainer}>
         <View style={styles.headerContainer}>
-          <Text style={styles.title}>{title}</Text>
+          <Text style={[styles.title, status === "unread" && styles.unreadTitle]}>
+            {title}
+          </Text>
           <Text style={styles.time}>{time}</Text>
         </View>
-        <Text style={styles.message}>{message}</Text>
+        <Text style={[styles.message, status === "unread" && styles.unreadMessage]}>
+          {message}
+        </Text>
       </View>
-    </View>
+      {status === "unread" && (
+        <View style={styles.unreadBadge}>
+          <Text style={styles.unreadBadgeText}>New</Text>
+        </View>
+      )}
+    </TouchableOpacity>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
+    padding: 16,
+    marginBottom: 8,
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   icon: {
     marginRight: 12,
@@ -43,8 +67,10 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: "bold",
     color: "#333",
+  },
+  unreadTitle: {
+    fontWeight: "bold",
   },
   time: {
     fontSize: 12,
@@ -54,8 +80,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
   },
+  unreadMessage: {
+    color: "#444",
+  },
   unreadNotification: {
-    backgroundColor: "#cee8ff", // Light blue background for unread
+    backgroundColor: "#f0f7ff",
+    borderLeftWidth: 3,
+    borderLeftColor: "#4E72E3",
+  },
+  unreadBadge: {
+    backgroundColor: "#FF4B26",
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginLeft: 8,
+  },
+  unreadBadgeText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "bold",
   },
 });
 

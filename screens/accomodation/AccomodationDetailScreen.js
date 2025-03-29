@@ -23,7 +23,7 @@ import { useGetAccommodationTypeByIdQuery } from "../../api/accommodationTypeApi
 const AccomodationDetailScreen = ({ route, navigation }) => {
   const { accommodationTypeId } = route.params;
   const { data, isLoading, isError } = useGetAccommodationTypeByIdQuery(accommodationTypeId);
-  
+
   const [activeTab, setActiveTab] = useState(0);
   const [isImageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -57,22 +57,30 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
   const accommodationType = data.data;
   const rentalLocation = accommodationType.rentalLocationId || {};
 
+  const allServices = accommodationType.serviceIds?.map(service => service.name) || [];
+
   const accommodationTypeData = {
     id: accommodationType._id,
     name: accommodationType.name,
     location: rentalLocation.name || "Unknown location",
     price: accommodationType.basePrice,
+    overtimePrice: accommodationType.overtimeHourlyPrice,
     priceUnit: "h",
-    rating: "4.5", 
-    reviewCount: "12", 
-    images: accommodationType.image?.map((img, index) => ({
-      id: `img-${index}`,
-      source: { uri: img }
-    })) || [],
-    amenities: accommodationType.serviceIds?.map(service => service.name) || [],
+    rating: "4.5",
+    reviewCount: "12",
+    images: accommodationType.image?.length > 0
+      ? accommodationType.image.map((img, index) => ({
+        id: `img-${index}`,
+        source: { uri: img }
+      }))
+      : [{
+        id: 'default-img',
+        source: require("../../assets/images/banner.png")
+      }],
+    amenities: allServices || [],
     description: accommodationType.description || "No description available",
     maxPeople: accommodationType.maxPeopleNumber,
-    reviews: [ 
+    reviews: [
       {
         userName: "John Doe",
         rating: 5,
@@ -90,7 +98,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
   const openGalleryModal = (index) => {
     const imageSet = accommodationTypeData.images
       .map((img) => ({
-        uri: img?.source ? img.source.uri : "",
+        uri: img?.source?.uri || img.source,
       }))
       .filter((img) => img.uri);
     setCurrentImageSet(imageSet);
@@ -137,19 +145,14 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
 
   const renderMainInfo = () => (
     <View style={styles.mainInfo}>
-      {accommodationTypeData.images.length > 0 ? (
-        <TouchableOpacity onPress={() => openSingleImageModal(accommodationTypeData.images[0].source.uri)}>
-          <Image
-            source={{ uri: accommodationTypeData.images[0].source.uri }}
-            style={styles.mainImage}
-          />
-        </TouchableOpacity>
-      ) : (
+      <TouchableOpacity onPress={() => openSingleImageModal(accommodationTypeData.images[0].source)}>
         <Image
-          source={require("../../assets/images/banner.png")}
+          source={typeof accommodationTypeData.images[0].source === 'string'
+            ? { uri: accommodationTypeData.images[0].source }
+            : accommodationTypeData.images[0].source}
           style={styles.mainImage}
         />
-      )}
+      </TouchableOpacity>
       <View style={styles.infoContainer}>
         <View style={styles.accommodationTypeHeader}>
           <Text style={styles.accommodationTypeName}>{accommodationTypeData.name}</Text>
@@ -157,6 +160,18 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
         </View>
         <View style={styles.priceContainer}>
           <Text style={styles.priceText}>{`${accommodationTypeData.price}đ/${accommodationTypeData.priceUnit}`}</Text>
+        </View>
+        <View style={styles.detailRow}>
+          <MaterialIcons name="access-time" size={20} color="#4e72e3" />
+          <Text style={styles.detailText}>
+            Giá overtime: {accommodationTypeData.overtimePrice}đ/giờ
+          </Text>
+        </View>
+        <View style={styles.detailRow}>
+          <MaterialIcons name="people" size={20} color="#4e72e3" />
+          <Text style={styles.detailText}>
+            Số người tối đa: {accommodationTypeData.maxPeople}
+          </Text>
         </View>
         <View style={styles.reviewContainer}>
           <MaterialIcons name="star" size={20} color="#ffc907" />
@@ -185,13 +200,6 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
       )}
     </View>
   );
-
-  // const renderLocation = () => (
-  //   <View style={styles.locationSection}>
-  //     <Text style={styles.sectionTitle}>Location</Text>
-  //     <MapWithPopup />
-  //   </View>
-  // );
 
   const renderTabs = () => {
     const tabs = ["Chi tiết", "Ảnh", "Đánh giá"];
@@ -246,7 +254,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
             ]}
           >
             <Image
-              source={{ uri: item.source.uri }}
+              source={typeof item.source === 'string' ? { uri: item.source } : item.source}
               style={[styles.gridImage, { width: imageWidth, height: imageWidth }]}
               resizeMode="cover"
             />
@@ -319,7 +327,6 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
           <ScrollView>
             <Text style={styles.descriptionText}>{accommodationTypeData.description}</Text>
             {renderAmenities()}
-            {/* {renderLocation()} */}
           </ScrollView>
         );
       case 1:
@@ -608,6 +615,15 @@ const styles = StyleSheet.create({
   amenityText: {
     color: "#374151",
     fontSize: 14,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  detailText: {
+    marginLeft: 8,
+    color: '#555',
   },
 });
 
