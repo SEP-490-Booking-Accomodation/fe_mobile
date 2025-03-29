@@ -13,7 +13,7 @@ const filters = ["Tất cả", "Gợi ý ", "Yêu thích ", "Phổ biến ", "G�
 
 export default function LocationList({ rentalData, onViewAllPress }) {
   const [selectedFilterIndex, setSelectedFilterIndex] = useState(0);
-  // console.log(rentalData);
+  console.log(rentalData);
 
   const rentalDisplay = rentalData.data.map((item) => ({
     id: item._id,
@@ -32,6 +32,8 @@ export default function LocationList({ rentalData, onViewAllPress }) {
     district: item.district,
     city: item.city,
     location: `${item.address}, ${item.ward}, ${item.district}, ${item.city}`,
+    ratingPoint: item.averageRating,
+    numberOfReview: item.totalFeedbacks,
   }));
 
   return (
@@ -62,7 +64,7 @@ export default function LocationList({ rentalData, onViewAllPress }) {
       <ScrollView style={styles.paddingVerticalCard}>
         {rentalDisplay.map((item) => (
           <VerticalCard
-            key={item._id}
+            key={item.id}
             {...item}
             onFavouritePress={(isFav) =>
               console.log(
@@ -70,7 +72,7 @@ export default function LocationList({ rentalData, onViewAllPress }) {
                 item.placeName
               )
             }
-            onCardPress={() => onLocationPress(item._id)} 
+            onCardPress={() => onLocationPress(item._id)}
           />
         ))}
       </ScrollView>
