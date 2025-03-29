@@ -193,6 +193,16 @@ const MessageStack = () => (
   </Stack.Navigator>
 );
 
+// MapMap STACK
+const MapStack = () => (
+  <Stack.Navigator>
+    <Stack.Screen
+      name="MapScreen"
+      component={MapScreen}
+      options={{ title: "Bản đồ" }}
+    />
+  </Stack.Navigator>
+);
 //Setting Stack
 const SettingStack = () => (
   <Stack.Navigator>
@@ -316,7 +326,7 @@ const MainTabNavigator = () => {
       />
       <Tab.Screen
         name="Map"
-        component={MapScreen}
+        component={MapStack}
         options={{
           headerShown: false,
           tabBarIcon: ({ color }) => (
@@ -330,7 +340,7 @@ const MainTabNavigator = () => {
                   <Ionicons name="map" size={24} color={color} />
                 ),
               }}
-              onPress={() => navigation.navigate("Map")}
+              // onPress={() => navigation.navigate("Map")}
             />
           ),
         }}
