@@ -17,7 +17,7 @@ import HeaderLNA from "./HeaderLNA";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/authSlice";
 import { useGetUserQuery } from "../../api/authApi";
-import { useGetAllRentalQuery } from "../../api/rentalLocationApi";
+import { useGetAllRentalQuery, useGetRentalByIdQuery } from "../../api/rentalLocationApi";
 
 const cities = [
   "Hà Nội",
@@ -63,7 +63,12 @@ export default function HomeScreen() {
 
     setRefreshing(false); // Kết thúc trạng thái tải lại
   };
-
+  const handleLocationPress = (locationId) => {
+    console.log("Navigating with locationId:", locationId); 
+    navigation.navigate("DetailRentalLocation", { 
+      locationId: locationId 
+    });
+  };
   useEffect(() => {
     const getLocation = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -127,7 +132,7 @@ export default function HomeScreen() {
           authData={authData}
           onLoginPress={() => navigation.navigate("Auth")}
           displayUser={displayUser}
-          // onLocationPress={() => setModalVisible(true)}
+        // onLocationPress={() => setModalVisible(true)}
         />
 
         <ScrollView
@@ -155,11 +160,12 @@ export default function HomeScreen() {
           {loading ? (
             <Text>Loading</Text>
           ) : (
-            <LocationList
-              rentalData={rental}
-              onViewAllPress={() => navigation.navigate("SearchResult")}
-            />
-          )}
+          <LocationList
+            rentalData={rental}
+            onLocationPress={handleLocationPress}
+            onViewAllPress={() => navigation.navigate("SearchResult")}
+          />
+          )}  
         </ScrollView>
       </>
       {/* <Modal transparent={true} visible={modalVisible} animationType="slide">
