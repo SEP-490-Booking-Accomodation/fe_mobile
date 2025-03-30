@@ -183,7 +183,7 @@ const MessageStack = () => (
     <Stack.Screen
       name="MessagesScreen"
       component={MessagesScreen}
-      options={{ title: "Nhắn tin" }}
+      options={{headerShown: false}}
     />
     <Stack.Screen
       name="Chat"

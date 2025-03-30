@@ -19,7 +19,7 @@ import CustomInput from "../../components/TextInput";
 import { useLazyGetUserQuery, useLoginMutation } from "../../api/authApi";
 import { loginSuccess, logout } from "../../redux/authSlice";
 import { useLazyGetRoleByIdQuery } from "../../api/roleApi";
-
+import { ensureUserInDatabase } from "../../lib/supabase";
 const LoginScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
