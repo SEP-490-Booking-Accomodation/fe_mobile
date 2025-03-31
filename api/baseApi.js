@@ -22,7 +22,8 @@ export const baseApi = createApi({
     "PolicySystem",
     "RentalLocation",
     "AccommodationType",
-    "Notification"
+    "Booking",
+    "Notification",
   ],
   endpoints: () => ({}),
 });

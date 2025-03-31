@@ -41,6 +41,8 @@ export default function HomeScreen() {
   const [manualCity, setManualCity] = useState(null);
   const authData = useSelector((state) => state.auth);
   const userId = authData.userId;
+  console.log(userId);
+
   const { data: user, refetch: refetchUser } = useGetUserQuery(userId);
   const { data: rental, refetch: refetchRental } = useGetAllRentalQuery();
   const [displayUser, setDisplayUser] = useState(null);
@@ -109,13 +111,13 @@ export default function HomeScreen() {
   useEffect(() => {
     if (rental) {
       setLoading(false);
-      // setDisplayUser({
-      //   name: user.getUser.fullName || "Guest",
-      //   email: user.getUser.email || "guest@example.com",
-      //   avatar:
-      //     user.getUser.avatarUrl?.[0] ||
-      //     `https://ui-avatars.com/api/?name=${user.getUser.fullName}&background=random`,
-      // });
+      setDisplayUser({
+        name: user?.getUser.fullName || "Guest",
+        email: user?.getUser.email || "guest@example.com",
+        avatar:
+          user?.getUser?.avatarUrl?.[0] ||
+          `https://ui-avatars.com/api/?name=${user.getUser.fullName}&background=random`,
+      });
     } else {
       setLoading(true);
     }

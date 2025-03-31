@@ -1,7 +1,7 @@
 import baseApi from "./baseApi";
 
 export const authApi = baseApi.injectEndpoints({
-  overrideExisting: true, // Thêm dòng này
+  overrideExisting: true,
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({

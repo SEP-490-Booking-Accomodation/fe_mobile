@@ -13,7 +13,7 @@ const filters = ["Tất cả", "Gợi ý ", "Yêu thích ", "Phổ biến ", "G�
 
 export default function LocationList({ rentalData, onViewAllPress }) {
   const [selectedFilterIndex, setSelectedFilterIndex] = useState(0);
-  console.log(rentalData);
+  // console.log(rentalData);
 
   const rentalDisplay = rentalData.data.map((item) => ({
     id: item._id,
