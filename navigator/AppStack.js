@@ -53,6 +53,7 @@ import FavouriteList from "../screens/profile/childPage/FavouriteList";
 import HistoryScreen from "../screens/profile/childPage/HistoryScreen";
 import RatingHistory from "../screens/profile/childPage/RatingHistory";
 import TicketList from "../screens/ticket/TicketList";
+import BookingInformation from "../screens/booking/BookingInformation";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -69,6 +70,7 @@ const hideTabBarScreens = [
   "DetailAccomodation",
   "ConfirmBooking",
   "PaymentConfirm",
+  "BookingInformation",
   "PaymentSuccess",
   "Chat",
   "Policies",
@@ -128,6 +130,11 @@ const HomeStack = () => (
     <Stack.Screen
       name="DetailAccomodation"
       component={AccomodationDetailScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="BookingInformation"
+      component={BookingInformation}
       options={{ headerShown: false }}
     />
     <Stack.Screen

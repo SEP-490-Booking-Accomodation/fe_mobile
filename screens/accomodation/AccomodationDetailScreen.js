@@ -116,7 +116,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
       );
       return;
     }
-    navigation.navigate("ConfirmBooking", {
+    navigation.navigate("BookingInformation", {
       accommodationTypeData: data,
       rentalData: rentalData,
     });

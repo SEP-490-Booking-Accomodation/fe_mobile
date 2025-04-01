@@ -37,6 +37,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     isLoading,
     isError,
   } = useGetAllAccommodationTypeOfRentalLocationQuery(locationId);
+
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedServices, setSelectedServices] = useState([]);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
