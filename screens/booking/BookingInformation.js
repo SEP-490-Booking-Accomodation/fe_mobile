@@ -103,7 +103,7 @@ export default function BookingInformation({ route, navigation }) {
 
   const formatDate = useCallback((date) => {
     if (!date) return "";
-    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
   }, []);
 
   const formatTime = useCallback((date) => {

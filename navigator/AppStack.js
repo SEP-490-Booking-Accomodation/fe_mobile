@@ -41,6 +41,7 @@ import MessagesScreen from "../screens/chat/MessagesScreen";
 import ChatScreen from "../screens/chat/ChatScreen";
 import ConfirmBooking from "../screens/booking/ConfirmBooking";
 import PaymentConfirm from "../screens/payment/PaymentConfirm";
+import BookingDetail from "../screens/booking/BookingDetail";
 import PaymentSuccess from "../screens/payment/PaymentSuccess";
 import WalletScreen from "../screens/profile/childPage/WalletScreen";
 import PaymentMethod from "../screens/payment/PaymentMethod";
@@ -71,6 +72,7 @@ const hideTabBarScreens = [
   "ConfirmBooking",
   "PaymentConfirm",
   "BookingInformation",
+  "BookingDetail",
   "PaymentSuccess",
   "Chat",
   "Policies",
@@ -145,6 +147,11 @@ const HomeStack = () => (
     <Stack.Screen
       name="PaymentConfirm"
       component={PaymentConfirm}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="BookingDetail"
+      component={BookingDetail}
       options={{ headerShown: false }}
     />
     <Stack.Screen

@@ -111,13 +111,21 @@ export default function HomeScreen() {
   useEffect(() => {
     if (rental) {
       setLoading(false);
-      setDisplayUser({
-        name: user?.getUser.fullName || "Guest",
-        email: user?.getUser.email || "guest@example.com",
-        avatar:
-          user?.getUser?.avatarUrl?.[0] ||
-          `https://ui-avatars.com/api/?name=${user.getUser.fullName}&background=random`,
-      });
+      if (user && user.getUser) {
+        setDisplayUser({
+          name: user.getUser.fullName || "Guest",
+          email: user.getUser.email || "guest@example.com",
+          avatar:
+            user.getUser.avatarUrl?.[0] ||
+            `https://ui-avatars.com/api/?name=${user.getUser.fullName}&background=random`,
+        });
+      } else {
+        setDisplayUser({
+          name: "Guest",
+          email: "guest@example.com",
+          avatar: "https://ui-avatars.com/api/?name=Guest&background=random",
+        });
+      }
     } else {
       setLoading(true);
     }

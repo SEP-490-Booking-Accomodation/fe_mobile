@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Provider, useDispatch } from "react-redux";
 import { NavigationContainer } from "@react-navigation/native";
-import { Alert, StatusBar } from "react-native";
+import { Alert, Linking, StatusBar } from "react-native";
 import { AsyncStorageProvider } from "./context/AsyncStorageContext";
 import AppStack from "./navigator/AppStack";
 import { StripeProvider } from "@stripe/stripe-react-native";
@@ -14,6 +14,50 @@ import dayjs from "dayjs";
 import { useRefreshTokenWithParamMutation } from "./api/authApi";
 
 export default function App() {
+  useEffect(() => {
+    // Xử lý deep link khi ứng dụng đang chạy
+    const subscription = Linking.addEventListener("url", handleDeepLink);
+
+    // Kiểm tra nếu ứng dụng được mở bằng deep link
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleDeepLink({ url });
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  const handleDeepLink = ({ url }) => {
+    if (url) {
+      // Phân tích URL để lấy thông tin từ callback
+      const route = url.replace(/.*?:\/\//g, "");
+
+      // Kiểm tra nếu đây là callback thanh toán
+      if (route.includes("payment/callback")) {
+        const params = route.split("?")[1];
+
+        if (params) {
+          const paramsObj = params.split("&").reduce((prev, curr) => {
+            const [key, value] = curr.split("=");
+            prev[key] = value;
+            return prev;
+          }, {});
+
+          // Xử lý theo trạng thái thanh toán
+          if (paramsObj.status === "success") {
+            // Hiển thị thông báo hoàn thành thanh toán
+            Alert.alert("Thành công", "Thanh toán hoàn tất!");
+
+            // Cập nhật lại dữ liệu đặt phòng nếu cần
+            // Có thể dispatch một action để refresh dữ liệu đặt phòng
+          }
+        }
+      }
+    }
+  };
   return (
     <Provider store={store}>
       <StripeProvider publishableKey={STRIPE_PUBLIC_KEY}>
@@ -69,7 +113,7 @@ const AuthLoader = () => {
           console.log("Token còn hạn sử dụng.");
         }
       } catch (error) {
-        console.error("Lỗi khi decode token:", error);
+        // console.error("Lỗi khi decode token:", error);
         Alert.alert("Phiên đăng nhập hết hạn");
         dispatch(logout());
       }
