@@ -1,13 +1,19 @@
-import { StyleSheet, Text, SafeAreaView, ScrollView, RefreshControl } from "react-native"
-import { useEffect, useState } from "react"
-import { useNavigation } from "@react-navigation/native"
-import * as Location from "expo-location"
-import LocationList from "./LocationList"
-import SearchField from "./SearchField"
-import HeaderLNA from "./HeaderLNA"
-import { useSelector } from "react-redux"
-import { useGetUserQuery } from "../../api/authApi"
-import { useGetAllRentalQuery } from "../../api/rentalLocationApi"
+import {
+  StyleSheet,
+  Text,
+  SafeAreaView,
+  ScrollView,
+  RefreshControl,
+} from "react-native";
+import { useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import * as Location from "expo-location";
+import LocationList from "./LocationList";
+import SearchField from "./SearchField";
+import HeaderLNA from "./HeaderLNA";
+import { useSelector } from "react-redux";
+import { useGetUserQuery } from "../../api/authApi";
+import { useGetAllRentalQuery } from "../../api/rentalLocationApi";
 
 const cities = [
   "Hà Nội",
@@ -25,92 +31,105 @@ const cities = [
   "Hạ Long",
   "Vinh",
   "Pleiku",
-]
+];
 
 export default function HomeScreen() {
-  const navigation = useNavigation()
-  const [location, setLocation] = useState("Đang lấy vị trí")
-  const [address, setAddress] = useState(null)
-  const [errorMsg, setErrorMsg] = useState(null)
-  const [manualCity, setManualCity] = useState(null)
-  const authData = useSelector((state) => state.auth)
-  const userId = authData.userId
-  const { data: user, refetch: refetchUser } = useGetUserQuery(userId)
-  const { data: rental, refetch: refetchRental } = useGetAllRentalQuery()
-  const [displayUser, setDisplayUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
+  const navigation = useNavigation();
+  const [location, setLocation] = useState("Đang lấy vị trí");
+  const [address, setAddress] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [manualCity, setManualCity] = useState(null);
+  const authData = useSelector((state) => state.auth);
+  const userId = authData.userId;
+  console.log(userId);
+
+  const { data: user, refetch: refetchUser } = useGetUserQuery(userId);
+  const { data: rental, refetch: refetchRental } = useGetAllRentalQuery();
+  const [displayUser, setDisplayUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = async () => {
-    setRefreshing(true)
+    setRefreshing(true);
     try {
-      await refetchUser()
-      await refetchRental()
+      await refetchUser();
+      await refetchRental();
     } catch (error) {
-      console.error("Lỗi tải lại dữ liệu:", error)
+      console.error("Lỗi tải lại dữ liệu:", error);
     }
 
-    setRefreshing(false)
-  }
-  
+    setRefreshing(false);
+  };
+
   const handleLocationPress = (locationId) => {
-    console.log("Navigating with locationId:", locationId)
-    
+    console.log("Navigating with locationId:", locationId);
+
     // Find the rental data by locationId
-    const selectedRental = rental?.data?.find(item => item._id === locationId)
-    
+    const selectedRental = rental?.data?.find(
+      (item) => item._id === locationId
+    );
+
     if (selectedRental) {
       navigation.navigate("DetailRentalLocation", {
         rentalData: selectedRental,
-        previousScreen: "Home"
-      })
+        previousScreen: "Home",
+      });
     } else {
-      console.error("Không tìm thấy dữ liệu cho locationId:", locationId)
+      console.error("Không tìm thấy dữ liệu cho locationId:", locationId);
     }
-  }
-  
+  };
+
   useEffect(() => {
     const getLocation = async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync()
+      const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        setErrorMsg("Quyền truy cập vị trí đã bị từ chối.")
-        return
+        setErrorMsg("Quyền truy cập vị trí đã bị từ chối.");
+        return;
       }
 
       try {
-        const currentLocation = await Location.getCurrentPositionAsync({})
-        setLocation(currentLocation.coords)
+        const currentLocation = await Location.getCurrentPositionAsync({});
+        setLocation(currentLocation.coords);
 
         const geocode = await Location.reverseGeocodeAsync({
           latitude: currentLocation.coords.latitude,
           longitude: currentLocation.coords.longitude,
-        })
+        });
 
         if (geocode.length > 0) {
-          const place = geocode[0]
-          setAddress(`${place.city || ""}, ${place.region || ""}`)
+          const place = geocode[0];
+          setAddress(`${place.city || ""}, ${place.region || ""}`);
         }
       } catch (error) {
-        setErrorMsg("Không thể lấy thông tin địa điểm.")
+        setErrorMsg("Không thể lấy thông tin địa điểm.");
       }
-    }
+    };
 
-    getLocation()
-  }, [])
+    getLocation();
+  }, []);
 
   useEffect(() => {
-    if (user && rental) {
-      setLoading(false)
-      setDisplayUser({
-        name: user.getUser.fullName || "Guest",
-        email: user.getUser.email || "guest@example.com",
-        avatar:
-          user.getUser.avatarUrl?.[0] || `https://ui-avatars.com/api/?name=${user.getUser.fullName}&background=random`,
-      })
+    if (rental) {
+      setLoading(false);
+      if (user && user.getUser) {
+        setDisplayUser({
+          name: user.getUser.fullName || "Guest",
+          email: user.getUser.email || "guest@example.com",
+          avatar:
+            user.getUser.avatarUrl?.[0] ||
+            `https://ui-avatars.com/api/?name=${user.getUser.fullName}&background=random`,
+        });
+      } else {
+        setDisplayUser({
+          name: "Guest",
+          email: "guest@example.com",
+          avatar: "https://ui-avatars.com/api/?name=Guest&background=random",
+        });
+      }
     } else {
-      setLoading(true)
+      setLoading(true);
     }
-  }, [user, rental])
+  }, [user, rental]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -120,7 +139,9 @@ export default function HomeScreen() {
           onNotificationPress={() => navigation.navigate("NotificationScreen")}
           onAvatarPress={() => navigation.navigate("ProfileScreen")}
           notificationCount={2}
-          avatarSource={"https://i.pinimg.com/236x/0d/85/e4/0d85e4a8cd465ac49c265e29af5e53e8.jpg"}
+          avatarSource={
+            "https://i.pinimg.com/236x/0d/85/e4/0d85e4a8cd465ac49c265e29af5e53e8.jpg"
+          }
           authData={authData}
           onLoginPress={() => navigation.navigate("Auth")}
           displayUser={displayUser}
@@ -158,7 +179,7 @@ export default function HomeScreen() {
           )}
         </ScrollView>
       </>
-       {/* <Modal transparent={true} visible={modalVisible} animationType="slide">
+      {/* <Modal transparent={true} visible={modalVisible} animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Chọn thành phố</Text>
@@ -189,7 +210,7 @@ export default function HomeScreen() {
         </View>
       </Modal> */}
     </SafeAreaView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -259,4 +280,4 @@ const styles = StyleSheet.create({
     color: "#fff",
     letterSpacing: 0.5,
   },
-})
+});

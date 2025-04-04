@@ -3,26 +3,28 @@ import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import PropTypes from "prop-types";
 import { useNavigation } from "@react-navigation/native";
-
 export default function VerticalCard({
   id,
   imageUrl,
   openHour = "00:00",
   closeHour = "23:59",
   placeName = "Địa điểm chưa xác định",
-  minPrice = "0",
-  maxPrice = "0",
+  minPrice = 0,
+  maxPrice = 0,
   status = 0,
   location = "Không rõ",
   isOverNight = false,
-  ratingPoint = "0",
-  numberOfReview = "0",
+  ratingPoint = 0,
+  numberOfReview = 0,
   initFavourite = false,
   onFavouritePress = () => {},
   // onCardPress = () => {},
 }) {
+  const loadingGif = "https://i.gifer.com/XOsX.gif";
   const [isFavourite, setIsFavourite] = useState(initFavourite);
   const navigate = useNavigation();
+  const [isLoading, setIsLoading] = useState(true); // Trạng thái tải ảnh
+
   const handleFavouritePress = () => {
     const newValue = !isFavourite;
     setIsFavourite(newValue);
@@ -42,10 +44,19 @@ export default function VerticalCard({
     >
       {/* Image Section */}
       <View style={styles.imageContainer}>
+        {isLoading && (
+          <Image
+            source={{ uri: loadingGif }}
+            style={styles.image}
+            resizeMode="contain"
+          />
+        )}
         <Image
           source={{ uri: imageUrl }}
-          style={styles.image}
+          style={[styles.image, isLoading ? styles.hidden : {}]}
           resizeMode="cover"
+          onLoad={() => setIsLoading(false)}
+          onError={() => setIsLoading(false)} // Nếu lỗi, ẩn GIF
         />
         {/* Favourite Button */}
         <TouchableOpacity
@@ -119,11 +130,11 @@ VerticalCard.propTypes = {
   openHour: PropTypes.string,
   closeHour: PropTypes.string,
   placeName: PropTypes.string,
-  minPrice: PropTypes.string,
-  maxPrice: PropTypes.string,
+  minPrice: PropTypes.number,
+  maxPrice: PropTypes.number,
   location: PropTypes.string,
-  ratingPoint: PropTypes.string,
-  numberOfReview: PropTypes.string,
+  ratingPoint: PropTypes.number,
+  numberOfReview: PropTypes.number,
   initFavourite: PropTypes.bool,
   onFavouritePress: PropTypes.func,
   onCardPress: PropTypes.func,

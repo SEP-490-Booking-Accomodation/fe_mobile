@@ -25,13 +25,15 @@ export default function LocationList({ rentalData, onViewAllPress }) {
     placeName: item.name,
     isOverNight: item.isOverNight,
     status: item.status,
-    minPrice: item.minPrice,
-    maxPrice: item.maxPrice,
+    minPrice: item.minPrice || 0,
+    maxPrice: item.maxPrice || 0,
     address: item.address,
     ward: item.ward,
     district: item.district,
     city: item.city,
     location: `${item.address}, ${item.ward}, ${item.district}, ${item.city}`,
+    ratingPoint: item.averageRating,
+    numberOfReview: item.totalFeedbacks,
   }));
 
   return (
@@ -62,7 +64,7 @@ export default function LocationList({ rentalData, onViewAllPress }) {
       <ScrollView style={styles.paddingVerticalCard}>
         {rentalDisplay.map((item) => (
           <VerticalCard
-            key={item._id}
+            key={item.id}
             {...item}
             onFavouritePress={(isFav) =>
               console.log(
@@ -70,7 +72,7 @@ export default function LocationList({ rentalData, onViewAllPress }) {
                 item.placeName
               )
             }
-            onCardPress={() => onLocationPress(item._id)} 
+            onCardPress={() => onLocationPress(item._id)}
           />
         ))}
       </ScrollView>

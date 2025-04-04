@@ -1,8 +1,23 @@
-import { useState } from "react"
-import { View, Text, Modal, StyleSheet, TouchableOpacity } from "react-native"
-import { Minus, Plus } from "lucide-react-native"
+import { useState } from "react";
+import {
+  View,
+  Text,
+  Modal,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
+import { Minus, Plus } from "lucide-react-native";
 
-const GuestCounter = ({ title, subtitle, value, onIncrement, onDecrement }) => (
+const GuestCounter = ({
+  title,
+  subtitle,
+  value,
+  onIncrement,
+  onDecrement,
+  maxValue,
+}) => (
   <View style={styles.counterContainer}>
     <View style={styles.counterInfo}>
       <Text style={styles.counterTitle}>{title}</Text>
@@ -10,69 +25,178 @@ const GuestCounter = ({ title, subtitle, value, onIncrement, onDecrement }) => (
     </View>
     <View style={styles.counterControls}>
       <TouchableOpacity
-        style={[styles.counterButton, value === 0 && styles.counterButtonDisabled]}
+        style={[
+          styles.counterButton,
+          value === 0 && styles.counterButtonDisabled,
+        ]}
         onPress={onDecrement}
         disabled={value === 0}
       >
         <Minus size={24} color={value === 0 ? "#ccc" : "#000"} />
       </TouchableOpacity>
       <Text style={styles.counterValue}>{value}</Text>
-      <TouchableOpacity style={styles.counterButton} onPress={onIncrement}>
-        <Plus size={24} color="#000" />
+      <TouchableOpacity
+        style={[
+          styles.counterButton,
+          value === maxValue && styles.counterButtonDisabled,
+        ]}
+        onPress={onIncrement}
+        disabled={value === maxValue}
+      >
+        <Plus size={24} color={value === maxValue ? "#ccc" : "#000"} />
       </TouchableOpacity>
     </View>
   </View>
-)
+);
 
-const GuestSelectionModal = ({ visible, onClose, onConfirm }) => {
-  const [adults, setAdults] = useState(0)
-  const [children, setChildren] = useState(0)
-  const [infants, setInfants] = useState(0)
+const GuestSelectionModal = ({
+  visible,
+  onClose,
+  onConfirm,
+  maxPeople = 3,
+}) => {
+  const [adults, setAdults] = useState(0);
+  const [children, setChildren] = useState(0);
+  const [infants, setInfants] = useState(0);
+
+  const totalCount = adults + children + infants;
+  const isAtMaxCapacity = totalCount >= maxPeople;
+
+  const handleIncrement = (type) => {
+    if (isAtMaxCapacity) return;
+    switch (type) {
+      case "adults":
+        setAdults(adults + 1);
+        break;
+      case "children":
+        setChildren(children + 1);
+        break;
+      case "infants":
+        setInfants(infants + 1);
+        break;
+    }
+  };
+
+  const handleDecrement = (type) => {
+    switch (type) {
+      case "adults":
+        setAdults(Math.max(adults - 1, 0));
+        break;
+      case "children":
+        setChildren(Math.max(children - 1, 0));
+        break;
+      case "infants":
+        setInfants(Math.max(infants - 1, 0));
+        break;
+    }
+  };
 
   const handleConfirm = () => {
-    onConfirm({ adults, children, infants })
-    onClose()
-  }
+    onConfirm({ adults, children, infants });
+    onClose();
+  };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Số lượng người ở phòng</Text>
-          <Text style={styles.modalSubtitle}>Tối đa 2 người lớn, 1 trẻ em</Text>
+    // <Modal
+    //   visible={visible}
+    //   animationType="slide"
+    //   transparent
+    //   onRequestClose={onClose}
+    // >
+    //   <View style={styles.modalOverlay}>
+    //     <View style={styles.modalContent}>
+    //       <Text style={styles.modalTitle}>Số lượng người ở phòng</Text>
+    //       <Text style={styles.modalSubtitle}>Tối đa {maxPeople} người</Text>
 
-          <GuestCounter
-            title="Người lớn"
-            subtitle="Từ 18 tuổi trở lên"
-            value={adults}
-            onIncrement={() => setAdults(Math.min(adults + 1, 2))}
-            onDecrement={() => setAdults(Math.max(adults - 1, 0))}
-          />
+    //       <GuestCounter
+    //         title="Người lớn"
+    //         subtitle="Từ 18 tuổi trở lên"
+    //         value={adults}
+    //         onIncrement={() => handleIncrement("adults")}
+    //         onDecrement={() => handleDecrement("adults")}
+    //         maxValue={maxPeople - children - infants}
+    //       />
+    //       <GuestCounter
+    //         title="Trẻ em"
+    //         subtitle="Từ 2 đến 17 tuổi"
+    //         value={children}
+    //         onIncrement={() => handleIncrement("children")}
+    //         onDecrement={() => handleDecrement("children")}
+    //         maxValue={maxPeople - adults - infants}
+    //       />
+    //       {/* <GuestCounter
+    //         title="Trẻ sơ sinh"
+    //         subtitle="Dưới 2 tuổi"
+    //         value={infants}
+    //         onIncrement={() => handleIncrement("infants")}
+    //         onDecrement={() => handleDecrement("infants")}
+    //         maxValue={maxPeople - adults - children}
+    //       /> */}
 
-          <GuestCounter
-            title="Trẻ em"
-            subtitle="Từ 2 đến 17 tuổi"
-            value={children}
-            onIncrement={() => setChildren(Math.min(children + 1, 1))}
-            onDecrement={() => setChildren(Math.max(children - 1, 0))}
-          />
+    //       {isAtMaxCapacity && (
+    //         <Text style={styles.maxCapacityWarning}>
+    //           Đã đạt giới hạn số người tối đa ({maxPeople})
+    //         </Text>
+    //       )}
 
-          <GuestCounter
-            title="Trẻ sơ sinh"
-            subtitle="Dưới 2 tuổi"
-            value={infants}
-            onIncrement={() => setInfants(infants + 1)}
-            onDecrement={() => setInfants(Math.max(infants - 1, 0))}
-          />
+    //       <TouchableOpacity
+    //         style={styles.confirmButton}
+    //         onPress={handleConfirm}
+    //       >
+    //         <Text style={styles.confirmButtonText}>Tiếp tục</Text>
+    //       </TouchableOpacity>
+    //     </View>
+    //   </View>
+    // </Modal>
+    <Modal
+      visible={visible}
+      animationType="fade"
+      transparent
+      onRequestClose={onClose}
+    >
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Số lượng người ở phòng</Text>
+              <Text style={styles.modalSubtitle}>Tối đa {maxPeople} người</Text>
 
-          <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
-            <Text style={styles.confirmButtonText}>Tiếp tục</Text>
-          </TouchableOpacity>
+              <GuestCounter
+                title="Người lớn"
+                subtitle="Từ 18 tuổi trở lên"
+                value={adults}
+                onIncrement={() => handleIncrement("adults")}
+                onDecrement={() => handleDecrement("adults")}
+                maxValue={maxPeople - children - infants}
+              />
+              <GuestCounter
+                title="Trẻ em"
+                subtitle="Từ 2 đến 17 tuổi"
+                value={children}
+                onIncrement={() => handleIncrement("children")}
+                onDecrement={() => handleDecrement("children")}
+                maxValue={maxPeople - adults - infants}
+              />
+
+              {isAtMaxCapacity && (
+                <Text style={styles.maxCapacityWarning}>
+                  Đã đạt giới hạn số người tối đa ({maxPeople})
+                </Text>
+              )}
+
+              <TouchableOpacity
+                style={styles.confirmButton}
+                onPress={handleConfirm}
+              >
+                <Text style={styles.confirmButtonText}>Tiếp tục</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableWithoutFeedback>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   modalOverlay: {
@@ -85,7 +209,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
-    paddingBottom: 34,
   },
   modalTitle: {
     fontSize: 24,
@@ -95,7 +218,6 @@ const styles = StyleSheet.create({
   modalSubtitle: {
     fontSize: 16,
     color: "#666",
-    marginBottom: 24,
   },
   counterContainer: {
     flexDirection: "row",
@@ -120,7 +242,6 @@ const styles = StyleSheet.create({
   counterControls: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
   },
   counterButton: {
     width: 40,
@@ -151,7 +272,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-})
+  maxCapacityWarning: {
+    color: "#ff6b6b",
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 16,
+    fontWeight: "500",
+  },
+});
 
-export default GuestSelectionModal
-
+export default GuestSelectionModal;

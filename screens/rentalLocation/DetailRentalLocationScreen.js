@@ -19,20 +19,25 @@ import { useGetAllAccommodationTypeOfRentalLocationQuery } from "../../api/renta
 import { Button } from "react-native-elements";
 
 const DetailRentalLocationScreen = ({ route, navigation }) => {
-  console.log("Route params:", route.params);
+  // console.log("Route params:", route.params);
   const { rentalId: locationId } = route.params;
-  console.log("Extracted locationId:", locationId);
+  // console.log("Extracted locationId:", locationId);
 
   if (!locationId) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text>Không tìm thấy ID địa điểm</Text>
         <Button title="Quay lại" onPress={() => navigation.goBack()} />
       </View>
     );
   }
 
-  const { data: rentalData, isLoading, isError } = useGetAllAccommodationTypeOfRentalLocationQuery(locationId);
+  const {
+    data: rentalData,
+    isLoading,
+    isError,
+  } = useGetAllAccommodationTypeOfRentalLocationQuery(locationId);
+
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedServices, setSelectedServices] = useState([]);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -40,7 +45,9 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     const loadFavoriteStatus = async () => {
-      const favoriteStatus = await AsyncStorage.getItem(`favoriteStatus_${locationId}`);
+      const favoriteStatus = await AsyncStorage.getItem(
+        `favoriteStatus_${locationId}`
+      );
       if (favoriteStatus !== null) {
         setIsFavorite(JSON.parse(favoriteStatus));
       }
@@ -51,9 +58,9 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   useEffect(() => {
     if (rentalData?.data?.accommodationTypeIds?.data) {
       const services = new Set();
-      rentalData.data.accommodationTypeIds.data.forEach(accommodation => {
+      rentalData.data.accommodationTypeIds.data.forEach((accommodation) => {
         if (accommodation.serviceIds) {
-          accommodation.serviceIds.forEach(service => {
+          accommodation.serviceIds.forEach((service) => {
             services.add(service.name);
           });
         }
@@ -65,7 +72,10 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const toggleFavorite = async () => {
     const newStatus = !isFavorite;
     setIsFavorite(newStatus);
-    await AsyncStorage.setItem(`favoriteStatus_${locationId}`, JSON.stringify(newStatus));
+    await AsyncStorage.setItem(
+      `favoriteStatus_${locationId}`,
+      JSON.stringify(newStatus)
+    );
   };
 
   const handleMoreOptions = () => {
@@ -77,10 +87,13 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   };
 
   const handleCardPress = (accommodationType) => {
-  navigation.navigate("DetailAccomodation", { 
-    accommodationTypeId: accommodationType._id 
-  });
-};
+    console.log(accommodationType);
+
+    navigation.navigate("DetailAccomodation", {
+      accommodationTypeId: accommodationType._id,
+      rentalData: rentalData,
+    });
+  };
 
   if (isLoading) {
     return (
@@ -105,13 +118,14 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const rental = rentalData.data;
   const accommodationTypes = rental.accommodationTypeIds.data || [];
 
-  const filteredAccommodationTypes = selectedServices.length > 0
-    ? accommodationTypes.filter(accommodation =>
-      accommodation.serviceIds?.some(service =>
-        selectedServices.includes(service.name)
-      )
-    )
-    : accommodationTypes;
+  const filteredAccommodationTypes =
+    selectedServices.length > 0
+      ? accommodationTypes.filter((accommodation) =>
+          accommodation.serviceIds?.some((service) =>
+            selectedServices.includes(service.name)
+          )
+        )
+      : accommodationTypes;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -137,7 +151,9 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
         <ScrollView style={styles.container}>
           <View style={styles.headerContainer}>
             <Image
-              source={{ uri: rental.image?.[0] || "https://via.placeholder.com/300" }}
+              source={{
+                uri: rental.image?.[0] || "https://via.placeholder.com/300",
+              }}
               style={styles.headerImage}
             />
             <View style={styles.headerDetails}>
@@ -152,21 +168,22 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               <View style={styles.locationContainer}>
                 <Icon name="location-on" size={20} color="#4e72e3" />
                 <Text style={styles.locationText}>
-                  {rental.address}, {rental.ward}, {rental.district}, {rental.city}
+                  {rental.address}, {rental.ward}, {rental.district},{" "}
+                  {rental.city}
                 </Text>
               </View>
               <View style={styles.ratingContainer}>
                 <Icon name="star" size={20} color="#ffc907" />
-                <Text style={styles.ratingText}>
-                  4.5 (120 Reviews)
-                </Text>
+                <Text style={styles.ratingText}>4.5 (120 Reviews)</Text>
               </View>
               <Text style={styles.description}>
                 {isDescriptionExpanded
                   ? rental.description
                   : `${rental.description.slice(0, 90)}...`}
                 <TouchableOpacity
-                  onPress={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                  onPress={() =>
+                    setIsDescriptionExpanded(!isDescriptionExpanded)
+                  }
                   style={styles.readMoreContainer}
                 >
                   <Text style={styles.readMoreText}>
@@ -180,11 +197,17 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
             <View style={styles.multiSelectButtonGroup}>
               <MultiSelectButtonGroup
                 items={allServices}
-                selectedIndexes={allServices.map(service =>
-                  selectedServices.includes(service) ? allServices.indexOf(service) : -1
-                ).filter(index => index !== -1)}
+                selectedIndexes={allServices
+                  .map((service) =>
+                    selectedServices.includes(service)
+                      ? allServices.indexOf(service)
+                      : -1
+                  )
+                  .filter((index) => index !== -1)}
                 onChange={(selectedIndexes) => {
-                  setSelectedServices(selectedIndexes.map(index => allServices[index]));
+                  setSelectedServices(
+                    selectedIndexes.map((index) => allServices[index])
+                  );
                 }}
                 activeButtonStyle={styles.activeButton}
                 inactiveButtonStyle={styles.inactiveButton}
@@ -197,7 +220,11 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
           {filteredAccommodationTypes.map((accommodationType) => (
             <SimpleVerticalCard
               key={accommodationType._id}
-              imageUrl={accommodationType.image?.[0] || rental.image?.[0] || "https://via.placeholder.com/300"}
+              imageUrl={
+                accommodationType.image?.[0] ||
+                rental.image?.[0] ||
+                "https://via.placeholder.com/300"
+              }
               placeName={accommodationType.name}
               price={`${accommodationType.basePrice}đ/giờ`}
               location={`${rental.address}, ${rental.ward} , ${rental.district}, ${rental.city}`}
