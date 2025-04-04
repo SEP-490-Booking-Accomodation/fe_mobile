@@ -23,6 +23,7 @@ export const baseApi = createApi({
     "RentalLocation",
     "AccommodationType",
     "Booking",
+    "Customer",
     "Notification",
     "Payment",
   ],

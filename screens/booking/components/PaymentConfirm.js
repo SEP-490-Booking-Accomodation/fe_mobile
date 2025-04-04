@@ -48,6 +48,8 @@ const PaymentConfirm = ({ setPaymentMethod }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Phương thức thanh toán</Text>
+      <Text style={styles.sectionTitle}>Momo</Text>
+
       {paymentMethods.map((method) => (
         <TouchableOpacity
           key={method.value}

@@ -61,11 +61,16 @@ export const authApi = baseApi.injectEndpoints({
         method: "GET",
       }),
     }),
+    getCustomerByUserId: builder.query({
+      query: (userId) => `/customer/detail-customer/${userId}`,
+      providesTags: ["Customer"],
+    }),
   }),
 });
 
 export const {
   useLoginMutation,
+  useGetCustomerByUserIdQuery,
   useLogoutQuery,
   useLazyGetUserQuery,
   useLazyGetRoleByIdQuery,

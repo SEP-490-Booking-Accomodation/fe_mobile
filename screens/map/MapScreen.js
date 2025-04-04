@@ -1,44 +1,58 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import { StyleSheet, View, ScrollView, Text, ActivityIndicator, Button } from "react-native"
-import MapView, { Marker } from "react-native-maps"
-import * as Location from "expo-location"
-import { FontAwesome5 } from "@expo/vector-icons"
-import HorizontalCardMedium from "../../components/cards/HorizontalCardMedium"
-import SearchField from "../../components/SearchField"
-import Filter from "../../components/Filter"
-import { useGetAllRentalQuery } from "../../api/rentalLocationApi"
+import { useState, useEffect, useRef } from "react";
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  Text,
+  ActivityIndicator,
+  Button,
+} from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import * as Location from "expo-location";
+import { FontAwesome5 } from "@expo/vector-icons";
+import HorizontalCardMedium from "../../components/cards/HorizontalCardMedium";
+import SearchField from "../../components/SearchField";
+import Filter from "../../components/Filter";
+import { useGetAllRentalQuery } from "../../api/rentalLocationApi";
 
 const MapScreen = ({ navigation }) => {
-  const mapRef = useRef(null)
+  const mapRef = useRef(null);
 
-  const [userLocation, setUserLocation] = useState(null)
-  const [searchText, setSearchText] = useState("")
-  const [locationError, setLocationError] = useState(null)
-  const [filterVisible, setFilterVisible] = useState(false)
-  const [selectedLocation, setSelectedLocation] = useState(null)
+  const [userLocation, setUserLocation] = useState(null);
+  const [searchText, setSearchText] = useState("");
+  const [locationError, setLocationError] = useState(null);
+  const [filterVisible, setFilterVisible] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
   const [filters, setFilters] = useState({
     priceRange: [100000, 100000000],
     selectedRating: null,
     selectedAmenities: [],
-  })
+  });
 
-  const { data: rentalLocations, isLoading, error, refetch } = useGetAllRentalQuery()
+  const {
+    data: rentalLocations,
+    isLoading,
+    error,
+    refetch,
+  } = useGetAllRentalQuery();
 
   useEffect(() => {
     const checkLocationPermission = async () => {
       try {
-        const { status } = await Location.requestForegroundPermissionsAsync()
+        const { status } = await Location.requestForegroundPermissionsAsync();
 
         if (status !== "granted") {
-          setLocationError("Ứng dụng cần quyền truy cập vị trí để hiển thị bản đồ")
-          return
+          setLocationError(
+            "Ứng dụng cần quyền truy cập vị trí để hiển thị bản đồ"
+          );
+          return;
         }
 
-        const location = await Location.getCurrentPositionAsync({})
+        const location = await Location.getCurrentPositionAsync({});
         if (!location.coords) {
-          throw new Error("Không lấy được tọa độ")
+          throw new Error("Không lấy được tọa độ");
         }
 
         setUserLocation({
@@ -46,33 +60,36 @@ const MapScreen = ({ navigation }) => {
           longitude: location.coords.longitude,
           latitudeDelta: 0.05,
           longitudeDelta: 0.05,
-        })
+        });
       } catch (error) {
-        console.error("Location error:", error)
-        setLocationError("Không thể xác định vị trí hiện tại")
+        console.error("Location error:", error);
+        setLocationError("Không thể xác định vị trí hiện tại");
       }
-    }
+    };
 
-    checkLocationPermission()
-  }, [])
+    checkLocationPermission();
+  }, []);
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const deg2rad = (deg) => deg * (Math.PI / 180)
-    const R = 6371
+    const deg2rad = (deg) => deg * (Math.PI / 180);
+    const R = 6371;
 
-    const dLat = deg2rad(lat2 - lat1)
-    const dLon = deg2rad(lon2 - lon1)
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
 
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
+      Math.cos(deg2rad(lat1)) *
+        Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    return R * c
-  }
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
 
   const transformLocations = () => {
-    if (!rentalLocations?.data) return []
+    if (!rentalLocations?.data) return [];
 
     return rentalLocations.data
       .filter((location) => {
@@ -81,11 +98,11 @@ const MapScreen = ({ navigation }) => {
           location.longitude &&
           !isNaN(Number.parseFloat(location.latitude)) &&
           !isNaN(Number.parseFloat(location.longitude))
-        )
+        );
       })
       .map((location) => {
-        const lat = Number.parseFloat(location.latitude)
-        const lng = Number.parseFloat(location.longitude)
+        const lat = Number.parseFloat(location.latitude);
+        const lng = Number.parseFloat(location.longitude);
 
         return {
           id: location._id,
@@ -95,68 +112,90 @@ const MapScreen = ({ navigation }) => {
           placeName: location.name,
           openHour: location.openHour || "08:00",
           closeHour: location.closeHour || "22:00",
-          minPrice: location.minPrice || "100.000",
-          maxPrice: location.maxPrice || "500.000",
-          location: `${location.address || ""}, ${location.ward || ""}, ${location.district || ""}, ${location.city || ""}`,
+          minPrice: location?.minPrice || 100000,
+          maxPrice: location?.maxPrice || 500000,
+          location: `${location.address || ""}, ${location.ward || ""}, ${
+            location.district || ""
+          }, ${location.city || ""}`,
           rating: location.rating || "4.5",
           numOfReviews: location.numOfReviews || "10",
           distance: userLocation
-            ? calculateDistance(userLocation.latitude, userLocation.longitude, lat, lng).toFixed(1)
+            ? calculateDistance(
+                userLocation.latitude,
+                userLocation.longitude,
+                lat,
+                lng
+              ).toFixed(1)
             : "N/A",
           destination: location,
-        }
-      })
-  }
+        };
+      });
+  };
 
   const getAllLocations = () => {
-    return transformLocations()
-  }
+    return transformLocations();
+  };
 
   const getNearbyLocations = () => {
-    const locations = transformLocations()
+    const locations = transformLocations();
 
     if (selectedLocation) {
-      return [selectedLocation]
+      return [selectedLocation];
     }
 
     return locations
       .filter((location) => {
         if (searchText && searchText.length > 0) {
-          const searchLower = searchText.toLowerCase()
+          const searchLower = searchText.toLowerCase();
           if (
             !location.placeName.toLowerCase().includes(searchLower) &&
             !location.location.toLowerCase().includes(searchLower)
           ) {
-            return false
+            return false;
           }
         }
 
         if (userLocation && location.distance && location.distance !== "N/A") {
-          const distance = Number.parseFloat(location.distance)
-          if (distance > 5) return false
+          const distance = Number.parseFloat(location.distance);
+          if (distance > 5) return false;
         }
+        const formatMoney = (amount) =>
+          new Intl.NumberFormat("vi-VN", {
+            style: "currency",
+            currency: "VND",
+          }).format(amount);
 
-        const minPrice = Number.parseInt((location.minPrice || "100000").replace(/\./g, ""))
-        const maxPrice = Number.parseInt((location.maxPrice || "500000").replace(/\./g, ""))
-        const isInPriceRange = minPrice >= filters.priceRange[0] && maxPrice <= filters.priceRange[1]
+        // const minPrice = Number.parseInt(
+        //   (location.minPrice || "100000").replace(/\./g, "")
+        // );
+        // const maxPrice = Number.parseInt(
+        //   (location.maxPrice || "500000").replace(/\./g, "")
+        // );
+        const minPrice = formatMoney(minPrice);
+        const maxPrice = formatMoney(maxPrice);
+        const isInPriceRange =
+          minPrice >= filters.priceRange[0] &&
+          maxPrice <= filters.priceRange[1];
 
-        const isRatingMatch = !filters.selectedRating || Number.parseFloat(location.rating) >= filters.selectedRating
+        const isRatingMatch =
+          !filters.selectedRating ||
+          Number.parseFloat(location.rating) >= filters.selectedRating;
 
-        return isInPriceRange && isRatingMatch
+        return isInPriceRange && isRatingMatch;
       })
       .sort((a, b) => {
         if (userLocation && a.distance !== "N/A" && b.distance !== "N/A") {
-          return Number.parseFloat(a.distance) - Number.parseFloat(b.distance)
+          return Number.parseFloat(a.distance) - Number.parseFloat(b.distance);
         }
-        return 0
-      })
-  }
+        return 0;
+      });
+  };
 
-  const allLocations = getAllLocations()
-  const nearbyLocations = getNearbyLocations()
+  const allLocations = getAllLocations();
+  const nearbyLocations = getNearbyLocations();
 
   const handleMarkerPress = (location) => {
-    setSelectedLocation(location)
+    setSelectedLocation(location);
     if (mapRef.current) {
       mapRef.current.animateToRegion(
         {
@@ -165,13 +204,13 @@ const MapScreen = ({ navigation }) => {
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         },
-        500,
-      )
+        500
+      );
     }
-  }
+  };
 
   const handleUserLocationPress = () => {
-    setSelectedLocation(null)
+    setSelectedLocation(null);
     if (mapRef.current && userLocation) {
       mapRef.current.animateToRegion(
         {
@@ -180,10 +219,10 @@ const MapScreen = ({ navigation }) => {
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         },
-        500,
-      )
+        500
+      );
     }
-  }
+  };
 
   const handleCardPress = (location) => {
     // Navigate to the HomeStack with a flag indicating we came from Map
@@ -193,15 +232,15 @@ const MapScreen = ({ navigation }) => {
         rentalId: location.id,
         previousScreen: "Map",
       },
-    })
-  }
+    });
+  };
 
   if (locationError) {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>{locationError}</Text>
       </View>
-    )
+    );
   }
 
   if (isLoading) {
@@ -210,17 +249,19 @@ const MapScreen = ({ navigation }) => {
         <ActivityIndicator size="large" color="#4E72E3" />
         <Text>Đang tải dữ liệu...</Text>
       </View>
-    )
+    );
   }
 
   if (error) {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>Không thể tải dữ liệu địa điểm</Text>
-        <Text style={styles.errorSubText}>Vui lòng kiểm tra kết nối mạng và thử lại</Text>
+        <Text style={styles.errorSubText}>
+          Vui lòng kiểm tra kết nối mạng và thử lại
+        </Text>
         <Button title="Thử lại" onPress={() => refetch()} color="#4E72E3" />
       </View>
-    )
+    );
   }
 
   if (!rentalLocations?.data?.length) {
@@ -229,7 +270,7 @@ const MapScreen = ({ navigation }) => {
         <Text style={styles.errorText}>Không có dữ liệu địa điểm</Text>
         <Button title="Thử lại" onPress={() => refetch()} color="#4E72E3" />
       </View>
-    )
+    );
   }
 
   return (
@@ -272,16 +313,23 @@ const MapScreen = ({ navigation }) => {
         )}
 
         {allLocations.map((location) => (
-          <Marker key={location.id} coordinate={location.coordinate} onPress={() => handleMarkerPress(location)}>
+          <Marker
+            key={location.id}
+            coordinate={location.coordinate}
+            onPress={() => handleMarkerPress(location)}
+          >
             <View
               style={[
                 styles.locationMarkerContainer,
-                selectedLocation?.id === location.id && styles.selectedMarkerContainer,
+                selectedLocation?.id === location.id &&
+                  styles.selectedMarkerContainer,
               ]}
             >
               {selectedLocation?.id === location.id && (
                 <View style={styles.selectedMarkerCallout}>
-                  <Text style={styles.selectedMarkerText}>{location.placeName}</Text>
+                  <Text style={styles.selectedMarkerText}>
+                    {location.placeName}
+                  </Text>
                 </View>
               )}
               <View style={styles.locationPinOuter}>
@@ -298,9 +346,14 @@ const MapScreen = ({ navigation }) => {
 
       <View style={styles.listContainer}>
         <Text style={styles.listTitle}>Điểm đến gần nhất (bán kính 5km)</Text>
-        <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContentContainer}>
+        <ScrollView
+          style={styles.scrollContainer}
+          contentContainerStyle={styles.scrollContentContainer}
+        >
           {nearbyLocations.length === 0 ? (
-            <Text style={styles.noResultsText}>Không có địa điểm nào phù hợp</Text>
+            <Text style={styles.noResultsText}>
+              Không có địa điểm nào phù hợp
+            </Text>
           ) : (
             nearbyLocations.map((location) => (
               <HorizontalCardMedium
@@ -329,8 +382,8 @@ const MapScreen = ({ navigation }) => {
         onApply={(appliedFilters) => setFilters(appliedFilters)}
       />
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -556,7 +609,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     textAlign: "center",
   },
-})
+});
 
-export default MapScreen
-
+export default MapScreen;

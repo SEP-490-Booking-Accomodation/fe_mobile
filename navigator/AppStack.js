@@ -149,11 +149,11 @@ const HomeStack = () => (
       component={PaymentConfirm}
       options={{ headerShown: false }}
     />
-    <Stack.Screen
+    {/* <Stack.Screen
       name="BookingDetail"
       component={BookingDetail}
       options={{ headerShown: false }}
-    />
+    /> */}
     <Stack.Screen
       name="PaymentSuccess"
       component={PaymentSuccess}
@@ -247,6 +247,11 @@ const SettingStack = () => (
 const TicketStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="TicketList" component={TicketList} />
+    {/* <Stack.Screen
+      name="BookingDetail"
+      component={BookingDetail}
+      options={{ headerShown: false }}
+    /> */}
   </Stack.Navigator>
 );
 
@@ -434,6 +439,7 @@ const AppStack = () => {
 
         {/* Auth Flow */}
         <Stack.Screen name="Auth" component={AuthStack} />
+        <Stack.Screen name="BookingDetail" component={BookingDetail} />
 
         {/* Main App Flow - Thay DrawerNavigator bằng MainTabNavigator */}
         <Stack.Screen name="MainTabs" component={MainTabNavigator} />

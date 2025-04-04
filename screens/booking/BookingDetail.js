@@ -24,13 +24,26 @@ import dayjs from "dayjs";
 import { useGetBookingByIdQuery } from "../../api/bookingApi";
 import { useProcessMomoPaymentMutation } from "../../api/momoPayment";
 import Constants from "expo-constants";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
 export default function BookingDetail() {
   const navigation = useNavigation();
   const route = useRoute();
   const { bookingId } = route.params || {};
-  const { data: bookingData, isLoading } = useGetBookingByIdQuery(bookingId);
+  const {
+    data: bookingData,
+    isLoading,
+    refetch,
+  } = useGetBookingByIdQuery(bookingId);
   const [processMomoPayment] = useProcessMomoPaymentMutation();
+  console.log(bookingData);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch(); // Refetch API mỗi khi quay lại màn hình
+    }, [refetch])
+  );
 
   const formatMoney = (amount) =>
     new Intl.NumberFormat("vi-VN", {
@@ -40,15 +53,16 @@ export default function BookingDetail() {
 
   const getStatusText = (status) => {
     const statusMap = {
-      1: "Chờ xác nhận",
-      2: "Đã xác nhận",
-      3: "Đã hủy",
-      4: "Đã hoàn tiền",
-      5: "Đang sử dụng",
-      6: "Đã hoàn thành",
-      7: "Đã từ chối",
-      8: "Chờ thanh toán",
+      1: "Các nhận",
+      2: "Cần Check-in",
+      3: "Check-in",
+      4: "Cần Check-out",
+      5: "Check-out",
+      6: "Đã hủy",
+      7: "Hoàn thành",
+      8: "Chờ",
     };
+
     return statusMap[status] || "Không xác định";
   };
 
@@ -66,10 +80,10 @@ export default function BookingDetail() {
       1: "Chờ thanh toán",
       2: "Chờ thanh toán",
       3: "Đã thanh toán",
-      4: "Chưa thanh toán",
-      5: "Hoàn tiền",
-      6: "Thất bại",
+      4: "Hoàn tiền",
+      5: "Thất bại",
     };
+
     return statusMap[status] || "Không xác định";
   };
 
@@ -105,7 +119,11 @@ export default function BookingDetail() {
         }).unwrap();
 
         if (response.payUrl) {
-          Linking.openURL(response.deeplink); // Mở app Momo
+          Linking.openURL(response.deeplink);
+
+          setTimeout(() => {
+            refetch();
+          }, 3000);
         } else {
           Alert.alert("Lỗi", "Không thể tạo thanh toán Momo");
         }
@@ -114,11 +132,10 @@ export default function BookingDetail() {
         Alert.alert("Lỗi", "Thanh toán Momo thất bại");
       }
     } else if (paymentMethod === "3") {
-      // ZaloPay payment
       //   navigation.navigate("ZaloPayment", {
       //     bookingId: bookingData.id,
       //     amount: bookingData.basePrice * bookingData.durationBookingHour,
-      //   });
+      //   });>
     }
   };
 
@@ -166,14 +183,15 @@ export default function BookingDetail() {
 
       <View style={styles.statusBar}>
         <Text style={styles.statusText}>
-          Trạng thái:{" "}
+          Trạng thái:
           <Text style={styles.statusValue}>
             {getStatusText(bookingData.status)}
           </Text>
         </Text>
         <Text style={styles.statusText}>
-          Thanh toán:{" "}
+          Thanh toán:
           <Text style={styles.statusValue}>
+            {bookingData.paymentStatus}
             {getPaymentStatusText(bookingData.paymentStatus)}
           </Text>
         </Text>
@@ -213,14 +231,10 @@ export default function BookingDetail() {
             <Clock size={20} color="#ff385c" />
             <Text style={styles.cardTitle}>Thời gian thuê</Text>
           </View>
+          {/* <Text style={styles.value}>Ngày: {bookingData.checkInHour}</Text> */}
+          <Text style={styles.value}>Check-in: {bookingData.checkInHour}</Text>
           <Text style={styles.value}>
-            Ngày: {dayjs(bookingData.checkInHour).format("DD/MM/YYYY")}
-          </Text>
-          <Text style={styles.value}>
-            Check-in: {dayjs(bookingData.checkInHour).format("HH:mm")}
-          </Text>
-          <Text style={styles.value}>
-            Check-out: {dayjs(bookingData.checkOutHour).format("HH:mm")}
+            Check-out: {bookingData.checkOutHour}
           </Text>
           <Text style={styles.value}>
             Thời gian thuê: {bookingData.durationBookingHour} giờ
@@ -292,7 +306,12 @@ export default function BookingDetail() {
         ) : (
           <CustomButton
             title="Về trang chủ"
-            onPress={() => navigation.navigate("Home")}
+            onPress={() =>
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "Home" }],
+              })
+            }
             style={styles.homeButton}
           />
         )}
@@ -313,6 +332,7 @@ const styles = StyleSheet.create({
     // justifyContent: "space-between",
     gap: 10,
     paddingHorizontal: 10,
+    marginTop: 10,
     marginBottom: 16,
   },
   header: {

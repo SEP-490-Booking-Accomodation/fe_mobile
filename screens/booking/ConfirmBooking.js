@@ -19,11 +19,12 @@ import PaymentConfirm from "./components/PaymentConfirm";
 import { useCreateBookingMutation } from "../../api/bookingApi";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
+import { useGetCustomerByUserIdQuery } from "../../api/authApi";
 
 export default function ConfirmBooking() {
   const authData = useSelector((state) => state.auth);
   const [paymentMethod, setPaymentMethod] = useState(1); // Add state for payment method
-  console.log(authData);
+  const { data: customerData } = useGetCustomerByUserIdQuery(authData.userId);
 
   const [createBooking] = useCreateBookingMutation();
   const navigation = useNavigation();
@@ -70,10 +71,7 @@ export default function ConfirmBooking() {
     hoursEnd,
     minutesEnd
   ).toISOString();
-  console.log(checkInHour);
-  console.log(checkOutHour);
 
-  // console.log(startDateFormat);
   const checkInDateTime = `${bookingData.date} ${bookingData.time}:00`;
   const checkOutDateTime = `${bookingData.date} ${bookingData.endTime}:00`;
 
@@ -82,7 +80,7 @@ export default function ConfirmBooking() {
       policySystemIds: bookingData.policySystemIds || [
         "67ebf15d828b69a4d279d960",
       ],
-      customerId: authData.id,
+      customerId: customerData.id,
       accommodationTypeId: typeRoom.id,
       // couponId: bookingData?.couponId||,
       couponId: null,
@@ -103,23 +101,20 @@ export default function ConfirmBooking() {
       status: 8,
     };
 
-    console.log(formBooking);
-
     try {
       const response = await createBooking({
         data: formBooking,
       }).unwrap();
-      console.log(response);
 
-      if (response) {
-        if (paymentMethod === 1) {
-          Alert.alert("Chưa hỗ trợ");
-        } else if (paymentMethod === 2) {
-          Alert.alert("Momo");
-        } else if (paymentMethod === 3) {
-          Alert.alert("Đi thẳng");
-        }
-      }
+      // if (response) {
+      //   if (paymentMethod === 1) {
+      //     // Alert.alert("Chưa hỗ trợ");
+      //   } else if (paymentMethod === 2) {
+      //     // Alert.alert("Momo");
+      //   } else if (paymentMethod === 3) {
+      //     Alert.alert("Đi thẳng");
+      //   }
+      // }
       navigation.navigate("BookingDetail", {
         bookingData: bookingData,
         bookingId: response.booking.id,
