@@ -10,11 +10,15 @@ export const AsyncStorageProvider = ({ children }) => {
   // const [data, setData] = useState(null);
   const [searchHistory, setSearchHistory] = useState([]);
   const [favorites, setFavorites] = useState([]);
+  // This is missing:
+  const [idChatPlatform, setIdChatPlatform] = useState([]);
+
 
   useEffect(() => {
     // loadData();
     loadFavorites();
     loadSearchHistory();
+    loadIdChatPlatform(); 
   }, []);
   // const loadData = async () => {
   //   try {
@@ -141,20 +145,54 @@ export const AsyncStorageProvider = ({ children }) => {
       console.error("Failed to add favorite:", error);
     }
   };
+  //========================================================================
+  // idChatPlatform
 
-  const removeFavorite = async (itemId) => {
+  const loadIdChatPlatform = async () => {
     try {
-      const updatedFavorites = favorites.filter((item) => item._id !== itemId);
-      setFavorites(updatedFavorites);
-      await AsyncStorage.setItem("favorites", JSON.stringify(updatedFavorites));
-    } catch (error) {
-      console.error("Failed to remove favorite:", error);
+      const storedIdChatPlatform = await AsyncStorage.getItem("idChatPlatform");
+      if (storedIdChatPlatform) {
+        const parsedData = JSON.parse(storedIdChatPlatform);
+        setIdChatPlatform(parsedData);
+        return parsedData; // Return the loaded data
+      }
+      return []; // Return empty array if no data
+    } catch(error) {
+      console.error("Failed to load idChatPlatform:", error);
+      return []; // Return empty array on error
     }
-  };
+  }
 
-  const isFavorite = (itemId) => {
-    return favorites.some((item) => item._id === itemId);
-  };
+  const addIdChatPlatform = async (item) => {
+    try {
+      const updatedIdChatPlatform = [...idChatPlatform];
+      const existingIndex = updatedIdChatPlatform.findIndex(
+        (fav) => fav._id === item._id
+      );
+      if (existingIndex === -1) {
+        updatedIdChatPlatform.push(item);
+        setIdChatPlatform(updatedIdChatPlatform);
+        await AsyncStorage.setItem(
+          "idChatPlatform",
+          JSON.stringify(updatedIdChatPlatform)
+        );
+      }
+    } catch (error) {
+      console.error("Failed to add idChatPlatform:", error);
+      
+    }
+  }
+
+  const removeAllIdChatPlaform = async () => {
+    try {
+      await AsyncStorage.removeItem("idChatPlatform");  
+      setIdChatPlatform([]);
+    } catch (error) {
+      console.log("Failed to remove idChatPlatform:", error);
+    }
+  }
+
+
 
   return (
     <AsyncStorageContext.Provider
@@ -174,7 +212,13 @@ export const AsyncStorageProvider = ({ children }) => {
         //Favorite Provider
         favorites,
         addFavorite,
-        removeFavorite,
+
+        //IdChatPlatform
+        idChatPlatform,
+        addIdChatPlatform,
+        loadIdChatPlatform,
+        removeAllIdChatPlaform,
+
       }}
     >
       {children}

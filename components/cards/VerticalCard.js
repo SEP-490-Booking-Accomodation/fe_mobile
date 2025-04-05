@@ -36,6 +36,7 @@ export default function VerticalCard({
 
   return (
     <TouchableOpacity
+      
       style={styles.card}
       onPress={onCardPress}
       activeOpacity={0.97}

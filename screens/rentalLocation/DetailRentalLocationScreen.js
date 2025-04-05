@@ -18,11 +18,13 @@ import SimpleVerticalCard from "../../components/cards/SimpleVerticalCard";
 import { useGetAllAccommodationTypeOfRentalLocationQuery } from "../../api/rentalLocationApi";
 import { Button } from "react-native-elements";
 import { MaterialIcons } from "@expo/vector-icons";
+import { ensureUserInDatabaseWithoutAsyncStorage, newChat } from "../../lib/supabase";
+
 
 const DetailRentalLocationScreen = ({ route, navigation }) => {
-  console.log("Route params:", route.params);
+  
   const { rentalId: locationId } = route.params;
-  console.log("Extracted locationId:", locationId);
+  
 
   if (!locationId) {
     return (
@@ -42,6 +44,18 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const [selectedServices, setSelectedServices] = useState([]);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [allServices, setAllServices] = useState([]);
+
+  
+
+  const handleChatPress = async () => {
+    try{
+      await ensureUserInDatabaseWithoutAsyncStorage();
+      var result = await newChat(locationId);
+      consol
+    }catch (error){
+      console.log(error);
+    }
+  }
 
   useEffect(() => {
     const loadFavoriteStatus = async () => {

@@ -13,21 +13,50 @@ import {
 } from "react-native"
 import { supabase } from "../../lib/supabase"
 import { Ionicons } from "@expo/vector-icons"
+import { MaterialIcons } from "@expo/vector-icons"
+import { useSelector } from "react-redux"
+import { useAsyncStorage } from "../../context/AsyncStorageContext";
 
-export default function ChatListScreen({ navigation, userId, username }) {
-  const [chats, setChats] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [creating, setCreating] = useState(false)
-  const [modalVisible, setModalVisible] = useState(false)
-  const [newChatName, setNewChatName] = useState("")
-  const [refreshing, setRefreshing] = useState(false)
-  const [lastMessages, setLastMessages] = useState({})
-  const [unreadCounts, setUnreadCounts] = useState({})
-  const [userProfiles, setUserProfiles] = useState({})
-  const [searchText, setSearchText] = useState("")
-  const [filteredChats, setFilteredChats] = useState([])
+export default function ChatListScreen({ navigation  }) {
+  const [chats, setChats] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newChatName, setNewChatName] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastMessages, setLastMessages] = useState({});
+  const [unreadCounts, setUnreadCounts] = useState({});
+  const [userProfiles, setUserProfiles] = useState({});
+  const [searchText, setSearchText] = useState("");
+  const [filteredChats, setFilteredChats] = useState([]);
+  const {loadIdChatPlatform} = useAsyncStorage();
+  const [userId, setUserId] = useState(null);
+  const [username, setUsername] = useState(null);
+  const [userLoaded, setUserLoaded] = useState(false);
 
   useEffect(() => {
+    const loadUserData = async () => {
+      var user = await loadIdChatPlatform();
+      
+      if (user !== null && user.length > 0) {
+        const storedUser = user[0];
+        console.log("Loaded user from AsyncStorage:", storedUser);
+        
+        if (storedUser._id) setUserId(storedUser._id);
+        if (storedUser.username) setUsername(storedUser.username);
+      } else {
+        console.log("No user data found in AsyncStorage");
+      }
+      
+      setUserLoaded(true);
+    };
+    
+    loadUserData();
+  }, []);
+
+  
+  useEffect(() => {
+    
     if (userId) {
       // Update user status to online
       updateUserOnlineStatus(true)
@@ -57,8 +86,8 @@ export default function ChatListScreen({ navigation, userId, username }) {
       return () => {
         // Update user status to offline when component unmounts
         updateUserOnlineStatus(false)
-        subscription.unsubscribe()
-        messagesSubscription.unsubscribe()
+        supabase.removeChannel(subscription)
+        supabase.removeChannel(messagesSubscription)
       }
     }
   }, [userId])
@@ -100,13 +129,14 @@ export default function ChatListScreen({ navigation, userId, username }) {
 
   async function updateUserOnlineStatus(isOnline) {
     try {
+      const userIdPlatform = await loadIdChatPlatform();
       const { error } = await supabase
           .from("profiles")
           .update({
             is_online: isOnline,
             ...(isOnline ? {} : { last_seen: new Date().toISOString() }),
           })
-          .eq("id", userId)
+          .eq("iduserplatform", userIdPlatform.iduserplatform)
 
       if (error) {
         console.error("Error updating online status:", error.message)
@@ -115,10 +145,12 @@ export default function ChatListScreen({ navigation, userId, username }) {
       console.error("Exception updating online status:", e.message)
     }
   }
+  
 
   async function fetchChats() {
     if (!userId) {
       console.log("No user ID available, skipping fetch chats")
+      console.warn(userId);
       setLoading(false)
       return
     }
@@ -209,6 +241,7 @@ export default function ChatListScreen({ navigation, userId, username }) {
     }
   }
 
+
   async function fetchLastMessages(chatIds = null) {
     if (!userId) return
 
@@ -223,7 +256,7 @@ export default function ChatListScreen({ navigation, userId, username }) {
       const promises = chatIds.map(async (chatId) => {
         const { data, error } = await supabase
             .from("messages")
-            .select("id, content, created_at, user_id, status, type")
+            .select("id, content, created_at, user_id, status")
             .eq("chat_id", chatId)
             .order("created_at", { ascending: false })
             .limit(1)
@@ -293,62 +326,6 @@ export default function ChatListScreen({ navigation, userId, username }) {
     }
   }
 
-  // async function createNewChat() {
-  //   if (!newChatName.trim()) {
-  //     Alert.alert("Error", "Please enter a chat name")
-  //     return
-  //   }
-  //
-  //   try {
-  //     setCreating(true)
-  //     console.log("Creating new chat:", newChatName)
-  //
-  //     // Insert new chat
-  //     const { data: chatData, error: chatError } = await supabase
-  //         .from("chats")
-  //         .insert([{ name: newChatName }])
-  //         .select()
-  //
-  //     if (chatError) {
-  //       console.error("Error creating chat:", chatError.message)
-  //       throw chatError
-  //     }
-  //
-  //     if (!chatData || chatData.length === 0) {
-  //       throw new Error("No chat data returned after creation")
-  //     }
-  //
-  //     console.log("Chat created:", chatData[0].id)
-  //
-  //     // Add current user as participant
-  //     const { error: participantError } = await supabase
-  //         .from("chat_participants")
-  //         .insert([{ chat_id: chatData[0].id, user_id: userId }])
-  //
-  //     if (participantError) {
-  //       console.error("Error adding participant:", participantError.message)
-  //       throw participantError
-  //     }
-  //
-  //     console.log("Added user as participant")
-  //     setModalVisible(false)
-  //     setNewChatName("")
-  //
-  //     // Fetch chats again to update the list
-  //     await fetchChats()
-  //
-  //     // Navigate to the new chat
-  //     navigation.navigate("Chat", {
-  //       chatId: chatData[0].id,
-  //       chatName: chatData[0].name,
-  //     })
-  //   } catch (error) {
-  //     console.error("Exception creating chat:", error.message)
-  //     Alert.alert("Error", "Failed to create chat: " + error.message)
-  //   } finally {
-  //     setCreating(false)
-  //   }
-  // }
 
   function handlePressChat(chat) {
     // Get the other participant for 1-on-1 chats
@@ -403,10 +380,6 @@ export default function ChatListScreen({ navigation, userId, username }) {
     const getMessagePreview = (message) => {
       if (!message) return "No messages yet"
 
-      if (message.type === "image") {
-        return "📷 Image"
-      }
-
       return message.content
     }
 
@@ -443,6 +416,17 @@ export default function ChatListScreen({ navigation, userId, username }) {
         </TouchableOpacity>
     )
   }
+  const renderHeader = () => (
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.arrowBack}
+          onPress={() => navigation.goBack()}
+        >
+          <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
+        </TouchableOpacity>
+        <Text style={styles.textHeader}>Cuộc hội thoại </Text>
+      </View>
+    );
 
   return (
       <View style={styles.container}>
@@ -453,12 +437,7 @@ export default function ChatListScreen({ navigation, userId, username }) {
         </View> */}
 
         {/* Header with new chat button */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Conversations</Text>
-          {/* <TouchableOpacity style={styles.newChatButton} onPress={() => setModalVisible(true)}>
-            <Ionicons name="add" size={24} color="white" />
-          </TouchableOpacity> */}
-        </View>
+        {renderHeader()}
 
         {loading ? (
             <View style={styles.loadingContainer}>
@@ -734,6 +713,32 @@ const styles = StyleSheet.create({
   createButtonText: {
     color: "white",
     fontWeight: "bold",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    padding: 16,
+    marginTop: 40,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+    elevation: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  arrowBack: {
+    marginRight: 10,
+    color: "#4E72E3",
+  },
+  textHeader: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#1F2937",
   },
 })
 

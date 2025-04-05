@@ -18,6 +18,7 @@ import { useGetCustomerDetailByIdQuery } from "../../api/profileApi";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { logout } from "../../redux/authSlice";
+import { useAsyncStorage } from "../../context/AsyncStorageContext";
 
 
 export default function ProfileScreen() {
@@ -26,7 +27,7 @@ export default function ProfileScreen() {
   const { data, isLoading, error } = useGetCustomerDetailByIdQuery(userId);
   const defaultAvatar = require("../../assets/images/man.jpg");
   const dispatch = useDispatch();
-
+  const {removeAllIdChatPlaform} = useAsyncStorage();
   const navigation = useNavigation();
 
   const logoutModalRender = () => (
@@ -131,9 +132,10 @@ export default function ProfileScreen() {
     setShowLogoutModal(true);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setShowLogoutModal(false);
     dispatch(logout());
+    await removeAllIdChatPlaform();
     navigation.replace("HomeScreen"); // Tải lại trang
 
   };

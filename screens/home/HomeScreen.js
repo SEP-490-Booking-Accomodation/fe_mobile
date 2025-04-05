@@ -8,7 +8,8 @@ import HeaderLNA from "./HeaderLNA"
 import { useSelector } from "react-redux"
 import { useGetUserQuery } from "../../api/authApi"
 import { useGetAllRentalQuery } from "../../api/rentalLocationApi"
-
+import { ensureUserInDatabase } from "../../lib/supabase"
+import { useAsyncStorage } from "../../context/AsyncStorageContext"
 const cities = [
   "Hà Nội",
   "TP Hồ Chí Minh",
@@ -40,7 +41,9 @@ export default function HomeScreen() {
   const [displayUser, setDisplayUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
-
+    // Get the context at the component level (outside of any function)
+    const asyncStorageContext = useAsyncStorage();
+  const {removeAllIdChatPlaform, addIdChatPlatform} = useAsyncStorage();
   const onRefresh = async () => {
     setRefreshing(true)
     try {
@@ -52,6 +55,10 @@ export default function HomeScreen() {
 
     setRefreshing(false)
   }
+
+
+
+
   
   const handleLocationPress = (locationId) => {
     console.log("Navigating with locationId:", locationId)
@@ -95,6 +102,12 @@ export default function HomeScreen() {
       }
     }
 
+    const checkUser = async () => {
+      // Use the context that was obtained at the component level
+      await ensureUserInDatabase(user.getUser.id.toString(), user.getUser.fullName, asyncStorageContext);
+    }
+    
+    checkUser()
     getLocation()
   }, [])
 
