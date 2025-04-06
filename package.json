@@ -29,6 +29,7 @@
     "@stripe/stripe-react-native": "^0.41.0",
     "dayjs": "^1.11.13",
     "expo": "~52.0.23",
+    "expo-constants": "~17.0.8",
     "expo-image-picker": "~16.0.6",
     "expo-linear-gradient": "^14.0.2",
     "expo-location": "~18.0.5",
@@ -53,6 +54,7 @@
     "react-native-image-viewing": "^0.2.2",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-maps": "^1.20.1",
+    "react-native-modal": "^14.0.0-rc.1",
     "react-native-modal-datetime-picker": "^18.0.0",
     "react-native-pager-view": "^6.6.1",
     "react-native-paper": "^5.13.1",
@@ -65,8 +67,7 @@
     "react-native-swiper": "^1.6.0",
     "react-native-tab-view": "^4.0.5",
     "react-native-vector-icons": "^10.2.0",
-    "react-redux": "^9.2.0",
-    "expo-constants": "~17.0.8"
+    "react-redux": "^9.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

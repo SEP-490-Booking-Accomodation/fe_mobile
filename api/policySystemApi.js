@@ -11,7 +11,13 @@ export const policySystemApi = baseApi.injectEndpoints({
       query: (id) => `/policy-system/${id}`, // Corrected the URL
       providesTags: ["PolicySystem"],
     }),
+    getPolicyHashTag: builder.query({
+      query: (hashtag) =>
+        `/policy-system/all-policy-systems-by-hashtag/${hashtag}`, // Corrected the URL
+      providesTags: ["PolicySystem"],
+    }),
   }),
 });
 
-export const { useLazyGetAllPoliciesQuery, useGetPolicyByIdQuery } = policySystemApi;
+export const { useGetPolicyHashTagQuery,useLazyGetAllPoliciesQuery, useGetPolicyByIdQuery } =
+  policySystemApi;
