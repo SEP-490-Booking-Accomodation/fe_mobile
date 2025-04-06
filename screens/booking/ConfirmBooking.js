@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
-  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -14,22 +13,105 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { ArrowLeft } from "lucide-react-native";
 import CustomButton from "../../components/buttons/Button";
-import { Entypo } from "@expo/vector-icons";
 import PaymentConfirm from "./components/PaymentConfirm";
 import { useCreateBookingMutation } from "../../api/bookingApi";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
 import { useGetCustomerByUserIdQuery } from "../../api/authApi";
+import CouponSelector from "./components/CouponSelector";
+import { useGetPolicyHashTagQuery } from "../../api/policySystemApi";
 
 export default function ConfirmBooking() {
   const authData = useSelector((state) => state.auth);
-  const [paymentMethod, setPaymentMethod] = useState(1); // Add state for payment method
+  const [paymentMethod, setPaymentMethod] = useState(1);
   const { data: customerData } = useGetCustomerByUserIdQuery(authData.userId);
-
+  const [selectedVoucher, setSelectedVoucher] = useState(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [finalTotal, setFinalTotal] = useState(0);
+  const { data: policyDataLoiNhuan } = useGetPolicyHashTagQuery("loinhuan");
   const [createBooking] = useCreateBookingMutation();
   const navigation = useNavigation();
   const route = useRoute();
   const { bookingData } = route.params || {};
+  const [phiDuyTri, setPhiDuyTri] = useState(0);
+
+  const loinhuan = policyDataLoiNhuan?.data?.[0];
+  const loinhuanbandau = loinhuan?.values?.[0];
+  console.log(loinhuanbandau);
+
+  useEffect(() => {
+    if (bookingData) {
+      calculateTotal();
+    }
+  }, [bookingData, selectedVoucher, loinhuanbandau]);
+
+  useEffect(() => {
+    if (
+      bookingData?.totalPrice &&
+      loinhuanbandau?.val1 &&
+      loinhuanbandau?.unit == "percent"
+    ) {
+      const fee =
+        (bookingData.totalPrice * parseFloat(loinhuanbandau.val1)) / 100;
+      setPhiDuyTri(fee);
+    } else if (
+      bookingData?.totalPrice &&
+      loinhuanbandau?.val1 &&
+      loinhuanbandau?.unit == "vnd"
+    ) {
+      const fee = loinhuanbandau.val1;
+
+      setPhiDuyTri(fee);
+    }
+  }, [bookingData, loinhuanbandau]);
+  console.log(phiDuyTri);
+
+  const calculateTotal = () => {
+    if (!bookingData) return;
+
+    const originalTotal = bookingData.totalPrice;
+    let discount = 0;
+
+    if (selectedVoucher) {
+      if (
+        selectedVoucher.discountBasedOn === "Percentage" ||
+        selectedVoucher.discountBasedOn === "percentage"
+      ) {
+        discount = (originalTotal * selectedVoucher.amount) / 100;
+
+        if (
+          selectedVoucher.maxDiscount &&
+          discount > selectedVoucher.maxDiscount
+        ) {
+          discount = selectedVoucher.maxDiscount;
+        }
+      } else if (
+        selectedVoucher.discountBasedOn === "Fixed" ||
+        selectedVoucher.discountBasedOn === "fixed"
+      ) {
+        // Fixed discount
+        discount = selectedVoucher?.amount;
+
+        // Make sure discount doesn't exceed the total
+        if (discount > originalTotal) {
+          discount = originalTotal;
+        }
+      }
+    }
+
+    const priceAfterDiscount = originalTotal - discount;
+    let fee = 0;
+    if (loinhuanbandau?.val1 && loinhuanbandau.unit == "percent") {
+      fee = (priceAfterDiscount * parseFloat(loinhuanbandau.val1)) / 100;
+      setPhiDuyTri(fee);
+    } else if (loinhuanbandau?.val1 && loinhuanbandau.unit == "vnd") {
+      fee = parseFloat(loinhuanbandau.val1);
+      setPhiDuyTri(fee);
+    }
+    setDiscountAmount(discount);
+    setFinalTotal(priceAfterDiscount + fee);
+  };
+
   const formatMoney = (amount) =>
     new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -49,9 +131,11 @@ export default function ConfirmBooking() {
       </SafeAreaView>
     );
   }
+
   const rentalData = bookingData.rentalData.data;
   const typeRoom = bookingData.accommodationType;
   const address = `${rentalData.address}, ${rentalData.ward}, ${rentalData.district}, ${rentalData.city}`;
+
   const [day, month, year] = bookingData?.date.split("-");
   const [hours, minutes] = bookingData?.time.split(":");
   const checkInHour = new Date(
@@ -61,7 +145,7 @@ export default function ConfirmBooking() {
     hours,
     minutes
   ).toISOString();
-  const startDateFormat = dayjs(checkInHour).format("DD-MM-YYYY HH:mm:ss");
+
   const [dayEnd, monthEnd, yearEnd] = bookingData?.endDate.split("-");
   const [hoursEnd, minutesEnd] = bookingData?.endTime.split(":");
   const checkOutHour = new Date(
@@ -82,8 +166,7 @@ export default function ConfirmBooking() {
       ],
       customerId: customerData.id,
       accommodationTypeId: typeRoom.id,
-      // couponId: bookingData?.couponId||,
-      couponId: null,
+      couponId: selectedVoucher?.id || null,
       feedbackId: null,
       basePrice: typeRoom.basePrice,
       overtimeHourlyPrice: typeRoom.overtimeHourlyPrice,
@@ -96,9 +179,11 @@ export default function ConfirmBooking() {
       childNumber: bookingData.guests.children,
       durationBookingHour: bookingData.duration,
       completedDate: null,
-      passwordRoom: "", // Có thể cập nhật nếu cần
+      passwordRoom: "",
       note: bookingData.note || "",
       status: 8,
+      discountAmount: discountAmount, // Add discount amount to the booking data
+      finalTotal: finalTotal, // Add final total after discount
     };
 
     try {
@@ -106,24 +191,19 @@ export default function ConfirmBooking() {
         data: formBooking,
       }).unwrap();
 
-      // if (response) {
-      //   if (paymentMethod === 1) {
-      //     // Alert.alert("Chưa hỗ trợ");
-      //   } else if (paymentMethod === 2) {
-      //     // Alert.alert("Momo");
-      //   } else if (paymentMethod === 3) {
-      //     Alert.alert("Đi thẳng");
-      //   }
-      // }
       navigation.navigate("BookingDetail", {
-        bookingData: bookingData,
+        bookingData: {
+          ...bookingData,
+          discountAmount,
+          finalTotal,
+        },
         bookingId: response.booking.id,
       });
-
-      // navigation.navigate("PaymentConfirm");
     } catch (error) {
-      // console.error("Booking failed:", error);
-      Alert.alert("Failed", error.data.message);
+      Alert.alert(
+        "Failed",
+        error.data?.message || "Đặt phòng thất bại, vui lòng thử lại sau"
+      );
     }
   };
 
@@ -178,7 +258,6 @@ export default function ConfirmBooking() {
 
           <View style={styles.card}>
             <Text style={styles.label}>Số khách:</Text>
-
             <View style={styles.jusBetween}>
               <Text style={styles.value}>Người lớn:</Text>
               <Text>{bookingData?.guests?.adults}</Text>
@@ -188,8 +267,53 @@ export default function ConfirmBooking() {
               <Text>{bookingData?.guests?.children}</Text>
             </View>
           </View>
+
+          <View style={styles.card}>
+            <CouponSelector
+              selectedVoucher={selectedVoucher}
+              setSelectedVoucher={setSelectedVoucher}
+            />
+          </View>
+
           <View style={styles.card}>
             <PaymentConfirm setPaymentMethod={setPaymentMethod} />
+          </View>
+
+          {/* Summary section */}
+          <View style={styles.card}>
+            <Text style={styles.label}>Tổng thanh toán:</Text>
+            <View style={styles.jusBetween}>
+              <Text style={styles.value}>Đơn giá phòng:</Text>
+              <Text>{formatMoney(bookingData.totalPrice)}</Text>
+            </View>
+
+            {selectedVoucher && (
+              <View style={styles.jusBetween}>
+                <Text style={[styles.value, styles.discountText]}>
+                  Giảm giá:
+                </Text>
+                <Text style={styles.discountText}>
+                  - {formatMoney(discountAmount)}
+                </Text>
+              </View>
+            )}
+            <View style={styles.jusBetween}>
+              {loinhuanbandau?.unit == "percent" ? (
+                <Text style={styles.value}>
+                  Phí duy trì ({loinhuanbandau.val1}%)
+                </Text>
+              ) : loinhuanbandau?.unit == "vnd" ? (
+                <Text style={styles.value}>
+                  Phí duy trì ({loinhuanbandau.val1} VND)
+                </Text>
+              ) : null}
+              <Text>{formatMoney(phiDuyTri)}</Text>
+            </View>
+
+            <View style={[styles.jusBetween, styles.totalRow]}>
+              <Text style={styles.totalText}>Thành tiền:</Text>
+              <Text style={styles.totalAmount}>{formatMoney(finalTotal)}</Text>
+            </View>
           </View>
         </KeyboardAvoidingView>
       </ScrollView>
@@ -203,9 +327,7 @@ export default function ConfirmBooking() {
         </TouchableOpacity>
         <View>
           <Text>Tổng</Text>
-          <Text style={styles.totalAmount}>
-            {formatMoney(bookingData.totalPrice)}
-          </Text>
+          <Text style={styles.totalAmount}>{formatMoney(finalTotal)}</Text>
         </View>
         <CustomButton
           onPress={handleConfirm}
@@ -248,58 +370,41 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    paddingVertical: 3,
   },
   label: {
     fontSize: 16,
     fontWeight: "700",
     color: "#444",
+    marginBottom: 5,
   },
   value: {
     fontSize: 16,
-    fontWeight: 400,
+    fontWeight: "400",
     color: "#222",
-    marginTop: 5,
   },
-  cardTotal: {
-    backgroundColor: "#ffffff",
-    padding: 15,
-    borderRadius: 10,
-    marginTop: 20,
+  discountText: {
+    color: "#e63946",
+    fontWeight: "500",
   },
-  totalLabel: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "black",
+  totalRow: {
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+    marginTop: 8,
+    paddingTop: 8,
   },
-  totalValue: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "black",
-    marginTop: 5,
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 30,
-  },
-  backButton: {
-    padding: 15,
-    backgroundColor: "#ccc",
-    borderRadius: 10,
+  totalText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#000",
   },
   totalAmount: {
     fontSize: 18,
-    fontWeight: "bold",
-  },
-  backText: {
-    fontSize: 16,
     fontWeight: "bold",
     color: "#000",
   },
   footer: {
     padding: 20,
-    // backgroundColor: "#fff",
-    // borderTopWidth: 1,
     borderTopColor: "#eee",
     flexDirection: "row",
     alignItems: "center",
@@ -319,18 +424,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-start",
     paddingLeft: 15,
-  },
-  currencySymbol: {
-    fontSize: 16,
-    color: "#666",
-    marginRight: 4,
-  },
-  price: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#000",
-  },
-  disabledButton: {
-    opacity: 0.5,
   },
 });

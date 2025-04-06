@@ -37,7 +37,7 @@ export default function BookingDetail() {
     refetch,
   } = useGetBookingByIdQuery(bookingId);
   const [processMomoPayment] = useProcessMomoPaymentMutation();
-  console.log(bookingData);
+  // console.log(bookingData);
 
   useFocusEffect(
     useCallback(() => {
@@ -53,7 +53,7 @@ export default function BookingDetail() {
 
   const getStatusText = (status) => {
     const statusMap = {
-      1: "Các nhận",
+      1: "Xác nhận",
       2: "Cần Check-in",
       3: "Check-in",
       4: "Cần Check-out",
@@ -112,9 +112,10 @@ export default function BookingDetail() {
           data: {
             bookingId: bookingData.id,
             amount: totalPrice,
-            description: `Thanh toán đặt phòng ${bookingData.id} qua Momo`,
+            description: `Thanh toán đặt phòng ${bookingData.id} qua Momo ${totalPrice}`,
             returnUrlFE: returnUrl,
-            orderIdFE: bookingData.id + "-" + new Date().getTime(), // Thêm timestamp để tránh trùng lặp
+            // orderIdFE: "MOMO " + bookingData.id + " " + new Date().getTime(), // Thêm timestamp để tránh trùng lặp
+            orderIdFE: "MOMO " + new Date().getTime(), // Thêm timestamp để tránh trùng lặp
           },
         }).unwrap();
 
