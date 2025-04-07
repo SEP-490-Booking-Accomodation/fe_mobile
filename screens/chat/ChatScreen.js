@@ -10,85 +10,57 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
-  Modal,
   AppState,
-  Image,
   SafeAreaView,
 } from "react-native";
 import { supabase } from "../../lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
 import OnlineStatus from "../../components/chat/OnlineStatus";
 import MessageStatus from "../../components/chat/MessageStatus";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
-export default function ChatScreen({ route, navigation}) {
+
+export default function ChatScreen({ route, navigation }) {
   const { chatId, chatName } = route.params;
+  
+  // State management
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [userProfiles, setUserProfiles] = useState({});
-  const [inviteModalVisible, setInviteModalVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [searching, setSearching] = useState(false);
-  const [inviting, setInviting] = useState(false);
   const [participants, setParticipants] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const [userName, setUserName] = useState(null);
+  
+  // Refs
   const flatListRef = useRef(null);
   const appState = useRef(AppState.currentState);
   const realtimeSubscription = useRef(null);
-  const {loadIdChatPlatform} = useAsyncStorage();
-  const [userId, setUserId] = useState(null);
-  const [userName, setUserName] = useState(null);  
-
-
   
-  // At the start of your component
+  // Hooks
+  const { loadIdChatPlatform } = useAsyncStorage();
+
+  // Load user data on mount
   useEffect(() => {
-    const fetchUserId = async () => {
-      var user = await loadIdChatPlatform();
-      
+    const fetchUserData = async () => {
+      const user = await loadIdChatPlatform();
+
       if (user !== null && user.length > 0) {
         const storedUser = user[0];
-        console.log("Loaded user from AsyncStorage:", storedUser);
-        
         if (storedUser._id) setUserId(storedUser._id);
         if (storedUser.username) setUserName(storedUser.username);
-      } else {
-        console.log("No user data found in AsyncStorage");
       }
     };
-    
-    fetchUserId();
-    console.log("ChatScreen mounted. ChatId:", chatId, "UserId:", userId);
-  }, []);
-  
-// Add at the top of your component body
-console.log("Rendering ChatScreen with state:", {
-  loading,
-  messagesLoaded: messages.length > 0,
-  participantsLoaded: participants.length > 0,
-  userId,
-  chatId
-});
-  // Set up navigation options
-  useEffect(() => {
-    if (participants.length > 0 && participants.length === 2 && userId) {
-      // Find the other participant (not current user)
-      const otherParticipant = participants.find((p) => p.id !== userId);
 
-      if (otherParticipant) {
-        navigation.setOptions({
-          headerShown: false,
-        });
-      }
-    } else {
-      navigation.setOptions({
-        headerShown: false,
-      });
-    }
+    fetchUserData();
+  }, []);
+
+  // Configure navigation options
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
   }, [navigation, participants, userId]);
 
   // Handle app state changes (background/foreground)
@@ -98,7 +70,6 @@ console.log("Rendering ChatScreen with state:", {
         appState.current.match(/inactive|background/) &&
         nextAppState === "active"
       ) {
-        console.log("App has come to the foreground - refreshing messages");
         fetchMessages();
 
         // Mark messages as read when returning to the app
@@ -112,7 +83,7 @@ console.log("Rendering ChatScreen with state:", {
     return () => {
       subscription.remove();
     };
-  }, [userId]);
+  }, [userId, chatId]);
 
   // Mark messages as read when entering the chat
   useEffect(() => {
@@ -121,17 +92,18 @@ console.log("Rendering ChatScreen with state:", {
     }
   }, [userId, loading, chatId]);
 
+  // Initialize chat data and realtime subscription
   useEffect(() => {
     if (userId) {
       setLoading(true);
-      
+
       // First fetch data only
       fetchMessages()
         .then(() => fetchParticipants())
         .then(() => {
           // Only setup realtime after data is loaded
           setupRealtimeSubscription();
-          setLoading(false); // Move this here to ensure it's set after everything completes
+          setLoading(false);
         })
         .catch((error) => {
           console.error("Error initializing chat:", error);
@@ -139,22 +111,21 @@ console.log("Rendering ChatScreen with state:", {
           Alert.alert("Error", "Failed to load chat data. Please try again.");
         });
     }
-  
+
     return () => {
       if (realtimeSubscription.current) {
-        console.log("Unsubscribing from realtime updates");
         realtimeSubscription.current.unsubscribe();
       }
     };
   }, [chatId, userId]);
+
+  // Setup realtime subscription for new messages
   function setupRealtimeSubscription() {
     try {
       // Clean up any existing subscription
       if (realtimeSubscription.current) {
         realtimeSubscription.current.unsubscribe();
       }
-
-      console.log(`Setting up realtime subscription for chat: ${chatId}`);
 
       // Create a new subscription
       const channel = supabase.channel(`chat:${chatId}`, {
@@ -175,17 +146,13 @@ console.log("Rendering ChatScreen with state:", {
             filter: `chat_id=eq.${chatId}`,
           },
           (payload) => {
-            console.log("New message received via realtime:", payload.new.id);
-
             // Add the new message to the state
             setMessages((prevMessages) => {
               // Check if we already have this message to avoid duplicates
               if (prevMessages.some((msg) => msg.id === payload.new.id)) {
-                console.log("Message already exists, skipping");
                 return prevMessages;
               }
 
-              console.log("Adding new message to state");
               const updatedMessages = [...prevMessages, payload.new];
 
               // Scroll to bottom on next render
@@ -224,8 +191,6 @@ console.log("Rendering ChatScreen with state:", {
             filter: `chat_id=eq.${chatId}`,
           },
           (payload) => {
-            console.log("Message updated via realtime:", payload.new.id);
-
             // Update the message in state
             setMessages((prevMessages) =>
               prevMessages.map((msg) =>
@@ -234,36 +199,27 @@ console.log("Rendering ChatScreen with state:", {
             );
           }
         )
-        .subscribe((status) => {
-          console.log(`Realtime subscription status: ${status}`);
-          if (status === "SUBSCRIBED") {
-            console.log("Successfully subscribed to realtime updates");
-          } else if (status === "CHANNEL_ERROR") {
-            console.error("Error subscribing to realtime updates");
-          }
-        });
+        .subscribe();
     } catch (error) {
       console.error("Error setting up realtime subscription:", error);
     }
   }
 
+  // Fetch chat participants
   async function fetchParticipants() {
     try {
-      console.log("Fetching participants for chat:", chatId);
-  
       const { data, error } = await supabase
-        .from("chat_participants") 
-        .select(`
+        .from("chat_participants")
+        .select(
+          `
           user_id,
           profiles:user_id(id, username, is_online, last_seen)
-        `)
+        `
+        )
         .eq("chat_id", chatId);
-  
-      if (error) {
-        console.error("Error fetching participants:", error.message);
-        throw error;
-      }
-  
+
+      if (error) throw error;
+
       if (Array.isArray(data)) {
         const participantList = data.map((p) => ({
           id: p.user_id,
@@ -271,10 +227,9 @@ console.log("Rendering ChatScreen with state:", {
           isOnline: p.profiles?.is_online || false,
           lastSeen: p.profiles?.last_seen || null,
         }));
-  
-        console.log("Fetched participants:", participantList.length);
+
         setParticipants(participantList);
-  
+
         // Also update userProfiles with this data
         const profilesMap = {};
         participantList.forEach((p) => {
@@ -285,12 +240,10 @@ console.log("Rendering ChatScreen with state:", {
             lastSeen: p.lastSeen,
           };
         });
-        
-        // Use functional update to ensure we don't lose existing profiles
-        setUserProfiles(prev => ({ ...prev, ...profilesMap }));
+
+        setUserProfiles((prev) => ({ ...prev, ...profilesMap }));
         return participantList;
       } else {
-        console.error("Invalid participants data format:", data);
         setParticipants([]);
         return [];
       }
@@ -301,6 +254,7 @@ console.log("Rendering ChatScreen with state:", {
     }
   }
 
+  // Fetch user profile
   async function fetchUserProfile(profileId) {
     try {
       const { data, error } = await supabase
@@ -309,10 +263,7 @@ console.log("Rendering ChatScreen with state:", {
         .eq("id", profileId)
         .single();
 
-      if (error) {
-        console.error("Error fetching profile:", error.message);
-        return;
-      }
+      if (error) return;
 
       if (data) {
         setUserProfiles((prev) => ({
@@ -329,62 +280,58 @@ console.log("Rendering ChatScreen with state:", {
     }
   }
 
+  // Fetch messages
   async function fetchMessages() {
     try {
       setIsRefreshing(false);
-      console.log("Fetching messages for chat:", chatId);
-  
-      // Remove the timeout race - it may be causing issues
+
       const { data, error } = await supabase
         .from("messages")
-        .select(`
+        .select(
+          `
           id,
           content,
           created_at,
           user_id,
           status,
-          read_by,
-        `)
+          read_by
+        `
+        )
         .eq("chat_id", chatId)
         .order("created_at", { ascending: true });
-  
-      if (error) {
-        console.error("Error fetching messages:", error.message);
-        throw error;
-      }
-  
-      console.log("Fetched messages:", data ? data.length : 0);
-  
+
+      if (error) throw error;
+
       // Check that data is actually an array before setting state
       if (Array.isArray(data)) {
         setMessages(data);
-  
+
         // Fetch profiles for all users in the messages
         const userIds = [...new Set(data.map((msg) => msg.user_id))];
         await Promise.all(userIds.map(fetchUserProfile));
       } else {
-        console.error("Invalid messages data format:", data);
         setMessages([]);
       }
-  
+
       // Mark messages as read separate from the main loading flow
       if (userId) {
-        markChatMessagesAsRead(chatId, userId).catch(err => 
+        markChatMessagesAsRead(chatId, userId).catch((err) =>
           console.error("Error marking messages as read:", err)
         );
       }
-  
+
       return true;
     } catch (error) {
       console.error("Exception fetching messages:", error.message);
       Alert.alert("Error", "Failed to load messages. Please try again.");
-      setMessages([]); 
+      setMessages([]);
       return false;
     } finally {
       setIsRefreshing(false);
     }
   }
 
+  // Update message status
   async function updateMessageStatus(messageId, status, userId) {
     if (!messageId || !status || !userId) return;
 
@@ -396,10 +343,7 @@ console.log("Rendering ChatScreen with state:", {
         .eq("id", messageId)
         .single();
 
-      if (fetchError) {
-        console.error("Error fetching message:", fetchError.message);
-        return;
-      }
+      if (fetchError) return;
 
       const updateData = { status };
 
@@ -411,7 +355,6 @@ console.log("Rendering ChatScreen with state:", {
             ? JSON.parse(JSON.stringify(message.read_by))
             : [];
         } catch (e) {
-          console.error("Error parsing read_by:", e.message);
           readBy = [];
         }
 
@@ -425,20 +368,17 @@ console.log("Rendering ChatScreen with state:", {
       // Order: sent < delivered < read
       const statusOrder = { sent: 1, delivered: 2, read: 3 };
       if (statusOrder[status] > statusOrder[message.status]) {
-        const { error } = await supabase
+        await supabase
           .from("messages")
           .update(updateData)
           .eq("id", messageId);
-
-        if (error) {
-          console.error("Error updating message status:", error.message);
-        }
       }
     } catch (e) {
       console.error("Exception updating message status:", e.message);
     }
   }
 
+  // Mark all messages as read
   async function markChatMessagesAsRead(chatId, userId) {
     if (!chatId || !userId) return;
 
@@ -451,13 +391,7 @@ console.log("Rendering ChatScreen with state:", {
         .neq("user_id", userId)
         .neq("status", "read");
 
-      if (error) {
-        console.error(
-          "Error fetching messages to mark as read:",
-          error.message
-        );
-        return;
-      }
+      if (error) return;
 
       // Update each message
       for (const message of data) {
@@ -468,12 +402,12 @@ console.log("Rendering ChatScreen with state:", {
     }
   }
 
+  // Send a new message
   async function sendMessage() {
     if (!newMessage.trim() || !userId) return;
 
     try {
       setSending(true);
-      console.log("Sending message to chat:", chatId);
 
       // Create a temporary message object to show immediately
       const tempMessage = {
@@ -513,8 +447,6 @@ console.log("Rendering ChatScreen with state:", {
         .select();
 
       if (error) {
-        console.error("Error sending message:", error.message);
-
         // Remove the temporary message and show error
         setMessages((prevMessages) =>
           prevMessages.filter((msg) => msg.id !== tempMessage.id)
@@ -522,8 +454,6 @@ console.log("Rendering ChatScreen with state:", {
 
         throw error;
       }
-
-      console.log("Message sent successfully:", data);
 
       // Replace the temporary message with the real one from the server
       if (data && data.length > 0) {
@@ -539,28 +469,53 @@ console.log("Rendering ChatScreen with state:", {
     }
   }
 
-
-
-
+  // Render a message
   function renderMessage({ item }) {
     const isCurrentUser = item.user_id === userId;
     const profile = userProfiles[item.user_id];
     const username = profile ? profile.username : "Unknown User";
-
     
+    return (
+      <View
+        style={[
+          styles.messageContainer,
+          isCurrentUser ? styles.currentUserMessage : styles.otherUserMessage
+        ]}
+      >
+        {!isCurrentUser && (
+          <Text style={styles.messageSender}>{username}</Text>
+        )}
+        <View style={styles.messageContentRow}>
+          <View
+            style={[
+              styles.messageBubble,
+              isCurrentUser ? styles.currentUserBubble : styles.otherUserBubble,
+              item.isTemp && styles.tempMessageBubble
+            ]}
+          >
+            <Text style={[
+              styles.messageText,
+              isCurrentUser ? styles.currentUserText : styles.otherUserText
+            ]}>
+              {item.content}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.messageFooter}>
+          <Text style={styles.messageTime}>
+            {new Date(item.created_at).toLocaleTimeString([], { 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            })}
+          </Text>
+          {isCurrentUser && (
+            <MessageStatus status={item.status} />
+          )}
+        </View>
+      </View>
+    );
+  }
 
-    return null;
-  }
-  console.log("Message",messages);async function fetchMessages() {
-    console.log('fetchMessages called');
-    try {
-      // ...
-    } catch (error) {
-      console.error('Error fetching messages:', error.message);
-    } finally {
-      console.log('fetchMessages finished');
-    }
-  }
   // Get the other participant for 1-on-1 chats
   const otherParticipant =
     participants.length === 2 && userId
@@ -576,7 +531,10 @@ console.log("Rendering ChatScreen with state:", {
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
             <Ionicons name="arrow-back" size={24} color="#000000" />
           </TouchableOpacity>
 
@@ -604,8 +562,8 @@ console.log("Rendering ChatScreen with state:", {
             )}
           </View>
 
-          <TouchableOpacity onPress={() => setInviteModalVisible(true)}>
-            <Ionicons name="person-add" size={24} color="#4A90E2" />
+          <TouchableOpacity style={styles.headerButton}>
+            <Ionicons name="ellipsis-vertical" size={24} color="#4A90E2" />
           </TouchableOpacity>
         </View>
 
@@ -618,33 +576,18 @@ console.log("Rendering ChatScreen with state:", {
           <FlatList
             ref={flatListRef}
             data={messages}
-            renderItem={renderMessage}
             keyExtractor={(item) => item.id.toString()}
+            renderItem={renderMessage}
             contentContainerStyle={styles.chatList}
-            onContentSizeChange={() =>
-              flatListRef.current?.scrollToEnd({ animated: true })
-            }
-            onLayout={() =>
-              flatListRef.current?.scrollToEnd({ animated: true })
-            }
-            refreshing={isRefreshing}
             onRefresh={fetchMessages}
+            refreshing={isRefreshing}
+            onContentSizeChange={() => 
+              flatListRef.current?.scrollToEnd({ animated: false })
+            }
           />
         )}
 
         <View style={styles.inputContainer}>
-          {/* <TouchableOpacity
-            style={styles.imageButton}
-            onPress={pickImage}
-            disabled={uploadingImage}
-          >
-            {uploadingImage ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <Ionicons name="image" size={24} color="white" />
-            )}
-          </TouchableOpacity> */}
-
           <TextInput
             style={styles.input}
             value={newMessage}
@@ -652,95 +595,24 @@ console.log("Rendering ChatScreen with state:", {
             placeholder="Type a message..."
             multiline
             editable={!sending}
+            placeholderTextColor="#999"
           />
 
           <TouchableOpacity
-            style={styles.sendButton}
+            style={[
+              styles.sendButton,
+              !newMessage.trim() || sending ? styles.sendButtonDisabled : null
+            ]}
             onPress={sendMessage}
             disabled={!newMessage.trim() || sending}
           >
             {sending ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
-              <Text style={styles.sendButtonText}>Send</Text>
+              <Ionicons name="send" size={20} color="white" />
             )}
           </TouchableOpacity>
         </View>
-
-        {/* Invite Users Modal */}
-        {/* <Modal
-          animationType="slide"
-          transparent={true}
-          visible={inviteModalVisible}
-          onRequestClose={() => setInviteModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Invite Users</Text>
-                <TouchableOpacity
-                  onPress={() => setInviteModalVisible(false)}
-                  style={styles.closeButton}
-                >
-                  <Ionicons name="close" size={24} color="#666" />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.searchContainer}>
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="Search users by username..."
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  onSubmitEditing={searchUsers}
-                  autoCapitalize="none"
-                />
-                <TouchableOpacity
-                  style={styles.searchButton}
-                  onPress={searchUsers}
-                  disabled={searching || !searchQuery.trim()}
-                >
-                  {searching ? (
-                    <ActivityIndicator size="small" color="white" />
-                  ) : (
-                    <Ionicons name="search" size={20} color="white" />
-                  )}
-                </TouchableOpacity>
-              </View>
-
-              
-
-              <View style={styles.participantsContainer}>
-                <Text style={styles.sectionTitle}>
-                  Current Participants ({participants.length})
-                </Text>
-                <FlatList
-                  data={participants}
-                  renderItem={({ item }) => (
-                    <View style={styles.participantItem}>
-                      <View style={styles.userAvatar}>
-                        <Text style={styles.userAvatarText}>
-                          {item.username.charAt(0).toUpperCase()}
-                        </Text>
-                      </View>
-                      <Text style={styles.username}>{item.username}</Text>
-                      {item.id === userId && (
-                        <Text style={styles.youLabel}>(You)</Text>
-                      )}
-                      <OnlineStatus
-                        isOnline={item.isOnline}
-                        lastSeen={item.lastSeen}
-                        showText={true}
-                      />
-                    </View>
-                  )}
-                  keyExtractor={(item) => item.id}
-                  style={styles.participantsList}
-                />
-              </View>
-            </View>
-          </View>
-        </Modal> */}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -749,12 +621,11 @@ console.log("Rendering ChatScreen with state:", {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    paddingTop: 20,
     backgroundColor: "#FFFFFF",
   },
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F8F9FA",
   },
   header: {
     flexDirection: "row",
@@ -764,12 +635,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#E5E5E5",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+  },
+  backButton: {
+    padding: 8,
   },
   headerProfile: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    marginLeft: 12,
+    marginLeft: 8,
   },
   avatar: {
     width: 40,
@@ -778,7 +657,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#4A90E2",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 8,
+    marginRight: 12,
   },
   avatarText: {
     color: "white",
@@ -793,6 +672,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#000000",
   },
+  headerButton: {
+    padding: 8,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -801,12 +683,14 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     color: "#666",
+    fontSize: 16,
   },
   chatList: {
     padding: 16,
+    paddingBottom: 24,
   },
   messageContainer: {
-    marginBottom: 15,
+    marginBottom: 16,
     maxWidth: "80%",
   },
   currentUserMessage: {
@@ -826,8 +710,9 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   messageBubble: {
-    borderRadius: 20,
+    borderRadius: 18,
     padding: 12,
+    maxWidth: "100%",
   },
   currentUserBubble: {
     backgroundColor: "#DCF8C6",
@@ -838,12 +723,9 @@ const styles = StyleSheet.create({
   tempMessageBubble: {
     opacity: 0.7,
   },
-  imageBubble: {
-    padding: 4,
-    overflow: "hidden",
-  },
   messageText: {
     fontSize: 16,
+    lineHeight: 22,
   },
   currentUserText: {
     color: "#333",
@@ -851,175 +733,48 @@ const styles = StyleSheet.create({
   otherUserText: {
     color: "#333",
   },
-  imageMessage: {
-    width: 200,
-    height: 200,
-    borderRadius: 8,
-  },
   messageFooter: {
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
-    marginTop: 2,
+    marginTop: 4,
+    paddingRight: 4,
   },
   messageTime: {
-    fontSize: 10,
+    fontSize: 11,
     color: "#999",
     marginRight: 4,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
+    padding: 12,
+    backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
     borderTopColor: "#E5E5E5",
   },
   input: {
     flex: 1,
-    height: 40,
+    minHeight: 40,
+    maxHeight: 100,
     borderWidth: 1,
     borderColor: "#E5E5E5",
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     marginRight: 8,
+    backgroundColor: "#F8F9FA",
+    fontSize: 16,
   },
   sendButton: {
-    backgroundColor: "#1D4ED8",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-  },
-  sendButtonText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  imageButton: {
-    marginRight: 8,
-    backgroundColor: "#1D4ED8",
-    padding: 10,
-    borderRadius: 8,
-    width: 44,
-    height: 44,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    width: "90%",
-    height: "80%",
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  closeButton: {
-    padding: 5,
-  },
-  searchContainer: {
-    flexDirection: "row",
-    marginBottom: 20,
-  },
-  searchInput: {
-    flex: 1,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 5,
-    padding: 10,
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  searchButton: {
     backgroundColor: "#4A90E2",
-    borderRadius: 5,
-    padding: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    width: 40,
-  },
-  resultsContainer: {
-    flex: 1,
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#666",
-  },
-  resultsList: {
-    flex: 1,
-  },
-  searchResultItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  userAvatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#4A90E2",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 10,
   },
-  userAvatarText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  username: {
-    flex: 1,
-    fontSize: 16,
-  },
-  emptyText: {
-    textAlign: "center",
-    color: "#999",
-    padding: 20,
-  },
-  participantsContainer: {
-    flex: 1,
-  },
-  participantsList: {
-    flex: 1,
-  },
-  participantItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  youLabel: {
-    fontSize: 14,
-    color: "#999",
-    marginLeft: 5,
-    marginRight: 10,
+  sendButtonDisabled: {
+    backgroundColor: "#A0C2E7",
   },
 });
-
