@@ -14,30 +14,30 @@ const PaymentConfirm = ({ setPaymentMethod }) => {
   const [selectedPayment, setSelectedPayment] = useState(1);
 
   const paymentMethods = [
+    // {
+    //   value: 1,
+    //   label: "Thanh toán bằng ví Mean",
+    //   sublabel: "Thanh toán bằng ví Mean của bạn",
+    //   image: {
+    //     uri: "https://developers.momo.vn/v3/assets/images/square-logo-f8712a4d5be38f389e6bc94c70a33bf4.png",
+    //   },
+    // },
     {
       value: 1,
-      label: "Thanh toán bằng ví Mean",
-      sublabel: "Thanh toán bằng ví Mean của bạn",
-      image: {
-        uri: "https://developers.momo.vn/v3/assets/images/square-logo-f8712a4d5be38f389e6bc94c70a33bf4.png",
-      },
-    },
-    {
-      value: 2,
       label: "Momo",
       sublabel: "Thanh toán bằng Momo của bạn",
       image: {
         uri: "https://developers.momo.vn/v3/assets/images/square-logo-f8712a4d5be38f389e6bc94c70a33bf4.png",
       },
     },
-    {
-      value: 3,
-      label: "Thanh toán Test",
-      sublabel: "Thanh toán Test",
-      image: {
-        uri: "https://developers.momo.vn/v3/assets/images/square-logo-f8712a4d5be38f389e6bc94c70a33bf4.png",
-      },
-    },
+    // {
+    //   value: 3,
+    //   label: "Thanh toán Test",
+    //   sublabel: "Thanh toán Test",
+    //   image: {
+    //     uri: "https://developers.momo.vn/v3/assets/images/square-logo-f8712a4d5be38f389e6bc94c70a33bf4.png",
+    //   },
+    // },
   ];
 
   const handleSelectPayment = (method) => {

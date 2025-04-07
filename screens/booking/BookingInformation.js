@@ -36,7 +36,8 @@ export default function BookingInformation({ route, navigation }) {
   );
 
   const MAX_PEOPLE = accommodationTypeData?.data?.maxPeopleNumber || 3;
-  const isOverNight = accommodationTypeData?.data?.isOverNight || false;
+  const isOverNight = rentalData?.data?.isOverNight;
+  console.log("isOverNight", isOverNight);
 
   // State for pickers and modals
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
@@ -116,11 +117,15 @@ export default function BookingInformation({ route, navigation }) {
   const handleDateSelect = (date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
     const selectedDay = new Date(date);
     selectedDay.setHours(0, 0, 0, 0);
 
-    if (selectedDay < today) {
-      Alert.alert("Lỗi", "Vui lòng chọn ngày từ hôm nay trở đi.");
+    if (selectedDay < today || selectedDay > tomorrow) {
+      Alert.alert("Lỗi", "Chỉ được chọn ngày hôm nay hoặc ngày mai.");
       return;
     }
 
@@ -140,14 +145,14 @@ export default function BookingInformation({ route, navigation }) {
 
     const selectedHour = time.getHours();
     const selectedMinute = time.getMinutes();
-    // Kiểm tra nếu thời gian chọn nhỏ hơn giờ mở cửa
+
     if (
       selectedHour < OPENING_HOUR ||
       (selectedHour === OPENING_HOUR && selectedMinute < OPENING_MINUTE)
     ) {
       Alert.alert(
         "Lỗi",
-        `Thời gian hoạt động chỉ từ ${OPENING_HOUR}:${String(
+        `Thời gian nhận phòng chỉ từ ${OPENING_HOUR}:${String(
           OPENING_MINUTE
         ).padStart(2, "0")} đến ${CLOSING_HOUR}:${String(
           CLOSING_MINUTE
@@ -156,11 +161,24 @@ export default function BookingInformation({ route, navigation }) {
       return;
     }
 
-    // Tính thời gian kết thúc
+    if (
+      selectedHour > CLOSING_HOUR ||
+      (selectedHour === CLOSING_HOUR && selectedMinute < CLOSING_MINUTE)
+    ) {
+      Alert.alert(
+        "Lỗi",
+        `Thời gian nhận phòng chỉ từ ${OPENING_HOUR}:${String(
+          OPENING_MINUTE
+        ).padStart(2, "0")} đến ${CLOSING_HOUR}:${String(
+          CLOSING_MINUTE
+        ).padStart(2, "0")}.`
+      );
+      return;
+    }
+
     const endDateTime = new Date(selectedDateTime);
     endDateTime.setHours(endDateTime.getHours() + selectedDuration);
 
-    // Kiểm tra nếu endTime vượt quá giờ đóng cửa (nếu không phải qua đêm)
     if (
       !isOverNight &&
       (endDateTime.getHours() > CLOSING_HOUR ||
@@ -169,7 +187,7 @@ export default function BookingInformation({ route, navigation }) {
     ) {
       Alert.alert(
         "Lỗi",
-        `Thời gian kết thúc không được vượt quá ${CLOSING_HOUR}:${String(
+        `Thời gian nhận phòng không được chọn sau ${CLOSING_HOUR}:${String(
           CLOSING_MINUTE
         ).padStart(2, "0")}.`
       );
@@ -231,8 +249,8 @@ export default function BookingInformation({ route, navigation }) {
   const calculateTotalPrice = () => {
     if (!accommodationTypeData?.data) return 0;
 
-    const basePrice = accommodationTypeData.data.basePrice || 0;
-    const overtimePrice = accommodationTypeData.data.overtimeHourlyPrice || 0;
+    const basePrice = accommodationTypeData?.data.basePrice || 0;
+    const overtimePrice = accommodationTypeData?.data.overtimeHourlyPrice || 0;
 
     return basePrice + (selectedDuration - 1) * overtimePrice;
   };
@@ -306,6 +324,10 @@ export default function BookingInformation({ route, navigation }) {
             <DurationSelector
               selectedDuration={selectedDuration}
               handleSelectDuration={handleSelectDuration}
+              selectedTime={selectedTime}
+              isOverNight={isOverNight}
+              closingHour={CLOSING_HOUR}
+              closingMinute={CLOSING_MINUTE}
             />
 
             <GuestSelector

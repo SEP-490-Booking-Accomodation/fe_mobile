@@ -37,7 +37,6 @@ export default function ConfirmBooking() {
 
   const loinhuan = policyDataLoiNhuan?.data?.[0];
   const loinhuanbandau = loinhuan?.values?.[0];
-  console.log(loinhuanbandau);
 
   useEffect(() => {
     if (bookingData) {
@@ -64,7 +63,6 @@ export default function ConfirmBooking() {
       setPhiDuyTri(fee);
     }
   }, [bookingData, loinhuanbandau]);
-  console.log(phiDuyTri);
 
   const calculateTotal = () => {
     if (!bookingData) return;
@@ -158,12 +156,12 @@ export default function ConfirmBooking() {
 
   const checkInDateTime = `${bookingData.date} ${bookingData.time}:00`;
   const checkOutDateTime = `${bookingData.date} ${bookingData.endTime}:00`;
+  const policyId = policyDataLoiNhuan?.data?.[0].id;
+  console.log(policyId);
 
   const handleConfirm = async () => {
     const formBooking = {
-      policySystemIds: bookingData.policySystemIds || [
-        "67ebf15d828b69a4d279d960",
-      ],
+      policySystemIds: policyId || ["67ebf15d828b69a4d279d960"],
       customerId: customerData.id,
       accommodationTypeId: typeRoom.id,
       couponId: selectedVoucher?.id || null,
