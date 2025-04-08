@@ -9,7 +9,6 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "platforms": ["ios", "android"],
-
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -17,7 +16,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mean.identifier"
+      "bundleIdentifier": "com.mean.identifier",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.mean.package",
@@ -29,6 +31,22 @@
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "da99a83b-a51e-46d6-a301-3d90cdb681a6"
+      }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "swiftVersion": "5.0"
+            
+          }
+        }
+      ]
+    ]
   }
 }
