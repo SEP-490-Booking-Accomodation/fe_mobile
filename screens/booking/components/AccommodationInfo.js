@@ -8,19 +8,18 @@ const AccommodationInfo = ({
   isOverNight,
 }) => {
   if (!accommodationTypeData?.data) return null;
-  const loadingGif = "https://i.gifer.com/XOsX.gif";
+  const loadingGif = "https://i.gifer.com/WMDx.gif";
   const [isLoading, setIsLoading] = useState(true); // Trạng thái tải ảnh
-  console.log(rentalData);
 
   return (
     <View style={styles.typeInfoContainer}>
-      {isLoading && (
+      {/* {isLoading && (
         <Image
           source={{ uri: loadingGif }}
-          style={styles.image}
-          resizeMode="contain"
+          style={styles.mainImage}
+          resizeMode="center"
         />
-      )}
+      )} */}
       <Image
         source={{
           uri: accommodationTypeData?.data?.image?.[0],
@@ -31,7 +30,12 @@ const AccommodationInfo = ({
         onError={() => setIsLoading(false)} // Nếu lỗi, ẩn GIF
       />
 
-      <Text style={styles.typeName}>{accommodationTypeData?.data?.name}</Text>
+      <View style={{ display: "flex", flexDirection: "row", gap: 10 }}>
+        <Text style={styles.typeName}>{accommodationTypeData?.data?.name}</Text>
+        {isOverNight && (
+          <Text style={styles.specialTag}>Cho phép đặt qua đêm</Text>
+        )}
+      </View>
       <Text style={styles.infoText}>
         {rentalData?.data.openHour} - {rentalData?.data.closeHour}
       </Text>
@@ -45,9 +49,6 @@ const AccommodationInfo = ({
         Giá giờ tiếp theo:{" "}
         {formatMoney(accommodationTypeData?.data?.overtimeHourlyPrice)} / giờ
       </Text>
-      {isOverNight && (
-        <Text style={styles.specialTag}>Cho phép đặt qua đêm</Text>
-      )}
     </View>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import PropTypes from "prop-types";
@@ -20,10 +20,25 @@ export default function VerticalCard({
   onFavouritePress = () => {},
   // onCardPress = () => {},
 }) {
-  const loadingGif = "https://i.gifer.com/XOsX.gif";
+  const loadingGif = "https://i.gifer.com/WMDx.gif";
+  const fallbackImage =
+    "https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png";
+
   const [isFavourite, setIsFavourite] = useState(initFavourite);
   const navigate = useNavigation();
   const [isLoading, setIsLoading] = useState(true); // Trạng thái tải ảnh
+  const [currentImage, setCurrentImage] = useState(imageUrl);
+
+  useEffect(() => {
+    let timeout = setTimeout(() => {
+      if (isLoading) {
+        setCurrentImage(fallbackImage);
+        setIsLoading(false);
+      }
+    }, 3000); // 3 giây
+
+    return () => clearTimeout(timeout);
+  }, [isLoading]);
 
   const handleFavouritePress = () => {
     const newValue = !isFavourite;
@@ -45,15 +60,16 @@ export default function VerticalCard({
     >
       {/* Image Section */}
       <View style={styles.imageContainer}>
-        {isLoading && (
+        {isLoading && currentImage !== fallbackImage && (
           <Image
             source={{ uri: loadingGif }}
             style={styles.image}
-            resizeMode="contain"
+            resizeMode="center"
           />
         )}
+
         <Image
-          source={{ uri: imageUrl }}
+          source={{ uri: currentImage }}
           style={[styles.image, isLoading ? styles.hidden : {}]}
           resizeMode="cover"
           onLoad={() => setIsLoading(false)}

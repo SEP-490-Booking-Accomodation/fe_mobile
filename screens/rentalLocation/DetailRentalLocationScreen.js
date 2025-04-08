@@ -264,15 +264,10 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               />
             </View>
           )}
-
           {filteredAccommodationTypes.map((accommodationType) => (
             <SimpleVerticalCard
               key={accommodationType._id}
-              imageUrl={
-                accommodationType.image?.[0] ||
-                rental.image?.[0] ||
-                "https://via.placeholder.com/300"
-              }
+              imageUrl={accommodationType.image?.[0]}
               placeName={accommodationType.name}
               price={`${accommodationType.basePrice}đ/giờ`}
               location={`${rental.address}, ${rental.ward} , ${rental.district}, ${rental.city}`}
