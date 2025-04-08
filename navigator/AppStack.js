@@ -41,6 +41,7 @@ import MessagesScreen from "../screens/chat/MessagesScreen";
 import ChatScreen from "../screens/chat/ChatScreen";
 import ConfirmBooking from "../screens/booking/ConfirmBooking";
 import PaymentConfirm from "../screens/payment/PaymentConfirm";
+import BookingDetail from "../screens/booking/BookingDetail";
 import PaymentSuccess from "../screens/payment/PaymentSuccess";
 import WalletScreen from "../screens/profile/childPage/WalletScreen";
 import PaymentMethod from "../screens/payment/PaymentMethod";
@@ -53,6 +54,7 @@ import FavouriteList from "../screens/profile/childPage/FavouriteList";
 import HistoryScreen from "../screens/profile/childPage/HistoryScreen";
 import RatingHistory from "../screens/profile/childPage/RatingHistory";
 import TicketList from "../screens/ticket/TicketList";
+import BookingInformation from "../screens/booking/BookingInformation";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -69,6 +71,8 @@ const hideTabBarScreens = [
   "DetailAccomodation",
   "ConfirmBooking",
   "PaymentConfirm",
+  "BookingInformation",
+  "BookingDetail",
   "PaymentSuccess",
   "Chat",
   "Policies",
@@ -131,11 +135,25 @@ const HomeStack = () => (
       options={{ headerShown: false }}
     />
     <Stack.Screen
+      name="BookingInformation"
+      component={BookingInformation}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
       name="ConfirmBooking"
       component={ConfirmBooking}
       options={{ headerShown: false }}
     />
-    <Stack.Screen name="PaymentConfirm" component={PaymentConfirm} />
+    <Stack.Screen
+      name="PaymentConfirm"
+      component={PaymentConfirm}
+      options={{ headerShown: false }}
+    />
+    {/* <Stack.Screen
+      name="BookingDetail"
+      component={BookingDetail}
+      options={{ headerShown: false }}
+    /> */}
     <Stack.Screen
       name="PaymentSuccess"
       component={PaymentSuccess}
@@ -229,6 +247,11 @@ const SettingStack = () => (
 const TicketStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="TicketList" component={TicketList} />
+    {/* <Stack.Screen
+      name="BookingDetail"
+      component={BookingDetail}
+      options={{ headerShown: false }}
+    /> */}
   </Stack.Navigator>
 );
 
@@ -416,6 +439,7 @@ const AppStack = () => {
 
         {/* Auth Flow */}
         <Stack.Screen name="Auth" component={AuthStack} />
+        <Stack.Screen name="BookingDetail" component={BookingDetail} />
 
         {/* Main App Flow - Thay DrawerNavigator bằng MainTabNavigator */}
         <Stack.Screen name="MainTabs" component={MainTabNavigator} />

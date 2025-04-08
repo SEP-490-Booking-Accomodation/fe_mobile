@@ -132,8 +132,11 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   };
 
   const handleCardPress = (accommodationType) => {
+    console.log(accommodationType);
+
     navigation.navigate("DetailAccomodation", {
       accommodationTypeId: accommodationType._id,
+      rentalData: rentalData,
     });
   };
 

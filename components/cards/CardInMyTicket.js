@@ -1,49 +1,36 @@
-import {
-  Image,
-  StyleSheet,
-  Touchable,
-  TouchableOpacity,
-  View,
-  Text,
-} from "react-native";
+import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import React from "react";
+import React, { useState } from "react";
 import CustomButton from "../buttons/Button";
-import { useState } from "react";
 
 /*
-    - Status: 
-        + (-1) : has button review + view detail 
-        + (0) : has button Cancel + view detail (from customer book and before the cancelation)
-        + (1) : has only button Re-booking (after done review just show 1 button is re-booking)
-
+  Status codes:
+  - (-1): Completed or cancelled booking - has button review + view detail
+  - (0): Upcoming booking - has button Cancel + view detail
+  - (1): Current booking - has only button Re-booking
 */
 /**
- * 
- * @example 
- * <CardInMyTicket
-           imageUrl = {require("./assets/images/horizontalCardImage.jpeg")}
-           nameRoom = {'room 1'}
-           tagName = {'price'}
-           placeName = {'Bình Hưng Hoà'}
-           maxPeople = {'3'}
-           price = {'1.200.000'}
-           dateCompleted = {'12/10/2022'}
-           status = '-1'
-         ></CardInMyTicket>
- * 
- * @param {imageUrl, nameRoom, tagName, placeName, maxPeople, price, dateCompelete, status
- * } props 
- * @returns componentCardInMyTicket
- * 
- * 
+ * Card component for displaying booking information in My Tickets screen
+ *
+ * @param {Object} props Component properties
+ * @param {string|Object} props.imageUrl Image source for the room
+ * @param {string} props.nameRoom Name of the room
+ * @param {string} props.placeName Location name
+ * @param {string} props.maxPeople Maximum number of people
+ * @param {string} props.price Price of the booking
+ * @param {string} props.dateCompleted Checkout date
+ * @param {string} props.status Status code to determine available actions
+ * @param {Function} props.onViewDetail Function called when View Detail button is pressed
+ * @param {Function} props.onReviewAction Function called when Review button is pressed
+ * @param {Function} props.onCancelAction Function called when Cancel button is pressed
+ * @param {Function} props.onRebookingAction Function called when Rebooking button is pressed
+ * @returns {React.Component}
  */
-
 export default function CardInMyTicket(props) {
   const {
     imageUrl,
     nameRoom,
-    tagName,
+    tagName = "Imperial",
     placeName,
     maxPeople,
     price,
@@ -56,35 +43,64 @@ export default function CardInMyTicket(props) {
   } = props;
 
   const [loading, setLoading] = useState(false);
-  //'../../assets/images/horizontalCardImage.jpeg'
+
+  // Determine the status text and color based on status
+  const getStatusInfo = () => {
+    switch (status) {
+      case "-1":
+        return { text: "Đã hủy/Hoàn tất", color: "#EF4444" };
+      case "0":
+        return { text: "Sắp tới", color: "#10B981" };
+      case "1":
+        return { text: "Đang diễn ra", color: "#4E72E3" };
+      default:
+        return { text: "N/A", color: "#6B7280" };
+    }
+  };
+
+  const statusInfo = getStatusInfo();
+
   return (
-    <TouchableOpacity style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={onViewDetail}>
       <View style={styles.contentRow}>
         <Image
-          source={imageUrl} // Replace with your image path
+          source={imageUrl} // Image source
           style={styles.thumbnail}
         />
 
         <View style={styles.rightContainer}>
           <View style={styles.detailsContainer}>
             <Text style={styles.title}>{nameRoom}</Text>
-            <View style={styles.tagContainer}>
-              <Text style={styles.tagText}>Imperial</Text>
+
+            {/* Status tag */}
+            <View
+              style={[
+                styles.tagContainer,
+                { backgroundColor: `${statusInfo.color}20` },
+              ]}
+            >
+              <Text style={[styles.tagText, { color: statusInfo.color }]}>
+                {statusInfo.text}
+              </Text>
             </View>
+
             <View style={styles.locationContainer}>
               <Icon name="location-on" size={16} color="#4B84F5" />
               <Text style={styles.locationText}>{placeName}</Text>
               <Text style={styles.dateText}>{dateCompleted}</Text>
             </View>
+
             <View style={styles.peopleContainer}>
               <Icon name="person" size={16} color="#4B84F5" />
-              <Text style={styles.peopleText}>{maxPeople} người lớn</Text>
+              <Text style={styles.peopleText}>{maxPeople} người </Text>
             </View>
-            <Text style={styles.priceText}>{price}đ</Text>
+
+            <Text style={styles.priceText}>{price}</Text>
           </View>
 
           <View style={styles.buttonContainer}>
             {status === "-1" ? (
+              // For completed or cancelled bookings - Review + View detail
               <CustomButton
                 title={"Đánh giá"}
                 backgroundColor="#dadada"
@@ -97,6 +113,7 @@ export default function CardInMyTicket(props) {
                 onPress={onReviewAction}
               />
             ) : status === "0" ? (
+              // For upcoming bookings - Cancel + View detail
               <CustomButton
                 title={"Huỷ"}
                 backgroundColor="#fef2f2"
@@ -132,9 +149,7 @@ export default function CardInMyTicket(props) {
                   : {}
               }
               onPress={
-                status === "-1"
-                  ? onViewDetail
-                  : status === "0"
+                status === "-1" || status === "0"
                   ? onViewDetail
                   : status === "1"
                   ? onRebookingAction
@@ -147,6 +162,7 @@ export default function CardInMyTicket(props) {
     </TouchableOpacity>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#FFFFFF",
@@ -175,7 +191,7 @@ const styles = StyleSheet.create({
   },
   rightContainer: {
     flex: 1,
-    justifyContent: "space-between", 
+    justifyContent: "space-between",
     minHeight: 130,
   },
   detailsContainer: {
@@ -196,6 +212,7 @@ const styles = StyleSheet.create({
   tagText: {
     color: "#4B84F5",
     fontSize: 12,
+    fontWeight: "500",
   },
   locationContainer: {
     flexDirection: "row",
@@ -228,15 +245,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     marginTop: 8,
-  },
-  detailsButton: {
-    flex: 1,
-    backgroundColor: "#1A1A1A",
-    paddingVertical: 8,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  detailsButtonText: {
-    color: "#FFFFFF",
   },
 });

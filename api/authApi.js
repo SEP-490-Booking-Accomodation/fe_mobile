@@ -1,7 +1,7 @@
 import baseApi from "./baseApi";
 
 export const authApi = baseApi.injectEndpoints({
-  overrideExisting: true, // Thêm dòng này
+  overrideExisting: true,
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
@@ -61,11 +61,16 @@ export const authApi = baseApi.injectEndpoints({
         method: "GET",
       }),
     }),
+    getCustomerByUserId: builder.query({
+      query: (userId) => `/customer/detail-customer/${userId}`,
+      providesTags: ["Customer"],
+    }),
   }),
 });
 
 export const {
   useLoginMutation,
+  useGetCustomerByUserIdQuery,
   useLogoutQuery,
   useLazyGetUserQuery,
   useLazyGetRoleByIdQuery,
