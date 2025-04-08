@@ -41,13 +41,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 
     fetchUser();
   }, []); 
-
-
-
-
-
-  
-
   if (!locationId) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -79,9 +72,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
       // Prepare required values
       const ownerPlatformId = rentalData.data?.ownerId?.userId?._id;
       const locationId = rentalData.data?._id;
-      console.log("Owner Platform ID:", ownerPlatformId);
-      console.log("Location ID:", locationId);
-
       // Call newChat with full object
       const result = await newChat({
         ownerPlatformId,
@@ -194,7 +184,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
                 color="red"
               />
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleChatPress()}>
+            <TouchableOpacity onPress={handleChatPress}>
               <MaterialIcons name="chat" size={24} color="#333" />
             </TouchableOpacity>
             <TouchableOpacity onPress={handleMoreOptions}>

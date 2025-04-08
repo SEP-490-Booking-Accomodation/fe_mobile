@@ -21,7 +21,6 @@ import { useAsyncStorage } from "../../context/AsyncStorageContext";
 
 export default function ChatScreen({ route, navigation }) {
   const { chatId, chatName } = route.params;
-  
   // State management
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");

@@ -178,7 +178,10 @@ export const AsyncStorageProvider = ({ children }) => {
         );
       }
     } catch (error) {
-      console.error("Failed to add idChatPlatform:", error);
+      useEffect(() => {
+        console.log("idChatPlatform updated:", idChatPlatform);
+      }, [idChatPlatform]);
+      
       
     }
   }
@@ -189,8 +192,9 @@ export const AsyncStorageProvider = ({ children }) => {
       setIdChatPlatform([]);
     } catch (error) {
       console.log("Failed to remove idChatPlatform:", error);
-    }
-  }
+    } 
+  };
+  
 
 
 
