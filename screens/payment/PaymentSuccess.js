@@ -68,7 +68,6 @@ const PaymentSuccess = ({ route, navigation }) => {
               </View>
               <Text style={styles.title}>Thanh toán thành công</Text>
               <Text style={styles.subtitle}>Chúng tôi vừa gửi số tiền của bạn cho</Text>
-
               <View style={styles.roomInfo}>
                 <Image
                   source={{

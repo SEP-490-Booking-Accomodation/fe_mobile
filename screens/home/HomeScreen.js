@@ -1,20 +1,15 @@
-import {
-  StyleSheet,
-  Text,
-  SafeAreaView,
-  ScrollView,
-  RefreshControl,
-} from "react-native";
-import { useEffect, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
-import * as Location from "expo-location";
-import LocationList from "./LocationList";
-import SearchField from "./SearchField";
-import HeaderLNA from "./HeaderLNA";
-import { useSelector } from "react-redux";
-import { useGetUserQuery } from "../../api/authApi";
-import { useGetAllRentalQuery } from "../../api/rentalLocationApi";
-
+import { StyleSheet, Text, SafeAreaView, ScrollView, RefreshControl } from "react-native"
+import { useEffect, useState } from "react"
+import { useNavigation } from "@react-navigation/native"
+import * as Location from "expo-location"
+import LocationList from "./LocationList"
+import SearchField from "./SearchField"
+import HeaderLNA from "./HeaderLNA"
+import { useSelector } from "react-redux"
+import { useGetUserQuery } from "../../api/authApi"
+import { useGetAllRentalQuery } from "../../api/rentalLocationApi"
+import { ensureUserInDatabase } from "../../lib/supabase"
+import { useAsyncStorage } from "../../context/AsyncStorageContext"
 const cities = [
   "Hà Nội",
   "TP Hồ Chí Minh",
@@ -34,21 +29,21 @@ const cities = [
 ];
 
 export default function HomeScreen() {
-  const navigation = useNavigation();
-  const [location, setLocation] = useState("Đang lấy vị trí");
-  const [address, setAddress] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
-  const [manualCity, setManualCity] = useState(null);
-  const authData = useSelector((state) => state.auth);
-  const userId = authData.userId;
-  console.log(userId);
-
-  const { data: user, refetch: refetchUser } = useGetUserQuery(userId);
-  const { data: rental, refetch: refetchRental } = useGetAllRentalQuery();
-  const [displayUser, setDisplayUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-
+  const navigation = useNavigation()
+  const [location, setLocation] = useState("Đang lấy vị trí")
+  const [address, setAddress] = useState(null)
+  const [errorMsg, setErrorMsg] = useState(null)
+  const [manualCity, setManualCity] = useState(null)
+  const authData = useSelector((state) => state.auth)
+  const userId = authData.userId
+  const { data: user, refetch: refetchUser } = useGetUserQuery(userId)
+  const { data: rental, refetch: refetchRental } = useGetAllRentalQuery()
+  const [displayUser, setDisplayUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+    // Get the context at the component level (outside of any function)
+    const asyncStorageContext = useAsyncStorage();
+  const {removeAllIdChatPlaform, addIdChatPlatform} = useAsyncStorage();
   const onRefresh = async () => {
     setRefreshing(true);
     try {
@@ -105,8 +100,14 @@ export default function HomeScreen() {
       }
     };
 
-    getLocation();
-  }, []);
+    const checkUser = async () => {
+      // Use the context that was obtained at the component level
+      await ensureUserInDatabase(user.getUser.id.toString(), user.getUser.fullName, asyncStorageContext);
+    }
+    
+    checkUser()
+    getLocation()
+  }, [])
 
   useEffect(() => {
     if (rental) {

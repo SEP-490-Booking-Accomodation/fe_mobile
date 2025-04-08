@@ -11,7 +11,6 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import CustomButton from "../../components/buttons/Button";
@@ -19,7 +18,7 @@ import CustomInput from "../../components/TextInput";
 import { useLazyGetUserQuery, useLoginMutation } from "../../api/authApi";
 import { loginSuccess, logout } from "../../redux/authSlice";
 import { useLazyGetRoleByIdQuery } from "../../api/roleApi";
-
+import { useAsyncStorage } from "../../context/AsyncStorageContext";
 const LoginScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
@@ -29,6 +28,7 @@ const LoginScreen = () => {
   const [login] = useLoginMutation();
   const [isLoading, setIsLoading] = useState(false);
   const [getRoleById] = useLazyGetRoleByIdQuery();
+  const {addIdChatPlatform} = useAsyncStorage();
 
   const handleLogin = async () => {
     console.log("Đang gọi API login...");
@@ -97,6 +97,8 @@ const LoginScreen = () => {
           refreshToken: response.refreshToken,
         })
       );
+
+      
 
       navigation.replace("MainTabs");
     } catch (error) {

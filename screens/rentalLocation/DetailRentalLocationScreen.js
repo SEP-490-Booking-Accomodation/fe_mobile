@@ -11,18 +11,36 @@ import {
   ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage, { useAsyncStorage } from "../../context/AsyncStorageContext"
 import MultiSelectButtonGroup from "../../components/buttons/MultiSelectButtonGroup";
 import Tag from "../../components/Tag";
 import SimpleVerticalCard from "../../components/cards/SimpleVerticalCard";
 import { useGetAllAccommodationTypeOfRentalLocationQuery } from "../../api/rentalLocationApi";
 import { Button } from "react-native-elements";
+import { MaterialIcons } from "@expo/vector-icons";
+import { ensureUserInDatabaseWithoutAsyncStorage, newChat } from "../../lib/supabase";
+import { KeyboardAwareSectionList } from "react-native-keyboard-aware-scroll-view";
+
 
 const DetailRentalLocationScreen = ({ route, navigation }) => {
-  // console.log("Route params:", route.params);
+  const [user, setUser] = useState({});
+  const {loadIdChatPlatform} = useAsyncStorage();
   const { rentalId: locationId } = route.params;
-  // console.log("Extracted locationId:", locationId);
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userData = await loadIdChatPlatform();
+        if (userData) {
+          setUser(userData[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);    
+      }
+    };
+
+    fetchUser();
+  }, []); 
   if (!locationId) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -37,11 +55,38 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     isLoading,
     isError,
   } = useGetAllAccommodationTypeOfRentalLocationQuery(locationId);
-
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedServices, setSelectedServices] = useState([]);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [allServices, setAllServices] = useState([]);
+
+  
+
+  const handleChatPress = async () => {
+    try {
+      
+
+      // Load current user
+      const currentUser = user;
+      console.log("Current User:", currentUser);  
+      // Prepare required values
+      const ownerPlatformId = rentalData.data?.ownerId?.userId?._id;
+      const locationId = rentalData.data?._id;
+      // Call newChat with full object
+      const result = await newChat({
+        ownerPlatformId,
+        locationId,
+        currentUser,
+        rental: rentalData.data,
+        navigation,
+      });
+
+      console.log(result);
+    } catch (error) {
+      console.error("Chat start error:", error);
+    }
+  };
+
 
   useEffect(() => {
     const loadFavoriteStatus = async () => {
@@ -141,6 +186,9 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
                 size={24}
                 color="red"
               />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleChatPress}>
+              <MaterialIcons name="chat" size={24} color="#333" />
             </TouchableOpacity>
             <TouchableOpacity onPress={handleMoreOptions}>
               <Icon name="more-vert" size={24} color="#333" />
