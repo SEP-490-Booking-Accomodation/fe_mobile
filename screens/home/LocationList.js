@@ -16,7 +16,6 @@ export default function LocationList({ rentalData, onViewAllPress }) {
   // console.log(rentalData);
 
   const rentalDisplay = rentalData.data.map((item) => ({
-    key: item._id,
     id: item._id,
     imageUrl:
       item.image?.[0] ||
@@ -36,9 +35,6 @@ export default function LocationList({ rentalData, onViewAllPress }) {
     ratingPoint: item.averageRating,
     numberOfReview: item.totalFeedbacks,
   }));
-
-
-  
 
   return (
     <View style={styles.container}>
@@ -66,7 +62,7 @@ export default function LocationList({ rentalData, onViewAllPress }) {
       thì set initFavourite = true //Nếu không thì set initFavourite = false */}
       {/* Danh sách địa điểm */}
       <ScrollView style={styles.paddingVerticalCard}>
-        {rentalDisplay.map(({key, ...itemProps}) => (
+        {rentalDisplay.map((item) => (
           <VerticalCard
             key={item.id}
             {...item}

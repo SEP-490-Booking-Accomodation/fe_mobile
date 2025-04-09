@@ -180,8 +180,8 @@ export default function ConfirmBooking() {
       passwordRoom: "",
       note: bookingData.note || "",
       status: 8,
-      discountAmount: discountAmount, // Add discount amount to the booking data
-      finalTotal: finalTotal, // Add final total after discount
+      // discountAmount: discountAmount, // Add discount amount to the booking data
+      totalPrice: finalTotal, // Add final total after discount
     };
 
     try {

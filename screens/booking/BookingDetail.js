@@ -101,12 +101,6 @@ export default function BookingDetail() {
 
     const paymentMethod = bookingData.paymentMethod;
     if (paymentMethod === "1") {
-      //   navigation.navigate("BankTransfer", {
-      //     bookingId: bookingData.id,
-      //     amount: bookingData.basePrice * bookingData.durationBookingHour,
-      //   });
-      Alert.alert("Ví Mean");
-    } else if (paymentMethod === "2") {
       try {
         const response = await processMomoPayment({
           data: {
@@ -132,7 +126,7 @@ export default function BookingDetail() {
         console.error("Thanh toán thất bại:", error);
         Alert.alert("Lỗi", "Thanh toán Momo thất bại");
       }
-    } else if (paymentMethod === "3") {
+    } else if (paymentMethod === "2") {
       //   navigation.navigate("ZaloPayment", {
       //     bookingId: bookingData.id,
       //     amount: bookingData.basePrice * bookingData.durationBookingHour,
