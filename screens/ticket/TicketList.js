@@ -73,6 +73,14 @@ export default function TicketList() {
     }
   };
 
+  const tabColors = {
+    all: "#4E72E3",
+    upcoming: "#F59E0B",
+    current: "#10B981",
+    cancelled: "#EF4444",
+    completed: "#6366F1",
+  };
+
   // Function to map status to UI display status code
   const mapStatusToUiCode = (status) => {
     if (status === BOOKING_STATUS.CANCELLED) {
@@ -168,16 +176,33 @@ export default function TicketList() {
               { title: "Hiện tại", key: "current" },
               { title: "Đã hủy", key: "cancelled" },
               { title: "Hoàn tất", key: "completed" },
-            ].map((tab) => (
-              <CustomButton
-                key={tab.key}
-                title={tab.title}
-                style={styles.buttonNav}
-                backgroundColor={activeTab.key === tab.key ? "#4E72E3" : "#fff"}
-                titleColor={activeTab.key === tab.key ? "#FFFFFF" : "#6B7280"}
-                onPress={() => setActiveTab({ key: tab.key, value: tab.value })}
-              />
-            ))}
+            ].map((tab) => {
+              const isActive = activeTab.key === tab.key;
+              const bgColor = isActive ? tabColors[tab.key] : "#fff";
+              const titleColor = isActive ? "#FFFFFF" : "#6B7280";
+              const borderColor = isActive ? tabColors[tab.key] : "#E5E7EB"; // light gray border when not active
+              const fontWeight = isActive ? "bold" : "normal";
+
+              return (
+                <CustomButton
+                  key={tab.key}
+                  title={tab.title}
+                  style={[
+                    styles.buttonNav,
+                    {
+                      backgroundColor: bgColor,
+                      borderWidth: 2,
+                      borderColor: borderColor,
+                    },
+                  ]}
+                  titleStyle={{ fontWeight }}
+                  titleColor={titleColor}
+                  onPress={() =>
+                    setActiveTab({ key: tab.key, value: tab.value })
+                  }
+                />
+              );
+            })}
           </ScrollView>
         </View>
 
