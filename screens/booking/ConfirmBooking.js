@@ -98,16 +98,17 @@ export default function ConfirmBooking() {
     }
 
     const priceAfterDiscount = originalTotal - discount;
-    let fee = 0;
-    if (loinhuanbandau?.val1 && loinhuanbandau.unit == "percent") {
-      fee = (priceAfterDiscount * parseFloat(loinhuanbandau.val1)) / 100;
-      setPhiDuyTri(fee);
-    } else if (loinhuanbandau?.val1 && loinhuanbandau.unit == "vnd") {
-      fee = parseFloat(loinhuanbandau.val1);
-      setPhiDuyTri(fee);
-    }
+    // let fee = 0;
+    // if (loinhuanbandau?.val1 && loinhuanbandau.unit == "percent") {
+    //   fee = (priceAfterDiscount * parseFloat(loinhuanbandau.val1)) / 100;
+    //   setPhiDuyTri(fee);
+    // } else if (loinhuanbandau?.val1 && loinhuanbandau.unit == "vnd") {
+    //   fee = parseFloat(loinhuanbandau.val1);
+    //   setPhiDuyTri(fee);
+    // }
     setDiscountAmount(discount);
-    setFinalTotal(priceAfterDiscount + fee);
+    // setFinalTotal(priceAfterDiscount + fee);
+    setFinalTotal(priceAfterDiscount);
   };
 
   const formatMoney = (amount) =>
@@ -295,7 +296,7 @@ export default function ConfirmBooking() {
                 </Text>
               </View>
             )}
-            <View style={styles.jusBetween}>
+            {/* <View style={styles.jusBetween}>
               {loinhuanbandau?.unit == "percent" ? (
                 <Text style={styles.value}>
                   Phí duy trì ({loinhuanbandau.val1}%)
@@ -306,7 +307,7 @@ export default function ConfirmBooking() {
                 </Text>
               ) : null}
               <Text>{formatMoney(phiDuyTri)}</Text>
-            </View>
+            </View> */}
 
             <View style={[styles.jusBetween, styles.totalRow]}>
               <Text style={styles.totalText}>Thành tiền:</Text>

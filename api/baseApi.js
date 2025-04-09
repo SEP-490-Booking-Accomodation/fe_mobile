@@ -20,6 +20,7 @@ export const baseApi = createApi({
     "Booking",
     "Coupon",
     "Message",
+    "CheckAvailable",
     "PolicySystem",
     "RentalLocation",
     "AccommodationType",
@@ -32,4 +33,3 @@ export const baseApi = createApi({
 });
 
 export default baseApi;
-

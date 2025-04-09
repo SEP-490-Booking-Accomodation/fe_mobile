@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,33 +8,82 @@ import {
 } from "react-native";
 import VerticalCard from "../../components/cards/VerticalCard";
 import ButtonGroup from "../../components/buttons/ButtonGroup"; // Import ButtonGroup
+import * as Location from "expo-location";
 
 const filters = ["Tất cả", "Gợi ý ", "Yêu thích ", "Phổ biến ", "Gần bạn "];
 
 export default function LocationList({ rentalData, onViewAllPress }) {
   const [selectedFilterIndex, setSelectedFilterIndex] = useState(0);
   // console.log(rentalData);
+  const [userLocation, setUserLocation] = useState(null);
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        return;
+      }
 
-  const rentalDisplay = rentalData.data.map((item) => ({
-    id: item._id,
-    imageUrl:
-      item.image?.[0] ||
-      `https://ui-avatars.com/api/?name=${item.name}&background=random`,
-    openHour: item.openHour,
-    closeHour: item.closeHour,
-    placeName: item.name,
-    isOverNight: item.isOverNight,
-    status: item.status,
-    minPrice: item.minPrice || 0,
-    maxPrice: item.maxPrice || 0,
-    address: item.address,
-    ward: item.ward,
-    district: item.district,
-    city: item.city,
-    location: `${item.address}, ${item.ward}, ${item.district}, ${item.city}`,
-    ratingPoint: item.averageRating,
-    numberOfReview: item.totalFeedbacks,
-  }));
+      const location = await Location.getCurrentPositionAsync({});
+      setUserLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+    })();
+  }, []);
+
+  const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
+    const toRad = (value) => (value * Math.PI) / 180;
+    const R = 6371; // Radius of the earth in km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c;
+    return d; // distance in km
+  };
+
+  const rentalDisplay = rentalData.data.map((item) => {
+    const latitude = item.latitude;
+    const longitude = item.longitude;
+
+    const distance =
+      userLocation && latitude && longitude
+        ? getDistanceFromLatLonInKm(
+            userLocation.latitude,
+            userLocation.longitude,
+            latitude,
+            longitude
+          )
+        : null;
+
+    return {
+      id: item._id,
+      imageUrl:
+        item.image?.[0] ||
+        `https://ui-avatars.com/api/?name=${item.name}&background=random`,
+      openHour: item.openHour,
+      closeHour: item.closeHour,
+      placeName: item.name,
+      isOverNight: item.isOverNight,
+      status: item.status,
+      minPrice: item.minPrice || 0,
+      maxPrice: item.maxPrice || 0,
+      address: item.address,
+      ward: item.ward,
+      district: item.district,
+      city: item.city,
+      location: `${item.address}, ${item.ward}, ${item.district}, ${item.city}`,
+      ratingPoint: item.averageRating,
+      numberOfReview: item.totalFeedbacks,
+      distance: distance, // Thêm distance vào đây
+    };
+  });
 
   return (
     <View style={styles.container}>
