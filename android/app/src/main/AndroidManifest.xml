@@ -30,6 +30,7 @@
         <data android:scheme="mean"/>
         <data android:scheme="com.mean.package"/>
         <data android:scheme="exp+mean"/>
+        <data android:scheme="com.mean.app"/>
       </intent-filter>
     </activity>
   </application>

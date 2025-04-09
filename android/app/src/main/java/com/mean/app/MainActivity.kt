@@ -1,4 +1,4 @@
-package com.mean.package
+package com.mean.app
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

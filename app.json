@@ -22,7 +22,7 @@
       }
     },
     "android": {
-      "package": "com.mean.package",
+      "package": "com.mean.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"

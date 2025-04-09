@@ -1,4 +1,4 @@
-package com.mean.package
+package com.mean.app
 
 import android.app.Application
 import android.content.res.Configuration
