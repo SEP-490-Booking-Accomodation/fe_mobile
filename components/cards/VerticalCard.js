@@ -16,6 +16,7 @@ export default function VerticalCard({
   isOverNight = false,
   ratingPoint = 0,
   numberOfReview = 0,
+  distance,
   initFavourite = false,
   onFavouritePress = () => {},
   // onCardPress = () => {},
@@ -35,7 +36,7 @@ export default function VerticalCard({
         setCurrentImage(fallbackImage);
         setIsLoading(false);
       }
-    }, 3000); // 3 giây
+    }, 5000); // 3 giây
 
     return () => clearTimeout(timeout);
   }, [isLoading]);
@@ -53,20 +54,20 @@ export default function VerticalCard({
 
   return (
     <TouchableOpacity
-      
       style={styles.card}
       onPress={onCardPress}
       activeOpacity={0.97}
     >
       {/* Image Section */}
       <View style={styles.imageContainer}>
-        {isLoading && currentImage !== fallbackImage && (
-          <Image
-            source={{ uri: loadingGif }}
-            style={styles.image}
-            resizeMode="center"
-          />
-        )}
+        {isLoading &&
+          currentImage !== fallbackImage &&
+          // <Image
+          //   source={{ uri: loadingGif }}
+          //   style={styles.image}
+          //   resizeMode="center"
+          // />
+          null}
 
         <Image
           source={{ uri: currentImage }}
@@ -129,7 +130,13 @@ export default function VerticalCard({
             {location}
           </Text>
         </View>
-
+        <View style={styles.distanceContainer}>
+          {distance != null && (
+            <Text style={styles.distanceText}>
+              Cách bạn khoảng {distance.toFixed(1)} km
+            </Text>
+          )}
+        </View>
         <View style={styles.ratingContainer}>
           <Icon name="star" size={20} color={"#ffc907"} />
           <Text style={styles.ratingText}>
@@ -170,6 +177,15 @@ const styles = StyleSheet.create({
     // shadowRadius: 3.84,
     // elevation: 5,
   },
+  distanceText: {
+    fontSize: 14,
+    color: "#666",
+    // marginTop: 4,
+  },
+  distanceContainer: {
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
   isOverNight: {
     padding: 6,
     borderRadius: 20,
@@ -179,7 +195,7 @@ const styles = StyleSheet.create({
     fontWeight: 700,
   },
   imageContainer: {
-    position: "relative",
+    // position: "relative",
     height: 200,
     borderRadius: 16,
     // margin: 1,

@@ -16,6 +16,7 @@ import DurationSelector from "./components/DurationSelector";
 import GuestSelector from "./components/GuestSelector";
 import BookingFooter from "./components/BookingFooter";
 import GuestSelectionModal from "./modals/GuestSelectionModal";
+import { useCheckAvailableRoomMutation } from "../../api/bookingApi";
 
 export default function BookingInformation({ route, navigation }) {
   const { accommodationTypeData, rentalData } = route.params || {};
@@ -26,6 +27,7 @@ export default function BookingInformation({ route, navigation }) {
     const [hour, minute] = timeStr.split(":").map(Number);
     return { hour, minute };
   };
+  const [checkAvailable] = useCheckAvailableRoomMutation();
 
   // Operating hours
   const { hour: OPENING_HOUR, minute: OPENING_MINUTE } = parseTime(
@@ -37,7 +39,6 @@ export default function BookingInformation({ route, navigation }) {
 
   const MAX_PEOPLE = accommodationTypeData?.data?.maxPeopleNumber || 3;
   const isOverNight = rentalData?.data?.isOverNight;
-  console.log("isOverNight", isOverNight);
 
   // State for pickers and modals
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
@@ -255,7 +256,7 @@ export default function BookingInformation({ route, navigation }) {
     return basePrice + (selectedDuration - 1) * overtimePrice;
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!isFormValid) {
       let errorMessage = "";
 
@@ -270,21 +271,47 @@ export default function BookingInformation({ route, navigation }) {
       Alert.alert("Thiếu thông tin", errorMessage);
       return;
     }
+    const checkInDateTime = `${formatDate(selectedDate)} ${formatTime(
+      selectedTime
+    )}:00`;
+    const checkOutDateTime = `${formatTime(endTime)} ${formatDate(endTime)}:00`;
 
-    navigation.navigate("ConfirmBooking", {
-      bookingData: {
-        accommodationType: accommodationTypeData?.data,
-        date: formatDate(selectedDate),
-        time: formatTime(selectedTime),
-        duration: selectedDuration,
-        endTime: formatTime(endTime),
-        endDate: formatDate(endTime),
-        guests: guestCount,
-        // contact: formData,
-        totalPrice: calculateTotalPrice(),
-        rentalData: rentalData,
-      },
-    });
+    const formCheckAvailable = {
+      accommodationTypeId: accommodationTypeData?.data.id,
+      checkIn: checkInDateTime,
+      checkOut: checkOutDateTime,
+    };
+
+    try {
+      const response = await checkAvailable({
+        data: formCheckAvailable,
+      }).unwrap();
+      if (response.isAvailable) {
+        navigation.navigate("ConfirmBooking", {
+          bookingData: {
+            accommodationType: accommodationTypeData?.data,
+            date: formatDate(selectedDate),
+            time: formatTime(selectedTime),
+            duration: selectedDuration,
+            endTime: formatTime(endTime),
+            endDate: formatDate(endTime),
+            guests: guestCount,
+            // contact: formData,
+            totalPrice: calculateTotalPrice(),
+            rentalData: rentalData,
+          },
+        });
+      } else {
+        Alert.alert("Xin lỗi", "Khung giờ hiện tại không còn phòng chống");
+      }
+
+      return;
+    } catch (error) {
+      Alert.alert(
+        "Failed",
+        error.data?.message || "Đặt phòng thất bại, vui lòng thử lại sau"
+      );
+    }
   };
 
   return (

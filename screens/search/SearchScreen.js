@@ -139,26 +139,26 @@ const SearchScreen = ({ route, navigation }) => {
             </>
           ) : null,
       },
-      {
-        title: "Gợi ý địa điểm",
-        data: exampleData,
-        renderItem: ({ item }) => (
-          <HorizontalCardMedium
-            key={item.id}
-            imageUrlLogo={item.imageUrlLogo}
-            placeName={item.placeName}
-            openHour={item.openHour}
-            closeHour={item.closeHour}
-            minPrice={item.minPrice}
-            maxPrice={item.maxPrice}
-            location={item.location}
-            rating={item.rating}
-            numOfReviews={item.numOfReviews}
-            distance={item.distance}
-          />
-        ),
-        keyExtractor: (item) => item.id.toString(),
-      },
+      // {
+      //   title: "Gợi ý địa điểm",
+      //   data: exampleData,
+      //   renderItem: ({ item }) => (
+      //     <HorizontalCardMedium
+      //       key={item.id}
+      //       imageUrlLogo={item.imageUrlLogo}
+      //       placeName={item.placeName}
+      //       openHour={item.openHour}
+      //       closeHour={item.closeHour}
+      //       minPrice={item.minPrice}
+      //       maxPrice={item.maxPrice}
+      //       location={item.location}
+      //       rating={item.rating}
+      //       numOfReviews={item.numOfReviews}
+      //       distance={item.distance}
+      //     />
+      //   ),
+      //   keyExtractor: (item) => item.id.toString(),
+      // },
     ];
 
     return (

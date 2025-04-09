@@ -11,6 +11,14 @@ export const BookingApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Booking"],
     }),
+    checkAvailableRoom: builder.mutation({
+      query: ({ data }) => ({
+        url: "/booking/check-availability",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["CheckAvailable"],
+    }),
 
     getAllBookingByCustomerId: builder.query({
       query: (customerId) => `/booking/booking-history/${customerId}`,
@@ -36,4 +44,5 @@ export const {
   useGetBookingByIdQuery,
   useUpdateBookingMutation,
   useGetAllBookingByCustomerIdQuery,
+  useCheckAvailableRoomMutation,
 } = BookingApi;

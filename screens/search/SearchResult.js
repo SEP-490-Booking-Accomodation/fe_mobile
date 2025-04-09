@@ -12,15 +12,50 @@ import Dropdown from "../../components/DropDown";
 import VerticalCard from "../../components/cards/VerticalCard";
 import Filter from "../../components/Filter";
 import { useGetAllRentalQuery } from "../../api/rentalLocationApi";
+import * as Location from "expo-location";
 
 const SearchResult = ({ route, navigation }) => {
   const query = route?.params?.query || "";
+  const [userLocation, setUserLocation] = useState(null);
+
   const { data: rental, refetch: refetchRental } = useGetAllRentalQuery();
   const [refreshing, setRefreshing] = useState(false);
   const [selectedSortOption, setSelectedSortOption] = useState(
     "Giá từ thấp đến cao"
   );
   console.log(rental);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({});
+      setUserLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+    })();
+  }, []);
+
+  const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
+    const toRad = (value) => (value * Math.PI) / 180;
+    const R = 6371; // Radius of the earth in km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c;
+    return d; // distance in km
+  };
 
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [filterParams, setFilterParams] = useState({
@@ -41,28 +76,44 @@ const SearchResult = ({ route, navigation }) => {
 
   const rentalDisplay = useMemo(() => {
     if (!rental?.data) return [];
-    return rental.data.map((item) => ({
-      id: item._id,
-      imageUrl:
-        item.image?.[0] ||
-        `https://ui-avatars.com/api/?name=${item.name}&background=random`,
-      openHour: item.openHour,
-      closeHour: item.closeHour,
-      placeName: item.name,
-      isOverNight: item.isOverNight,
-      // minPrice: item.minPrice,
-      // maxPrice: item.maxPrice,
-      address: item.address,
-      ward: item.ward,
-      district: item.district,
-      city: item.city,
-      status: item.status,
-      location: `${item.address}, ${item.ward}, ${item.district}, ${item.city}`,
-      // ratingPoint: item.ratingPoint,
-      // numberOfReview: item.numberOfReview,
-      // amenities: item.amenities || [],
-    }));
-  }, [rental]);
+
+    return rental.data.map((item) => {
+      console.log(item.latitude);
+      console.log(item.longitude);
+
+      const distance =
+        userLocation && item.latitude && item.longitude
+          ? getDistanceFromLatLonInKm(
+              userLocation.latitude,
+              userLocation.longitude,
+              item.latitude, // latitude
+              item.longitude // longitude
+            )
+          : null;
+
+      return {
+        id: item._id,
+        imageUrl:
+          item.image?.[0] ||
+          `https://ui-avatars.com/api/?name=${item.name}&background=random`,
+        openHour: item.openHour,
+        closeHour: item.closeHour,
+        placeName: item.name,
+        isOverNight: item.isOverNight,
+        status: item.status,
+        minPrice: item.minPrice || 0,
+        maxPrice: item.maxPrice || 0,
+        address: item.address,
+        ward: item.ward,
+        district: item.district,
+        city: item.city,
+        location: `${item.address}, ${item.ward}, ${item.district}, ${item.city}`,
+        ratingPoint: item.averageRating,
+        numberOfReview: item.totalFeedbacks,
+        distance: distance,
+      };
+    });
+  }, [rental, userLocation]);
 
   const filteredAndSortedData = useMemo(() => {
     let filteredData = rentalDisplay;
@@ -95,11 +146,16 @@ const SearchResult = ({ route, navigation }) => {
       );
     }
 
-    return filteredData.sort((a, b) =>
-      selectedSortOption === "Giá từ thấp đến cao"
-        ? a.minPrice - b.minPrice
-        : b.minPrice - a.minPrice
-    );
+    return filteredData.sort((a, b) => {
+      if (selectedSortOption === "Giá từ thấp đến cao") {
+        return a.minPrice - b.minPrice;
+      } else if (selectedSortOption === "Giá từ cao đến thấp") {
+        return b.minPrice - a.minPrice;
+      } else if (selectedSortOption === "Gần bạn nhất") {
+        return (a.distance ?? Infinity) - (b.distance ?? Infinity);
+      }
+      return 0;
+    });
   }, [query, selectedSortOption, rentalDisplay, filterParams]);
 
   return (
@@ -116,7 +172,7 @@ const SearchResult = ({ route, navigation }) => {
       <View style={styles.sortContainer}>
         <Text style={styles.textSort}>Sắp xếp theo</Text>
         <Dropdown
-          data={["Giá từ thấp đến cao", "Giá từ cao đến thấp"]}
+          data={["Giá từ thấp đến cao", "Giá từ cao đến thấp", "Gần bạn nhất"]}
           selectedValue={selectedSortOption}
           onSelect={setSelectedSortOption}
           placeholder="Chọn cách sắp xếp"
@@ -136,25 +192,23 @@ const SearchResult = ({ route, navigation }) => {
             </Text>
           </View>
         ) : (
-          filteredAndSortedData.map((item) => (
-            <VerticalCard
-              key={item.id}
-              imageUrl={item.imageUrl}
-              openHour={item.openHour}
-              closeHour={item.closeHour}
-              placeName={item.placeName}
-              minPrice={String(item.minPrice)}
-              maxPrice={String(item.maxPrice)}
-              isOverNight={item.isOverNight}
-              location={item.location}
-              status={item.status}
-              ratingPoint={String(item.ratingPoint)}
-              numberOfReview={item.numberOfReview}
-              initFavourite={false}
-              onFavouritePress={(isFav) => console.log("Yêu thích:", isFav)}
-              onCardPress={() => console.log("Đã nhấn vào card")}
-            />
-          ))
+          filteredAndSortedData.map((item) => {
+            console.log(
+              "Khoảng cách đến",
+              item.placeName,
+              "là:",
+              item.distance
+            );
+            return (
+              <VerticalCard
+                key={item.id}
+                {...item}
+                initFavourite={false}
+                onFavouritePress={(isFav) => console.log("Yêu thích:", isFav)}
+                onCardPress={() => console.log("Đã nhấn vào card")}
+              />
+            );
+          })
         )}
       </ScrollView>
 
