@@ -157,6 +157,8 @@ export default function ConfirmBooking() {
 
   const checkInDateTime = `${bookingData.date} ${bookingData.time}:00`;
   const checkOutDateTime = `${bookingData.date} ${bookingData.endTime}:00`;
+  console.log(checkInDateTime);
+  console.log(checkOutDateTime);
   const policyId = policyDataLoiNhuan?.data?.[0].id;
   console.log(policyId);
 

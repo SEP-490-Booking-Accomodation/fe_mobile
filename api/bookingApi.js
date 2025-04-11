@@ -30,7 +30,7 @@ export const BookingApi = baseApi.injectEndpoints({
     }),
     updateBooking: builder.mutation({
       query: ({ id, data }) => ({
-        url: `/booking/update-booking/${id}`,
+        url: `/booking/${id}`,
         method: "PUT",
         body: data,
       }),

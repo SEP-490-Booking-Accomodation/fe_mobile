@@ -25,7 +25,6 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
   const { accommodationTypeId, rentalData } = route.params;
   const authData = useSelector((state) => state.auth);
   const userId = authData.userId;
-  console.log("ame " + accommodationTypeId);
 
   const { data, isLoading, isError } =
     useGetAccommodationTypeByIdQuery(accommodationTypeId);
@@ -243,7 +242,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
   );
 
   const renderTabs = () => {
-    const tabs = ["Chi tiết", "Ảnh", "Đánh giá"];
+    const tabs = ["Chi tiết", "Ảnh"];
     return (
       <View style={styles.tabContainer}>
         {tabs.map((tab, index) => (
@@ -265,6 +264,9 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
       </View>
     );
   };
+
+
+
 
   const renderPhotos = () => {
     if (accommodationTypeData.images.length === 0) {
@@ -318,71 +320,6 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
     );
   };
 
-  const renderReviews = () => (
-    <View style={styles.reviewsContainer}>
-      <View style={styles.ratingSummaryContainer}>
-        <View style={styles.ratingAverageContainer}>
-          <Text style={styles.averageRating}>
-            {accommodationTypeData.rating}
-          </Text>
-          <Text style={styles.totalReviews}>
-            ({accommodationTypeData.reviewCount} Đánh giá)
-          </Text>
-        </View>
-        <View style={styles.ratingBreakdownContainer}>
-          {[5, 4, 3, 2, 1].map((rating) => (
-            <View key={rating} style={styles.ratingRow}>
-              <Text style={styles.ratingNumber}>{rating}</Text>
-              <View style={styles.ratingBarBackground}>
-                <View
-                  style={[styles.ratingBar, { width: `${rating * 20}%` }]}
-                />
-              </View>
-            </View>
-          ))}
-        </View>
-      </View>
-      {accommodationTypeData.reviews?.map((review, index) => (
-        <View key={index} style={styles.reviewCard}>
-          <View style={styles.reviewHeader}>
-            <Image
-              source={require("../../assets/images/banner.png")}
-              style={styles.reviewerImage}
-            />
-            <View style={styles.reviewerDetails}>
-              <Text style={styles.reviewerName}>{review.userName}</Text>
-              <View style={styles.starContainer}>
-                {Array(review.rating)
-                  .fill(null)
-                  .map((_, i) => (
-                    <MaterialIcons
-                      key={i}
-                      name="star"
-                      size={16}
-                      color="#ffc907"
-                    />
-                  ))}
-              </View>
-            </View>
-          </View>
-          <Text style={styles.reviewText}>{review.comment}</Text>
-          {review.images?.length > 0 && (
-            <View style={styles.reviewImagesContainer}>
-              {review.images.map((image, imgIndex) => (
-                <TouchableOpacity
-                  key={imgIndex}
-                  onPress={() => openReviewModal(imgIndex)}
-                >
-                  <Image source={image.source} style={styles.reviewImage} />
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-          <Text style={styles.reviewDate}>{review.date}</Text>
-        </View>
-      ))}
-    </View>
-  );
 
   const renderContent = () => {
     switch (activeTab) {
@@ -418,6 +355,8 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
           title="Đặt ngay"
           style={styles.bookButton}
           backgroundColor="#101828"
+          disabled={rentalData.data?.status === 4 || rentalData.data?.status === 5}
+
         />
       </View>
       <ImageViewing
@@ -501,10 +440,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 8,
   },
-  ratingText: {
-    marginLeft: 8,
-    color: "#555",
-  },
+
   amenitiesContainer: {
     paddingHorizontal: 16,
     marginTop: 16,
@@ -565,102 +501,6 @@ const styles = StyleSheet.create({
   },
   gridImage: {
     borderRadius: 8,
-  },
-  reviewsContainer: {
-    padding: 16,
-  },
-  ratingSummaryContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  ratingAverageContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 22,
-  },
-  averageRating: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#4e72e3",
-  },
-  totalReviews: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 4,
-  },
-  ratingBreakdownContainer: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  ratingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  ratingNumber: {
-    width: 20,
-    fontSize: 14,
-    color: "#333",
-    marginRight: 8,
-  },
-  ratingBarBackground: {
-    flex: 1,
-    height: 8,
-    backgroundColor: "#e5e7eb",
-    borderRadius: 4,
-  },
-  ratingBar: {
-    height: 8,
-    backgroundColor: "#ffc907",
-    borderRadius: 4,
-  },
-  reviewCard: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-  },
-  reviewHeader: {
-    flexDirection: "row",
-    marginBottom: 8,
-  },
-  reviewerImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 12,
-  },
-  reviewerDetails: {
-    flex: 1,
-  },
-  reviewerName: {
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  starContainer: {
-    flexDirection: "row",
-  },
-  reviewText: {
-    color: "#666",
-    marginBottom: 8,
-  },
-  reviewImagesContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginVertical: 8,
-    gap: 8,
-  },
-  reviewImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-  },
-  reviewDate: {
-    fontSize: 12,
-    color: "#999",
-    marginTop: 8,
-    alignSelf: "flex-end",
   },
   footer: {
     padding: 14,

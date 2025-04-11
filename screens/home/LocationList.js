@@ -48,7 +48,9 @@ export default function LocationList({ rentalData, onViewAllPress }) {
     return d; // distance in km
   };
 
-  const rentalDisplay = rentalData.data.map((item) => {
+  const rentalDisplay = rentalData.data
+      .filter((item) => item.status === 3)
+      .map((item) => {
     const latitude = item.latitude;
     const longitude = item.longitude;
 
@@ -84,6 +86,10 @@ export default function LocationList({ rentalData, onViewAllPress }) {
       distance: distance, // Thêm distance vào đây
     };
   });
+
+  const filterDataRental = rentalData.data.map((item) => {
+    //how to filter rental data only status
+  })
 
   return (
     <View style={styles.container}>
