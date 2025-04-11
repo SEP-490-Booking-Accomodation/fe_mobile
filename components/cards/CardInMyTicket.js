@@ -1,31 +1,8 @@
-import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import React, { useState } from "react";
-import CustomButton from "../buttons/Button";
+import { useState } from "react"
+import { TouchableOpacity, View, StyleSheet, Text, Image } from "react-native"
+import Icon from "react-native-vector-icons/MaterialIcons"
+import CustomButton from "../buttons/Button"
 
-/*
-  Status codes:
-  - (-1): Completed or cancelled booking - has button review + view detail
-  - (0): Upcoming booking - has button Cancel + view detail
-  - (1): Current booking - has only button Re-booking
-*/
-/**
- * Card component for displaying booking information in My Tickets screen
- *
- * @param {Object} props Component properties
- * @param {string|Object} props.imageUrl Image source for the room
- * @param {string} props.nameRoom Name of the room
- * @param {string} props.placeName Location name
- * @param {string} props.maxPeople Maximum number of people
- * @param {string} props.price Price of the booking
- * @param {string} props.dateCompleted Checkout date
- * @param {string} props.status Status code to determine available actions
- * @param {Function} props.onViewDetail Function called when View Detail button is pressed
- * @param {Function} props.onReviewAction Function called when Review button is pressed
- * @param {Function} props.onCancelAction Function called when Cancel button is pressed
- * @param {Function} props.onRebookingAction Function called when Rebooking button is pressed
- * @returns {React.Component}
- */
 export default function CardInMyTicket(props) {
   const {
     imageUrl,
@@ -36,131 +13,125 @@ export default function CardInMyTicket(props) {
     price,
     dateCompleted,
     status,
+    feedbackId,
     onViewDetail = () => {},
     onReviewAction = () => {},
     onCancelAction = () => {},
     onRebookingAction = () => {},
-  } = props;
+  } = props
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
 
   // Determine the status text and color based on status
   const getStatusInfo = () => {
     switch (status) {
       case "-1":
-        return { text: "Đã hủy/Hoàn tất", color: "#EF4444" };
+        return { text: "Đã hủy", color: "#EF4444" }
       case "0":
-        return { text: "Sắp tới", color: "#10B981" };
+        return { text: "Đang diễn ra", color: "#10B981" }
       case "1":
-        return { text: "Đang diễn ra", color: "#4E72E3" };
+        return { text: "Hoàn tất", color: "#6366F1" }
       default:
-        return { text: "N/A", color: "#6B7280" };
+        return { text: "N/A", color: "#6B7280" }
     }
-  };
+  }
 
-  const statusInfo = getStatusInfo();
+  const statusInfo = getStatusInfo()
 
   return (
-    <TouchableOpacity style={styles.container} onPress={onViewDetail}>
-      <View style={styles.contentRow}>
-        <Image
-          source={imageUrl} // Image source
-          style={styles.thumbnail}
-        />
+      <TouchableOpacity style={styles.container} onPress={onViewDetail}>
+        <View style={styles.contentRow}>
+          <Image
+              source={imageUrl} // Image source
+              style={styles.thumbnail}
+          />
 
-        <View style={styles.rightContainer}>
-          <View style={styles.detailsContainer}>
-            <Text style={styles.title}>{nameRoom}</Text>
+          <View style={styles.rightContainer}>
+            <View style={styles.detailsContainer}>
+              <Text style={styles.title}>{nameRoom}</Text>
 
-            {/* Status tag */}
-            <View
-              style={[
-                styles.tagContainer,
-                { backgroundColor: `${statusInfo.color}20` },
-              ]}
-            >
-              <Text style={[styles.tagText, { color: statusInfo.color }]}>
-                {statusInfo.text}
-              </Text>
+              {/* Status tag */}
+              <View style={[styles.tagContainer, { backgroundColor: `${statusInfo.color}20` }]}>
+                <Text style={[styles.tagText, { color: statusInfo.color }]}>{statusInfo.text}</Text>
+              </View>
+
+              <View style={styles.locationContainer}>
+                <Icon name="location-on" size={16} color="#4B84F5" />
+                <Text style={styles.locationText}>{placeName}</Text>
+                <Text style={styles.dateText}>{dateCompleted}</Text>
+              </View>
+
+              <View style={styles.peopleContainer}>
+                <Icon name="person" size={16} color="#4B84F5" />
+                <Text style={styles.peopleText}>{maxPeople} người </Text>
+              </View>
+
+              <Text style={styles.priceText}>{price}</Text>
             </View>
 
-            <View style={styles.locationContainer}>
-              <Icon name="location-on" size={16} color="#4B84F5" />
-              <Text style={styles.locationText}>{placeName}</Text>
-              <Text style={styles.dateText}>{dateCompleted}</Text>
+            <View style={styles.buttonContainer}>
+              {status === "-1" ? (
+                  // For cancelled bookings - Show "Đặt lại" button
+                  <CustomButton
+                      title={"Đặt lại"}
+                      backgroundColor="#fef2f2"
+                      disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
+                      titleColor="#101828"
+                      disabledTitleColor="#FFFFFF"
+                      loading={loading}
+                      style={{ minWidth: feedbackId === null ? "45%" : "100%" }}
+                      disabled={false}
+                      onPress={onRebookingAction}
+                  />
+              ) : status === "0" ? (
+                  // For current/upcoming bookings - Show only "Xem chi tiết" button (removed "Hủy" button)
+                  <CustomButton
+                      title={"Xem chi tiết"}
+                      backgroundColor="#101828"
+                      disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
+                      titleColor="#ffffff"
+                      disabledTitleColor="#FFFFFF"
+                      loading={loading}
+                      disabled={false}
+                      style={{ minWidth: "100%", paddingVertical: 10 }}
+                      onPress={onViewDetail}
+                  />
+              ) : status === "1" ? (
+                  // For completed bookings - Show "Đánh giá" button if feedbackId is null
+                  feedbackId === null ? (
+                      <CustomButton
+                          title={"Đánh giá"}
+                          backgroundColor="#dadada"
+                          disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
+                          titleColor="#101828"
+                          disabledTitleColor="#FFFFFF"
+                          loading={loading}
+                          style={{ minWidth: "100%" }}
+                          disabled={false}
+                          onPress={onReviewAction}
+                      />
+                  ) : null
+              ) : null}
+
+              {/* Show "Đánh giá" button next to "Đặt lại" for cancelled bookings if feedbackId is null */}
+              {status === "-1" && feedbackId === null && (
+                  <CustomButton
+                      title={"Đánh giá"}
+                      backgroundColor="#dadada"
+                      disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
+                      titleColor="#101828"
+                      disabledTitleColor="#FFFFFF"
+                      loading={loading}
+                      style={{ minWidth: "45%" }}
+                      disabled={false}
+                      onPress={onReviewAction}
+                  />
+              )}
             </View>
-
-            <View style={styles.peopleContainer}>
-              <Icon name="person" size={16} color="#4B84F5" />
-              <Text style={styles.peopleText}>{maxPeople} người </Text>
-            </View>
-
-            <Text style={styles.priceText}>{price}</Text>
-          </View>
-
-          <View style={styles.buttonContainer}>
-            {status === "-1" ? (
-              // For completed or cancelled bookings - Review + View detail
-              <CustomButton
-                title={"Đánh giá"}
-                backgroundColor="#dadada"
-                disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
-                titleColor="#101828"
-                disabledTitleColor="#FFFFFF"
-                loading={loading}
-                style={{ minWidth: "45%" }}
-                disabled={false}
-                onPress={onReviewAction}
-              />
-            ) : status === "0" ? (
-              // For upcoming bookings - Cancel + View detail
-              <CustomButton
-                title={"Huỷ"}
-                backgroundColor="#fef2f2"
-                disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
-                titleColor="#101828"
-                disabledTitleColor="#FFFFFF"
-                loading={loading}
-                disabled={false}
-                style={{ minWidth: "45%", paddingVertical: 10 }}
-                onPress={onCancelAction}
-              />
-            ) : null}
-
-            <CustomButton
-              title={
-                status === "-1" || status === "0"
-                  ? "Xem chi tiết"
-                  : status === "1"
-                  ? "Đặt lại"
-                  : "N/a"
-              }
-              backgroundColor="#101828"
-              disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
-              titleColor="#ffffff"
-              disabledTitleColor="#FFFFFF"
-              loading={loading}
-              disabled={false}
-              style={
-                status === "-1" || status === "0"
-                  ? { minWidth: "45%", paddingVertical: 10 }
-                  : status === "1"
-                  ? { minWidth: "100%", paddingVertical: 10 }
-                  : {}
-              }
-              onPress={
-                status === "-1" || status === "0"
-                  ? onViewDetail
-                  : status === "1"
-                  ? onRebookingAction
-                  : null
-              }
-            />
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -246,4 +217,4 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 8,
   },
-});
+})

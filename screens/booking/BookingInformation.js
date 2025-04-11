@@ -127,11 +127,12 @@ export default function BookingInformation({ route, navigation }) {
 
     if (selectedDay < today || selectedDay > tomorrow) {
       Alert.alert("Lỗi", "Chỉ được chọn ngày hôm nay hoặc ngày mai.");
+      closeDatePicker();
       return;
     }
 
     setSelectedDate(date);
-    closeDatePicker();
+
   };
 
   const handleTimeSelect = (time) => {
@@ -141,6 +142,7 @@ export default function BookingInformation({ route, navigation }) {
 
     if (selectedDateTime < now) {
       Alert.alert("Lỗi", "Vui lòng chọn thời gian trong tương lai.");
+      closeTimePicker();
       return;
     }
 
@@ -159,6 +161,7 @@ export default function BookingInformation({ route, navigation }) {
           CLOSING_MINUTE
         ).padStart(2, "0")}.`
       );
+      closeTimePicker();
       return;
     }
 
@@ -174,6 +177,7 @@ export default function BookingInformation({ route, navigation }) {
           CLOSING_MINUTE
         ).padStart(2, "0")}.`
       );
+      closeTimePicker();
       return;
     }
 
@@ -192,11 +196,12 @@ export default function BookingInformation({ route, navigation }) {
           CLOSING_MINUTE
         ).padStart(2, "0")}.`
       );
+      closeTimePicker();
       return;
     }
 
     setSelectedTime(time);
-    closeTimePicker();
+
   };
 
   const closeDatePicker = useCallback(() => {
@@ -274,8 +279,9 @@ export default function BookingInformation({ route, navigation }) {
     const checkInDateTime = `${formatDate(selectedDate)} ${formatTime(
       selectedTime
     )}:00`;
-    const checkOutDateTime = `${formatTime(endTime)} ${formatDate(endTime)}:00`;
-
+    const checkOutDateTime = `${formatDate(endTime)} ${formatTime(endTime)}:00`;
+    console.log(checkInDateTime);
+    console.log(checkOutDateTime);
     const formCheckAvailable = {
       accommodationTypeId: accommodationTypeData?.data.id,
       checkIn: checkInDateTime,
@@ -302,7 +308,8 @@ export default function BookingInformation({ route, navigation }) {
           },
         });
       } else {
-        Alert.alert("Xin lỗi", "Khung giờ hiện tại không còn phòng chống");
+        Alert.alert("Xin lỗi", "Khung giờ hiện tại không còn phòng trống");
+
       }
 
       return;
@@ -311,6 +318,7 @@ export default function BookingInformation({ route, navigation }) {
         "Failed",
         error.data?.message || "Đặt phòng thất bại, vui lòng thử lại sau"
       );
+
     }
   };
 

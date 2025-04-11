@@ -185,18 +185,18 @@ export default function ProfileScreen() {
               false,
               handleNavigateFavouriteList
             )}
-            {renderItem(
-              "wallet-outline",
-              "Ví của tôi",
-              false,
-              handleNavigateWalletScreen
-            )}
-            {renderItem(
-              "newspaper-outline",
-              "Lịch sử",
-              false,
-              handleNavigateHistory
-            )}
+            {/*{renderItem(*/}
+            {/*  "wallet-outline",*/}
+            {/*  "Ví của tôi",*/}
+            {/*  false,*/}
+            {/*  handleNavigateWalletScreen*/}
+            {/*)}*/}
+            {/*{renderItem(*/}
+            {/*  "newspaper-outline",*/}
+            {/*  "Lịch sử",*/}
+            {/*  false,*/}
+            {/*  handleNavigateHistory*/}
+            {/*)}*/}
             {renderItem(
               "star-outline",
               "Đánh giá của tôi",

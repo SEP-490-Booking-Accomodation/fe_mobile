@@ -71,7 +71,52 @@ export default function HistoryScreen() {
       dateCompleted: "23/12/2024",
       status: "1",
       bookingStatus: "cancelled"
+    },
+    {
+      id: 6,
+      imageUrl: imageTest,
+      nameRoom: "Phòng 1",
+      placeName: "Vũng Tàu",
+      maxPeople: "2",
+      price: "500.000",
+      dateCompleted: "23/12/2024",
+      status: "1",
+      bookingStatus: "cancelled"
+    },
+    {
+      id: 7,
+      imageUrl: imageTest,
+      nameRoom: "Phòng 1",
+      placeName: "Vũng Tàu",
+      maxPeople: "2",
+      price: "500.000",
+      dateCompleted: "23/12/2024",
+      status: "1",
+      bookingStatus: "cancelled"
+    },
+    {
+      id: 8,
+      imageUrl: imageTest,
+      nameRoom: "Phòng 1",
+      placeName: "Vũng Tàu",
+      maxPeople: "2",
+      price: "500.000",
+      dateCompleted: "23/12/2024",
+      status: "1",
+      bookingStatus: "cancelled"
+    },{
+      id: 9,
+      imageUrl: imageTest,
+      nameRoom: "Phòng 1",
+      placeName: "Vũng Tàu",
+      maxPeople: "2",
+      price: "500.000",
+      dateCompleted: "23/12/2024",
+      status: "1",
+      bookingStatus: "cancelled"
     }
+
+
   ];
 
   const renderHeader = () => (
@@ -82,7 +127,7 @@ export default function HistoryScreen() {
       >
         <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
       </TouchableOpacity>
-      <Text style={styles.textHeader}>Về phòng của tôi</Text>
+      <Text style={styles.textHeader}>Lịch sử đặt phòng</Text>
     </View>
   );
 
@@ -163,7 +208,7 @@ export default function HistoryScreen() {
           title="Hiện tại"
           variant={activeTab === "past" ? "filled" : "outlined"}
           backgroundColor="#4E72E3"
-          titleColor={activeTab === "past" ? "#FFFFFF" : "#4E72E3"}
+          titleColor={activeTab === "past" ? "#FFFFFF" : "#10B981"}
           onPress={() => setActiveTab("past")}
           style={styles.tabButton}
           size="small"
@@ -175,7 +220,7 @@ export default function HistoryScreen() {
           title="Đã qua"
           variant={activeTab === "cancelled" ? "filled" : "outlined"}
           backgroundColor="#4E72E3"
-          titleColor={activeTab === "cancelled" ? "#FFFFFF" : "#4E72E3"}
+          titleColor={activeTab === "cancelled" ? "#FFFFFF" : "#6366F1"}
           onPress={() => setActiveTab("cancelled")}
           style={styles.tabButton}
           size="small"
@@ -235,6 +280,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: 16,
     alignItems: "center",
+    marginTop: 20,
   },
   tabButton: {
     flex: 1,
