@@ -80,7 +80,7 @@ const RegisterScreen = () => {
         password,
         doB: dob,
         avatarUrl: null,
-        roleID: "67927ffda0a58ce4f7e8e840",
+        roleID: "67f87ca8c19b91da666bbdc9",
       };
       const response = await register({ data: data }).unwrap();
       console.log("Register response:", response);
@@ -112,6 +112,7 @@ const RegisterScreen = () => {
   };
 
   const confirmDate = () => {
+    console.log("confirm");
     setIsModalVisible(false);
   };
 
