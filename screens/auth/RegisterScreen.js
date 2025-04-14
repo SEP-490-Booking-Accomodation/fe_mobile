@@ -29,6 +29,7 @@ const RegisterScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [dob, setDob] = useState(new Date());
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useState(false);
   const [register] = useRegisterMutation();
 
@@ -102,10 +103,19 @@ const RegisterScreen = () => {
   };
 
   const showDatepicker = () => {
-    setIsModalVisible(true);
+    if (Platform.OS === 'ios') {
+      setIsModalVisible(true);
+    } else {
+      setShowDatePicker(true);
+    }
   };
 
   const onDateChange = (event, selectedDate) => {
+    // For Android, hiding is automatic after selection
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+    }
+    
     if (selectedDate) {
       setDob(selectedDate);
     }
@@ -232,6 +242,19 @@ const RegisterScreen = () => {
         </KeyboardAvoidingView>
       </View>
 
+      {/* DatePicker for Android */}
+      {Platform.OS === 'android' && showDatePicker && (
+        <DateTimePicker
+          value={dob}
+          mode="date"
+          display="default"
+          onChange={onDateChange}
+          maximumDate={new Date()}
+          minimumDate={new Date(1900, 0, 1)}
+        />
+      )}
+
+      {/* DatePicker Modal for iOS */}
       <Modal visible={isModalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -255,6 +278,7 @@ const RegisterScreen = () => {
     </ImageBackground>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
