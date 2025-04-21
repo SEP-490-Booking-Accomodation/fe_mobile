@@ -184,7 +184,11 @@ const HomeStack = () => (
       component={ChangePassword}
       options={{ headerShown: false }}
     />
-    <Stack.Screen name="RatingHistory" component={RatingHistory} />
+    <Stack.Screen name="RatingHistory" component={RatingHistory} options={
+      {
+        headerShown : false
+      }
+    }/>
     <Stack.Screen name="Wallet" component={WalletScreen} />
     <Stack.Screen name="PaymentMethod" component={PaymentMethod} />
     <Stack.Screen

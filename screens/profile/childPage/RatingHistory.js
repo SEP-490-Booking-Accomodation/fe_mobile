@@ -300,6 +300,8 @@ export default function RatingHistory() {
             ) : (
                 <>
                     <View style={styles.header}>
+                        <TouchableOpacity style={styles.backButton}  onPress={() => navigation.goBack()}> 
+                            </TouchableOpacity>
                         <Text style={styles.headerTitle}>Lịch sử đánh giá</Text>
                     </View>
                     {renderRatingList()}
