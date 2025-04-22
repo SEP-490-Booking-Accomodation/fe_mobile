@@ -130,9 +130,8 @@ export default function BookingInformation({ route, navigation }) {
       closeDatePicker();
       return;
     }
-
+    closeDatePicker();
     setSelectedDate(date);
-
   };
 
   const handleTimeSelect = (time) => {
@@ -199,9 +198,9 @@ export default function BookingInformation({ route, navigation }) {
       closeTimePicker();
       return;
     }
+    closeTimePicker();
 
     setSelectedTime(time);
-
   };
 
   const closeDatePicker = useCallback(() => {
@@ -309,7 +308,6 @@ export default function BookingInformation({ route, navigation }) {
         });
       } else {
         Alert.alert("Xin lỗi", "Khung giờ hiện tại không còn phòng trống");
-
       }
 
       return;
@@ -318,7 +316,6 @@ export default function BookingInformation({ route, navigation }) {
         "Failed",
         error.data?.message || "Đặt phòng thất bại, vui lòng thử lại sau"
       );
-
     }
   };
 

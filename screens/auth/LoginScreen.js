@@ -28,7 +28,7 @@ const LoginScreen = () => {
   const [login] = useLoginMutation();
   const [isLoading, setIsLoading] = useState(false);
   const [getRoleById] = useLazyGetRoleByIdQuery();
-  const {addIdChatPlatform} = useAsyncStorage();
+  const { addIdChatPlatform } = useAsyncStorage();
 
   const handleLogin = async () => {
     console.log("Đang gọi API login...");
@@ -97,10 +97,12 @@ const LoginScreen = () => {
           refreshToken: response.refreshToken,
         })
       );
+      navigation.goBack();
 
-      
-
-      navigation.replace("MainTabs");
+      // navigation.reset({
+      //   index: 0,
+      //   routes: [{ name: "MainTabs" }],
+      // });
     } catch (error) {
       console.log("Login error:", error);
       Alert.alert(
