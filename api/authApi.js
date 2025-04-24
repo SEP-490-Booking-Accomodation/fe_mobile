@@ -71,6 +71,7 @@ export const authApi = baseApi.injectEndpoints({
 export const {
   useLoginMutation,
   useGetCustomerByUserIdQuery,
+  useLazyGetCustomerByUserIdQuery,
   useLogoutQuery,
   useLazyGetUserQuery,
   useLazyGetRoleByIdQuery,

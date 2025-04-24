@@ -51,11 +51,11 @@ export default function SettingList() {
         /> */}
 
         {/* Component hiển thị thông tin user */}
-        <UserProfile
+        {/* <UserProfile
           user={displayUser}
           isLoading={isLoading}
           navigation={navigation}
-        />
+        /> */}
 
         <View style={styles.itemList}>
           {renderItem("earth-outline", "Đổi ngôn ngữ")}
