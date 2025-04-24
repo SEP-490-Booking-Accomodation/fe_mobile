@@ -66,7 +66,7 @@ export default function BookingDetail() {
         const response = await processMomoPayment({
           data: {
             bookingId: bookingData.id,
-            amount: totalPrice,
+            amount: bookingData.totalPrice,
             description: `Thanh toán đặt phòng ${bookingData.id} qua Momo ${totalPrice}`,
             returnUrlFE: returnUrl,
             orderIdFE: "MOMO" + new Date().getTime(),

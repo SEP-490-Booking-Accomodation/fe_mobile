@@ -10,6 +10,7 @@ export default function BookingFooter({
   onGoHome,
   isUpdating,
 }) {
+  
   const shouldShowCancel = () => {
     const status = Number(bookingData?.status);
     const paymentStatus = Number(bookingData?.paymentStatus);

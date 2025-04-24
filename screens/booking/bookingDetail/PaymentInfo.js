@@ -5,9 +5,12 @@ import InfoCard from "./InfoCard";
 import { formatMoney, getPaymentMethodText } from "../../../utils/formatters";
 
 export default function PaymentInfo({ bookingData }) {
-  const totalPrice =
+  const totalPriceHour =
     bookingData.basePrice +
     (bookingData.durationBookingHour - 1) * bookingData.overtimeHourlyPrice;
+
+  const { couponId } = bookingData;
+  console.log(couponId);
 
   return (
     <InfoCard
@@ -30,9 +33,19 @@ export default function PaymentInfo({ bookingData }) {
         label="Số giờ thuê:"
         value={`${bookingData.durationBookingHour} giờ`}
       />
+      <View style={[styles.paymentRow, styles.totalRow]}></View>
+      <PaymentRow label="Tổng tiền:" value={`${formatMoney(totalPriceHour)}`} />
+      {bookingData.couponId && (
+        <PaymentRow
+          label="Giảm giá:"
+          value={`${formatMoney(couponId?.amount)}`}
+        />
+      )}
       <View style={[styles.paymentRow, styles.totalRow]}>
         <Text style={styles.totalLabel}>Tổng cộng:</Text>
-        <Text style={styles.totalValue}>{formatMoney(totalPrice)}</Text>
+        <Text style={styles.totalValue}>
+          {formatMoney(bookingData?.totalPrice)}
+        </Text>
       </View>
     </InfoCard>
   );

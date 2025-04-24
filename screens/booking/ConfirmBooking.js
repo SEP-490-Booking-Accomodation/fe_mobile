@@ -25,6 +25,7 @@ export default function ConfirmBooking() {
   const authData = useSelector((state) => state.auth);
   const [paymentMethod, setPaymentMethod] = useState(1);
   const { data: customerData } = useGetCustomerByUserIdQuery(authData.userId);
+  const { data: getTimeRefund } = useGetPolicyHashTagQuery("");
   const [selectedVoucher, setSelectedVoucher] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [finalTotal, setFinalTotal] = useState(0);
@@ -32,7 +33,6 @@ export default function ConfirmBooking() {
   const navigation = useNavigation();
   const route = useRoute();
   const { bookingData } = route.params || {};
-  const [phiDuyTri, setPhiDuyTri] = useState(0);
 
   useEffect(() => {
     if (bookingData) {
@@ -127,7 +127,7 @@ export default function ConfirmBooking() {
 
   const handleConfirm = async () => {
     const formBooking = {
-      policySystemIds: policyId || ["67ebf15d828b69a4d279d960"],
+      // policySystemIds: policyId || ["67ebf15d828b69a4d279d960"],
       customerId: customerData.id,
       accommodationTypeId: typeRoom.id,
       couponId: selectedVoucher?.id || null,
@@ -170,6 +170,9 @@ export default function ConfirmBooking() {
         error.data?.message || "Đặt phòng thất bại, vui lòng thử lại sau"
       );
     }
+  };
+  const handleConfirm1 = async () => {
+    console.log("Confirm");
   };
 
   return (
