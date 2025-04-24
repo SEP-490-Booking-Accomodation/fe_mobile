@@ -15,7 +15,11 @@ import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import CustomButton from "../../components/buttons/Button";
 import CustomInput from "../../components/TextInput";
-import { useLazyGetUserQuery, useLoginMutation } from "../../api/authApi";
+import {
+  useLazyGetCustomerByUserIdQuery,
+  useLazyGetUserQuery,
+  useLoginMutation,
+} from "../../api/authApi";
 import { loginSuccess, logout } from "../../redux/authSlice";
 import { useLazyGetRoleByIdQuery } from "../../api/roleApi";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
@@ -28,7 +32,8 @@ const LoginScreen = () => {
   const [login] = useLoginMutation();
   const [isLoading, setIsLoading] = useState(false);
   const [getRoleById] = useLazyGetRoleByIdQuery();
-  const {addIdChatPlatform} = useAsyncStorage();
+  const [useGetCustomerByUserIdLazy] = useLazyGetCustomerByUserIdQuery();
+  const { addIdChatPlatform } = useAsyncStorage();
 
   const handleLogin = async () => {
     console.log("Đang gọi API login...");
@@ -46,7 +51,6 @@ const LoginScreen = () => {
       // Lấy thông tin người dùng từ API
       const resGetUser = await getUserById(response._id).unwrap();
       const userData = resGetUser.getUser;
-      // console.log("User Data:", userData);
 
       // Kiểm tra tài khoản có bị khóa không
       if (!userData?.isActive) {
@@ -61,6 +65,11 @@ const LoginScreen = () => {
       // Kiểm tra role của user
       const roleData = await getRoleById(userData.roleID).unwrap();
       // console.log("Role Data:", roleData);
+
+      const resCustomer = await useGetCustomerByUserIdLazy(
+        userData._id
+      ).unwrap();
+      const customerId = resCustomer.id;
 
       if (roleData.roleName !== "Customer") {
         Alert.alert("Lỗi đăng nhập", "Bạn không phải khách hàng!");
@@ -83,6 +92,7 @@ const LoginScreen = () => {
           token: response.accessToken,
           userData: userData,
           refreshToken: response.refreshToken,
+          customerId: customerId,
         });
         return;
       }
@@ -95,12 +105,15 @@ const LoginScreen = () => {
           userData: userData,
           isAuth: true,
           refreshToken: response.refreshToken,
+          customerId: customerId,
         })
       );
+      navigation.goBack();
 
-      
-
-      navigation.replace("MainTabs");
+      // navigation.reset({
+      //   index: 0,
+      //   routes: [{ name: "MainTabs" }],
+      // });
     } catch (error) {
       console.log("Login error:", error);
       Alert.alert(

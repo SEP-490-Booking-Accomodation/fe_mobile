@@ -11,6 +11,7 @@ import {
   Dimensions,
   Modal,
   ScrollView,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CustomButton from "../../components/buttons/Button";
@@ -85,8 +86,8 @@ const RegisterScreen = () => {
       };
       const response = await register({ data: data }).unwrap();
       console.log("Register response:", response);
-      alert("Đăng ký thành công!");
-      // navigation.navigate("Login");
+      Alert.alert("Thành công","Đăng ký thành công!");
+      navigation.goBack();
     } catch (error) {
       console.log("Register error:", error);
       alert("Đăng ký thất bại!");
@@ -103,7 +104,7 @@ const RegisterScreen = () => {
   };
 
   const showDatepicker = () => {
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === "ios") {
       setIsModalVisible(true);
     } else {
       setShowDatePicker(true);
@@ -112,10 +113,10 @@ const RegisterScreen = () => {
 
   const onDateChange = (event, selectedDate) => {
     // For Android, hiding is automatic after selection
-    if (Platform.OS === 'android') {
+    if (Platform.OS === "android") {
       setShowDatePicker(false);
     }
-    
+
     if (selectedDate) {
       setDob(selectedDate);
     }
@@ -243,7 +244,7 @@ const RegisterScreen = () => {
       </View>
 
       {/* DatePicker for Android */}
-      {Platform.OS === 'android' && showDatePicker && (
+      {Platform.OS === "android" && showDatePicker && (
         <DateTimePicker
           value={dob}
           mode="date"
@@ -278,7 +279,6 @@ const RegisterScreen = () => {
     </ImageBackground>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {

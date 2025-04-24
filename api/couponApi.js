@@ -4,10 +4,14 @@ export const CouponApi = baseApi.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
     getAllCoupon: builder.query({
-      query: (customerId) => `/coupon/all-coupons`,
+      query: () => `/coupon/all-coupons`,
+      providesTags: ["Coupon"],
+    }),
+    getCouponById: builder.query({
+      query: (id) => `/coupon/${id}`,
       providesTags: ["Coupon"],
     }),
   }),
 });
 
-export const { useGetAllCouponQuery } = CouponApi;
+export const { useGetAllCouponQuery, useGetCouponByIdQuery } = CouponApi;

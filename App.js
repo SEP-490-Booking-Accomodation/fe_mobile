@@ -89,10 +89,17 @@ const AuthLoader = () => {
         console.log("Đã đăng xuất");
       } else if (authData) {
         // console.log("Đã đăng nhập");
-        const { userId, token, isAuth, userData, refreshToken } =
+        const { userId, token, isAuth, userData, refreshToken, customerId } =
           JSON.parse(authData);
         dispatch(
-          restoreAuth({ userId, token, isAuth, userData, refreshToken })
+          restoreAuth({
+            userId,
+            token,
+            isAuth,
+            userData,
+            refreshToken,
+            customerId,
+          })
         );
       }
 

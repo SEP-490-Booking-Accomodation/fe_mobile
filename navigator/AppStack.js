@@ -41,7 +41,7 @@ import MessagesScreen from "../screens/chat/MessagesScreen";
 import ChatScreen from "../screens/chat/ChatScreen";
 import ConfirmBooking from "../screens/booking/ConfirmBooking";
 import PaymentConfirm from "../screens/payment/PaymentConfirm";
-import BookingDetail from "../screens/booking/BookingDetail";
+import BookingDetail from "../screens/booking/bookingDetail/BookingDetail";
 import PaymentSuccess from "../screens/payment/PaymentSuccess";
 import WalletScreen from "../screens/profile/childPage/WalletScreen";
 import PaymentMethod from "../screens/payment/PaymentMethod";
@@ -79,7 +79,7 @@ const hideTabBarScreens = [
   "Policies",
   "PolicyDetail",
   "MapScreen",
-  "TicketList",
+  // "TicketList",
   "HistoryScreen",
 ];
 
@@ -150,11 +150,12 @@ const HomeStack = () => (
       component={PaymentConfirm}
       options={{ headerShown: false }}
     />
-    {/* <Stack.Screen
+    <Stack.Screen
       name="BookingDetail"
       component={BookingDetail}
       options={{ headerShown: false }}
-    /> */}
+    />
+
     <Stack.Screen
       name="PaymentSuccess"
       component={PaymentSuccess}
@@ -261,14 +262,9 @@ const SettingStack = () => (
 const TicketStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="TicketList" component={TicketList} />
-    {/* <Stack.Screen
-      name="BookingDetail"
-      component={BookingDetail}
-      options={{ headerShown: false }}
-    /> */}
+    <Stack.Screen name="BookingDetail" component={BookingDetail} />
   </Stack.Navigator>
 );
-
 // Custom Middle Button Component
 const MiddleButton = ({ item, onPress }) => (
   <View style={{ alignItems: "center", justifyContent: "center" }}>

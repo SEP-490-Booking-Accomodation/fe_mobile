@@ -20,14 +20,13 @@ import { useDispatch } from "react-redux";
 import { logout } from "../../redux/authSlice";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
 
-
 export default function ProfileScreen() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const userId = useSelector((state) => state.auth?.userId);
   const { data, isLoading, error } = useGetCustomerDetailByIdQuery(userId);
   const defaultAvatar = require("../../assets/images/man.jpg");
   const dispatch = useDispatch();
-  const {removeAllIdChatPlaform} = useAsyncStorage();
+  const { removeAllIdChatPlaform } = useAsyncStorage();
   const navigation = useNavigation();
 
   const logoutModalRender = () => (
@@ -136,8 +135,10 @@ export default function ProfileScreen() {
     setShowLogoutModal(false);
     dispatch(logout());
     await removeAllIdChatPlaform();
-    navigation.replace("HomeScreen"); // Tải lại trang
-
+    navigation.reset({//xóa các stack trước đó 
+      index: 0,
+      routes: [{ name: "MainTabs" }],
+    });
   };
 
   return (

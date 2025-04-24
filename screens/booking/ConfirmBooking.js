@@ -25,48 +25,23 @@ export default function ConfirmBooking() {
   const authData = useSelector((state) => state.auth);
   const [paymentMethod, setPaymentMethod] = useState(1);
   const { data: customerData } = useGetCustomerByUserIdQuery(authData.userId);
+  const { data: getTimeRefund } = useGetPolicyHashTagQuery("");
   const [selectedVoucher, setSelectedVoucher] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [finalTotal, setFinalTotal] = useState(0);
-  const { data: policyDataLoiNhuan } = useGetPolicyHashTagQuery("loinhuan");
   const [createBooking] = useCreateBookingMutation();
   const navigation = useNavigation();
   const route = useRoute();
   const { bookingData } = route.params || {};
-  const [phiDuyTri, setPhiDuyTri] = useState(0);
-
-  const loinhuan = policyDataLoiNhuan?.data?.[0];
-  const loinhuanbandau = loinhuan?.values?.[0];
 
   useEffect(() => {
     if (bookingData) {
       calculateTotal();
     }
-  }, [bookingData, selectedVoucher, loinhuanbandau]);
-
-  useEffect(() => {
-    if (
-      bookingData?.totalPrice &&
-      loinhuanbandau?.val1 &&
-      loinhuanbandau?.unit == "percent"
-    ) {
-      const fee =
-        (bookingData.totalPrice * parseFloat(loinhuanbandau.val1)) / 100;
-      setPhiDuyTri(fee);
-    } else if (
-      bookingData?.totalPrice &&
-      loinhuanbandau?.val1 &&
-      loinhuanbandau?.unit == "vnd"
-    ) {
-      const fee = loinhuanbandau.val1;
-
-      setPhiDuyTri(fee);
-    }
-  }, [bookingData, loinhuanbandau]);
+  }, [bookingData, selectedVoucher]);
 
   const calculateTotal = () => {
     if (!bookingData) return;
-
     const originalTotal = bookingData.totalPrice;
     let discount = 0;
 
@@ -87,10 +62,8 @@ export default function ConfirmBooking() {
         selectedVoucher.discountBasedOn === "Fixed" ||
         selectedVoucher.discountBasedOn === "fixed"
       ) {
-        // Fixed discount
         discount = selectedVoucher?.amount;
 
-        // Make sure discount doesn't exceed the total
         if (discount > originalTotal) {
           discount = originalTotal;
         }
@@ -98,16 +71,7 @@ export default function ConfirmBooking() {
     }
 
     const priceAfterDiscount = originalTotal - discount;
-    // let fee = 0;
-    // if (loinhuanbandau?.val1 && loinhuanbandau.unit == "percent") {
-    //   fee = (priceAfterDiscount * parseFloat(loinhuanbandau.val1)) / 100;
-    //   setPhiDuyTri(fee);
-    // } else if (loinhuanbandau?.val1 && loinhuanbandau.unit == "vnd") {
-    //   fee = parseFloat(loinhuanbandau.val1);
-    //   setPhiDuyTri(fee);
-    // }
     setDiscountAmount(discount);
-    // setFinalTotal(priceAfterDiscount + fee);
     setFinalTotal(priceAfterDiscount);
   };
 
@@ -157,14 +121,13 @@ export default function ConfirmBooking() {
 
   const checkInDateTime = `${bookingData.date} ${bookingData.time}:00`;
   const checkOutDateTime = `${bookingData.date} ${bookingData.endTime}:00`;
-  console.log(checkInDateTime);
-  console.log(checkOutDateTime);
-  const policyId = policyDataLoiNhuan?.data?.[0].id;
-  console.log(policyId);
+  // console.log(checkInDateTime);
+  // console.log(checkOutDateTime);
+  // console.log(finalTotal);
 
   const handleConfirm = async () => {
     const formBooking = {
-      policySystemIds: policyId || ["67ebf15d828b69a4d279d960"],
+      // policySystemIds: policyId || ["67ebf15d828b69a4d279d960"],
       customerId: customerData.id,
       accommodationTypeId: typeRoom.id,
       couponId: selectedVoucher?.id || null,
@@ -186,6 +149,7 @@ export default function ConfirmBooking() {
       // discountAmount: discountAmount, // Add discount amount to the booking data
       totalPrice: finalTotal, // Add final total after discount
     };
+    console.log(formBooking);
 
     try {
       const response = await createBooking({
@@ -206,6 +170,9 @@ export default function ConfirmBooking() {
         error.data?.message || "Đặt phòng thất bại, vui lòng thử lại sau"
       );
     }
+  };
+  const handleConfirm1 = async () => {
+    console.log("Confirm");
   };
 
   return (
@@ -333,7 +300,7 @@ export default function ConfirmBooking() {
         <CustomButton
           onPress={handleConfirm}
           style={{ width: "40%" }}
-          title="Thanh toán"
+          title="Xác nhận"
         />
       </View>
     </SafeAreaView>
