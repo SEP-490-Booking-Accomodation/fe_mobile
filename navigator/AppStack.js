@@ -52,7 +52,8 @@ import EditInfo from "../screens/profile/childPage/EditInfo";
 import ChangePassword from "../screens/profile/childPage/ChangePassword";
 import FavouriteList from "../screens/profile/childPage/FavouriteList";
 import HistoryScreen from "../screens/profile/childPage/HistoryScreen";
-import RatingHistory from "../screens/profile/childPage/RatingHistory";
+import RatingList from "../screens/profile/childPage/Rating/RatingList";
+import RatingDetail from "../screens/profile/childPage/Rating/RatingDetail";
 import TicketList from "../screens/ticket/TicketList";
 import BookingInformation from "../screens/booking/BookingInformation";
 
@@ -184,11 +185,20 @@ const HomeStack = () => (
       component={ChangePassword}
       options={{ headerShown: false }}
     />
-    <Stack.Screen name="RatingHistory" component={RatingHistory} options={
-      {
-        headerShown : false
-      }
-    }/>
+    <Stack.Screen
+      name="RatingList"
+      component={RatingList}
+      options={{
+        headerShown: false,
+      }}
+    />
+    <Stack.Screen
+      name="RatingDetail"
+      component={RatingDetail}
+      options={{
+        headerShown: false,
+      }}
+    />
     <Stack.Screen name="Wallet" component={WalletScreen} />
     <Stack.Screen name="PaymentMethod" component={PaymentMethod} />
     <Stack.Screen
@@ -205,7 +215,7 @@ const MessageStack = () => (
     <Stack.Screen
       name="MessagesScreen"
       component={MessagesScreen}
-      options={{headerShown: false}}
+      options={{ headerShown: false }}
     />
     <Stack.Screen
       name="Chat"

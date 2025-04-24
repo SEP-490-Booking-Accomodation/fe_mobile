@@ -1,3 +1,4 @@
+// RatingList.jsx
 "use client"
 import { useState } from "react"
 import {
@@ -12,7 +13,8 @@ import {
     ActivityIndicator,
 } from "react-native"
 import { useNavigation } from "@react-navigation/native"
-import { ArrowLeft, Star, ChevronRight, Calendar } from "lucide-react-native"
+import { ArrowLeft, Star, ChevronRight } from "lucide-react-native"
+import RatingDetail from "./RatingDetail"
 
 // Mock data for testing
 const MOCK_FEEDBACKS = [
@@ -100,7 +102,7 @@ const MOCK_FEEDBACKS = [
     },
 ]
 
-export default function RatingHistory() {
+export default function RatingList() {
     const navigation = useNavigation()
     const [refreshing, setRefreshing] = useState(false)
     const [selectedRating, setSelectedRating] = useState(null)
@@ -126,12 +128,6 @@ export default function RatingHistory() {
         setSelectedRating(null)
     }
 
-    const handleViewBooking = (bookingId) => {
-        // Navigate to booking detail
-        navigation.navigate("BookingDetail", { bookingId })
-        console.log("Navigating to booking:", bookingId)
-    }
-
     const formatDate = (dateString) => {
         const date = new Date(dateString)
         return date.toLocaleDateString("vi-VN", {
@@ -153,86 +149,6 @@ export default function RatingHistory() {
                         color={star <= rating ? "#FFB800" : "#D1D5DB"}
                     />
                 ))}
-            </View>
-        )
-    }
-
-    // Render the rating detail view
-    const renderRatingDetail = () => {
-        if (!selectedRating) return null
-
-        return (
-            <View style={styles.detailContainer}>
-                <View style={styles.detailHeader}>
-                    <TouchableOpacity onPress={handleBackToList} style={styles.backButton}>
-                        <ArrowLeft size={24} color="#000" />
-                    </TouchableOpacity>
-                    <Text style={styles.detailHeaderTitle}>Chi tiết đánh giá</Text>
-                    <View style={{ width: 24 }} />
-                </View>
-
-                <ScrollView style={styles.detailContent} showsVerticalScrollIndicator={false}>
-                    <View style={styles.accommodationCard}>
-                        <Image
-                            source={{
-                                uri: selectedRating.bookingId?.accommodationId?.image?.[0] || "/placeholder.svg?height=100&width=100",
-                            }}
-                            style={styles.accommodationImage}
-                        />
-                        <View style={styles.accommodationInfo}>
-                            <Text style={styles.accommodationName}>
-                                {selectedRating.bookingId?.accommodationId?.accommodationTypeId?.name || "Phòng"}
-                            </Text>
-                            <Text style={styles.accommodationLocation}>
-                                {selectedRating.bookingId?.accommodationId?.rentalLocationId?.city || "Địa điểm"}
-                            </Text>
-                            <View style={styles.ratingDateRow}>
-                                <Calendar size={14} color="#6B7280" />
-                                <Text style={styles.ratingDate}>{formatDate(selectedRating.createdAt)}</Text>
-                            </View>
-                        </View>
-                    </View>
-
-                    <View style={styles.ratingSection}>
-                        <Text style={styles.sectionTitle}>Đánh giá của bạn</Text>
-                        <View style={styles.ratingBox}>
-                            <View style={styles.ratingHeader}>
-                                <Text style={styles.ratingValue}>{selectedRating.rating.toFixed(1)}</Text>
-                                {renderStars(selectedRating.rating)}
-                            </View>
-                            <Text style={styles.ratingContent}>{selectedRating.content}</Text>
-
-                            {selectedRating.images && selectedRating.images.length > 0 && (
-                                <View style={styles.ratingImages}>
-                                    <Text style={styles.imagesTitle}>Hình ảnh</Text>
-                                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                                        {selectedRating.images.map((image, index) => (
-                                            <Image key={index} source={{ uri: image }} style={styles.ratingImage} />
-                                        ))}
-                                    </ScrollView>
-                                </View>
-                            )}
-                        </View>
-                    </View>
-
-                    {selectedRating.contentReply && (
-                        <View style={styles.replySection}>
-                            <Text style={styles.sectionTitle}>Phản hồi từ chủ nhà</Text>
-                            <View style={styles.replyBox}>
-                                <Text style={styles.replyContent}>{selectedRating.contentReply}</Text>
-                                <Text style={styles.replyDate}>{selectedRating.updatedAt && formatDate(selectedRating.updatedAt)}</Text>
-                            </View>
-                        </View>
-                    )}
-
-                    <TouchableOpacity
-                        style={styles.viewBookingButton}
-                        onPress={() => handleViewBooking(selectedRating.bookingId.id)}
-                    >
-                        <Text style={styles.viewBookingText}>Xem chi tiết đặt phòng</Text>
-                        <ChevronRight size={20} color="#FFFFFF" />
-                    </TouchableOpacity>
-                </ScrollView>
             </View>
         )
     }
@@ -296,13 +212,20 @@ export default function RatingHistory() {
     return (
         <SafeAreaView style={styles.container}>
             {selectedRating ? (
-                renderRatingDetail()
+                <RatingDetail 
+                    rating={selectedRating} 
+                    onBack={handleBackToList} 
+                    formatDate={formatDate}
+                    renderStars={renderStars}
+                />
             ) : (
                 <>
                     <View style={styles.header}>
-                        <TouchableOpacity style={styles.backButton}  onPress={() => navigation.goBack()}> 
-                            </TouchableOpacity>
+                        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                            <ArrowLeft size={24} color="#000" />
+                        </TouchableOpacity>
                         <Text style={styles.headerTitle}>Lịch sử đánh giá</Text>
+                        <View style={{ width: 24 }} />
                     </View>
                     {renderRatingList()}
                 </>
@@ -334,6 +257,9 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 18,
         fontWeight: "600",
+    },
+    backButton: {
+        padding: 4,
     },
     scrollView: {
         flex: 1,
@@ -415,168 +341,5 @@ const styles = StyleSheet.create({
     starsContainer: {
         flexDirection: "row",
         alignItems: "center",
-    },
-
-    // Detail view styles
-    detailContainer: {
-        flex: 1,
-        backgroundColor: "#f9f9f9",
-    },
-    detailHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        backgroundColor: "#fff",
-        padding: 16,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 3,
-    },
-    backButton: {
-        padding: 4,
-    },
-    detailHeaderTitle: {
-        fontSize: 18,
-        fontWeight: "600",
-    },
-    detailContent: {
-        flex: 1,
-        padding: 16,
-    },
-    accommodationCard: {
-        flexDirection: "row",
-        backgroundColor: "#FFFFFF",
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 16,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    accommodationImage: {
-        width: 80,
-        height: 80,
-        borderRadius: 8,
-        marginRight: 12,
-    },
-    accommodationInfo: {
-        flex: 1,
-        justifyContent: "center",
-    },
-    accommodationName: {
-        fontSize: 16,
-        fontWeight: "600",
-        marginBottom: 4,
-    },
-    accommodationLocation: {
-        fontSize: 14,
-        color: "#6B7280",
-        marginBottom: 8,
-    },
-    ratingDateRow: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    ratingDate: {
-        fontSize: 12,
-        color: "#6B7280",
-        marginLeft: 4,
-    },
-    ratingSection: {
-        marginBottom: 16,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: "600",
-        marginBottom: 8,
-    },
-    ratingBox: {
-        backgroundColor: "#FFFFFF",
-        borderRadius: 12,
-        padding: 16,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    ratingHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 12,
-    },
-    ratingValue: {
-        fontSize: 18,
-        fontWeight: "bold",
-        marginRight: 8,
-        color: "#FFB800",
-    },
-    ratingContent: {
-        fontSize: 14,
-        color: "#374151",
-        lineHeight: 20,
-        marginBottom: 12,
-    },
-    ratingImages: {
-        marginTop: 8,
-    },
-    imagesTitle: {
-        fontSize: 14,
-        fontWeight: "500",
-        marginBottom: 8,
-    },
-    ratingImage: {
-        width: 100,
-        height: 100,
-        borderRadius: 8,
-        marginRight: 8,
-    },
-    replySection: {
-        marginBottom: 16,
-    },
-    replyBox: {
-        backgroundColor: "#F3F4F6",
-        borderRadius: 12,
-        padding: 16,
-    },
-    replyContent: {
-        fontSize: 14,
-        color: "#374151",
-        lineHeight: 20,
-        marginBottom: 8,
-    },
-    replyDate: {
-        fontSize: 12,
-        color: "#6B7280",
-        textAlign: "right",
-    },
-    viewBookingButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#ff385c",
-        borderRadius: 12,
-        padding: 16,
-        marginTop: 16,
-        marginBottom: 32,
-    },
-    viewBookingText: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: "#FFFFFF",
-        marginRight: 8,
     },
 })
