@@ -32,7 +32,7 @@ export const getPaymentStatusText = (status) => {
     1: "Chờ thanh toán",
     2: "Chờ thanh toán",
     3: "Đã thanh toán",
-    4: "Hoàn tiền",
+    4: "Yêu cầu hoàn tiền",
     5: "Thất bại",
   };
   return statusMap[status] || "Không xác định";
