@@ -1,8 +1,9 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { CreditCard } from "lucide-react-native";
+import { CreditCard, Info } from "lucide-react-native";
 import InfoCard from "./InfoCard";
 import { formatMoney, getPaymentMethodText } from "../../../utils/formatters";
+import { BOOKING_STATUS } from "./Constants";
 
 export default function PaymentInfo({ bookingData }) {
   const totalPriceHour =
@@ -10,7 +11,24 @@ export default function PaymentInfo({ bookingData }) {
     (bookingData.durationBookingHour - 1) * bookingData.overtimeHourlyPrice;
 
   const { couponId } = bookingData;
-  console.log(couponId);
+
+  const isRefundEligible = () => {
+    const now = new Date();
+    const timeExpireRefund = new Date(bookingData.timeExpireRefund);
+    return (
+      // bookingData.status === BOOKING_STATUS.CANCELLED &&
+      bookingData.paymentStatus === 3 && now <= timeExpireRefund
+    );
+  };
+
+  const isRefundExpired = () => {
+    const now = new Date();
+    const timeExpireRefund = new Date(bookingData.timeExpireRefund);
+    return (
+      // bookingData.status === BOOKING_STATUS.CANCELLED &&
+      bookingData.paymentStatus === 3 && now > timeExpireRefund
+    );
+  };
 
   return (
     <InfoCard
@@ -33,9 +51,9 @@ export default function PaymentInfo({ bookingData }) {
         label="Số giờ thuê:"
         value={`${bookingData.durationBookingHour} giờ`}
       />
-      <View style={[styles.paymentRow, styles.totalRow]}></View>
+      <View style={[styles.paymentRow, styles.totalRow]} />
       <PaymentRow label="Tổng tiền:" value={`${formatMoney(totalPriceHour)}`} />
-      {bookingData.couponId && (
+      {couponId && (
         <PaymentRow
           label="Giảm giá:"
           value={`${formatMoney(couponId?.amount)}`}
@@ -47,6 +65,20 @@ export default function PaymentInfo({ bookingData }) {
           {formatMoney(bookingData?.totalPrice)}
         </Text>
       </View>
+
+      {(isRefundEligible() || isRefundExpired()) && (
+        <View style={styles.refundStatusContainer}>
+          <Info size={16} color={isRefundEligible() ? "#28a745" : "#aaa"} />
+          <Text
+            style={[
+              styles.refundStatusText,
+              { color: isRefundEligible() ? "#28a745" : "#aaa" },
+            ]}
+          >
+            {isRefundEligible() ? "Hoàn tiền khả dụng" : "Hết hạn hoàn tiền"}
+          </Text>
+        </View>
+      )}
     </InfoCard>
   );
 }
@@ -89,5 +121,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#ff385c",
+  },
+  refundStatusContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  refundStatusText: {
+    marginLeft: 6,
+    fontSize: 14,
+    fontWeight: "500",
   },
 });
