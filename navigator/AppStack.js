@@ -79,8 +79,9 @@ const hideTabBarScreens = [
   "Policies",
   "PolicyDetail",
   "MapScreen",
-  // "TicketList",
+  //"TicketList",
   "HistoryScreen",
+  "RatingList",
 ];
 
 // AUTH STACK

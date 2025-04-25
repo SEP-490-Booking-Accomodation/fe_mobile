@@ -60,11 +60,11 @@ const NotificationList = () => {
 
 const getNotificationIcon = (type) => {
   switch (type) {
-    case 1: 
+    case 1:
       return "checkmark-circle-outline";
-    case 2: 
+    case 2:
       return "close-circle-outline";
-    case 3: 
+    case 3:
       return "wallet-outline";
     default:
       return "notifications-outline";
@@ -75,20 +75,20 @@ const styles = StyleSheet.create({
   listContainer: {
     paddingBottom: 16,
     marginHorizontal: 5,
-    marginVertical: 5
+    marginVertical: 5,
   },
   loading: {
     marginTop: 20,
   },
   error: {
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 20,
-    color: 'red',
+    color: "red",
   },
   empty: {
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 20,
-    color: '#666',
+    color: "#666",
   },
 });
 
