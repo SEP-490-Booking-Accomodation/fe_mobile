@@ -39,6 +39,11 @@ export default function TicketList() {
 
   const authData = useSelector((state) => state.auth);
   const userAuth = useSelector((state) => state.auth?.userId);
+  const parseCustomDate = (dateStr) => {
+    const [day, month, yearAndTime] = dateStr.split("/");
+    const [year, time] = yearAndTime.split(" ");
+    return new Date(`${year}-${month}-${day}T${time}`);
+  };
 
   const { data: customerData } = useGetCustomerByUserIdQuery(authData.userId);
   const [createFeedback] = useCreateFeedbackMutation();
@@ -48,6 +53,7 @@ export default function TicketList() {
     refetch,
   } = useGetAllBookingByCustomerIdQuery(customerData?.id);
 
+  console.log("bookingData", bookingData);
   const mapStatusToFilterCategory = (status) => {
     switch (status) {
       case BOOKING_STATUS.CONFIRMED:
@@ -99,8 +105,11 @@ export default function TicketList() {
       maxPeople: booking.adultNumber + booking.childNumber,
       price: booking.basePrice.toLocaleString("vi-VN") + " VND",
       dateCompleted: booking.checkOutHour,
+      dateCheckin: booking.checkInHour,
+      dateBooked: booking.createdAt,
       status: mapStatusToUiCode(booking.status),
       bookingStatus: mapStatusToFilterCategory(booking.status),
+      paymentStatus: booking.paymentStatus,
       feedbackId: booking.feedbackId,
     }));
   };
@@ -214,7 +223,7 @@ export default function TicketList() {
       : convertedBookings.filter(
           (booking) => booking.bookingStatus === activeTab.key
         );
-
+  console.log("filteredBookings", filteredBookings);
   return (
     <>
       {!userAuth ? (
@@ -283,24 +292,50 @@ export default function TicketList() {
                   <Text style={styles.emptyStateText}>Đang tải...</Text>
                 </View>
               ) : filteredBookings.length > 0 ? (
-                filteredBookings.map((booking) => (
-                  <View key={booking.id} style={styles.cardWrapper}>
-                    <CardInMyTicket
-                      imageUrl={{ uri: booking.imageUrl }}
-                      nameRoom={booking.nameRoom}
-                      placeName={booking.placeName}
-                      maxPeople={booking.maxPeople}
-                      price={booking.price}
-                      dateCompleted={booking.dateCompleted}
-                      status={booking.status}
-                      feedbackId={booking.feedbackId}
-                      onViewDetail={() => handleViewDetail(booking.id)}
-                      onCancelAction={() => handleCancel(booking.id)}
-                      onReviewAction={() => handleReview(booking.id)}
-                      onRebookingAction={() => handleRebooking(booking.id)}
-                    />
-                  </View>
-                ))
+                [...filteredBookings]
+                  .sort((a, b) => {
+                    const parseCustomDate = (dateStr) => {
+                      const [day, month, yearAndTime] = dateStr.split("/");
+                      const [year, time] = yearAndTime.split(" ");
+                      return new Date(`${year}-${month}-${day}T${time}`);
+                    };
+
+                    if (activeTab.key === "upcoming") {
+                      return (
+                        parseCustomDate(b.dateCheckin) -
+                        parseCustomDate(a.dateCheckin)
+                      );
+                    } else if (activeTab.key === "current") {
+                      return (
+                        parseCustomDate(b.dateCompleted) -
+                        parseCustomDate(a.dateCompleted)
+                      );
+                    } else {
+                      return (
+                        parseCustomDate(b.dateBooked) -
+                        parseCustomDate(a.dateBooked)
+                      );
+                    }
+                  })
+                  .map((booking) => (
+                    <View key={booking.id} style={styles.cardWrapper}>
+                      <CardInMyTicket
+                        imageUrl={{ uri: booking.imageUrl }}
+                        nameRoom={booking.nameRoom}
+                        placeName={booking.placeName}
+                        maxPeople={booking.maxPeople}
+                        price={booking.price}
+                        dateCompleted={booking.dateCompleted}
+                        status={booking.status}
+                        paymentStatus={booking.paymentStatus}
+                        feedbackId={booking.feedbackId}
+                        onViewDetail={() => handleViewDetail(booking.id)}
+                        onCancelAction={() => handleCancel(booking.id)}
+                        onReviewAction={() => handleReview(booking.id)}
+                        onRebookingAction={() => handleRebooking(booking.id)}
+                      />
+                    </View>
+                  ))
               ) : (
                 <View style={styles.emptyState}>
                   <Text style={styles.emptyStateText}>

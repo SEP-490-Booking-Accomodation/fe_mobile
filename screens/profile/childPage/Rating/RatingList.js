@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ArrowLeft, Star, ChevronRight } from "lucide-react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import RatingDetail from "./RatingDetail";
 import { useSelector } from "react-redux";
 import { useGetAllFeedbackByCustomerIdQuery } from "../../../../api/feedbackApi";
@@ -123,6 +124,18 @@ export default function RatingList() {
     </View>
   );
 
+  const renderHeader = () => (
+    <View style={styles.header}>
+      <TouchableOpacity
+        style={styles.arrowBack}
+        onPress={() => navigation.goBack()}
+      >
+        <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
+      </TouchableOpacity>
+      <Text style={styles.textHeader}>Lịch sử đánh giá</Text>
+    </View>
+  );
+
   const renderRatingList = () => {
     if (isLoading) {
       return (
@@ -206,16 +219,7 @@ export default function RatingList() {
         />
       ) : (
         <>
-          <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => navigation.goBack()}
-            >
-              <ArrowLeft size={24} color="#000" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Lịch sử đánh giá</Text>
-            <View style={{ width: 24 }} />
-          </View>
+          {renderHeader()}
           {renderRatingList()}
         </>
       )}
@@ -231,24 +235,18 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    padding: 20,
     backgroundColor: "#fff",
-    padding: 16,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 1.32,
+    elevation: 5,
   },
-  headerTitle: {
-    fontSize: 18,
+  textHeader: {
+    fontSize: 20,
     fontWeight: "600",
-  },
-  backButton: {
-    padding: 4,
+    marginLeft: 10,
   },
   scrollView: {
     flex: 1,
