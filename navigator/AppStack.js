@@ -149,11 +149,11 @@ const HomeStack = () => (
       component={PaymentConfirm}
       options={{ headerShown: false }}
     />
-    <Stack.Screen
+    {/* <Stack.Screen
       name="BookingDetail"
       component={BookingDetail}
       options={{ headerShown: false }}
-    />
+    /> */}
 
     <Stack.Screen
       name="PaymentSuccess"
@@ -441,7 +441,7 @@ const AppStack = () => {
 
         {/* Auth Flow */}
         <Stack.Screen name="Auth" component={AuthStack} />
-        <Stack.Screen name="BookingDetail" component={BookingDetail} />
+        {/* <Stack.Screen name="BookingDetail" component={BookingDetail} /> */}
 
         {/* Main App Flow - Thay DrawerNavigator bằng MainTabNavigator */}
         <Stack.Screen name="MainTabs" component={MainTabNavigator} />

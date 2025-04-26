@@ -42,7 +42,6 @@ export default function HomeScreen() {
   const [manualCity, setManualCity] = useState(null);
   const authData = useSelector((state) => state.auth);
   const customerId = useSelector((state) => state.auth.customerId);
-  console.log(customerId);
   const userId = authData.userId;
   const { data: user, refetch: refetchUser } = useGetUserQuery(userId);
   const { data: rental, refetch: refetchRental } = useGetAllRentalQuery();

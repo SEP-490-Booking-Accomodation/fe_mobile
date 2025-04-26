@@ -10,7 +10,11 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import {
+  CommonActions,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { ArrowLeft } from "lucide-react-native";
 import CustomButton from "../../components/buttons/Button";
 import PaymentConfirm from "./components/PaymentConfirm";
@@ -25,7 +29,7 @@ export default function ConfirmBooking() {
   const authData = useSelector((state) => state.auth);
   const [paymentMethod, setPaymentMethod] = useState(1);
   const { data: customerData } = useGetCustomerByUserIdQuery(authData.userId);
-  const { data: getTimeRefund } = useGetPolicyHashTagQuery("");
+  const { data: getTimeRefundData } = useGetPolicyHashTagQuery("exRefund");
   const [selectedVoucher, setSelectedVoucher] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [finalTotal, setFinalTotal] = useState(0);
@@ -33,6 +37,13 @@ export default function ConfirmBooking() {
   const navigation = useNavigation();
   const route = useRoute();
   const { bookingData } = route.params || {};
+
+  const values = getTimeRefundData?.data?.[0]?.values || [];
+  let refundMinutes = values[0]?.val; // mặc định nếu không có
+  const bookingTime = dayjs(); // thời điểm tạo booking
+  const refundDeadline = bookingTime.add(refundMinutes, "minute");
+  // console.log(refundDeadline);
+  // console.log(bookingTime);
 
   useEffect(() => {
     if (bookingData) {
@@ -146,25 +157,68 @@ export default function ConfirmBooking() {
       passwordRoom: "",
       note: bookingData.note || "",
       status: 8,
+      timeExpireRefund: refundDeadline,
       // discountAmount: discountAmount, // Add discount amount to the booking data
       totalPrice: finalTotal, // Add final total after discount
     };
-    console.log(formBooking);
+    // console.log(formBooking);
 
     try {
       const response = await createBooking({
         data: formBooking,
       }).unwrap();
 
-      navigation.navigate("BookingDetail", {
-        bookingData: {
-          ...bookingData,
-          discountAmount,
-          finalTotal,
-        },
-        bookingId: response.booking.id,
-      });
+      // navigation.navigate("BookingDetail", {
+      //   bookingId: response.booking.id,
+      // });
+
+      // navigation.reset({
+      //   index: 1,
+      //   routes: [
+      //     {
+      //       name: "MainTabs",
+      //       params: {
+      //         screen: "Ticket",
+      //         params: {
+      //           screen: "BookingDetail",
+      //           params: { bookingId: response.booking.id },
+      //         },
+      //       },
+      //     },
+      //   ],
+      // });
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 1,
+          routes: [
+            {
+              name: "MainTabs",
+              state: {
+                routes: [
+                  { name: "Home" },
+                  {
+                    name: "Ticket",
+                    state: {
+                      routes: [
+                        { name: "TicketList" },
+                        {
+                          name: "BookingDetail",
+                          params: { bookingId: response.booking.id },
+                        },
+                      ],
+                      index: 1,
+                    },
+                  },
+                ],
+                index: 1,
+              },
+            },
+          ],
+        })
+      );
     } catch (error) {
+      console.log(error);
+
       Alert.alert(
         "Failed",
         error.data?.message || "Đặt phòng thất bại, vui lòng thử lại sau"

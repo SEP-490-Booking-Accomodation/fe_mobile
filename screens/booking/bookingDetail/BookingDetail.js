@@ -17,7 +17,7 @@ import {
   useUpdateBookingMutation,
 } from "../../../api/bookingApi";
 import { useProcessMomoPaymentMutation } from "../../../api/momoPayment";
-import { BOOKING_STATUS } from "./Constants";
+import { BOOKING_STATUS, PAYMENT_STATUS } from "./Constants";
 
 import BookingHeader from "./BookingHeader";
 import BookingStatusBar from "./BookingStatusBar";
@@ -31,6 +31,7 @@ import PaymentInfo from "./PaymentInfo";
 import BookingFooter from "./BookingFooter";
 import LoadingState from "./LoadingState";
 import EmptyState from "./EmptyState";
+import dayjs from "dayjs";
 
 export default function BookingDetail() {
   const navigation = useNavigation();
@@ -98,17 +99,35 @@ export default function BookingDetail() {
           text: "Có, hủy đặt phòng",
           onPress: async () => {
             try {
+              // Kiểm tra nếu hoàn tiền
+              const isPaid = bookingData?.paymentStatus === PAYMENT_STATUS.PAID;
+              const refundDeadline = bookingData?.timeExpireRefund;
+              const now = dayjs();
+              const isRefundAvailable =
+                refundDeadline && now.isBefore(dayjs(refundDeadline));
+
               const updatedBookingData = {
                 ...bookingData,
                 status: BOOKING_STATUS.CANCELLED,
+
+                paymentStatus:
+                  isPaid && isRefundAvailable
+                    ? PAYMENT_STATUS.REFUND
+                    : BOOKING_STATUS.PAID,
               };
+
               await updateBooking({
                 id: bookingId,
                 data: updatedBookingData,
               }).unwrap();
-              Alert.alert("Thành công", "Đã hủy đặt phòng thành công", [
-                { text: "OK", onPress: () => refetch() },
-              ]);
+
+              Alert.alert(
+                "Thành công",
+                isRefundAvailable
+                  ? "Đã gửi yêu cầu hoàn tiền và hủy đặt phòng."
+                  : "Đã hủy đặt phòng thành công.",
+                [{ text: "OK", onPress: () => refetch() }]
+              );
             } catch (error) {
               console.error("Error cancelling booking:", error);
               Alert.alert(
