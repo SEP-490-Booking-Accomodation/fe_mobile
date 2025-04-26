@@ -52,7 +52,8 @@ import EditInfo from "../screens/profile/childPage/EditInfo";
 import ChangePassword from "../screens/profile/childPage/ChangePassword";
 import FavouriteList from "../screens/profile/childPage/FavouriteList";
 import HistoryScreen from "../screens/profile/childPage/HistoryScreen";
-import RatingHistory from "../screens/profile/childPage/RatingHistory";
+import RatingList from "../screens/profile/childPage/Rating/RatingList";
+import RatingDetail from "../screens/profile/childPage/Rating/RatingDetail";
 import TicketList from "../screens/ticket/TicketList";
 import BookingInformation from "../screens/booking/BookingInformation";
 
@@ -78,8 +79,9 @@ const hideTabBarScreens = [
   "Policies",
   "PolicyDetail",
   "MapScreen",
-  // "TicketList",
+  //"TicketList",
   "HistoryScreen",
+  "RatingList",
 ];
 
 // AUTH STACK
@@ -186,8 +188,15 @@ const HomeStack = () => (
       options={{ headerShown: false }}
     />
     <Stack.Screen
-      name="RatingHistory"
-      component={RatingHistory}
+      name="RatingList"
+      component={RatingList}
+      options={{
+        headerShown: false,
+      }}
+    />
+    <Stack.Screen
+      name="RatingDetail"
+      component={RatingDetail}
       options={{
         headerShown: false,
       }}

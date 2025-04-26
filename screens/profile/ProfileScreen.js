@@ -123,8 +123,8 @@ export default function ProfileScreen() {
     navigation.navigate("Wallet");
   };
 
-  const handleNavigateRatingHistory = () => {
-    navigation.navigate("RatingHistory");
+  const handleNavigateRatingList = () => {
+    navigation.navigate("RatingList");
   };
 
   const handleNavigateLogout = () => {
@@ -202,7 +202,7 @@ export default function ProfileScreen() {
               "star-outline",
               "Đánh giá của tôi",
               false,
-              handleNavigateRatingHistory
+              handleNavigateRatingList
             )}
             {renderItem("power", "Đăng xuất", true, handleNavigateLogout)}
           </View>
