@@ -11,17 +11,17 @@ import {
   ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import AsyncStorage, { useAsyncStorage } from "../../context/AsyncStorageContext"
+import AsyncStorage, { useAsyncStorage } from "../../context/AsyncStorageContext";
 import MultiSelectButtonGroup from "../../components/buttons/MultiSelectButtonGroup";
 import Tag from "../../components/Tag";
 import SimpleVerticalCard from "../../components/cards/SimpleVerticalCard";
-import { useGetAllAccommodationTypeOfRentalLocationQuery } from "../../api/rentalLocationApi";
 import { Button } from "react-native-elements";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ensureUserInDatabaseWithoutAsyncStorage, newChat } from "../../lib/supabase";
-import { KeyboardAwareSectionList } from "react-native-keyboard-aware-scroll-view";
 import { useGetAllFeedbackByRentalIdQuery } from "../../api/feedbackApi";
-import {useGetAverageFeedbackByRentalIdQuery} from "../../api/feedbackApi";
+import { useGetAverageFeedbackByRentalIdQuery } from "../../api/feedbackApi";
+import { useGetRentalLocationByIdQuery } from "../../api/rentalLocationApi";
+import { useGetAllAccommodationTypesQuery } from "../../api/accommodationTypeApi";
 
 const DetailRentalLocationScreen = ({ route, navigation }) => {
   const [user, setUser] = useState({});
@@ -30,6 +30,22 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 
   const {data: feedbackDataList} = useGetAllFeedbackByRentalIdQuery(locationId);
   const {data: feedbackAverage} = useGetAverageFeedbackByRentalIdQuery(locationId);
+  
+  const {
+    data: rentalData,
+    isLoading: isRentalLoading,
+    isError: isRentalError
+  } = useGetRentalLocationByIdQuery(locationId);
+
+  const ownerId = rentalData?.data?.ownerId?._id;
+
+  const {
+    data: accommodationTypesData,
+    isLoading: isAccommodationLoading,
+    isError: isAccommodationError
+  } = useGetAllAccommodationTypesQuery(ownerId || "");
+  const isLoading = isRentalLoading || isAccommodationLoading;
+  const isError = isRentalError || isAccommodationError;
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -39,11 +55,12 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
           setUser(userData[0]);
         }
       } catch (error) {
-        console.error("Error fetching user data:", error);    
+        console.error("Error fetching user data:", error);
       }
     };
     fetchUser();
-  }, []); 
+  }, []);
+
   if (!locationId) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -53,26 +70,18 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     );
   }
 
-  const {
-    data: rentalData,
-    isLoading,
-    isError,
-  } = useGetAllAccommodationTypeOfRentalLocationQuery(locationId);
+  
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedServices, setSelectedServices] = useState([]);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [allServices, setAllServices] = useState([]);
   const handleChatPress = async () => {
     try {
-      
-
-      // Load current user
       const currentUser = user;
       console.log("Current User:", currentUser);  
-      // Prepare required values
       const ownerPlatformId = rentalData.data?.ownerId?.userId?._id;
       const locationId = rentalData.data?._id;
-      // Call newChat with full object
+      
       const result = await newChat({
         ownerPlatformId,
         locationId,
@@ -86,6 +95,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
       console.error("Chat start error:", error);
     }
   };
+
   useEffect(() => {
     const loadFavoriteStatus = async () => {
       const favoriteStatus = await AsyncStorage.getItem(
@@ -98,9 +108,9 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     loadFavoriteStatus();
   }, [locationId]);
   useEffect(() => {
-    if (rentalData?.data?.accommodationTypeIds?.data) {
+    if (accommodationTypesData?.data) {
       const services = new Set();
-      rentalData.data.accommodationTypeIds.data.forEach((accommodation) => {
+      accommodationTypesData.data.forEach((accommodation) => {
         if (accommodation.serviceIds) {
           accommodation.serviceIds.forEach((service) => {
             services.add(service.name);
@@ -109,7 +119,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
       });
       setAllServices(Array.from(services));
     }
-  }, [rentalData]);
+  }, [accommodationTypesData]);
   const toggleFavorite = async () => {
     const newStatus = !isFavorite;
     setIsFavorite(newStatus);
@@ -121,10 +131,10 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 
 
   const ratingCounts = (feedbackDataList || []).reduce((acc, review) => {
-    const rating = review.rating; // Get the rating from the review
-    console.log(acc); // Log the accumulator instead, to see progress
+    const rating = review.rating; 
+    console.log(acc); 
     if (rating >= 1 && rating <= 5) {
-      acc[rating] = (acc[rating] || 0) + 1; // Increment count for the rating
+      acc[rating] = (acc[rating] || 0) + 1;
     }
     return acc;
   }, {});
@@ -168,7 +178,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
             </View>
           </View>
 
-          {/* Add a ScrollView here for the comments section */}
           <ScrollView
               style={styles.commentsScrollView}
               nestedScrollEnabled={true}
@@ -234,6 +243,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     navigation.navigate("DetailAccomodation", {
       accommodationTypeId: accommodationType._id,
       rentalData: rentalData,
+      rentalName: rentalData?.data?.name
     });
   };
 
@@ -262,12 +272,12 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 
   const filteredAccommodationTypes =
     selectedServices.length > 0
-      ? accommodationTypes.filter((accommodation) =>
+      ? (accommodationTypesData?.data || []).filter((accommodation) =>
           accommodation.serviceIds?.some((service) =>
             selectedServices.includes(service.name)
           )
         )
-      : accommodationTypes;
+      : accommodationTypesData?.data || [];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -351,6 +361,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               </Text>
             </View>
           </View>
+          {renderReview()}
           {allServices.length > 0 && (
             <View style={styles.multiSelectButtonGroup}>
               <MultiSelectButtonGroup
@@ -374,6 +385,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               />
             </View>
           )}
+          <View style={styles.card}>
           {filteredAccommodationTypes.map((accommodationType) => (
             <SimpleVerticalCard
               key={accommodationType._id}
@@ -385,7 +397,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
             />
           ))}
 
-          {renderReview()}
+          </View>
         </ScrollView>
       </View>
     </SafeAreaView>
@@ -410,7 +422,7 @@ const styles = StyleSheet.create({
   },
 
   commentsScrollView: {
-    maxHeight: 300, // Set a fixed height for the scrollable area
+    maxHeight: 300,
     marginTop: 16,
   },
   ratingSummaryContainer: {
@@ -630,6 +642,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: "#333",
   },
+  card: {
+    marginBottom: 20
+  }
 });
 
 export default DetailRentalLocationScreen;

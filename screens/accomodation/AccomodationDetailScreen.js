@@ -22,7 +22,7 @@ import { useGetAccommodationTypeByIdQuery } from "../../api/accommodationTypeApi
 import { useSelector } from "react-redux";
 
 const AccomodationDetailScreen = ({ route, navigation }) => {
-  const { accommodationTypeId, rentalData } = route.params;
+  const { accommodationTypeId, rentalData, rentalName } = route.params;
   const authData = useSelector((state) => state.auth);
   const userId = authData.userId;
 
@@ -68,7 +68,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
   const accommodationTypeData = {
     id: accommodationType._id,
     name: accommodationType.name,
-    location: rentalLocation.name || "Unknown location",
+    location: rentalName || "Unknown location",
     price: accommodationType.basePrice,
     overtimePrice: accommodationType.overtimeHourlyPrice,
     priceUnit: "h",
