@@ -14,10 +14,12 @@ import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../../components/buttons/Button';
 import CustomInput from '../../components/TextInput';
 import IconButton from '../../components/buttons/IconButton';
+import { useTranslation } from 'react-i18next'; 
 
 const { height } = Dimensions.get('window');
 
 const ResetPasswordScreen = () => {
+    const { t } = useTranslation(); 
     const navigation = useNavigation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -26,7 +28,7 @@ const ResetPasswordScreen = () => {
 
     const handleResetPassword = () => {
         if (password !== confirmPassword) {
-            alert("Mật khẩu không khớp!");
+            alert(t("password_mismatch"));
             return;
         }
         setLoading(true);
@@ -60,16 +62,16 @@ const ResetPasswordScreen = () => {
                             style={styles.backButton}
                         />
                         <View style={styles.header}>
-                            <Text style={styles.title}>Đặt lại mật khẩu</Text>
+                            <Text style={styles.title}>{t("reset_password_title")}</Text>
                             <Text style={styles.subtitle}>
-                                Renew hành trình của bạn: Đặt lại mật khẩu
+                                {t("reset_password_subtitle")}
                             </Text>
                         </View>
                         <View style={styles.card}>
                             <View style={styles.formContainer}>
                                 <View style={styles.dot} />
                                 <CustomInput
-                                    label="Mật khẩu mới"
+                                    label={t("new_password")}
                                     placeholder="*************"
                                     value={password}
                                     onChangeText={setPassword}
@@ -79,7 +81,7 @@ const ResetPasswordScreen = () => {
                                     passwordIconColor="#6B7280"
                                 />
                                 <CustomInput
-                                    label="Xác nhận mật khẩu mới"
+                                    label={t("confirm_new_password")}
                                     placeholder="*************"
                                     value={confirmPassword}
                                     onChangeText={setConfirmPassword}
@@ -89,7 +91,7 @@ const ResetPasswordScreen = () => {
                                     passwordIconColor="#6B7280"
                                 />
                                 <CustomButton
-                                    title="Đặt lại mật khẩu"
+                                    title={t("reset_password_button")}
                                     backgroundColor="#1A2741"
                                     disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
                                     titleColor="#FFFFFF"

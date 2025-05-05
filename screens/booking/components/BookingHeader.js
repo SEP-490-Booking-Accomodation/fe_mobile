@@ -1,10 +1,12 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 
 const BookingHeader = () => {
+  const { t } = useTranslation();
   return (
     <View style={styles.header}>
-      <Text style={styles.textHeader}>Thông tin đặt phòng</Text>
+      <Text style={styles.textHeader}>{t("booking_info")}</Text>
     </View>
   );
 };

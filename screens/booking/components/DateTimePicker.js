@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Calendar, Clock } from "lucide-react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { useTranslation } from "react-i18next";
 
 const DateTimePicker = ({
   selectedDate,
@@ -18,26 +19,27 @@ const DateTimePicker = ({
   closeDatePicker,
   closeTimePicker,
 }) => {
+  const { t } = useTranslation();
   return (
     <View>
       {/* Date selection */}
-      <Text style={styles.sectionHeader}>Ngày nhận phòng</Text>
+      <Text style={styles.sectionHeader}>{t("check_in_date")}</Text>
       <TouchableOpacity style={styles.dateTimeButton} onPress={openDatePicker}>
         <Text
           style={[styles.dateTimeText, !selectedDate && styles.placeholderText]}
         >
-          {selectedDate ? formatDate(selectedDate) : "Chọn ngày"}
+          {selectedDate ? formatDate(selectedDate) : t("select_date")}
         </Text>
         <Calendar style={styles.icon} size={24} color="#666" />
       </TouchableOpacity>
 
       {/* Time selection */}
-      <Text style={styles.sectionHeader}>Giờ nhận phòng</Text>
+      <Text style={styles.sectionHeader}>{t("check_in_time")}</Text>
       <TouchableOpacity style={styles.dateTimeButton} onPress={openTimePicker}>
         <Text
           style={[styles.dateTimeText, !selectedTime && styles.placeholderText]}
         >
-          {selectedTime ? formatTime(selectedTime) : "Chọn giờ"}
+          {selectedTime ? formatTime(selectedTime) : t("select_time")}
         </Text>
         <Clock style={styles.icon} size={24} color="#666" />
       </TouchableOpacity>
@@ -45,9 +47,9 @@ const DateTimePicker = ({
       {/* Display expected end time */}
       {endTime && (
         <View style={styles.endTimeContainer}>
-          <Text style={styles.endTimeLabel}>Thời gian kết thúc dự kiến:</Text>
+          <Text style={styles.endTimeLabel}>{t("expected_end_time")}:</Text>
           <Text style={styles.endTimeValue}>
-            {formatTime(endTime)} ngày {formatDate(endTime)}
+            {formatTime(endTime)} {t("on_date")} {formatDate(endTime)}
           </Text>
         </View>
       )}
@@ -62,7 +64,7 @@ const DateTimePicker = ({
         textColor="black"
         presentationStyle="overFullScreen"
         animationType="fade"
-        locale="vi"
+        locale={t("locale_code")}
         minimumDate={new Date()} // Cannot select dates in the past
       />
 
@@ -76,7 +78,7 @@ const DateTimePicker = ({
         textColor="black"
         presentationStyle="overFullScreen"
         animationType="fade"
-        locale="vi"
+        locale={t("locale_code")}
       />
     </View>
   );

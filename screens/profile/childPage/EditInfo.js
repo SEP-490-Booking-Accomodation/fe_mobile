@@ -15,15 +15,18 @@ import CustomButton from "../../../components/buttons/Button";
 import CustomInput from "../../../components/TextInput";
 import { useUpdateUserMutation } from "../../../api/profileApi";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+
 
 const AvatarUpload = ({ currentImage, onImageChange }) => {
+  const { t } = useTranslation();
   const pickImage = async () => {
     try {
       if (Platform.OS !== "web") {
         const { status } =
           await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
-          alert("Xin lỗi, bạn cần cấp quyền để tiếp tục!");
+          alert(t('permission_required'));
           return;
         }
       }
@@ -39,8 +42,7 @@ const AvatarUpload = ({ currentImage, onImageChange }) => {
         onImageChange(result.assets[0].uri);
       }
     } catch (error) {
-      console.error("Lỗi khi chọn ảnh:", error);
-      alert("Đã xảy ra lỗi, vui lòng thử lại.");
+      alert(t('general_error'));
     }
   };
 
@@ -60,6 +62,7 @@ const AvatarUpload = ({ currentImage, onImageChange }) => {
 };
 
 export default function EditInfo({ route, navigation }) {
+  const { t } = useTranslation();
   const userId = useSelector((state) => state.auth.userId);
   const [updateUserApi] = useUpdateUserMutation();
 
@@ -101,12 +104,11 @@ export default function EditInfo({ route, navigation }) {
         updatedUser: { fullName, email, phone, avatarUrl: image },
       }).unwrap();
 
-      console.log("Cập nhật thành công");
+      console.log(t('update_success'));
       setIsButtonSaveActive(false);
       navigation.navigate("ProfileScreen");
     } catch (error) {
-      alert("Đã xảy ra lỗi, vui lòng thử lại.");
-      console.error("Lỗi khi cập nhật thông tin:", error);  
+      alert(t('general_error'));
     }
   };
 
@@ -115,7 +117,7 @@ export default function EditInfo({ route, navigation }) {
       <TouchableOpacity onPress={() => navigation.goBack()}>
         <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
       </TouchableOpacity>
-      <Text style={styles.textHeader}>Chỉnh sửa hồ sơ</Text>
+      <Text style={styles.textHeader}>{t('edit_profile')}</Text>
     </View>
   );
 
@@ -127,18 +129,18 @@ export default function EditInfo({ route, navigation }) {
           <AvatarUpload currentImage={image} onImageChange={handleImageChange} />
         </View>
         <View style={styles.infoContainer}>
-          <Text style={styles.label}>Họ tên</Text>
+        <Text style={styles.label}>{t('full_name')}</Text>
           <CustomInput value={fullName} onChangeText={setFullName} />
           <View style={styles.spacing} />
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>{t('email')}</Text>
           <CustomInput value={email} onChangeText={setEmail} />
           <View style={styles.spacing} />
-          <Text style={styles.label}>Số điện thoại</Text>
+          <Text style={styles.label}>{t('phone_number')}</Text>
           <CustomInput value={phone} onChangeText={setPhone} />
         </View>
-        //TODO:  Chỗ này sau khi tắt bottom tab thì sễ để dưới dạng bottom bar ở dưới như header đang style hiện tại 
+        //TODO:  Chỗ này sau khi tắt bottom tab thì sễ để dưới dạng bottom bar ở dưới như header đang style hiện tại
         <CustomButton
-          title="Cập nhật thông tin"
+          title={t('update_info')}
           disabled={!isButtonSaveActive}
           onPress={handleUpdateInfo}
         />

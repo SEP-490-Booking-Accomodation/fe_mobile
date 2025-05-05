@@ -13,6 +13,7 @@ import {
 } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import { ArrowLeft, Star, ChevronRight, Calendar } from "lucide-react-native"
+import { useTranslation } from "react-i18next";
 
 // Mock data for testing
 const MOCK_FEEDBACKS = [
@@ -101,6 +102,7 @@ const MOCK_FEEDBACKS = [
 ]
 
 export default function RatingHistory() {
+    const { t } = useTranslation();
     const navigation = useNavigation()
     const [refreshing, setRefreshing] = useState(false)
     const [selectedRating, setSelectedRating] = useState(null)
@@ -134,12 +136,12 @@ export default function RatingHistory() {
 
     const formatDate = (dateString) => {
         const date = new Date(dateString)
-        return date.toLocaleDateString("vi-VN", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
+        return date.toLocaleDateString(t('locale'), {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
         })
-    }
+      }
 
     // Render the rating stars
     const renderStars = (rating) => {
@@ -167,7 +169,7 @@ export default function RatingHistory() {
                     <TouchableOpacity onPress={handleBackToList} style={styles.backButton}>
                         <ArrowLeft size={24} color="#000" />
                     </TouchableOpacity>
-                    <Text style={styles.detailHeaderTitle}>Chi tiết đánh giá</Text>
+                    <Text style={styles.detailHeaderTitle}>{t('rating_details')}</Text>
                     <View style={{ width: 24 }} />
                 </View>
 
@@ -194,7 +196,7 @@ export default function RatingHistory() {
                     </View>
 
                     <View style={styles.ratingSection}>
-                        <Text style={styles.sectionTitle}>Đánh giá của bạn</Text>
+                        <Text style={styles.sectionTitle}>{t('your_rating')}</Text>
                         <View style={styles.ratingBox}>
                             <View style={styles.ratingHeader}>
                                 <Text style={styles.ratingValue}>{selectedRating.rating.toFixed(1)}</Text>
@@ -204,7 +206,7 @@ export default function RatingHistory() {
 
                             {selectedRating.images && selectedRating.images.length > 0 && (
                                 <View style={styles.ratingImages}>
-                                    <Text style={styles.imagesTitle}>Hình ảnh</Text>
+                                    <Text style={styles.imagesTitle}>{t('images')}</Text>
                                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                                         {selectedRating.images.map((image, index) => (
                                             <Image key={index} source={{ uri: image }} style={styles.ratingImage} />
@@ -217,7 +219,7 @@ export default function RatingHistory() {
 
                     {selectedRating.contentReply && (
                         <View style={styles.replySection}>
-                            <Text style={styles.sectionTitle}>Phản hồi từ chủ nhà</Text>
+                            <Text style={styles.sectionTitle}>{t('host_response')}</Text>
                             <View style={styles.replyBox}>
                                 <Text style={styles.replyContent}>{selectedRating.contentReply}</Text>
                                 <Text style={styles.replyDate}>{selectedRating.updatedAt && formatDate(selectedRating.updatedAt)}</Text>
@@ -229,7 +231,7 @@ export default function RatingHistory() {
                         style={styles.viewBookingButton}
                         onPress={() => handleViewBooking(selectedRating.bookingId.id)}
                     >
-                        <Text style={styles.viewBookingText}>Xem chi tiết đặt phòng</Text>
+                        <Text style={styles.viewBookingText}>{t('view_booking_details')}</Text>
                         <ChevronRight size={20} color="#FFFFFF" />
                     </TouchableOpacity>
                 </ScrollView>
@@ -243,7 +245,7 @@ export default function RatingHistory() {
             return (
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#ff385c" />
-                    <Text style={styles.loadingText}>Đang tải dữ liệu...</Text>
+                    <Text style={styles.loadingText}>{t('loading_data')}</Text>
                 </View>
             )
         }
@@ -251,7 +253,7 @@ export default function RatingHistory() {
         if (!feedbacksData || feedbacksData.length === 0) {
             return (
                 <View style={styles.emptyContainer}>
-                    <Text style={styles.emptyText}>Bạn chưa có đánh giá nào</Text>
+                    <Text style={styles.emptyText}>{t('no_ratings')}</Text>
                 </View>
             )
         }
@@ -300,7 +302,7 @@ export default function RatingHistory() {
             ) : (
                 <>
                     <View style={styles.header}>
-                        <Text style={styles.headerTitle}>Lịch sử đánh giá</Text>
+                    <Text style={styles.headerTitle}>{t('rating_history')}</Text>
                     </View>
                     {renderRatingList()}
                 </>

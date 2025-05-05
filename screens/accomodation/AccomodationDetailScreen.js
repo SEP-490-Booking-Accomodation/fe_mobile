@@ -20,8 +20,10 @@ import ImageViewing from "react-native-image-viewing";
 import MultipleButtonNoSelect from "../../components/buttons/MultipleButtonNoSelect";
 import { useGetAccommodationTypeByIdQuery } from "../../api/accommodationTypeApi";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 const AccomodationDetailScreen = ({ route, navigation }) => {
+  const { t } = useTranslation();
   const { accommodationTypeId, rentalData, rentalName } = route.params;
   const authData = useSelector((state) => state.auth);
   const userId = authData.userId;
@@ -68,7 +70,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
   const accommodationTypeData = {
     id: accommodationType._id,
     name: accommodationType.name,
-    location: rentalName || "Unknown location",
+    location: rentalName || t("unknown_location"),
     price: accommodationType.basePrice,
     overtimePrice: accommodationType.overtimeHourlyPrice,
     priceUnit: "h",
@@ -77,17 +79,17 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
     images:
       accommodationType.image?.length > 0
         ? accommodationType.image.map((img, index) => ({
-            id: `img-${index}`,
-            source: { uri: img },
-          }))
+          id: `img-${index}`,
+          source: { uri: img },
+        }))
         : [
-            {
-              id: "default-img",
-              source: require("../../assets/images/banner.png"),
-            },
-          ],
+          {
+            id: "default-img",
+            source: require("../../assets/images/banner.png"),
+          },
+        ],
     amenities: allServices || [],
-    description: accommodationType.description || "No description available",
+    description: accommodationType.description || t("no_description"),
     maxPeople: accommodationType.maxPeopleNumber,
     reviews: [
       {
@@ -103,14 +105,14 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
   const handleBookNow = (accommodationType) => {
     if (!userId) {
       Alert.alert(
-        "Bạn chưa đăng nhập",
-        "Vui lòng đăng nhập để sử dụng tính năng này",
+        t("not_logged_in_title"),
+        t("not_logged_in_message"),
         [
           {
-            text: "Đăng nhập",
+            text: t("login"),
             onPress: () => navigation.navigate("Auth"),
           },
-          { text: "Để sau" },
+          { text: t("later") },
         ]
       );
       return;
@@ -151,10 +153,10 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
   };
 
   const handleMoreOptions = () => {
-    Alert.alert("More Options", "Choose an action", [
-      { text: "Share", onPress: () => console.log("Share pressed") },
-      { text: "Report", onPress: () => console.log("Report pressed") },
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("more_options"), t("choose_action"), [
+      { text: t("share"), onPress: () => console.log("Share pressed") },
+      { text: t("report"), onPress: () => console.log("Report pressed") },
+      { text: t("cancel"), style: "cancel" },
     ]);
   };
 
@@ -204,13 +206,13 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
         <View style={styles.detailRow}>
           <MaterialIcons name="access-time" size={20} color="#4e72e3" />
           <Text style={styles.detailText}>
-            Giá overtime: {accommodationTypeData.overtimePrice}đ/giờ
+            {t("overtime_price")}: {accommodationTypeData.overtimePrice}đ/giờ
           </Text>
         </View>
         <View style={styles.detailRow}>
           <MaterialIcons name="people" size={20} color="#4e72e3" />
           <Text style={styles.detailText}>
-            Số người tối đa: {accommodationTypeData.maxPeople}
+            {t("max_people")}: {accommodationTypeData.maxPeople}
           </Text>
         </View>
         <View style={styles.reviewContainer}>
@@ -225,7 +227,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
 
   const renderAmenities = () => (
     <View style={styles.amenitiesContainer}>
-      <Text style={styles.sectionTitle}>Amenities</Text>
+      <Text style={styles.sectionTitle}>{t("amenities")}</Text>
       {accommodationTypeData.amenities.length > 0 ? (
         <MultipleButtonNoSelect
           items={accommodationTypeData.amenities}
@@ -236,13 +238,13 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
           borderRadius={20}
         />
       ) : (
-        <Text style={styles.noAmenitiesText}>No amenities listed</Text>
+        <Text style={styles.noAmenitiesText}>{t("no_amenities")}</Text>
       )}
     </View>
   );
 
   const renderTabs = () => {
-    const tabs = ["Chi tiết", "Ảnh"];
+    const tabs = [t("details"), t("photos")];
     return (
       <View style={styles.tabContainer}>
         {tabs.map((tab, index) => (
@@ -267,12 +269,11 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
 
 
 
-
   const renderPhotos = () => {
     if (accommodationTypeData.images.length === 0) {
       return (
         <View style={styles.noPhotosContainer}>
-          <Text style={styles.noPhotosText}>No photos available</Text>
+          <Text style={styles.noPhotosText}>{t("no_photos")}</Text>
         </View>
       );
     }
@@ -352,7 +353,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
       <View style={styles.footer}>
         <CustomButton
           onPress={() => handleBookNow(accommodationTypeData)}
-          title="Đặt ngay"
+          title={t("book_now")}
           style={styles.bookButton}
           backgroundColor="#101828"
           disabled={rentalData.data?.status === 4 || rentalData.data?.status === 5}

@@ -12,6 +12,8 @@ import store from "./redux/store";
 import { jwtDecode } from "jwt-decode";
 import dayjs from "dayjs";
 import { useRefreshTokenWithParamMutation } from "./api/authApi";
+import { I18nextProvider } from 'react-i18next';
+import i18n from './utils/i18n';
 
 export default function App() {
   useEffect(() => {
@@ -60,15 +62,17 @@ export default function App() {
   };
   return (
     <Provider store={store}>
-      <StripeProvider publishableKey={STRIPE_PUBLIC_KEY}>
-        <StatusBar animated={true} />
-        <NavigationContainer>
-          <AsyncStorageProvider>
-            <AuthLoader />
-            <AppStack />
-          </AsyncStorageProvider>
-        </NavigationContainer>
-      </StripeProvider>
+      <I18nextProvider i18n={i18n}>
+        <StripeProvider publishableKey={STRIPE_PUBLIC_KEY}>
+          <StatusBar animated={true} />
+          <NavigationContainer>
+            <AsyncStorageProvider>
+              <AuthLoader />
+              <AppStack />
+            </AsyncStorageProvider>
+          </NavigationContainer>
+        </StripeProvider>
+      </I18nextProvider>
     </Provider>
   );
 }

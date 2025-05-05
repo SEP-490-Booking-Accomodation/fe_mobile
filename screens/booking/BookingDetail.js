@@ -8,6 +8,7 @@ import Constants from "expo-constants"
 import { useFocusEffect } from "@react-navigation/native"
 import { useCallback, useEffect, useState } from "react"
 import { CommonActions } from "@react-navigation/native"
+import { useTranslation } from "react-i18next";
 
 // Define payment status constants
 const PAYMENT_STATUS = Object.freeze({
@@ -31,6 +32,7 @@ const BOOKING_STATUS = Object.freeze({
 })
 
 export default function BookingDetail() {
+  const { t } = useTranslation();
   const navigation = useNavigation()
   const route = useRoute()
   const { bookingId } = route.params || {}
@@ -43,9 +45,9 @@ export default function BookingDetail() {
   useEffect(() => {
     if (bookingData) {
       const shouldShowCancel =
-          Number(bookingData.status) === BOOKING_STATUS.PENDING &&
-          (Number(bookingData.paymentStatus) === PAYMENT_STATUS.BOOKING ||
-              Number(bookingData.paymentStatus) === PAYMENT_STATUS.PENDING)
+        Number(bookingData.status) === BOOKING_STATUS.PENDING &&
+        (Number(bookingData.paymentStatus) === PAYMENT_STATUS.BOOKING ||
+          Number(bookingData.paymentStatus) === PAYMENT_STATUS.PENDING)
 
       console.log("Setting showCancel to:", shouldShowCancel)
       setShowCancel(shouldShowCancel)
@@ -53,188 +55,177 @@ export default function BookingDetail() {
   }, [bookingData])
 
   useFocusEffect(
-      useCallback(() => {
-        refetch() // Refetch API mỗi khi quay lại màn hình
-      }, [refetch]),
+    useCallback(() => {
+      refetch() // Refetch API mỗi khi quay lại màn hình
+    }, [refetch]),
   )
 
   const formatMoney = (amount) =>
-      new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-      }).format(amount)
+    new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount)
 
   const getStatusText = (status) => {
     const statusMap = {
-      1: "Xác nhận",
-      2: "Cần Check-in",
-      3: "Check-in",
-      4: "Cần Check-out",
-      5: "Check-out",
-      6: "Đã hủy",
-      7: "Hoàn thành",
-      8: "Chờ",
+      1: t("status_confirmed"),
+      2: t("status_need_checkin"),
+      3: t("status_checked_in"),
+      4: t("status_need_checkout"),
+      5: t("status_checked_out"),
+      6: t("status_cancelled"),
+      7: t("status_completed"),
+      8: t("status_pending"),
     }
-
-    return statusMap[status] || "Không xác định"
+    return statusMap[status] || t("status_unknown")
   }
 
   const getPaymentMethodText = (method) => {
     const methodMap = {
-      1: "Ví Mean",
-      2: "Momo",
-      3: "Test",
+      1: t("payment_method_mean"),
+      2: t("payment_method_momo"),
+      3: t("payment_method_test"),
     }
-    return methodMap[method] || "Không xác định"
+    return methodMap[method] || t("payment_method_unknown")
   }
 
   const getPaymentStatusText = (status) => {
     const statusMap = {
-      1: "Chờ thanh toán",
-      2: "Chờ thanh toán",
-      3: "Đã thanh toán",
-      4: "Hoàn tiền",
-      5: "Thất bại",
+      1: t("payment_status_pending"),
+      2: t("payment_status_pending"),
+      3: t("payment_status_paid"),
+      4: t("payment_status_refund"),
+      5: t("payment_status_failed"),
     }
-
-    return statusMap[status] || "Không xác định"
+    return statusMap[status] || t("payment_status_unknown")
   }
 
   const handlePayment = async () => {
-    console.log(bookingData)
     if (!bookingData) return
-    console.log("Pressed")
-    const totalPrice = bookingData.basePrice + (bookingData.durationBookingHour - 1) * bookingData.overtimeHourlyPrice
 
-    // Định nghĩa URL ở đây, trong hàm handlePayment nơi chắc chắn bookingData đã tồn tại
+    const totalPrice = bookingData.basePrice + (bookingData.durationBookingHour - 1) * bookingData.overtimeHourlyPrice
     const devUrl = `exp://${Constants.expoConfig.hostUri}/--/payment/callback?status=success&orderId=${bookingData.id}`
     const prodUrl = `mean://payment/callback?status=success&orderId=${bookingData.id}`
     const returnUrl = process.env.NODE_ENV === "development" ? devUrl : prodUrl
 
     const paymentMethod = bookingData.paymentMethod
-    console.log(returnUrl)
+
     if (paymentMethod === 1) {
       try {
         const response = await processMomoPayment({
           data: {
             bookingId: bookingData.id,
             amount: totalPrice,
-            description: `Thanh toán đặt phòng ${bookingData.id} qua Momo ${totalPrice}`,
+            description: t("payment_description", { id: bookingData.id, price: totalPrice }),
             returnUrlFE: returnUrl,
-            // orderIdFE: "MOMO " + bookingData.id + " " + new Date().getTime(), // Thêm timestamp để tránh trùng lặp
-            orderIdFE: "MOMO" + new Date().getTime(), // Thêm timestamp để tránh trùng lặp
+            orderIdFE: "MOMO" + new Date().getTime(),
           },
         }).unwrap()
 
         if (response.payUrl) {
           Linking.openURL(response.deeplink)
-
           setTimeout(() => {
             refetch()
           }, 3000)
         } else {
-          Alert.alert("Lỗi", "Không thể tạo thanh toán Momo")
+          Alert.alert(t("error"), t("payment_create_failed"))
         }
       } catch (error) {
-        console.error("Thanh toán thất bại:", error)
-        Alert.alert("Lỗi", "Thanh toán Momo thất bại")
+        Alert.alert(t("error"), t("payment_failed"))
       }
-    } else if (paymentMethod === "2") {
-      //   navigation.navigate("ZaloPayment", {
-      //     bookingId: bookingData.id,
-      //     amount: bookingData.basePrice * bookingData.durationBookingHour,
-      //   });>
     }
   }
 
   const handleCancel = () => {
-    Alert.alert("Xác nhận hủy đặt phòng", "Bạn có chắc chắn muốn hủy đặt phòng này không?", [
-      {
-        text: "Không",
-        style: "cancel",
-      },
-      {
-        text: "Có, hủy đặt phòng",
-        onPress: async () => {
-          try {
-            // Create a copy of the current booking data
-            const updatedBookingData = {
-              ...bookingData,
-              status: BOOKING_STATUS.CANCELLED,
-            }
-
-            // Call the updateBooking mutation with the full updated booking data
-            const result = await updateBooking({
-              id: bookingId,
-              data: updatedBookingData,
-            }).unwrap()
-
-            console.log("Booking cancelled successfully:", result)
-            Alert.alert("Thành công", "Đã hủy đặt phòng thành công", [
-              {
-                text: "OK",
-                onPress: () => {
-                  // Refetch to update the UI
-                  refetch()
-                  // Optionally navigate back or to another screen
-                  // navigation.goBack()
-                },
-              },
-            ])
-          } catch (error) {
-            console.error("Error cancelling booking:", error)
-            Alert.alert(
-                "Lỗi",
-                error.data?.message || "Không thể hủy đặt phòng. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.",
-            )
-          }
+    Alert.alert(
+      t("cancel_confirmation_title"),
+      t("cancel_confirmation_message"),
+      [
+        {
+          text: t("no"),
+          style: "cancel",
         },
-      },
-    ])
+        {
+          text: t("yes_cancel_booking"),
+          onPress: async () => {
+            try {
+              const updatedBookingData = {
+                ...bookingData,
+                status: BOOKING_STATUS.CANCELLED,
+              }
+
+              const result = await updateBooking({
+                id: bookingId,
+                data: updatedBookingData,
+              }).unwrap()
+
+              Alert.alert(
+                t("success"),
+                t("cancel_success"),
+                [
+                  {
+                    text: "OK",
+                    onPress: () => {
+                      refetch()
+                    },
+                  },
+                ]
+              )
+            } catch (error) {
+              Alert.alert(
+                t("error"),
+                error.data?.message || t("cancel_failed")
+              )
+            }
+          },
+        },
+      ]
+    )
   }
+
 
   const handleGoHome = () => {
     navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [
-            {
-              name: "MainTabs",
-              state: {
-                index: 0,
-                routes: [
-                  {
-                    name: "Home",
-                    state: {
-                      index: 0,
-                      routes: [{ name: "HomeScreen" }],
-                    },
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: "MainTabs",
+            state: {
+              index: 0,
+              routes: [
+                {
+                  name: "Home",
+                  state: {
+                    index: 0,
+                    routes: [{ name: "HomeScreen" }],
                   },
-                ],
-              },
+                },
+              ],
             },
-          ],
-        }),
+          },
+        ],
+      }),
     )
   }
 
   if (isLoading) {
     return (
-        <SafeAreaView style={styles.container}>
-          <Text style={styles.header}>Đang tải...</Text>
-        </SafeAreaView>
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.header}>{t("loading")}</Text>
+      </SafeAreaView>
     )
   }
 
   if (!bookingData) {
     return (
-        <SafeAreaView style={styles.container}>
-          <Text style={styles.header}>Không có dữ liệu đặt phòng</Text>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <ArrowLeft size={24} color="#000" />
-            <Text style={styles.backText}>Quay lại</Text>
-          </TouchableOpacity>
-        </SafeAreaView>
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.header}>{t("no_booking_data")}</Text>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <ArrowLeft size={24} color="#000" />
+          <Text style={styles.backText}>{t("go_back")}</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
     )
   }
 
@@ -252,147 +243,148 @@ export default function BookingDetail() {
   const isPendingPayment = Number(bookingData.paymentStatus) === PAYMENT_STATUS.PENDING
 
   return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.headerContainer}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <ArrowLeft size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.header}>Chi tiết đặt phòng</Text>
-          <View style={{ width: 24 }} />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.headerContainer}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <ArrowLeft size={24} color="#000" />
+        </TouchableOpacity>
+        <Text style={styles.header}>{t("booking_details")}</Text>
+        <View style={{ width: 24 }} />
+      </View>
+
+      <View style={styles.statusBar}>
+        <Text style={styles.statusText}>
+          {t("status")}:
+          <Text style={styles.statusValue}>{getStatusText(bookingData.status)}</Text>
+        </Text>
+        <Text style={styles.statusText}>
+          {t("payment")}:
+          <Text style={styles.statusValue}>{getPaymentStatusText(bookingData.paymentStatus)}</Text>
+        </Text>
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {rentalData.image && rentalData.image.length > 0 && (
+          <View style={styles.imageContainer}>
+            <Image source={{ uri: rentalData.image[0] }} style={styles.image} />
+          </View>
+        )}
+
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <MapPin size={20} color="#ff385c" />
+            <Text style={styles.cardTitle}>{t("location")}</Text>
+          </View>
+          <Text style={styles.value}>{rentalData.name}</Text>
+          <Text style={styles.valueSecondary}>{address}</Text>
         </View>
 
-        <View style={styles.statusBar}>
-          <Text style={styles.statusText}>
-            Trạng thái:
-            <Text style={styles.statusValue}>{getStatusText(bookingData.status)}</Text>
-          </Text>
-          <Text style={styles.statusText}>
-            Thanh toán:
-            <Text style={styles.statusValue}>{getPaymentStatusText(bookingData.paymentStatus)}</Text>
-          </Text>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Bed size={20} color="#ff385c" />
+            <Text style={styles.cardTitle}>{t("room_type")}</Text>
+          </View>
+          <Text style={styles.value}>{typeRoom?.name ?? t("no_info")}</Text>
+          <Text style={styles.valueSecondary}>{typeRoom?.description ?? ""}</Text>
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {rentalData.image && rentalData.image.length > 0 && (
-              <View style={styles.imageContainer}>
-                <Image source={{ uri: rentalData.image[0] }} style={styles.image} />
-              </View>
-          )}
-
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <MapPin size={20} color="#ff385c" />
-              <Text style={styles.cardTitle}>Địa điểm</Text>
-            </View>
-            <Text style={styles.value}>{rentalData.name}</Text>
-            <Text style={styles.valueSecondary}>{address}</Text>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Clock size={20} color="#ff385c" />
+            <Text style={styles.cardTitle}>{t("rental_time")}</Text>
           </View>
-
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Bed size={20} color="#ff385c" />
-              <Text style={styles.cardTitle}>Loại phòng</Text>
-            </View>
-            <Text style={styles.value}>{typeRoom?.name ?? "Không có thông tin"}</Text>
-            <Text style={styles.valueSecondary}>{typeRoom?.description ?? ""}</Text>
-          </View>
-
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Clock size={20} color="#ff385c" />
-              <Text style={styles.cardTitle}>Thời gian thuê</Text>
-            </View>
-            {/* <Text style={styles.value}>Ngày: {bookingData.checkInHour}</Text> */}
-            <Text style={styles.value}>Check-in: {bookingData.checkInHour}</Text>
-            <Text style={styles.value}>Check-out: {bookingData.checkOutHour}</Text>
-            <Text style={styles.value}>Thời gian thuê: {bookingData.durationBookingHour} giờ</Text>
-          </View>
-
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Users size={20} color="#ff385c" />
-              <Text style={styles.cardTitle}>Số khách</Text>
-            </View>
-            <Text style={styles.value}>Người lớn: {bookingData.adultNumber}</Text>
-            <Text style={styles.value}>Trẻ em: {bookingData.childNumber}</Text>
-          </View>
-
-          {bookingData.note && (
-              <View style={styles.card}>
-                <View style={styles.cardHeader}>
-                  <Text style={styles.cardTitle}>Ghi chú</Text>
-                </View>
-                <Text style={styles.value}>{bookingData.note}</Text>
-              </View>
-          )}
-
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <CreditCard size={20} color="#ff385c" />
-              <Text style={styles.cardTitle}>Thông tin thanh toán</Text>
-            </View>
-            <View style={styles.paymentRow}>
-              <Text style={styles.paymentLabel}>Phương thức:</Text>
-              <Text style={styles.paymentValue}>{getPaymentMethodText(bookingData.paymentMethod)}</Text>
-            </View>
-            <View style={styles.paymentRow}>
-              <Text style={styles.paymentLabel}>Giá giờ đầu:</Text>
-              <Text style={styles.paymentValue}>{formatMoney(bookingData.basePrice)} / giờ</Text>
-            </View>
-            <View style={styles.paymentRow}>
-              <Text style={styles.paymentLabel}>Giá giờ sau:</Text>
-              <Text style={styles.paymentValue}>{formatMoney(bookingData.overtimeHourlyPrice)} / giờ</Text>
-            </View>
-            <View style={styles.paymentRow}>
-              <Text style={styles.paymentLabel}>Số giờ thuê:</Text>
-              <Text style={styles.paymentValue}>{bookingData.durationBookingHour} giờ</Text>
-            </View>
-            <View style={[styles.paymentRow, styles.totalRow]}>
-              <Text style={styles.totalLabel}>Tổng cộng:</Text>
-              <Text style={styles.totalValue}>{formatMoney(totalPrice)}</Text>
-            </View>
-          </View>
-        </ScrollView>
-
-        <View style={styles.footer}>
-          {/* Option 1: Payment is pending - show Pay button and Cancel button in the same row */}
-          {isPendingPayment && showCancel && (
-              <View style={styles.buttonRow}>
-                <CustomButton
-                    title="Hủy"
-                    onPress={handleCancel}
-                    titleColor={"#EF4444"}
-                    style={styles.cancelButton}
-                    textStyle={styles.cancelButtonText}
-                    loading={isUpdating}
-                    disabled={isUpdating}
-                />
-                <CustomButton
-                    title="Thanh toán ngay"
-                    onPress={handlePayment}
-                    style={styles.payButton}
-                    textStyle={styles.payButtonText}
-                    loading={false}
-                    disabled={isUpdating}
-                />
-
-              </View>
-          )}
-
-          {/* If payment is pending but cancel is not allowed, only show pay button */}
-          {isPendingPayment && !showCancel && (
-              <CustomButton
-                  title="Thanh toán ngay"
-                  onPress={handlePayment}
-                  style={styles.payButton}
-                  textStyle={styles.payButtonText}
-              />
-          )}
-
-          {/* Option 2: Payment is not pending - show just Home button */}
-          {!isPendingPayment && <CustomButton title="Về trang chủ" onPress={handleGoHome} style={styles.homeButton} />}
+          <Text style={styles.value}>{t("check_in")}: {bookingData.checkInHour}</Text>
+          <Text style={styles.value}>{t("check_out")}: {bookingData.checkOutHour}</Text>
+          <Text style={styles.value}>{t("rental_duration")}: {bookingData.durationBookingHour} {t("hours_text")}</Text>
         </View>
-      </SafeAreaView>
+
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Users size={20} color="#ff385c" />
+            <Text style={styles.cardTitle}>{t("guests")}</Text>
+          </View>
+          <Text style={styles.value}>{t("adults")}: {bookingData.adultNumber}</Text>
+          <Text style={styles.value}>{t("children")}: {bookingData.childNumber}</Text>
+        </View>
+
+        {bookingData.note && (
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>{t("notes")}</Text>
+            </View>
+            <Text style={styles.value}>{bookingData.note}</Text>
+          </View>
+        )}
+
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <CreditCard size={20} color="#ff385c" />
+            <Text style={styles.cardTitle}>{t("payment_info")}</Text>
+          </View>
+          <View style={styles.paymentRow}>
+            <Text style={styles.paymentLabel}>{t("payment_method")}:</Text>
+            <Text style={styles.paymentValue}>{getPaymentMethodText(bookingData.paymentMethod)}</Text>
+          </View>
+          <View style={styles.paymentRow}>
+            <Text style={styles.paymentLabel}>{t("base_price_text")}:</Text>
+            <Text style={styles.paymentValue}>{formatMoney(bookingData.basePrice)} / {t("hour")}</Text>
+          </View>
+          <View style={styles.paymentRow}>
+            <Text style={styles.paymentLabel}>{t("overtime_price")}:</Text>
+            <Text style={styles.paymentValue}>{formatMoney(bookingData.overtimeHourlyPrice)} / {t("hour")}</Text>
+          </View>
+          <View style={styles.paymentRow}>
+            <Text style={styles.paymentLabel}>{t("rental_hours")}:</Text>
+            <Text style={styles.paymentValue}>{bookingData.durationBookingHour} {t("hours")}</Text>
+          </View>
+          <View style={[styles.paymentRow, styles.totalRow]}>
+            <Text style={styles.totalLabel}>{t("total")}:</Text>
+            <Text style={styles.totalValue}>{formatMoney(totalPrice)}</Text>
+          </View>
+        </View>
+      </ScrollView>
+
+      <View style={styles.footer}>
+        {isPendingPayment && showCancel && (
+          <View style={styles.buttonRow}>
+            <CustomButton
+              title={t("cancel")}
+              onPress={handleCancel}
+              titleColor={"#EF4444"}
+              style={styles.cancelButton}
+              textStyle={styles.cancelButtonText}
+              loading={isUpdating}
+              disabled={isUpdating}
+            />
+            <CustomButton
+              title={t("pay_now")}
+              onPress={handlePayment}
+              style={styles.payButton}
+              textStyle={styles.payButtonText}
+              loading={false}
+              disabled={isUpdating}
+            />
+          </View>
+        )}
+
+        {isPendingPayment && !showCancel && (
+          <CustomButton
+            title={t("pay_now")}
+            onPress={handlePayment}
+            style={styles.payButton}
+            textStyle={styles.payButtonText}
+          />
+        )}
+
+        {!isPendingPayment && (
+          <CustomButton
+            title={t("go_home")}
+            onPress={handleGoHome}
+            style={styles.homeButton}
+          />
+        )}
+      </View>
+    </SafeAreaView>
   )
 }
 

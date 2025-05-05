@@ -22,15 +22,17 @@ import { useGetAllFeedbackByRentalIdQuery } from "../../api/feedbackApi";
 import { useGetAverageFeedbackByRentalIdQuery } from "../../api/feedbackApi";
 import { useGetRentalLocationByIdQuery } from "../../api/rentalLocationApi";
 import { useGetAllAccommodationTypesQuery } from "../../api/accommodationTypeApi";
+import { useTranslation } from "react-i18next";
 
 const DetailRentalLocationScreen = ({ route, navigation }) => {
+  const { t } = useTranslation();
   const [user, setUser] = useState({});
-  const {loadIdChatPlatform} = useAsyncStorage();
+  const { loadIdChatPlatform } = useAsyncStorage();
   const { rentalId: locationId } = route.params;
 
-  const {data: feedbackDataList} = useGetAllFeedbackByRentalIdQuery(locationId);
-  const {data: feedbackAverage} = useGetAverageFeedbackByRentalIdQuery(locationId);
-  
+  const { data: feedbackDataList } = useGetAllFeedbackByRentalIdQuery(locationId);
+  const { data: feedbackAverage } = useGetAverageFeedbackByRentalIdQuery(locationId);
+
   const {
     data: rentalData,
     isLoading: isRentalLoading,
@@ -64,13 +66,13 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   if (!locationId) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Không tìm thấy ID địa điểm</Text>
-        <Button title="Quay lại" onPress={() => navigation.goBack()} />
+        <Text>{t("location_not_found")}</Text>
+        <Button title={t("go_back")} onPress={() => navigation.goBack()} />
       </View>
     );
   }
 
-  
+
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedServices, setSelectedServices] = useState([]);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -78,10 +80,10 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const handleChatPress = async () => {
     try {
       const currentUser = user;
-      console.log("Current User:", currentUser);  
+      console.log("Current User:", currentUser);
       const ownerPlatformId = rentalData.data?.ownerId?.userId?._id;
       const locationId = rentalData.data?._id;
-      
+
       const result = await newChat({
         ownerPlatformId,
         locationId,
@@ -131,8 +133,8 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 
 
   const ratingCounts = (feedbackDataList || []).reduce((acc, review) => {
-    const rating = review.rating; 
-    console.log(acc); 
+    const rating = review.rating;
+    console.log(acc);
     if (rating >= 1 && rating <= 5) {
       acc[rating] = (acc[rating] || 0) + 1;
     }
@@ -145,101 +147,99 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const renderReview = () => {
     const totalReviews = feedbackDataList?.length || 1;
     return (
-        <View style={styles.reviewsContainer}>
-          <View style={styles.ratingSummaryContainer}>
-            <View style={styles.ratingAverageContainer}>
-              <Text style={styles.averageRating}>
-                {feedbackAverage?.averageRating.toFixed(1)}
-              </Text>
-              <Text style={styles.totalReviews}>
-                {feedbackAverage?.totalFeedbacks} lượt đánh giá
-              </Text>
-            </View>
-            <View style={styles.ratingBreakdownContainer}>
-              {[5, 4, 3, 2, 1].map((rating) => {
-                const count = ratingCounts[rating] || 0;
-                const percentage = (count / totalReviews) * 100;
-
-                return (
-                    <View key={rating} style={styles.ratingRow}>
-                      <Text style={styles.ratingNumber}>{rating}</Text>
-                      <View style={styles.ratingBarBackground}>
-                        <View
-                            style={[
-                              styles.ratingBar,
-                              { width: `${percentage}%` },
-                            ]}
-                        />
-                      </View>
-                      <Text style={styles.ratingCount}>{count} lượt</Text>
-                    </View>
-                );
-              })}
-            </View>
+      <View style={styles.reviewsContainer}>
+        <View style={styles.ratingSummaryContainer}>
+          <View style={styles.ratingAverageContainer}>
+            <Text style={styles.averageRating}>
+              {feedbackAverage?.averageRating.toFixed(1)}
+            </Text>
+            <Text style={styles.totalReviews}>
+              {feedbackAverage?.totalFeedbacks} {t("reviews_count")}
+            </Text>
           </View>
+          <View style={styles.ratingBreakdownContainer}>
+            {[5, 4, 3, 2, 1].map((rating) => {
+              const count = ratingCounts[rating] || 0;
+              const percentage = (count / totalReviews) * 100;
 
-          <ScrollView
-              style={styles.commentsScrollView}
-              nestedScrollEnabled={true}
-          >
-            {feedbackDataList?.map((review, index) => (
-                <View key={index} style={styles.reviewCard}>
-                  <View style={styles.reviewHeader}>
-                    <View style={styles.reviewerDetails}>
-                      <Text style={styles.reviewerName}>
-                        {review.bookingId?.customerId?.userId?.fullName && review.bookingId?.customerId?.userId?.fullName.length <= 1
-                            ? '*'
-                            : `${review.bookingId?.customerId?.userId?.fullName
-                                .slice(0, Math.floor(review.bookingId?.customerId?.userId?.fullName?.length / 2))
-                                .replace(/./g, '*')}${review.bookingId?.customerId?.userId?.fullName?.slice(Math.floor(review.bookingId?.customerId?.userId?.fullName?.length / 2))}`}
-                      </Text>
-
-                      <View style={styles.starContainer}>
-                        {Array(review.rating)
-                            .fill(null)
-                            .map((_, i) => (
-                                <MaterialIcons
-                                    key={i}
-                                    name="star"
-                                    size={16}
-                                    color="#ffc907"
-                                />
-                            ))}
-                      </View>
-                    </View>
+              return (
+                <View key={rating} style={styles.ratingRow}>
+                  <Text style={styles.ratingNumber}>{rating}</Text>
+                  <View style={styles.ratingBarBackground}>
+                    <View
+                      style={[
+                        styles.ratingBar,
+                        { width: `${percentage}%` },
+                      ]}
+                    />
                   </View>
-                  <Text style={styles.reviewText}>{review.content}</Text>
-                  {review.images?.length > 0 && (
-                      <View style={styles.reviewImagesContainer}>
-                        {review.images.map((image, imgIndex) => (
-                            <TouchableOpacity
-                                key={imgIndex}
-                                onPress={() => openReviewModal(imgIndex)}
-                            >
-                              <Image source={image.source} style={styles.reviewImage} />
-                            </TouchableOpacity>
-                        ))}
-                      </View>
-                  )}
-                  <Text style={styles.reviewDate}>{review.createdAt}</Text>
+                  <Text style={styles.ratingCount}>{count} {t("times")}</Text>
                 </View>
-            ))}
-          </ScrollView>
+              );
+            })}
+          </View>
         </View>
+
+        <ScrollView
+          style={styles.commentsScrollView}
+          nestedScrollEnabled={true}
+        >
+          {feedbackDataList?.map((review, index) => (
+            <View key={index} style={styles.reviewCard}>
+              <View style={styles.reviewHeader}>
+                <View style={styles.reviewerDetails}>
+                  <Text style={styles.reviewerName}>
+                    {review.bookingId?.customerId?.userId?.fullName && review.bookingId?.customerId?.userId?.fullName.length <= 1
+                      ? '*'
+                      : `${review.bookingId?.customerId?.userId?.fullName
+                        .slice(0, Math.floor(review.bookingId?.customerId?.userId?.fullName?.length / 2))
+                        .replace(/./g, '*')}${review.bookingId?.customerId?.userId?.fullName?.slice(Math.floor(review.bookingId?.customerId?.userId?.fullName?.length / 2))}`}
+                  </Text>
+
+                  <View style={styles.starContainer}>
+                    {Array(review.rating)
+                      .fill(null)
+                      .map((_, i) => (
+                        <MaterialIcons
+                          key={i}
+                          name="star"
+                          size={16}
+                          color="#ffc907"
+                        />
+                      ))}
+                  </View>
+                </View>
+              </View>
+              <Text style={styles.reviewText}>{review.content}</Text>
+              {review.images?.length > 0 && (
+                <View style={styles.reviewImagesContainer}>
+                  {review.images.map((image, imgIndex) => (
+                    <TouchableOpacity
+                      key={imgIndex}
+                      onPress={() => openReviewModal(imgIndex)}
+                    >
+                      <Image source={image.source} style={styles.reviewImage} />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+              <Text style={styles.reviewDate}>{review.createdAt}</Text>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
     );
   }
 
   const handleMoreOptions = () => {
-    Alert.alert("More Options", "Choose an action", [
-      { text: "Share", onPress: () => console.log("Share pressed") },
-      { text: "Report", onPress: () => console.log("Report pressed") },
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("more_options"), t("choose_action"), [
+      { text: t("share"), onPress: () => console.log("Share pressed") },
+      { text: t("report"), onPress: () => console.log("Report pressed") },
+      { text: t("cancel"), style: "cancel" },
     ]);
   };
 
   const handleCardPress = (accommodationType) => {
-    console.log("accomdationType",accommodationType);
-
     navigation.navigate("DetailAccomodation", {
       accommodationTypeId: accommodationType._id,
       rentalData: rentalData,
@@ -261,7 +261,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.errorContainer}>
-          <Text>Error loading rental location data</Text>
+          <Text>{t("data_load_error")}</Text>
         </View>
       </SafeAreaView>
     );
@@ -273,10 +273,10 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const filteredAccommodationTypes =
     selectedServices.length > 0
       ? (accommodationTypesData?.data || []).filter((accommodation) =>
-          accommodation.serviceIds?.some((service) =>
-            selectedServices.includes(service.name)
-          )
+        accommodation.serviceIds?.some((service) =>
+          selectedServices.includes(service.name)
         )
+      )
       : accommodationTypesData?.data || [];
 
   return (
@@ -305,14 +305,14 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
         </View>
         <View>
           {rentalData.data?.status === 4 && (
-              <View style={[styles.banner, { backgroundColor: '#FFA500' }]}>
-                <Text style={styles.bannerText}>Tạm thời căn hộ này đang tạm dừng</Text>
-              </View>
+            <View style={[styles.banner, { backgroundColor: '#FFA500' }]}>
+              <Text style={styles.bannerText}>{t("temporarily_paused")}</Text>
+            </View>
           )}
           {rentalData.data?.status === 5 && (
-              <View style={[styles.banner, { backgroundColor: '#ccc' }]}>
-                <Text style={styles.bannerText}>Tạm thời căn hộ này ngừng hoạt động</Text>
-              </View>
+            <View style={[styles.banner, { backgroundColor: '#ccc' }]}>
+              <Text style={styles.bannerText}>{t("inactive")}</Text>
+            </View>
           )}
         </View>
 
@@ -355,7 +355,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
                   style={styles.readMoreContainer}
                 >
                   <Text style={styles.readMoreText}>
-                    {isDescriptionExpanded ? "Thu gọn" : "Đọc thêm"}
+                    {isDescriptionExpanded ? t("collapse") : t("read_more")}
                   </Text>
                 </TouchableOpacity>
               </Text>
@@ -386,16 +386,16 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
             </View>
           )}
           <View style={styles.card}>
-          {filteredAccommodationTypes.map((accommodationType) => (
-            <SimpleVerticalCard
-              key={accommodationType._id}
-              imageUrl={accommodationType.image?.[0]}
-              placeName={accommodationType.name}
-              price={`${accommodationType.basePrice}đ/giờ`}
-              location={`${rental.address}, ${rental.ward} , ${rental.district}, ${rental.city}`}
-              onCardPress={() => handleCardPress(accommodationType)}
-            />
-          ))}
+            {filteredAccommodationTypes.map((accommodationType) => (
+              <SimpleVerticalCard
+                key={accommodationType._id}
+                imageUrl={accommodationType.image?.[0]}
+                placeName={accommodationType.name}
+                price={`${accommodationType.basePrice}${t("per_hour")}`}
+                location={`${rental.address}, ${rental.ward} , ${rental.district}, ${rental.city}`}
+                onCardPress={() => handleCardPress(accommodationType)}
+              />
+            ))}
 
           </View>
         </ScrollView>
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f8f9fa",
   },
-  ratingCount : {
+  ratingCount: {
     marginLeft: 8,
   },
   mainContainer: {

@@ -7,6 +7,7 @@ import { useSelector } from "react-redux"
 import { useGetAllBookingByCustomerIdQuery } from "../../api/bookingApi"
 import { useGetCustomerByUserIdQuery } from "../../api/authApi"
 import ReviewModal from "./modals/ReviewModal"
+import { useTranslation } from "react-i18next"
 // Define booking status constants
 const BOOKING_STATUS = Object.freeze({
   CONFIRMED: 1,
@@ -21,13 +22,14 @@ const BOOKING_STATUS = Object.freeze({
 import { useCreateFeedbackMutation } from "../../api/feedbackApi"
 
 export default function TicketList() {
+  const { t } = useTranslation()
   const navigation = useNavigation()
   const [activeTab, setActiveTab] = useState({ key: "all", value: "0" })
   const [reviewModalVisible, setReviewModalVisible] = useState(false)
   const [selectedBookingId, setSelectedBookingId] = useState(null)
   const [localBookings, setLocalBookings] = useState([])
   const imageTest =
-      "https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    "https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
 
   const authData = useSelector((state) => state.auth)
   const { data: customerData } = useGetCustomerByUserIdQuery(authData.userId)
@@ -58,11 +60,11 @@ export default function TicketList() {
     if (status === BOOKING_STATUS.CANCELLED) {
       return "-1" // Cancelled - Show "Đặt lại" button
     } else if (
-        status === BOOKING_STATUS.PENDING ||
-        status === BOOKING_STATUS.CONFIRMED ||
-        status === BOOKING_STATUS.NEEDCHECKIN ||
-        status === BOOKING_STATUS.CHECKEDIN ||
-        status === BOOKING_STATUS.NEEDCHECKOUT
+      status === BOOKING_STATUS.PENDING ||
+      status === BOOKING_STATUS.CONFIRMED ||
+      status === BOOKING_STATUS.NEEDCHECKIN ||
+      status === BOOKING_STATUS.CHECKEDIN ||
+      status === BOOKING_STATUS.NEEDCHECKOUT
     ) {
       return "0" // Current or Upcoming - Show "Hủy" + "Xem chi tiết" buttons
     } else if (status === BOOKING_STATUS.COMPLETED || status === BOOKING_STATUS.CHECKEDOUT) {
@@ -101,13 +103,12 @@ export default function TicketList() {
     try {
       await refetch()
     } catch (error) {
-      console.error("Lỗi tải lại dữ liệu:", error)
+      console.error(t("data_refresh_error"), error)
     }
     setRefreshing(false)
   }
 
   const handleSubmitReview = async (reviewData) => {
-    console.log("Submitting review:", reviewData)
     const requestData = {
       bookingId: reviewData.bookingId,
       content: reviewData.content,
@@ -120,22 +121,15 @@ export default function TicketList() {
 
     try {
       const result = await createFeedback({ data: requestData })
-      console.log("Feedback result:", result)
 
-      // Update local state to reflect that feedback has been submitted
       setLocalBookings((prevBookings) =>
-          prevBookings.map((booking) =>
-              booking.id === reviewData.bookingId ? { ...booking, feedbackId: result.data.id } : booking,
-          ),
+        prevBookings.map((booking) =>
+          booking.id === reviewData.bookingId ? { ...booking, feedbackId: result.data.id } : booking,
+        ),
       )
 
-      // Close the modal
       setReviewModalVisible(false)
-
-      // Optional: Show success message
-      alert("Đánh giá của bạn đã được gửi thành công!")
-
-      // Refetch data to update the UI
+      alert(t("review_submitted"))
       refetch()
     } catch (error) {
       console.error(error)
@@ -151,14 +145,13 @@ export default function TicketList() {
     completed: "#6366F1",
   }
 
-  // Convert booking data to the format expected by CardInMyTicket
   const convertedBookings =
-      localBookings.length > 0 ? localBookings : bookingData?.bookings ? convertBookingsData(bookingData.bookings) : []
+    localBookings.length > 0 ? localBookings : bookingData?.bookings ? convertBookingsData(bookingData.bookings) : []
 
   const renderHeader = () => (
-      <View style={styles.header}>
-        <Text style={styles.textHeader}>Vé phòng của tôi</Text>
-      </View>
+    <View style={styles.header}>
+      <Text style={styles.textHeader}>{t("my_tickets")}</Text>
+    </View>
   )
 
   const handleViewDetail = (id) => {
@@ -186,104 +179,104 @@ export default function TicketList() {
 
   // Filter bookings based on active tab
   const filteredBookings =
-      activeTab.value === "0"
-          ? convertedBookings // Nếu là "Tất cả", hiển thị toàn bộ
-          : convertedBookings.filter((booking) => booking.bookingStatus === activeTab.key)
+    activeTab.value === "0"
+      ? convertedBookings
+      : convertedBookings.filter((booking) => booking.bookingStatus === activeTab.key)
 
   return (
-      <SafeAreaView style={styles.container}>
-        {renderHeader()}
-        <ScrollView
-            style={styles.content}
-            refreshControl={
-              <RefreshControl
-                  colors={["#FF5733", "#33FF57", "#3357FF"]}
-                  tintColor="#3357FF"
-                  title="Loading..."
-                  titleColor="#3357FF"
-                  refreshing={refreshing}
-                  onRefresh={onRefresh}
-              />
-            }
-        >
-          <View style={styles.navigationContainer}>
-            <ScrollView
-                horizontal={true}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.navigationBar}
-            >
-              {[
-                { title: "Tất cả", key: "all", value: "0" },
-                { title: "Sắp tới", key: "upcoming" },
-                { title: "Hiện tại", key: "current" },
-                { title: "Đã hủy", key: "cancelled" },
-                { title: "Hoàn tất", key: "completed" },
-              ].map((tab) => {
-                const isActive = activeTab.key === tab.key
-                const bgColor = isActive ? tabColors[tab.key] : "#fff"
-                const titleColor = isActive ? "#FFFFFF" : "#6B7280"
-                const borderColor = isActive ? tabColors[tab.key] : "#E5E7EB" // light gray border when not active
-                const fontWeight = isActive ? "bold" : "normal"
+    <SafeAreaView style={styles.container}>
+      {renderHeader()}
+      <ScrollView
+        style={styles.content}
+        refreshControl={
+          <RefreshControl
+            colors={["#FF5733", "#33FF57", "#3357FF"]}
+            tintColor="#3357FF"
+            title={t("loading")}
+            titleColor="#3357FF"
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
+      >
+        <View style={styles.navigationContainer}>
+          <ScrollView
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.navigationBar}
+          >
+            {[
+              { title: t("all"), key: "all", value: "0" },
+              { title: t("upcoming"), key: "upcoming" },
+              { title: t("current"), key: "current" },
+              { title: t("cancelled"), key: "cancelled" },
+              { title: t("completed"), key: "completed" },
+            ].map((tab) => {
+              const isActive = activeTab.key === tab.key
+              const bgColor = isActive ? tabColors[tab.key] : "#fff"
+              const titleColor = isActive ? "#FFFFFF" : "#6B7280"
+              const borderColor = isActive ? tabColors[tab.key] : "#E5E7EB"
+              const fontWeight = isActive ? "bold" : "normal"
 
-                return (
-                    <CustomButton
-                        key={tab.key}
-                        title={tab.title}
-                        style={[
-                          styles.buttonNav,
-                          {
-                            backgroundColor: bgColor,
-                            borderWidth: 2,
-                            borderColor: borderColor,
-                          },
-                        ]}
-                        titleStyle={{ fontWeight }}
-                        titleColor={titleColor}
-                        onPress={() => setActiveTab({ key: tab.key, value: tab.value })}
-                    />
-                )
-              })}
-            </ScrollView>
-          </View>
-
-          <ScrollView style={styles.scrollView}>
-            {isLoading ? (
-                <View style={styles.emptyState}>
-                  <Text style={styles.emptyStateText}>Đang tải...</Text>
-                </View>
-            ) : filteredBookings.length > 0 ? (
-                filteredBookings.map((booking) => (
-                    <View key={booking.id} style={styles.cardWrapper}>
-                      <CardInMyTicket
-                          imageUrl={{ uri: booking.imageUrl }}
-                          nameRoom={booking.nameRoom}
-                          placeName={booking.placeName}
-                          maxPeople={booking.maxPeople}
-                          price={booking.price}
-                          dateCompleted={booking.dateCompleted}
-                          status={booking.status}
-                          feedbackId={booking.feedbackId}
-                          onViewDetail={() => handleViewDetail(booking.id)}
-                          onCancelAction={() => handleCancel(booking.id)}
-                          onReviewAction={() => handleReview(booking.id)}
-                          onRebookingAction={() => handleRebooking(booking.id)}
-                      />
-                    </View>
-                ))
-            ) : (
-                <View style={styles.emptyState}>
-                  <Text style={styles.emptyStateText}>Không có đơn đặt phòng nào</Text>
-                </View>
-            )}
+              return (
+                <CustomButton
+                  key={tab.key}
+                  title={tab.title}
+                  style={[
+                    styles.buttonNav,
+                    {
+                      backgroundColor: bgColor,
+                      borderWidth: 2,
+                      borderColor: borderColor,
+                    },
+                  ]}
+                  titleStyle={{ fontWeight }}
+                  titleColor={titleColor}
+                  onPress={() => setActiveTab({ key: tab.key, value: tab.value })}
+                />
+              )
+            })}
           </ScrollView>
+        </View>
+
+        <ScrollView style={styles.scrollView}>
+          {isLoading ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>{t("loading")}</Text>
+            </View>
+          ) : filteredBookings.length > 0 ? (
+            filteredBookings.map((booking) => (
+              <View key={booking.id} style={styles.cardWrapper}>
+                <CardInMyTicket
+                  imageUrl={{ uri: booking.imageUrl }}
+                  nameRoom={booking.nameRoom}
+                  placeName={booking.placeName}
+                  maxPeople={booking.maxPeople}
+                  price={booking.price}
+                  dateCompleted={booking.dateCompleted}
+                  status={booking.status}
+                  feedbackId={booking.feedbackId}
+                  onViewDetail={() => handleViewDetail(booking.id)}
+                  onCancelAction={() => handleCancel(booking.id)}
+                  onReviewAction={() => handleReview(booking.id)}
+                  onRebookingAction={() => handleRebooking(booking.id)}
+                />
+              </View>
+            ))
+          ) : (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>{t("no_bookings")}</Text>
+            </View>
+          )}
         </ScrollView>
-        <ReviewModal
-            visible={reviewModalVisible}
-            onClose={() => setReviewModalVisible(false)}
-            onSubmit={handleSubmitReview}
-            bookingId={selectedBookingId}
-        />
-      </SafeAreaView>
+      </ScrollView>
+      <ReviewModal
+        visible={reviewModalVisible}
+        onClose={() => setReviewModalVisible(false)}
+        onSubmit={handleSubmitReview}
+        bookingId={selectedBookingId}
+      />
+    </SafeAreaView>
   )
 }
 

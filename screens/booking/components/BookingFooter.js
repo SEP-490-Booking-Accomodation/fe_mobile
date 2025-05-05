@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { ArrowLeft } from "lucide-react-native";
 import CustomButton from "../../../components/buttons/Button";
+import { useTranslation } from "react-i18next";
 
 const BookingFooter = ({
   navigation,
@@ -10,6 +11,7 @@ const BookingFooter = ({
   handleContinue,
   isFormValid,
 }) => {
+  const { t } = useTranslation();
   return (
     <View style={styles.footer}>
       <TouchableOpacity
@@ -19,18 +21,19 @@ const BookingFooter = ({
         <ArrowLeft size={24} color="#000" />
       </TouchableOpacity>
       <View style={styles.priceContainer}>
-        <Text style={styles.currencySymbol}>Tổng</Text>
+        <Text style={styles.currencySymbol}>{t("total")}</Text>
         <Text style={styles.price}>{formatMoney(calculateTotalPrice())}</Text>
       </View>
       <CustomButton
         style={[{ width: "45%" }, !isFormValid && styles.disabledButton]}
-        title="Xác nhận"
+        title={t("confirm_button")}
         onPress={handleContinue}
         disabled={!isFormValid}
       />
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   footer: {

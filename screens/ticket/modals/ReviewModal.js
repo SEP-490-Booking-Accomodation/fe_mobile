@@ -15,10 +15,12 @@ import {
 } from 'react-native';
 
 import { AntDesign } from '@expo/vector-icons'; // Make sure you have expo/vector-icons installed
+import { useTranslation } from 'react-i18next';
 
 const { height } = Dimensions.get('window');
 
 const ReviewModal = ({ visible, onClose, onSubmit, bookingId }) => {
+    const { t } = useTranslation();
     const [rating, setRating] = useState(0);
     const [review, setReview] = useState('');
     const slideAnim = useRef(new Animated.Value(height)).current;
@@ -41,7 +43,7 @@ const ReviewModal = ({ visible, onClose, onSubmit, bookingId }) => {
 
     const handleSubmit = () => {
         if (rating === 0) {
-            alert('Vui lòng chọn số sao đánh giá');
+            alert(t('rating_required'));
             return;
         }
 
@@ -82,6 +84,13 @@ const ReviewModal = ({ visible, onClose, onSubmit, bookingId }) => {
         return stars;
     };
 
+    const ratingTexts = {
+        1: t('very_dissatisfied'),
+        2: t('dissatisfied'),
+        3: t('neutral'),
+        4: t('satisfied'),
+        5: t('very_satisfied'),
+    };
     return (
         <Modal
             transparent
@@ -104,23 +113,18 @@ const ReviewModal = ({ visible, onClose, onSubmit, bookingId }) => {
                             >
                                 <View style={styles.handle} />
 
-                                <Text style={styles.title}>Đánh giá</Text>
+                                <Text style={styles.title}>{t('review')}</Text>
 
                                 <View style={styles.ratingContainer}>
                                     {renderStars()}
                                 </View>
 
                                 <Text style={styles.ratingText}>
-                                    {rating === 0 ? 'Chọn đánh giá của bạn' :
-                                        rating === 1 ? 'Rất không hài lòng' :
-                                            rating === 2 ? 'Không hài lòng' :
-                                                rating === 3 ? 'Bình thường' :
-                                                    rating === 4 ? 'Hài lòng' : 'Rất hài lòng'}
+                                    {rating === 0 ? t('choose_rating') : ratingTexts[rating]}
                                 </Text>
-
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Chia sẻ trải nghiệm của bạn..."
+                                    placeholder={t('share_experience')}
                                     multiline
                                     numberOfLines={5}
                                     value={review}
@@ -132,7 +136,7 @@ const ReviewModal = ({ visible, onClose, onSubmit, bookingId }) => {
                                         style={[styles.button, styles.cancelButton]}
                                         onPress={handleClose}
                                     >
-                                        <Text style={styles.cancelButtonText}>Hủy</Text>
+                                        <Text style={styles.cancelButtonText}>{t('cancel')}</Text>
                                     </TouchableOpacity>
 
                                     <TouchableOpacity
@@ -144,7 +148,7 @@ const ReviewModal = ({ visible, onClose, onSubmit, bookingId }) => {
                                         onPress={handleSubmit}
                                         disabled={rating === 0}
                                     >
-                                        <Text style={styles.submitButtonText}>Gửi đánh giá</Text>
+                                        <Text style={styles.submitButtonText}>{t('submit_review')}</Text>
                                     </TouchableOpacity>
                                 </View>
                             </Animated.View>

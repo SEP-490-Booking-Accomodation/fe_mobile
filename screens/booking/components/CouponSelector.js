@@ -10,11 +10,13 @@ import {
 import { Entypo, Feather } from "@expo/vector-icons";
 import { ReactNativeModal } from "react-native-modal";
 import { useGetAllCouponQuery } from "../../../api/couponApi";
+import { useTranslation } from "react-i18next";
 
 export default function CouponSelector({
   selectedVoucher,
   setSelectedVoucher,
 }) {
+  const { t } = useTranslation(); 
   const [modalVisible, setModalVisible] = useState(false);
   const [processedCoupons, setProcessedCoupons] = useState([]);
   const { data: couponData, refetch } = useGetAllCouponQuery();
@@ -44,50 +46,38 @@ export default function CouponSelector({
     const processed = [];
 
     couponData.forEach((coupon) => {
-      // Skip deleted or inactive coupons
       if (coupon.isDelete || !coupon.isActive) return;
 
       const startDate = new Date(convertVNDateToISO(coupon.startDate));
       const endDate = new Date(convertVNDateToISO(coupon.endDate));
 
-      // Format the discount value
       const discountFormatted =
         coupon.discountBasedOn.toLowerCase() === "percentage"
           ? `${coupon.amount}%`
           : `${formatCurrency(coupon.amount)}`;
 
-      // Create a description based on discount type
       const description =
         coupon.discountBasedOn.toLowerCase() === "percentage"
-          ? `Giảm ${coupon.amount}% cho đơn hàng` +
-            (coupon.maxDiscount
-              ? ` (tối đa ${formatCurrency(coupon.maxDiscount)})`
-              : "")
-          : `Giảm ${formatCurrency(coupon.amount)} cho đơn hàng`;
+          ? t("discount_percentage", {
+              amount: coupon.amount,
+              max: coupon.maxDiscount ? formatCurrency(coupon.maxDiscount) : "",
+            })
+          : t("discount_fixed", { amount: formatCurrency(coupon.amount) });
 
-      // Check if coupon is valid now or in the future
       const isCurrentlyValid =
         startDate <= currentDate && currentDate <= endDate;
       const isFuture = startDate > currentDate;
 
       if (isCurrentlyValid || isFuture) {
         processed.push({
-          id: coupon._id,
-          code: coupon.couponCode,
+          ...coupon,
           description: description,
           discount: discountFormatted,
-          discountBasedOn: coupon.discountBasedOn,
-          amount: coupon.amount || 0,
-          maxDiscount: coupon.maxDiscount || null,
-          name: coupon.name,
-          startDate: coupon.startDate,
-          endDate: coupon.endDate,
-          isSelectable: isCurrentlyValid, // Only currently valid coupons are selectable
+          isSelectable: isCurrentlyValid,
         });
       }
     });
 
-    // Sort: valid coupons first, then future coupons
     processed.sort((a, b) => {
       if (a.isSelectable && !b.isSelectable) return -1;
       if (!a.isSelectable && b.isSelectable) return 1;
@@ -125,7 +115,7 @@ export default function CouponSelector({
   return (
     <>
       <TouchableOpacity onPress={() => setModalVisible(true)}>
-        <Text style={styles.label}>Voucher khuyến mãi</Text>
+        <Text style={styles.label}>{t("promo_voucher")}</Text>
         {selectedVoucher ? (
           <View style={styles.selectedInfo}>
             <Text style={styles.voucherCode}>{selectedVoucher.code}</Text>
@@ -134,7 +124,7 @@ export default function CouponSelector({
             </Text>
           </View>
         ) : (
-          <Text style={styles.placeholder}>Chọn voucher</Text>
+          <Text style={styles.placeholder}>{t("select_voucher")}</Text>
         )}
         <Entypo
           name="chevron-right"
@@ -146,11 +136,6 @@ export default function CouponSelector({
 
       <ReactNativeModal
         isVisible={modalVisible}
-        onBackdropPress={() => setModalVisible(false)}
-        onSwipeComplete={() => setModalVisible(false)}
-        swipeDirection="right"
-        animationIn="slideInRight"
-        animationOut="slideOutRight"
         style={styles.modalWrapper}
       >
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
@@ -161,7 +146,7 @@ export default function CouponSelector({
                   <TouchableOpacity onPress={() => setModalVisible(false)}>
                     <Feather name="arrow-left" size={24} color="black" />
                   </TouchableOpacity>
-                  <Text style={styles.modalTitle}>Chọn Voucher</Text>
+                  <Text style={styles.modalTitle}>{t("choose_voucher")}</Text>
                 </View>
 
                 {processedCoupons.length > 0 ? (
@@ -169,7 +154,6 @@ export default function CouponSelector({
                     refreshing={refreshing}
                     onRefresh={handleRefresh}
                     data={processedCoupons}
-                    keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
                       <TouchableOpacity
                         style={[
@@ -192,20 +176,22 @@ export default function CouponSelector({
 
                         {!item.isSelectable && (
                           <Text style={styles.comingSoonTag}>
-                            Sắp có hiệu lực
+                            {t("coming_soon")}
                           </Text>
                         )}
 
                         <Text style={styles.validityPeriod}>
-                          HSD: {item.startDate.split(" ")[0]} -{" "}
-                          {item.endDate.split(" ")[0]}
+                          {t("validity_period", {
+                            start: item.startDate.split(" ")[0],
+                            end: item.endDate.split(" ")[0],
+                          })}
                         </Text>
                       </TouchableOpacity>
                     )}
                   />
                 ) : (
                   <View style={styles.noVouchers}>
-                    <Text>Không có voucher nào khả dụng</Text>
+                    <Text>{t("no_vouchers_available")}</Text>
                   </View>
                 )}
               </View>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 
 const AccommodationInfo = ({
   accommodationTypeData,
@@ -7,47 +8,44 @@ const AccommodationInfo = ({
   rentalData,
   isOverNight,
 }) => {
+  const { t } = useTranslation();
   if (!accommodationTypeData?.data) return null;
   const loadingGif = "https://i.gifer.com/WMDx.gif";
   const [isLoading, setIsLoading] = useState(true); // Trạng thái tải ảnh
 
   return (
     <View style={styles.typeInfoContainer}>
-      {/* {isLoading && (
-        <Image
-          source={{ uri: loadingGif }}
-          style={styles.mainImage}
-          resizeMode="center"
-        />
-      )} */}
       <Image
-        source={{
-          uri: accommodationTypeData?.data?.image?.[0],
-        }}
+        source={{ uri: accommodationTypeData?.data?.image?.[0] }}
         style={styles.mainImage}
         resizeMode="contain"
         onLoad={() => setIsLoading(false)}
-        onError={() => setIsLoading(false)} // Nếu lỗi, ẩn GIF
+        onError={() => setIsLoading(false)}
       />
 
       <View style={{ display: "flex", flexDirection: "row", gap: 10 }}>
         <Text style={styles.typeName}>{accommodationTypeData?.data?.name}</Text>
         {isOverNight && (
-          <Text style={styles.specialTag}>Cho phép đặt qua đêm</Text>
+          <Text style={styles.specialTag}>{t("allow_overnight_booking")}</Text>
         )}
       </View>
       <Text style={styles.infoText}>
         {rentalData?.data.openHour} - {rentalData?.data.closeHour}
       </Text>
       <Text style={styles.infoText}>
-        Số người tối đa: {accommodationTypeData?.data?.maxPeopleNumber}
+        {t("max_people_count", { count: accommodationTypeData?.data?.maxPeopleNumber })}
       </Text>
       <Text style={styles.infoText}>
-        Giá giờ đầu: {formatMoney(accommodationTypeData?.data?.basePrice)} / giờ
+        {t("base_price", { 
+          price: formatMoney(accommodationTypeData?.data?.basePrice),
+          unit: t("hour")
+        })}
       </Text>
       <Text style={styles.infoText}>
-        Giá giờ tiếp theo:{" "}
-        {formatMoney(accommodationTypeData?.data?.overtimeHourlyPrice)} / giờ
+        {t("overtime_price_unit", {
+          price: formatMoney(accommodationTypeData?.data?.overtimeHourlyPrice),
+          unit: t("hour")
+        })}
       </Text>
     </View>
   );

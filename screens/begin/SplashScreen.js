@@ -1,8 +1,10 @@
 import React, { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
+import { useTranslation } from 'react-i18next';
 
 const SplashScreenComponent = ({ navigation }) => {
+  const { t } = useTranslation();
   useEffect(() => {
     const loadApp = async () => {
       await SplashScreen.preventAutoHideAsync();
@@ -17,7 +19,7 @@ const SplashScreenComponent = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Mean</Text>
+      <Text style={styles.text}>{t("app_name")}</Text>
     </View>
   );
 };

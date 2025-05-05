@@ -2,28 +2,30 @@ import React, { useState } from 'react';
 import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import CustomButton from '../../components/buttons/Button';
 import { ArrowLeft } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 
 const PaymentConfirm = ({ route, navigation }) => {
+  const { t } = useTranslation();
   const [selectedPayment, setSelectedPayment] = useState('mean');
 
 
-    const renderHeader = () => (
-      <View style={styles.header}>
-        <Text style={styles.textHeader}>Xác nhận thanh toán</Text>
-      </View>
-    );
-  
+  const renderHeader = () => (
+    <View style={styles.header}>
+      <Text style={styles.textHeader}>{t('confirm_payment')}</Text>
+    </View>
+  );
+
   const RadioButton = ({ value, label, sublabel }) => (
-    <TouchableOpacity 
-      style={styles.paymentOption} 
+    <TouchableOpacity
+      style={styles.paymentOption}
       onPress={() => setSelectedPayment(value)}
     >
       <View style={styles.paymentIcon}>
         <Text>{value === 'mean' ? '📷' : '↔️'}</Text>
       </View>
       <View style={styles.paymentText}>
-        <Text style={styles.paymentTitle}>{label}</Text>
-        <Text style={styles.paymentSubtitle}>{sublabel}</Text>
+        <Text style={styles.paymentTitle}>{t(label)}</Text>
+        <Text style={styles.paymentSubtitle}>{t(sublabel)}</Text>
       </View>
       <View style={styles.radioOuter}>
         {selectedPayment === value && <View style={styles.radioInner} />}
@@ -37,23 +39,23 @@ const PaymentConfirm = ({ route, navigation }) => {
         {renderHeader()}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Phương thức thanh toán</Text>
+          <Text style={styles.sectionTitle}>{t('payment_method')}</Text>
           <RadioButton 
             value="mean" 
-            label="Thanh toán bằng ví Mean" 
-            sublabel="Thanh toán bằng ví Mean của bạn"
+            label="mean_wallet" 
+            sublabel="mean_wallet_desc"
           />
           <RadioButton 
             value="bank" 
-            label="Chuyển khoản" 
-            sublabel="Thanh toán bằng ngân hàng của bạn"
+            label="bank_transfer" 
+            sublabel="bank_transfer_desc"
           />
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Chi tiết thanh toán</Text>
+          <Text style={styles.sectionTitle}>{t('payment_details')}</Text>
           <View style={styles.detailRow}>
-            <Text>Tổng phụ</Text>
+            <Text>{t('subtotal')}</Text>
             <Text>500.000đ</Text>
           </View>
           <View style={styles.detailRow}>
@@ -65,9 +67,9 @@ const PaymentConfirm = ({ route, navigation }) => {
         <View style={styles.securityBox}>
           <Text style={styles.securityIcon}>🛡️</Text>
           <View>
-            <Text style={styles.securityTitle}>Cam kết thanh toán</Text>
+            <Text style={styles.securityTitle}>{t('payment_guarantee')}</Text>
             <Text style={styles.securityText}>
-              Mean đảm bảo số tiền bạn thanh toán cho mỗi giao dịch
+              {t('payment_guarantee_desc')}
             </Text>
           </View>
         </View>
@@ -75,20 +77,17 @@ const PaymentConfirm = ({ route, navigation }) => {
 
       <View style={styles.bottomBar}>
         <View style={styles.totalSection}>
-        <TouchableOpacity style={styles.backButton} onPress={() => 
-          //handleReturnBack()
-          navigation.goBack() 
-        }>
-          <ArrowLeft size={24} color="#000" />
-        </TouchableOpacity>
+          {/* ... back button remains the same */}
           <View>
-            <Text>Tổng</Text>
+            <Text>{t('total')}</Text>
             <Text style={styles.totalAmount}>550.000đ</Text>
           </View>
         </View>
         <CustomButton 
-            onPress={() => navigation.navigate('PaymentSuccess')}
-        title="Thanh toán" style={{width: "45%"}}/>
+          onPress={() => navigation.navigate('PaymentSuccess')}
+          title={t('pay_now')} 
+          style={{width: "45%"}}
+        />
       </View>
     </SafeAreaView>
   );

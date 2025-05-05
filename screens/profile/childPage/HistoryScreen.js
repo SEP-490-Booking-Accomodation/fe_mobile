@@ -10,8 +10,10 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import CustomButton from "../../../components/buttons/Button";
+import { useTranslation } from "react-i18next";
 
 export default function HistoryScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState("upcoming");
   const imageTest = "https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
@@ -104,7 +106,7 @@ export default function HistoryScreen() {
       dateCompleted: "23/12/2024",
       status: "1",
       bookingStatus: "cancelled"
-    },{
+    }, {
       id: 9,
       imageUrl: imageTest,
       nameRoom: "Phòng 1",
@@ -127,10 +129,9 @@ export default function HistoryScreen() {
       >
         <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
       </TouchableOpacity>
-      <Text style={styles.textHeader}>Lịch sử đặt phòng</Text>
+      <Text style={styles.textHeader}>{t("booking_history")}</Text>
     </View>
   );
-
   const handleViewDetail = (id) => {
     console.log("View detail", id);
   };
@@ -145,7 +146,7 @@ export default function HistoryScreen() {
     <View key={booking.id} style={styles.cardContainer}>
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.roomName}>Phòng 1</Text>
+          <Text style={styles.roomName}>{t("room")} 1</Text>
           <View style={styles.tagContainer}>
             <Text style={styles.tagText}>Imperial</Text>
           </View>
@@ -154,13 +155,13 @@ export default function HistoryScreen() {
         <View style={styles.cardDetails}>
           <View style={styles.detailRow}>
             <MaterialIcons name="location-on" size={16} color="#4E72E3" />
-            <Text style={styles.detailText}>Vũng Tàu</Text>
+            <Text style={styles.detailText}>{t("vung_tau")}</Text>
             <Text style={styles.dateText}>23/12/2024</Text>
           </View>
 
           <View style={styles.detailRow}>
             <MaterialIcons name="person" size={16} color="#4E72E3" />
-            <Text style={styles.detailText}>2 người lớn</Text>
+            <Text style={styles.detailText}>2 {t("adults")}</Text>
           </View>
 
           <Text style={styles.priceText}>500.000đ</Text>
@@ -169,18 +170,18 @@ export default function HistoryScreen() {
         <View style={styles.cardActions}>
           {activeTab === 'upcoming' && (
             <TouchableOpacity style={styles.cancelButton} onPress={() => handleCancel(booking.id)}>
-              <Text style={styles.cancelButtonText}>Hủy</Text>
+              <Text style={styles.cancelButtonText}>{t("cancel")}</Text>
             </TouchableOpacity>
           )}
 
           {activeTab === 'past' && (
             <TouchableOpacity style={styles.rateButton} onPress={() => { }}>
-              <Text style={styles.rateButtonText}>Đánh giá</Text>
+              <Text style={styles.rateButtonText}>{t("rate")}</Text>
             </TouchableOpacity>
           )}
 
           <TouchableOpacity style={styles.detailButton} onPress={() => handleViewDetail(booking.id)}>
-            <Text style={styles.detailButtonText}>Xem chi tiết</Text>
+            <Text style={styles.detailButtonText}>{t("view_details")}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -193,7 +194,7 @@ export default function HistoryScreen() {
 
       <View style={styles.tabButtonsContainer}>
         <CustomButton
-          title="Sắp tới"
+          title={t("upcoming")}
           variant={activeTab === "upcoming" ? "filled" : "outlined"}
           backgroundColor="#4E72E3"
           titleColor={activeTab === "upcoming" ? "#FFFFFF" : "#4E72E3"}
@@ -205,7 +206,7 @@ export default function HistoryScreen() {
         <View style={styles.tabSpacer} />
 
         <CustomButton
-          title="Hiện tại"
+          title={t("current")}
           variant={activeTab === "past" ? "filled" : "outlined"}
           backgroundColor="#4E72E3"
           titleColor={activeTab === "past" ? "#FFFFFF" : "#10B981"}
@@ -217,7 +218,7 @@ export default function HistoryScreen() {
         <View style={styles.tabSpacer} />
 
         <CustomButton
-          title="Đã qua"
+          title={t("past")}
           variant={activeTab === "cancelled" ? "filled" : "outlined"}
           backgroundColor="#4E72E3"
           titleColor={activeTab === "cancelled" ? "#FFFFFF" : "#6366F1"}
@@ -233,7 +234,7 @@ export default function HistoryScreen() {
         ) : (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateText}>
-              Không có đơn đặt phòng nào
+              {t("no_bookings")}
             </Text>
           </View>
         )}
@@ -396,9 +397,9 @@ const styles = StyleSheet.create({
   },
   rateButton: {
     backgroundColor: "#E5E7EB",
-    borderRadius: 100, 
+    borderRadius: 100,
     paddingVertical: 8,
-    paddingHorizontal: 24, 
+    paddingHorizontal: 24,
     marginRight: 8,
     justifyContent: "center",
     alignItems: "center",
@@ -411,16 +412,16 @@ const styles = StyleSheet.create({
   },
   detailButton: {
     backgroundColor: "#111827",
-    borderRadius: 100, 
+    borderRadius: 100,
     paddingVertical: 8,
     paddingHorizontal: 24,
     justifyContent: "center",
     alignItems: "center",
-    minWidth: 110, 
+    minWidth: 110,
   },
   detailButtonText: {
     color: "#FFFFFF",
-    fontSize: 12, 
+    fontSize: 12,
     fontWeight: "500",
   },
   emptyState: {

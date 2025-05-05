@@ -12,8 +12,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
 import { useAsyncStorage } from "../../../context/AsyncStorageContext";
 import DataEmpty from "../../../components/DataEmpty";
+import { useTranslation } from "react-i18next";
+
 export default function FavouriteList({ route, navigation }) {
-  const {favorites, addFavorite, removeFavorite} = useAsyncStorage();
+  const { t } = useTranslation();
+  const { favorites, addFavorite, removeFavorite } = useAsyncStorage();
   const [dataFavourite, setDataFavourite] = useState(favorites);
   console.log(dataFavourite);
   const renderHeader = () => (
@@ -24,33 +27,37 @@ export default function FavouriteList({ route, navigation }) {
       >
         <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
       </TouchableOpacity>
-      <Text style={styles.textHeader}>Danh sách yêu thích</Text>
+      <Text style={styles.textHeader}>{t("favorites_list")}</Text>
     </View>
   );
+
   return (
     <SafeAreaView style={styles.container}>
       {renderHeader()}
-      (dataFavourite.length === 0) ? (
-        <DataEmpty iconName="heart-broken" description="Danh sách yêu thích trống" /> 
+      {dataFavourite.length === 0 ? (
+        <DataEmpty 
+          iconName="heart-broken" 
+          description={t("empty_favorites")} 
+        /> 
       ) : (
-      <ScrollView contentContainerStyle={styles.content}>
-        {dataFavourite.map((item, index) => (
-          <HorizontalCardWishlist
-            key={index}
-            imageUrlLogo={item.imageUrl}
-            placeName={item.placeName}
-            openHour={item.openHour}
-            closeHour={item.closeHour}
-            minPrice={item.minPrice}
-            maxPrice={item.maxPrice}
-            location={item.location}
-            rating={item.rating}
-            numOfReviews={item.numOfReviews}
-            initFavourite={item.initFavourite}
-          />
-        ))}
-      </ScrollView>
-      )
+        <ScrollView contentContainerStyle={styles.content}>
+          {dataFavourite.map((item, index) => (
+            <HorizontalCardWishlist
+              key={index}
+              imageUrlLogo={item.imageUrl}
+              placeName={item.placeName}
+              openHour={item.openHour}
+              closeHour={item.closeHour}
+              minPrice={item.minPrice}
+              maxPrice={item.maxPrice}
+              location={item.location}
+              rating={item.rating}
+              numOfReviews={item.numOfReviews}
+              initFavourite={item.initFavourite}
+            />
+          ))}
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }

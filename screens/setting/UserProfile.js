@@ -9,8 +9,10 @@ import { useSelector, useDispatch } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { logout } from "../../redux/authSlice";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const UserProfile = ({ user, isLoading, navigation }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const storedToken = useSelector((state) => state.auth.token);
   const [currentUser, setCurrentUser] = useState(user);
@@ -42,14 +44,14 @@ const UserProfile = ({ user, isLoading, navigation }) => {
       ) : null}
       {storedToken && currentUser ? (
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Đăng xuất</Text>
+          <Text style={styles.logoutText}>{t("logout")}</Text>
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
           style={styles.loginButton}
           onPress={() => navigation.navigate("Auth")}
         >
-          <Text style={styles.loginText}>Đăng nhập</Text>
+          <Text style={styles.loginText}>{t("login")}</Text>
         </TouchableOpacity>
       )}
       {/* <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
