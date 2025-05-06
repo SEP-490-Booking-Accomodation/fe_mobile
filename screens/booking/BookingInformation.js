@@ -135,7 +135,7 @@ export default function BookingInformation({ route, navigation }) {
       closeDatePicker();
       return;
     }
-
+    closeDatePicker();
     setSelectedDate(date);
   };
 
@@ -204,9 +204,9 @@ export default function BookingInformation({ route, navigation }) {
       closeTimePicker();
       return;
     }
+    closeTimePicker();
 
     setSelectedTime(time);
-
   };
 
   const closeDatePicker = useCallback(() => {

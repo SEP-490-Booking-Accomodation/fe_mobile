@@ -15,7 +15,11 @@ import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import CustomButton from "../../components/buttons/Button";
 import CustomInput from "../../components/TextInput";
-import { useLazyGetUserQuery, useLoginMutation } from "../../api/authApi";
+import {
+  useLazyGetCustomerByUserIdQuery,
+  useLazyGetUserQuery,
+  useLoginMutation,
+} from "../../api/authApi";
 import { loginSuccess, logout } from "../../redux/authSlice";
 import { useLazyGetRoleByIdQuery } from "../../api/roleApi";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
@@ -31,7 +35,8 @@ const LoginScreen = () => {
   const [login] = useLoginMutation();
   const [isLoading, setIsLoading] = useState(false);
   const [getRoleById] = useLazyGetRoleByIdQuery();
-  const {addIdChatPlatform} = useAsyncStorage();
+  const [useGetCustomerByUserIdLazy] = useLazyGetCustomerByUserIdQuery();
+  const { addIdChatPlatform } = useAsyncStorage();
 
   const handleLogin = async () => {
     setIsLoading(true);
@@ -53,6 +58,12 @@ const LoginScreen = () => {
       }
 
       const roleData = await getRoleById(userData.roleID).unwrap();
+      // console.log("Role Data:", roleData);
+
+      const resCustomer = await useGetCustomerByUserIdLazy(
+        userData._id
+      ).unwrap();
+      const customerId = resCustomer.id;
 
       if (roleData.roleName !== "Customer") {
         Alert.alert(
@@ -70,6 +81,7 @@ const LoginScreen = () => {
           token: response.accessToken,
           userData: userData,
           refreshToken: response.refreshToken,
+          customerId: customerId,
         });
         return;
       }
@@ -81,10 +93,15 @@ const LoginScreen = () => {
           userData: userData,
           isAuth: true,
           refreshToken: response.refreshToken,
+          customerId: customerId,
         })
       );
+      navigation.goBack();
 
-      navigation.replace("MainTabs");
+      // navigation.reset({
+      //   index: 0,
+      //   routes: [{ name: "MainTabs" }],
+      // });
     } catch (error) {
       Alert.alert(
         t("login_failed"),

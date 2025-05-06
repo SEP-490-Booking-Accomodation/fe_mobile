@@ -18,8 +18,9 @@ const BOOKING_STATUS = Object.freeze({
   CANCELLED: 6,
   COMPLETED: 7,
   PENDING: 8,
-})
-import { useCreateFeedbackMutation } from "../../api/feedbackApi"
+});
+import { useCreateFeedbackMutation } from "../../api/feedbackApi";
+import NotAuth from "../auth/NotAuth";
 
 export default function TicketList() {
   const { t } = useTranslation()
@@ -31,34 +32,46 @@ export default function TicketList() {
   const imageTest =
     "https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
 
-  const authData = useSelector((state) => state.auth)
-  const { data: customerData } = useGetCustomerByUserIdQuery(authData.userId)
-  const [createFeedback] = useCreateFeedbackMutation()
-  const { data: bookingData, isLoading, refetch } = useGetAllBookingByCustomerIdQuery(customerData?.id)
+  const authData = useSelector((state) => state.auth);
+  const userAuth = useSelector((state) => state.auth?.userId);
+  const parseCustomDate = (dateStr) => {
+    const [day, month, yearAndTime] = dateStr.split("/");
+    const [year, time] = yearAndTime.split(" ");
+    return new Date(`${year}-${month}-${day}T${time}`);
+  };
 
+  const { data: customerData } = useGetCustomerByUserIdQuery(authData.userId);
+  const [createFeedback] = useCreateFeedbackMutation();
+  const {
+    data: bookingData,
+    isLoading,
+    refetch,
+  } = useGetAllBookingByCustomerIdQuery(customerData?.id);
+
+  console.log("bookingData", bookingData);
   const mapStatusToFilterCategory = (status) => {
     switch (status) {
       case BOOKING_STATUS.CONFIRMED:
       case BOOKING_STATUS.PENDING:
-        return "upcoming"
+        return "upcoming";
       case BOOKING_STATUS.CHECKEDIN:
       case BOOKING_STATUS.NEEDCHECKIN:
       case BOOKING_STATUS.NEEDCHECKOUT:
-        return "current"
+        return "current";
       case BOOKING_STATUS.COMPLETED:
-        return "completed"
+        return "completed";
       case BOOKING_STATUS.CANCELLED:
-        return "cancelled"
+        return "cancelled";
       case BOOKING_STATUS.CHECKEDOUT:
-        return "completed"
+        return "completed";
       default:
-        return "upcoming"
+        return "upcoming";
     }
-  }
+  };
 
   const mapStatusToUiCode = (status) => {
     if (status === BOOKING_STATUS.CANCELLED) {
-      return "-1" // Cancelled - Show "Đặt lại" button
+      return "-1"; // Cancelled - Show "Đặt lại" button
     } else if (
       status === BOOKING_STATUS.PENDING ||
       status === BOOKING_STATUS.CONFIRMED ||
@@ -66,13 +79,16 @@ export default function TicketList() {
       status === BOOKING_STATUS.CHECKEDIN ||
       status === BOOKING_STATUS.NEEDCHECKOUT
     ) {
-      return "0" // Current or Upcoming - Show "Hủy" + "Xem chi tiết" buttons
-    } else if (status === BOOKING_STATUS.COMPLETED || status === BOOKING_STATUS.CHECKEDOUT) {
-      return "1" // Completed - Show "Đánh giá" button
+      return "0"; // Current or Upcoming - Show "Hủy" + "Xem chi tiết" buttons
+    } else if (
+      status === BOOKING_STATUS.COMPLETED ||
+      status === BOOKING_STATUS.CHECKEDOUT
+    ) {
+      return "1"; // Completed - Show "Đánh giá" button
     } else {
-      return "0" // Default
+      return "0"; // Default
     }
-  }
+  };
 
   // Function to convert booking data - defined BEFORE it's used
   const convertBookingsData = (bookings) => {
@@ -84,29 +100,32 @@ export default function TicketList() {
       maxPeople: booking.adultNumber + booking.childNumber,
       price: booking.basePrice.toLocaleString("vi-VN") + " VND",
       dateCompleted: booking.checkOutHour,
+      dateCheckin: booking.checkInHour,
+      dateBooked: booking.createdAt,
       status: mapStatusToUiCode(booking.status),
       bookingStatus: mapStatusToFilterCategory(booking.status),
+      paymentStatus: booking.paymentStatus,
       feedbackId: booking.feedbackId,
-    }))
-  }
+    }));
+  };
 
   // Use useEffect instead of useState for side effects
   useEffect(() => {
     if (bookingData?.bookings) {
-      setLocalBookings(convertBookingsData(bookingData.bookings))
+      setLocalBookings(convertBookingsData(bookingData.bookings));
     }
-  }, [bookingData])
+  }, [bookingData]);
 
-  const [refreshing, setRefreshing] = useState(false)
+  const [refreshing, setRefreshing] = useState(false);
   const onRefresh = async () => {
-    setRefreshing(true)
+    setRefreshing(true);
     try {
-      await refetch()
+      await refetch();
     } catch (error) {
       console.error(t("data_refresh_error"), error)
     }
-    setRefreshing(false)
-  }
+    setRefreshing(false);
+  };
 
   const handleSubmitReview = async (reviewData) => {
     const requestData = {
@@ -117,7 +136,7 @@ export default function TicketList() {
       contentReply: null,
       isHidden: false,
       images: [],
-    }
+    };
 
     try {
       const result = await createFeedback({ data: requestData })
@@ -132,10 +151,10 @@ export default function TicketList() {
       alert(t("review_submitted"))
       refetch()
     } catch (error) {
-      console.error(error)
-      alert(error.message)
+      console.error(error);
+      alert(error.message);
     }
-  }
+  };
 
   const tabColors = {
     all: "#4E72E3",
@@ -143,7 +162,7 @@ export default function TicketList() {
     current: "#10B981",
     cancelled: "#EF4444",
     completed: "#6366F1",
-  }
+  };
 
   const convertedBookings =
     localBookings.length > 0 ? localBookings : bookingData?.bookings ? convertBookingsData(bookingData.bookings) : []
@@ -155,27 +174,27 @@ export default function TicketList() {
   )
 
   const handleViewDetail = (id) => {
-    console.log("View detail", id)
+    console.log("View detail", id);
     // Navigate to details page
-    navigation.navigate("BookingDetail", { bookingId: id })
-  }
+    navigation.navigate("BookingDetail", { bookingId: id });
+  };
 
   const handleCancel = (id) => {
-    console.log("Cancel booking", id)
+    console.log("Cancel booking", id);
     // Implement cancel logic
-  }
+  };
 
   const handleReview = (id) => {
-    console.log("Review booking", id)
-    setSelectedBookingId(id)
-    setReviewModalVisible(true)
-  }
+    console.log("Review booking", id);
+    setSelectedBookingId(id);
+    setReviewModalVisible(true);
+  };
 
   const handleRebooking = (id) => {
-    console.log("Rebooking", id)
+    console.log("Rebooking", id);
     // Navigate to rebooking page
     // navigation.navigate("RebookingPage", { bookingId: id });
-  }
+  };
 
   // Filter bookings based on active tab
   const filteredBookings =
@@ -245,7 +264,32 @@ export default function TicketList() {
               <Text style={styles.emptyStateText}>{t("loading")}</Text>
             </View>
           ) : filteredBookings.length > 0 ? (
-            filteredBookings.map((booking) => (
+            [...filteredBookings]
+                  .sort((a, b) => {
+                    const parseCustomDate = (dateStr) => {
+                      const [day, month, yearAndTime] = dateStr.split("/");
+                      const [year, time] = yearAndTime.split(" ");
+                      return new Date(`${year}-${month}-${day}T${time}`);
+                    };
+
+                    if (activeTab.key === "upcoming") {
+                      return (
+                        parseCustomDate(b.dateCheckin) -
+                        parseCustomDate(a.dateCheckin)
+                      );
+                    } else if (activeTab.key === "current") {
+                      return (
+                        parseCustomDate(b.dateCompleted) -
+                        parseCustomDate(a.dateCompleted)
+                      );
+                    } else {
+                      return (
+                        parseCustomDate(b.dateBooked) -
+                        parseCustomDate(a.dateBooked)
+                      );
+                    }
+                  })
+                  .map((booking) => (
               <View key={booking.id} style={styles.cardWrapper}>
                 <CardInMyTicket
                   imageUrl={{ uri: booking.imageUrl }}
@@ -342,4 +386,4 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginHorizontal: 5, // Tạo khoảng cách giữa các nút
   },
-})
+});

@@ -20,6 +20,11 @@ export const FeedbackApi = baseApi.injectEndpoints({
             query: (rentalId) => `/feedback/rental/${rentalId}/average-rating`,
             providesTags: ["Feedback"],
         }),
+
+        getAllFeedbackByCustomerId: builder.query({
+            query: (customerId) => `/feedback/customer/${customerId}`,
+            providesTags: ["Feedback"],
+        }),
     }),
 });
 
@@ -27,6 +32,5 @@ export const {
     useCreateFeedbackMutation,
     useGetAllFeedbackByRentalIdQuery,
     useGetAverageFeedbackByRentalIdQuery,
-
-
+    useGetAllFeedbackByCustomerIdQuery
 } = FeedbackApi;

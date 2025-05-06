@@ -21,7 +21,6 @@ import { logout } from "../../redux/authSlice";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
 import { useTranslation } from "react-i18next";
 
-
 export default function ProfileScreen() {
   const { t } = useTranslation();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -126,8 +125,8 @@ export default function ProfileScreen() {
     navigation.navigate("Wallet");
   };
 
-  const handleNavigateRatingHistory = () => {
-    navigation.navigate("RatingHistory");
+  const handleNavigateRatingList = () => {
+    navigation.navigate("RatingList");
   };
 
   const handleNavigateLogout = () => {
@@ -138,8 +137,10 @@ export default function ProfileScreen() {
     setShowLogoutModal(false);
     dispatch(logout());
     await removeAllIdChatPlaform();
-    navigation.replace("HomeScreen"); // Tải lại trang
-
+    navigation.reset({//xóa các stack trước đó 
+      index: 0,
+      routes: [{ name: "MainTabs" }],
+    });
   };
 
   return (
@@ -203,7 +204,7 @@ export default function ProfileScreen() {
               "star-outline",
               t('my_ratings'),
               false,
-              handleNavigateRatingHistory
+              handleNavigateRatingList
             )}
             {renderItem("power", t('logout'), true, handleNavigateLogout)}
           </View>

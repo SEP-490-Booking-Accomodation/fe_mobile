@@ -25,7 +25,6 @@ const SearchResult = ({ route, navigation }) => {
   const [selectedSortOption, setSelectedSortOption] = useState(
     t("price_low_to_high")
   );
-  console.log(rental);
 
   useEffect(() => {
     (async () => {
@@ -79,7 +78,9 @@ const SearchResult = ({ route, navigation }) => {
   const rentalDisplay = useMemo(() => {
     if (!rental?.data) return [];
 
-    return rental.data.map((item) => {
+    return rental.data
+    .filter((item) => item.status === 3)
+    .map((item) => {
       console.log(item.latitude);
       console.log(item.longitude);
 

@@ -41,7 +41,7 @@ import MessagesScreen from "../screens/chat/MessagesScreen";
 import ChatScreen from "../screens/chat/ChatScreen";
 import ConfirmBooking from "../screens/booking/ConfirmBooking";
 import PaymentConfirm from "../screens/payment/PaymentConfirm";
-import BookingDetail from "../screens/booking/BookingDetail";
+import BookingDetail from "../screens/booking/bookingDetail/BookingDetail";
 import PaymentSuccess from "../screens/payment/PaymentSuccess";
 import WalletScreen from "../screens/profile/childPage/WalletScreen";
 import PaymentMethod from "../screens/payment/PaymentMethod";
@@ -52,7 +52,8 @@ import EditInfo from "../screens/profile/childPage/EditInfo";
 import ChangePassword from "../screens/profile/childPage/ChangePassword";
 import FavouriteList from "../screens/profile/childPage/FavouriteList";
 import HistoryScreen from "../screens/profile/childPage/HistoryScreen";
-import RatingHistory from "../screens/profile/childPage/RatingHistory";
+import RatingList from "../screens/profile/childPage/Rating/RatingList";
+import RatingDetail from "../screens/profile/childPage/Rating/RatingDetail";
 import TicketList from "../screens/ticket/TicketList";
 import BookingInformation from "../screens/booking/BookingInformation";
 
@@ -78,8 +79,9 @@ const hideTabBarScreens = [
   "Policies",
   "PolicyDetail",
   "MapScreen",
-  "TicketList",
+  //"TicketList",
   "HistoryScreen",
+  "RatingList",
 ];
 
 // AUTH STACK
@@ -154,6 +156,7 @@ const HomeStack = () => (
       component={BookingDetail}
       options={{ headerShown: false }}
     /> */}
+
     <Stack.Screen
       name="PaymentSuccess"
       component={PaymentSuccess}
@@ -184,7 +187,20 @@ const HomeStack = () => (
       component={ChangePassword}
       options={{ headerShown: false }}
     />
-    <Stack.Screen name="RatingHistory" component={RatingHistory} />
+    <Stack.Screen
+      name="RatingList"
+      component={RatingList}
+      options={{
+        headerShown: false,
+      }}
+    />
+    <Stack.Screen
+      name="RatingDetail"
+      component={RatingDetail}
+      options={{
+        headerShown: false,
+      }}
+    />
     <Stack.Screen name="Wallet" component={WalletScreen} />
     <Stack.Screen name="PaymentMethod" component={PaymentMethod} />
     <Stack.Screen
@@ -201,7 +217,7 @@ const MessageStack = () => (
     <Stack.Screen
       name="MessagesScreen"
       component={MessagesScreen}
-      options={{headerShown: false}}
+      options={{ headerShown: false }}
     />
     <Stack.Screen
       name="Chat"
@@ -247,14 +263,9 @@ const SettingStack = () => (
 const TicketStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="TicketList" component={TicketList} />
-    {/* <Stack.Screen
-      name="BookingDetail"
-      component={BookingDetail}
-      options={{ headerShown: false }}
-    /> */}
+    <Stack.Screen name="BookingDetail" component={BookingDetail} />
   </Stack.Navigator>
 );
-
 // Custom Middle Button Component
 const MiddleButton = ({ item, onPress }) => (
   <View style={{ alignItems: "center", justifyContent: "center" }}>
@@ -439,7 +450,7 @@ const AppStack = () => {
 
         {/* Auth Flow */}
         <Stack.Screen name="Auth" component={AuthStack} />
-        <Stack.Screen name="BookingDetail" component={BookingDetail} />
+        {/* <Stack.Screen name="BookingDetail" component={BookingDetail} /> */}
 
         {/* Main App Flow - Thay DrawerNavigator bằng MainTabNavigator */}
         <Stack.Screen name="MainTabs" component={MainTabNavigator} />

@@ -23,7 +23,7 @@ const DurationSelector = ({
   useEffect(() => {
     if (isOverNight) {
       // For overnight stays, allow durations up to 24 hours
-      setAvailableDurations([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24]);
+      setAvailableDurations([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
       return;
     }
 
