@@ -18,8 +18,10 @@ import { Ionicons } from "@expo/vector-icons";
 import OnlineStatus from "../../components/chat/OnlineStatus";
 import MessageStatus from "../../components/chat/MessageStatus";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
+import { useTranslation } from "react-i18next"; 
 
 export default function ChatScreen({ route, navigation }) {
+  const { t } = useTranslation(); 
   const { chatId, chatName } = route.params;
   // State management
   const [messages, setMessages] = useState([]);
@@ -107,7 +109,7 @@ export default function ChatScreen({ route, navigation }) {
         .catch((error) => {
           console.error("Error initializing chat:", error);
           setLoading(false);
-          Alert.alert("Error", "Failed to load chat data. Please try again.");
+          Alert.alert(t("error"), t("failed_to_load_chat"));
         });
     }
 
@@ -222,7 +224,7 @@ export default function ChatScreen({ route, navigation }) {
       if (Array.isArray(data)) {
         const participantList = data.map((p) => ({
           id: p.user_id,
-          username: p.profiles?.username || "Unknown User",
+          username: p.profiles?.username || t("unknown_user"),
           isOnline: p.profiles?.is_online || false,
           lastSeen: p.profiles?.last_seen || null,
         }));
@@ -322,7 +324,7 @@ export default function ChatScreen({ route, navigation }) {
       return true;
     } catch (error) {
       console.error("Exception fetching messages:", error.message);
-      Alert.alert("Error", "Failed to load messages. Please try again.");
+      Alert.alert(t("error"), t("failed_to_load_messages"));
       setMessages([]);
       return false;
     } finally {
@@ -462,7 +464,7 @@ export default function ChatScreen({ route, navigation }) {
       }
     } catch (error) {
       console.error("Exception sending message:", error.message);
-      Alert.alert("Error", "Failed to send message: " + error.message);
+      Alert.alert(t("error"), t("failed_to_send_message") + error.message);
     } finally {
       setSending(false);
     }
@@ -472,7 +474,7 @@ export default function ChatScreen({ route, navigation }) {
   function renderMessage({ item }) {
     const isCurrentUser = item.user_id === userId;
     const profile = userProfiles[item.user_id];
-    const username = profile ? profile.username : "Unknown User";
+    const username = profile ? profile.username : t("unknown_user");
     
     return (
       <View
@@ -569,7 +571,7 @@ export default function ChatScreen({ route, navigation }) {
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#4A90E2" />
-            <Text style={styles.loadingText}>Loading messages...</Text>
+            <Text style={styles.loadingText}>{t("loading_messages")}</Text>
           </View>
         ) : (
           <FlatList
@@ -591,7 +593,7 @@ export default function ChatScreen({ route, navigation }) {
             style={styles.input}
             value={newMessage}
             onChangeText={setNewMessage}
-            placeholder="Type a message..."
+            placeholder={t("type_a_message")}
             multiline
             editable={!sending}
             placeholderTextColor="#999"

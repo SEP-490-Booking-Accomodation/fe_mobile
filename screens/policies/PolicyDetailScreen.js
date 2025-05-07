@@ -4,21 +4,25 @@ import { mockPolicies } from "../../data/mockData";
 import { MaterialIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGetPolicyByIdQuery } from "../../api/policySystemApi";
+import { useTranslation } from "react-i18next";
+
 const PolicyDetailScreen = ({ route, navigation }) => {
+  const { t } = useTranslation();
   const { policyId } = route.params;
   const { data, error, isLoading } = useGetPolicyByIdQuery(policyId);
   const policy = data;
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <Text>Loading...</Text>
+        <Text>{t("loading")}</Text>
       </View>
     );
   }
+
   if (error) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>Error: {error.data}</Text>
+        <Text style={styles.errorText}>{t("error")}: {error.data}</Text>
       </View>
     );
   }
@@ -26,7 +30,7 @@ const PolicyDetailScreen = ({ route, navigation }) => {
   if (!policy) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>Policy not found</Text>
+        <Text style={styles.errorText}>{t("policy_not_found")}</Text>
       </View>
     );
   }
@@ -44,15 +48,14 @@ const PolicyDetailScreen = ({ route, navigation }) => {
       </View>
       <ScrollView style={styles.contentContainer}>
         <Text style={styles.policyDescription}>
-          <Text style={styles.headline}>Loại chính sách:</Text>{" "}
+          <Text style={styles.headline}>{t("policy_type")}:</Text>{" "}
           {policy?.policySystemCategoryId?.categoryName}
         </Text>
         <Text style={styles.policyDescription}>
-          <Text style={styles.headline}>Mô tả:</Text> {policy.description}
+          <Text style={styles.headline}>{t("description")}:</Text> {policy.description}
         </Text>
-
         <Text style={styles.lastUpdate}>
-          Lần cuối cập nhật vào: {policy.updatedAt}
+          {t("last_updated")}: {policy.updatedAt}
         </Text>
       </ScrollView>
     </SafeAreaView>

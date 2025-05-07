@@ -7,7 +7,7 @@ export const rentalLocationApi = baseApi.injectEndpoints({
       query: () => `/rental-location/all-rental-location-with-rating`,
       providesTags: ["RentalLocation"],
     }),
-    getRentalById: builder.query({
+    getRentalLocationById: builder.query({
       query: (id) => `/rental-location/${id}`,
       providesTags: ["RentalLocation"],
     }),
@@ -21,6 +21,6 @@ export const rentalLocationApi = baseApi.injectEndpoints({
 
 export const {
   useGetAllRentalQuery,
-  useGetRentalByIdQuery,
+  useGetRentalLocationByIdQuery,
   useGetAllAccommodationTypeOfRentalLocationQuery,
 } = rentalLocationApi;

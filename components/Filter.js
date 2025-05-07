@@ -13,8 +13,10 @@ import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import ButtonGroup from "../components/buttons/ButtonGroup";
 import MultiSelectButtonGroup from "../components/buttons/MultiSelectButtonGroup";
 import CustomButton from "../components/buttons/Button";
+import { useTranslation } from "react-i18next";
 
 const Filter = ({ visible, onClose, onApply }) => {
+  const { t } = useTranslation();
   const [priceRange, setPriceRange] = useState([100000, 100000000]);
   const [selectedRating, setSelectedRating] = useState(null);
   const [selectedAmenities, setSelectedAmenities] = useState([]);
@@ -27,12 +29,8 @@ const Filter = ({ visible, onClose, onApply }) => {
     setPriceRange([100000, 100000000]);
     setSelectedRating(null);
     setSelectedAmenities([]);
-    console.log("Filters reset:", {
-      priceRange: [100000, 100000000],
-      selectedRating: null,
-      selectedAmenities: [],
-    });
   };
+
   const handleApply = () => {
     onApply({
       priceRange,
@@ -41,6 +39,7 @@ const Filter = ({ visible, onClose, onApply }) => {
     });
     onClose();
   };
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -72,31 +71,31 @@ const Filter = ({ visible, onClose, onApply }) => {
         >
           <View style={styles.dot} />
           <View style={styles.header}>
-            <Text style={styles.headerText}>Lọc nâng cao</Text>
+            <Text style={styles.headerText}>{t("advanced_filter")}</Text>
             <TouchableOpacity onPress={onClose}>
-              <Text style={styles.closeText}>Hủy</Text>
+              <Text style={styles.closeText}>{t("cancel")}</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Giá</Text>
+            <Text style={styles.sectionTitle}>{t("price")}</Text>
             <View style={styles.line} />
             <View style={styles.priceContainer}>
               <View style={styles.priceRangeLabels}>
                 <View>
-                  <Text style={styles.priceRangeTitle}>Tối thiểu</Text>
+                  <Text style={styles.priceRangeTitle}>{t("min")}</Text>
                   <View style={styles.priceBox}>
                     <Text style={styles.priceText}>
-                      {priceRange[0].toLocaleString()} đ
+                      {priceRange[0].toLocaleString()} {t("currency")}
                     </Text>
                   </View>
                 </View>
                 <Text style={styles.priceSeparator}>-</Text>
                 <View>
-                  <Text style={styles.priceRangeTitle}>Tối đa</Text>
+                  <Text style={styles.priceRangeTitle}>{t("max")}</Text>
                   <View style={styles.priceBox}>
                     <Text style={styles.priceText}>
-                      {priceRange[1].toLocaleString()} đ
+                      {priceRange[1].toLocaleString()} {t("currency")}
                     </Text>
                   </View>
                 </View>
@@ -131,10 +130,16 @@ const Filter = ({ visible, onClose, onApply }) => {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Đánh giá</Text>
+            <Text style={styles.sectionTitle}>{t("rating")}</Text>
             <View style={styles.line} />
             <ButtonGroup
-              items={["1 ⭐", "2 ⭐", "3 ⭐", "4 ⭐", "5 ⭐"]}
+              items={[
+                `1 ${t("star")}`,
+                `2 ${t("star")}`,
+                `3 ${t("star")}`,
+                `4 ${t("star")}`,
+                `5 ${t("star")}`
+              ]}
               selectedIndex={selectedRating}
               onChange={setSelectedRating}
               containerStyle={styles.buttonGroupContainer}
@@ -150,16 +155,16 @@ const Filter = ({ visible, onClose, onApply }) => {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Tiện ích</Text>
+            <Text style={styles.sectionTitle}>{t("amenities")}</Text>
             <View style={styles.line} />
             <MultiSelectButtonGroup
               items={[
-                "Máy lạnh",
-                "Tủ lạnh",
-                "Wifi",
-                "Tivi",
-                "Tiện ích khác",
-                "Pet allowed",
+                t("air_conditioner"),
+                t("refrigerator"),
+                t("wifi"),
+                t("tv"),
+                t("other_amenities"),
+                t("pet_allowed"),
               ]}
               selectedIndexes={selectedAmenities}
               onChange={setSelectedAmenities}
@@ -177,14 +182,14 @@ const Filter = ({ visible, onClose, onApply }) => {
 
           <View style={styles.buttonContainer}>
             <CustomButton
-              title="Đặt lại"
+              title={t("reset")}
               onPress={handleReset}
               backgroundColor="#E5E7EB"
               titleColor="#101828"
               style={styles.resetButton}
             />
             <CustomButton
-              title="Áp dụng"
+              title={t("apply")}
               onPress={handleApply}
               backgroundColor="#1A2741"
               titleColor="#FFF"

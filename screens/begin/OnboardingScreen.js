@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { View, Text, ImageBackground, StyleSheet, Dimensions, TouchableOpacity, Image } from "react-native";
 import Swiper from "react-native-swiper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTranslation } from 'react-i18next';
 
 const { width, height } = Dimensions.get("window");
 
@@ -11,6 +12,7 @@ const slides = [
   { image: require("../../assets/images/beach.jpg") },
 ];
 const OnboardingScreen = ({ navigation }) => {
+  const { t } = useTranslation();
   const swiperRef = useRef(null);
   const [index, setIndex] = useState(0);
 
@@ -33,10 +35,8 @@ const OnboardingScreen = ({ navigation }) => {
       {slides.map((slide, index) => (
         <ImageBackground key={index} source={slide.image} style={styles.background}>
           <View style={styles.contentContainer}>
-            <Text style={styles.title}>Hãy bắt đầu hành{"\n"}trình của bạn</Text>
-            <Text style={styles.subtitle}>
-              Chúng tôi sẵn sàng giúp bạn lên kế hoạch{"\n"}cho kỳ nghỉ của mình.
-            </Text>
+            <Text style={styles.title}>{t("onboarding_title")}</Text>
+            <Text style={styles.subtitle}>{t("onboarding_subtitle")}</Text>
           </View>
 
           <View style={styles.footer}>

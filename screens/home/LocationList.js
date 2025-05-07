@@ -9,13 +9,20 @@ import {
 import VerticalCard from "../../components/cards/VerticalCard";
 import ButtonGroup from "../../components/buttons/ButtonGroup"; // Import ButtonGroup
 import * as Location from "expo-location";
-
-const filters = ["Tất cả", "Gợi ý ", "Yêu thích ", "Phổ biến ", "Gần bạn "];
+import { useTranslation } from "react-i18next";
 
 export default function LocationList({ rentalData, onViewAllPress }) {
+  const { t } = useTranslation();
   const [selectedFilterIndex, setSelectedFilterIndex] = useState(0);
   // console.log(rentalData);
   const [userLocation, setUserLocation] = useState(null);
+  const filters = [
+    t('all'),
+    t('suggested'),
+    t('favorite'),
+    t('popular'),
+    t('nearby')
+  ];
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -40,52 +47,52 @@ export default function LocationList({ rentalData, onViewAllPress }) {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const d = R * c;
     return d; // distance in km
   };
 
   const rentalDisplay = rentalData.data
-      .filter((item) => item.status === 3)
-      .map((item) => {
-    const latitude = item.latitude;
-    const longitude = item.longitude;
+    .filter((item) => item.status === 3)
+    .map((item) => {
+      const latitude = item.latitude;
+      const longitude = item.longitude;
 
-    const distance =
-      userLocation && latitude && longitude
-        ? getDistanceFromLatLonInKm(
+      const distance =
+        userLocation && latitude && longitude
+          ? getDistanceFromLatLonInKm(
             userLocation.latitude,
             userLocation.longitude,
             latitude,
             longitude
           )
-        : null;
+          : null;
 
-    return {
-      id: item._id,
-      imageUrl:
-        item.image?.[0] ||
-        `https://ui-avatars.com/api/?name=${item.name}&background=random`,
-      openHour: item.openHour,
-      closeHour: item.closeHour,
-      placeName: item.name,
-      isOverNight: item.isOverNight,
-      status: item.status,
-      minPrice: item.minPrice || 0,
-      maxPrice: item.maxPrice || 0,
-      address: item.address,
-      ward: item.ward,
-      district: item.district,
-      city: item.city,
-      location: `${item.address}, ${item.ward}, ${item.district}, ${item.city}`,
-      ratingPoint: item.averageRating,
-      numberOfReview: item.totalFeedbacks,
-      distance: distance, // Thêm distance vào đây
-    };
-  });
+      return {
+        id: item._id,
+        imageUrl:
+          item.image?.[0] ||
+          `https://ui-avatars.com/api/?name=${item.name}&background=random`,
+        openHour: item.openHour,
+        closeHour: item.closeHour,
+        placeName: item.name,
+        isOverNight: item.isOverNight,
+        status: item.status,
+        minPrice: item.minPrice || 0,
+        maxPrice: item.maxPrice || 0,
+        address: item.address,
+        ward: item.ward,
+        district: item.district,
+        city: item.city,
+        location: `${item.address}, ${item.ward}, ${item.district}, ${item.city}`,
+        ratingPoint: item.averageRating,
+        numberOfReview: item.totalFeedbacks,
+        distance: distance, // Thêm distance vào đây
+      };
+    });
 
   const filterDataRental = rentalData.data.map((item) => {
     //how to filter rental data only status
@@ -94,9 +101,9 @@ export default function LocationList({ rentalData, onViewAllPress }) {
   return (
     <View style={styles.container}>
       <View style={[styles.jusSpace, styles.paddingVertical]}>
-        <Text style={styles.h4}>Khám phá các thành phố</Text>
+        <Text style={styles.h4}>{t('explore_cities')}</Text>
         <TouchableOpacity onPress={onViewAllPress}>
-          <Text style={styles.viewAllText}>Xem tất cả</Text>
+          <Text style={styles.viewAllText}>{t('view_all')}</Text>
         </TouchableOpacity>
       </View>
       {/* ButtonGroup thay thế ScrollView filter */}
@@ -123,11 +130,13 @@ export default function LocationList({ rentalData, onViewAllPress }) {
             {...item}
             onFavouritePress={(isFav) =>
               console.log(
-                `Đã ${isFav ? "thêm" : "bỏ"} yêu thích:`,
-                item.placeName
+                t('favorite_log', {
+                  action: t(isFav ? 'added' : 'removed'),
+                  name: item.placeName
+                })
               )
             }
-            onCardPress={() => onLocationPress(item._id)}
+            onCardPress={() => onLocationPress(item.id)}
           />
         ))}
       </ScrollView>

@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Calendar, Clock } from "lucide-react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { useTranslation } from "react-i18next";
 
 // Combined DateTimePicker and DurationSelector for better cohesion
 const ImprovedDateTimePicker = ({
@@ -27,6 +28,8 @@ const ImprovedDateTimePicker = ({
   handleSelectDuration,
   selectedDuration,
 }) => {
+  const { t, i18n } = useTranslation();
+  const currentLocale = i18n.language;
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
   const [isTimePickerVisible, setTimePickerVisible] = useState(false);
   const [availableDurations, setAvailableDurations] = useState([]);
@@ -104,8 +107,8 @@ const ImprovedDateTimePicker = ({
 
     if (selectedDay < today || selectedDay > tomorrow) {
       Alert.alert(
-        "Lỗi",
-        "Chỉ có thể đặt phòng trong vòng 48 giờ (hôm nay hoặc ngày mai)."
+        t("error"),
+        t("error_booking_window")
       );
       return;
     }
@@ -122,7 +125,7 @@ const ImprovedDateTimePicker = ({
 
     // Check if selected time is in the past
     if (selectedDateTime < now) {
-      Alert.alert("Lỗi", "Vui lòng chọn thời gian trong tương lai.");
+      Alert.alert(t("error"), t("error_past_time"));
       return;
     }
 
@@ -130,18 +133,15 @@ const ImprovedDateTimePicker = ({
     const selectedMinute = time.getMinutes();
 
     // Check if selected time is before opening hours
+    const openingTime = `${String(openingHour).padStart(2, "0")}:${String(openingMinute).padStart(2, "0")}`;
+    const closingTime = `${String(closingHour).padStart(2, "0")}:${String(closingMinute).padStart(2, "0")}`;
     if (
       selectedHour < openingHour ||
       (selectedHour === openingHour && selectedMinute < openingMinute)
     ) {
       Alert.alert(
-        "Lỗi",
-        `Thời gian hoạt động chỉ từ ${openingHour}:${String(
-          openingMinute
-        ).padStart(2, "0")} đến ${closingHour}:${String(closingMinute).padStart(
-          2,
-          "0"
-        )}.`
+        t("error"),
+        t("error_opening_hours", { opening: openingTime, closing: closingTime })
       );
       return;
     }
@@ -152,13 +152,8 @@ const ImprovedDateTimePicker = ({
       (selectedHour === closingHour && selectedMinute > closingMinute)
     ) {
       Alert.alert(
-        "Lỗi",
-        `Thời gian hoạt động chỉ từ ${openingHour}:${String(
-          openingMinute
-        ).padStart(2, "0")} đến ${closingHour}:${String(closingMinute).padStart(
-          2,
-          "0"
-        )}.`
+        t("error"),
+        t("error_opening_hours", { opening: openingTime, closing: closingTime })
       );
       return;
     }
@@ -179,38 +174,37 @@ const ImprovedDateTimePicker = ({
       return `${formatTime(endTime)} ngày ${formatDate(endTime)}`;
     }
 
-    return formatTime(endTime);
+    return endDate.toDateString() !== startDate.toDateString()
+      ? t("end_time_with_date", {
+        time: formatTime(endTime),
+        date: formatDate(endTime),
+      })
+      : formatTime(endTime);
   };
 
   return (
     <View>
       {/* Date selection */}
-      <Text style={styles.sectionHeader}>Ngày nhận phòng</Text>
+      <Text style={styles.sectionHeader}>{t("check_in_date")}</Text>
       <TouchableOpacity style={styles.dateTimeButton} onPress={openDatePicker}>
-        <Text
-          style={[styles.dateTimeText, !selectedDate && styles.placeholderText]}
-        >
-          {selectedDate ? formatDate(selectedDate) : "Chọn ngày"}
+        <Text style={[styles.dateTimeText, !selectedDate && styles.placeholderText]}>
+          {selectedDate ? formatDate(selectedDate) : t("select_date")}
         </Text>
         <Calendar style={styles.icon} size={24} color="#666" />
       </TouchableOpacity>
 
       {/* Time selection */}
-      <Text style={styles.sectionHeader}>Giờ nhận phòng</Text>
+      <Text style={styles.sectionHeader}>{t("check_in_time")}</Text>
       <TouchableOpacity style={styles.dateTimeButton} onPress={openTimePicker}>
-        <Text
-          style={[styles.dateTimeText, !selectedTime && styles.placeholderText]}
-        >
-          {selectedTime ? formatTime(selectedTime) : "Chọn giờ"}
+        <Text style={[styles.dateTimeText, !selectedTime && styles.placeholderText]}>
+          {selectedTime ? formatTime(selectedTime) : t("select_time")}
         </Text>
         <Clock style={styles.icon} size={24} color="#666" />
       </TouchableOpacity>
 
       {/* Duration selection */}
       <Text style={styles.sectionHeader}>
-        {isOverNight
-          ? "Thời lượng sử dụng (bao gồm qua đêm)"
-          : "Thời lượng sử dụng"}
+        {isOverNight ? t("usage_duration_overnight") : t("usage_duration")}
       </Text>
       <ScrollView
         horizontal
@@ -233,7 +227,7 @@ const ImprovedDateTimePicker = ({
                 selectedDuration === hours && styles.selectedDurationText,
               ]}
             >
-              {hours === 24 ? "Qua đêm" : `${hours} giờ`}
+              {hours === 24 ? t("overnight") : t("hours", { count: hours })}
             </Text>
           </TouchableOpacity>
         ))}
@@ -242,7 +236,7 @@ const ImprovedDateTimePicker = ({
       {/* Display expected end time */}
       {endTime && (
         <View style={styles.endTimeContainer}>
-          <Text style={styles.endTimeLabel}>Thời gian kết thúc dự kiến:</Text>
+          <Text style={styles.endTimeLabel}>{t("expected_end_time")}:</Text>
           <Text style={styles.endTimeValue}>{getEndTimeLabel()}</Text>
         </View>
       )}
@@ -259,7 +253,7 @@ const ImprovedDateTimePicker = ({
         textColor="black"
         presentationStyle="overFullScreen"
         animationType="fade"
-        locale="vi"
+        locale={currentLocale} 
       />
 
       {/* Time Picker Modal */}
@@ -272,7 +266,7 @@ const ImprovedDateTimePicker = ({
         textColor="black"
         presentationStyle="overFullScreen"
         animationType="fade"
-        locale="vi"
+        locale={currentLocale} 
       />
     </View>
   );

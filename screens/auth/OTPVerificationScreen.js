@@ -21,8 +21,10 @@ import {
 } from "../../api/authApi";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../redux/authSlice";
+import { useTranslation } from "react-i18next";
 
 const OTPVerificationScreen = () => {
+  const { t } = useTranslation(); 
   const navigation = useNavigation();
   const route = useRoute();
   const dispatch = useDispatch();
@@ -44,17 +46,11 @@ const OTPVerificationScreen = () => {
   }, []);
 
   const sendOtpToEmail = async () => {
-    console.log("Sending OTP to email:");
-
-    const dataSendOtp = {
-      email,
-    };
+    const dataSendOtp = { email };
     try {
-      const res = await sendOtp({ data: dataSendOtp });
-      console.log("OTP sent successfully:", res);
+      await sendOtp({ data: dataSendOtp }).unwrap();
     } catch (error) {
-      console.error("Error sending OTP:", error);
-      Alert.alert("Lỗi", "Không thể gửi mã OTP. Vui lòng thử lại sau.");
+      Alert.alert(t("error"), t("send_otp_error"));
     }
   };
 
@@ -64,27 +60,12 @@ const OTPVerificationScreen = () => {
   };
 
   const handleVerifyOtp = async () => {
-    console.log("Đang gửi Verify:");
     setLoading(true);
-    const verifyData = {
-      email: email,
-      otp: otpValue,
-    };
-    console.log(verifyData);
+    const verifyData = { email, otp: otpValue };
 
     try {
-      const res = await verifyEmailOtp({ data: verifyData });
-      console.log("OTP verified successfully:", res);
-      setLoading(false);
-
-      if (res?.error) {
-        setLoading(false);
-        const errorMessage =
-          // res.error.data?.message ||
-          "Mã OTP không chính xác hoặc đã hết hạn.";
-        Alert.alert("Lỗi", errorMessage);
-        return;
-      }
+      const res = await verifyEmailOtp({ data: verifyData }).unwrap();
+      
       dispatch(
         loginSuccess({
           userId: id,
@@ -97,16 +78,17 @@ const OTPVerificationScreen = () => {
       );
       navigation.replace("MainTabs");
     } catch (error) {
+      const errorMessage = error?.data?.message || t("invalid_otp");
+      Alert.alert(t("error"), errorMessage);
+    } finally {
       setLoading(false);
-      console.error("Error verifying OTP:", error);
-      Alert.alert("Lỗi", "Đã có lỗi xảy ra, vui lòng thử lại.");
     }
   };
 
   const handleResendOtp = () => {
     sendOtpToEmail();
     setOtpValue("");
-    Alert.alert("Thông báo", "Mã OTP mới đã được gửi đến email của bạn");
+    Alert.alert(t("notification"), t("otp_resent_message"));
   };
 
   const renderOtpBoxes = () => {
@@ -148,16 +130,13 @@ const OTPVerificationScreen = () => {
                 style={styles.backButton}
               />
               <View style={styles.header}>
-                <Text style={styles.title}>Xác nhận mã OTP</Text>
-                <Text style={styles.subtitle}>
-                  Mã OTP đã được gửi đến email của bạn
-                </Text>
+                <Text style={styles.title}>{t("verify_otp_title")}</Text>
+                <Text style={styles.subtitle}>{t("otp_sent_message")}</Text>
               </View>
               <View style={styles.card}>
                 <View style={styles.formContainer}>
                   <View style={styles.dot} />
 
-                  {/* Ẩn TextInput thực tế và chỉ hiển thị UI tùy chỉnh */}
                   <View style={styles.otpContainer}>
                     <TextInput
                       ref={otpInputRef}
@@ -172,7 +151,7 @@ const OTPVerificationScreen = () => {
                   </View>
 
                   <CustomButton
-                    title="Xác nhận mã OTP"
+                    title={t("verify_otp_button")}
                     backgroundColor="#1A2741"
                     disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
                     titleColor="#FFFFFF"
@@ -183,9 +162,9 @@ const OTPVerificationScreen = () => {
                     onPress={handleVerifyOtp}
                   />
                   <View style={styles.signupContainer}>
-                    <Text style={styles.signupText}>Chưa nhận được? </Text>
+                    <Text style={styles.signupText}>{t("not_received")} </Text>
                     <TouchableOpacity onPress={handleResendOtp}>
-                      <Text style={styles.signupButtonText}>Gửi lại</Text>
+                      <Text style={styles.signupButtonText}>{t("resend")}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>

@@ -7,9 +7,17 @@ export const accommodationTypeApi = baseApi.injectEndpoints({
             query: (id) => `/accommodation-type/${id}`,
             providesTags: ["AccommodationType"],
         }),
+        getAllAccommodationTypes: builder.query({
+            query: (ownerId) => {
+              const url = "/accommodation-type/all-accommodation-types";
+              return ownerId ? `${url}?ownerId=${ownerId}` : url;
+            },
+            providesTags: ["AccommodationType"],
+          }),
     }),
 });
 
 export const {
-    useGetAccommodationTypeByIdQuery 
+    useGetAccommodationTypeByIdQuery,
+    useGetAllAccommodationTypesQuery
 } = accommodationTypeApi;

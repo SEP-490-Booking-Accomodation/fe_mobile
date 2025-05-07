@@ -23,7 +23,10 @@ import {
 import { loginSuccess, logout } from "../../redux/authSlice";
 import { useLazyGetRoleByIdQuery } from "../../api/roleApi";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
+import { useTranslation } from "react-i18next";
+
 const LoginScreen = () => {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [email, setEmail] = useState("");
@@ -36,33 +39,24 @@ const LoginScreen = () => {
   const { addIdChatPlatform } = useAsyncStorage();
 
   const handleLogin = async () => {
-    console.log("Đang gọi API login...");
     setIsLoading(true);
 
     try {
       const response = await login({ email, password }).unwrap();
-      dispatch(
-        loginSuccess({
-          token: response.accessToken,
-        })
-      );
-      console.log("Full login response:", response);
+      dispatch(loginSuccess({ token: response.accessToken }));
 
-      // Lấy thông tin người dùng từ API
       const resGetUser = await getUserById(response._id).unwrap();
       const userData = resGetUser.getUser;
 
-      // Kiểm tra tài khoản có bị khóa không
       if (!userData?.isActive) {
-        notification.error({
-          message: "Tài khoản bị khóa",
-          description: "Vui lòng liên hệ quản trị viên để biết thêm chi tiết.",
-        });
+        Alert.alert(
+          t("account_locked_title"),
+          t("account_locked_message")
+        );
         setIsLoading(false);
         return;
       }
 
-      // Kiểm tra role của user
       const roleData = await getRoleById(userData.roleID).unwrap();
       // console.log("Role Data:", roleData);
 
@@ -72,20 +66,15 @@ const LoginScreen = () => {
       const customerId = resCustomer.id;
 
       if (roleData.roleName !== "Customer") {
-        Alert.alert("Lỗi đăng nhập", "Bạn không phải khách hàng!");
-        setIsLoading(false);
-        dispatch(
-          loginSuccess({
-            token: response.accessToken,
-          })
+        Alert.alert(
+          t("login_error"),
+          t("not_customer")
         );
+        setIsLoading(false);
         return;
       }
+
       if (userData.isVerifiedEmail === false) {
-        // const dataSendOtp = { email: userData.email };
-        // const resSendOtp = await sendOtp({ data: dataSendOtp }).unwrap();
-        // console.log("Send OTP response:", resSendOtp);
-        // setIsLoading(false);
         navigation.navigate("OTPVerification", {
           id: response._id,
           email: email,
@@ -97,7 +86,6 @@ const LoginScreen = () => {
         return;
       }
 
-      // Lưu token vào Redux
       dispatch(
         loginSuccess({
           userId: response._id,
@@ -115,10 +103,9 @@ const LoginScreen = () => {
       //   routes: [{ name: "MainTabs" }],
       // });
     } catch (error) {
-      console.log("Login error:", error);
       Alert.alert(
-        "Đăng nhập thất bại",
-        error?.data?.message || "Vui lòng kiểm tra lại thông tin đăng nhập"
+        t("login_failed"),
+        error?.data?.message || t("check_credentials")
       );
     } finally {
       setIsLoading(false);
@@ -138,28 +125,22 @@ const LoginScreen = () => {
           >
             <View style={styles.contentContainer}>
               <View style={styles.header}>
-                {/* <Button title="Back" onPress={() => navigation.goBack()} /> */}
-
-                <Text style={styles.title}>Đăng nhập</Text>
-                <Text style={styles.subtitle}>
-                  Bắt đầu hành trình của bạn: Đăng nhập để khám phá
-                </Text>
+                <Text style={styles.title}>{t("login_title")}</Text>
+                <Text style={styles.subtitle}>{t("login_subtitle")}</Text>
               </View>
               <View style={styles.card}>
                 <View style={styles.formContainer}>
                   <CustomInput
-                    // label="Email hoặc Số điện thoại"
-                    // placeholder="Nhập email hoặc số điện thoại"
-                    label="Email"
-                    placeholder="Nhập email"
+                    label={t("email")}
+                    placeholder={t("enter_email")}
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
                     keyboardType="email-address"
                   />
                   <CustomInput
-                    label="Mật khẩu"
-                    placeholder="Nhập mật khẩu"
+                    label={t("password")}
+                    placeholder={t("enter_password")}
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry
@@ -169,11 +150,11 @@ const LoginScreen = () => {
                     onPress={() => navigation.navigate("ForgotPassword")}
                   >
                     <Text style={styles.forgotPasswordText}>
-                      Quên Mật khẩu?
+                      {t("forgot_password?")}
                     </Text>
                   </TouchableOpacity>
                   <CustomButton
-                    title="Đăng nhập"
+                    title={t("login_button")}
                     backgroundColor="#1A2741"
                     disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
                     titleColor="#FFFFFF"
@@ -183,11 +164,11 @@ const LoginScreen = () => {
                     onPress={handleLogin}
                   />
                   <View style={styles.signupContainer}>
-                    <Text style={styles.signupText}>Chưa có tài khoản? </Text>
+                    <Text style={styles.signupText}>{t("no_account")} </Text>
                     <TouchableOpacity
                       onPress={() => navigation.navigate("Register")}
                     >
-                      <Text style={styles.signupButtonText}>Đăng ký ngay</Text>
+                      <Text style={styles.signupButtonText}>{t("sign_up")}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>

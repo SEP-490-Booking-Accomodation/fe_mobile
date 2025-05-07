@@ -9,8 +9,10 @@ import {
   Alert,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { useTranslation } from "react-i18next";
 
 const SelectCustomer = ({ maxGuests, onSelect, isVisible, onClose }) => {
+  const { t } = useTranslation();
   const [adultCount, setAdultCount] = useState(1);
   const [childrenCount, setChildrenCount] = useState(0);
   const [infantCount, setInfantCount] = useState(0);
@@ -37,7 +39,10 @@ const SelectCustomer = ({ maxGuests, onSelect, isVisible, onClose }) => {
         setChildrenCount(childrenCount - 1);
       if (type === "infant" && infantCount > 0) setInfantCount(infantCount - 1);
     } else if (action === "increase" && totalGuests >= maxGuests) {
-      Alert.alert("Giới hạn khách", `Tối đa chỉ ${maxGuests} người được phép.`);
+      Alert.alert(
+        t('guest_limit'),
+        t('max_guests_warning', { maxGuests })
+      );
     }
   };
 
@@ -48,22 +53,17 @@ const SelectCustomer = ({ maxGuests, onSelect, isVisible, onClose }) => {
   };
 
   return (
-    <Modal
-      visible={isVisible}
-      onRequestClose={onClose}
-      animationType="fade"
-      transparent={true}
-    >
+    <Modal visible={isVisible} onRequestClose={onClose} animationType="fade" transparent={true}>
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Text style={styles.title}>Số lượng khách hàng</Text>
-          <Text style={styles.itemSubTitle}>Tối đa {maxGuests} người</Text>
+          <Text style={styles.title}>{t('customer_count')}</Text>
+          <Text style={styles.itemSubTitle}>{t('max_guests', { maxGuests })}</Text>
 
           {/* Người lớn */}
           <View style={styles.itemContainer}>
             <View>
-              <Text style={styles.itemLabel}>Người lớn</Text>
-              <Text style={styles.itemSubLabel}>Từ 18 tuổi trở lên</Text>
+              <Text style={styles.itemLabel}>{t('adults')}</Text>
+              <Text style={styles.itemSubLabel}>{t('adult_age')}</Text>
             </View>
             <View style={styles.counterContainer}>
               <TouchableOpacity
@@ -85,8 +85,8 @@ const SelectCustomer = ({ maxGuests, onSelect, isVisible, onClose }) => {
           {/* Trẻ em */}
           <View style={styles.itemContainer}>
             <View>
-              <Text style={styles.itemLabel}>Trẻ em</Text>
-              <Text style={styles.itemSubLabel}>Từ 2 đến 17 tuổi</Text>
+              <Text style={styles.itemLabel}>{t('children')}</Text>
+              <Text style={styles.itemSubLabel}>{t('child_age')}</Text>
             </View>
             <View style={styles.counterContainer}>
               <TouchableOpacity
@@ -108,8 +108,8 @@ const SelectCustomer = ({ maxGuests, onSelect, isVisible, onClose }) => {
           {/* Trẻ sơ sinh */}
           <View style={styles.itemContainer}>
             <View>
-              <Text style={styles.itemLabel}>Trẻ sơ sinh</Text>
-              <Text style={styles.itemSubLabel}>Dưới 2 tuổi</Text>
+              <Text style={styles.itemLabel}>{t('infants')}</Text>
+              <Text style={styles.itemSubLabel}>{t('infant_age')}</Text>
             </View>
             <View style={styles.counterContainer}>
               <TouchableOpacity
@@ -130,7 +130,7 @@ const SelectCustomer = ({ maxGuests, onSelect, isVisible, onClose }) => {
 
           {/* Nút xác nhận */}
           <TouchableOpacity style={styles.submitButton} onPress={handleSelect}>
-            <Text style={styles.submitButtonText}>Tiếp tục</Text>
+            <Text style={styles.submitButtonText}>{t('continue')}</Text>
           </TouchableOpacity>
         </View>
       </View>

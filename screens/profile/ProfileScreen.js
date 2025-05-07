@@ -19,8 +19,10 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { logout } from "../../redux/authSlice";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
+import { useTranslation } from "react-i18next";
 
 export default function ProfileScreen() {
+  const { t } = useTranslation();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const userId = useSelector((state) => state.auth?.userId);
   const { data, isLoading, error } = useGetCustomerDetailByIdQuery(userId);
@@ -40,22 +42,22 @@ export default function ProfileScreen() {
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Đăng xuất</Text>
+              <Text style={styles.modalTitle}>{t('logout')}</Text>
               <Text style={styles.modalMessage}>
-                Bạn có chắc chắn muốn đăng xuất tài khoản này không?
+                {t('logout_confirmation')}
               </Text>
               <View style={styles.modalButtonContainer}>
                 <TouchableOpacity
                   style={[styles.modalButton, styles.cancelButton]}
                   onPress={() => setShowLogoutModal(false)}
                 >
-                  <Text style={styles.cancelButtonText}>Hủy</Text>
+                  <Text style={styles.cancelButtonText}>{t('cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.modalButton, styles.logoutButton]}
                   onPress={handleLogout}
                 >
-                  <Text style={styles.logoutButtonText}>Đăng xuất</Text>
+                  <Text style={styles.logoutButtonText}>{t('logout')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -73,7 +75,7 @@ export default function ProfileScreen() {
       >
         <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
       </TouchableOpacity>
-      <Text style={styles.textHeader}>Hồ sơ </Text>
+      <Text style={styles.textHeader}>{t('profile')}</Text>
     </View>
   );
 
@@ -165,24 +167,24 @@ export default function ProfileScreen() {
               style={styles.button}
               onPress={handleNavigateEditInfo}
             >
-              <Text style={styles.buttonText}>Chỉnh sửa </Text>
+              <Text style={styles.buttonText}>{t('edit')}</Text>
               <Ionicons name="pencil-outline" size={16} color="white" />
             </TouchableOpacity>
           </LinearGradient>
         </View>
 
         <View style={styles.informationSection}>
-          <Text style={styles.sectionHeader}>Thông tin của tôi</Text>
+          <Text style={styles.sectionHeader}>{t('my_info')}</Text>
           <View style={styles.itemList}>
             {renderItem(
               "key-outline",
-              "Đổi mật khẩu",
+              t('change_password'),
               false,
               handleNavigateChangePassword
             )}
             {renderItem(
               "heart-outline",
-              "Danh sách yêu thích",
+              t('favorite_list'),
               false,
               handleNavigateFavouriteList
             )}
@@ -200,11 +202,11 @@ export default function ProfileScreen() {
             {/*)}*/}
             {renderItem(
               "star-outline",
-              "Đánh giá của tôi",
+              t('my_ratings'),
               false,
               handleNavigateRatingList
             )}
-            {renderItem("power", "Đăng xuất", true, handleNavigateLogout)}
+            {renderItem("power", t('logout'), true, handleNavigateLogout)}
           </View>
         </View>
       </ScrollView>

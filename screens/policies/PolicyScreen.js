@@ -5,8 +5,10 @@ import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLazyGetAllPoliciesQuery } from "../../api/policySystemApi";
+import { useTranslation } from "react-i18next";
 
 const PolicyScreen = () => {
+    const { t } = useTranslation();
     const navigation = useNavigation();
     const [getAllPolicies, { isLoading, error, data }] = useLazyGetAllPoliciesQuery();
 
@@ -27,13 +29,13 @@ const PolicyScreen = () => {
                     color="#4E72E3"
                     onPress={() => navigation.goBack()}
                 />
-                <Text style={styles.header}>Chính sách</Text>
+                <Text style={styles.header}>{t("policies")}</Text>
             </View>
 
             {isLoading ? (
                 <ActivityIndicator size="large" color="#4E72E3" />
             ) : error ? (
-                <Text style={styles.errorText}>Lỗi khi tải dữ liệu</Text>
+                <Text style={styles.errorText}>{t("data_load_error")}</Text>
             ) : (
                 <FlatList
                     data={data || []}

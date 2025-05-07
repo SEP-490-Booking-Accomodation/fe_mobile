@@ -15,8 +15,10 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
 import { useSelector } from "react-redux";
 import NotAuth from "../auth/NotAuth";
+import { useTranslation } from "react-i18next";
 
 export default function MessagesScreen({ navigation }) {
+  const { t } = useTranslation();
   // State management
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +31,8 @@ export default function MessagesScreen({ navigation }) {
   const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState(null);
   const [userLoaded, setUserLoaded] = useState(false);
+  
+  // Redux state
   const userAuth = useSelector((state) => state.auth?.userId);
 
   // Hooks
@@ -229,7 +233,7 @@ export default function MessagesScreen({ navigation }) {
       fetchUnreadCounts(chatIds);
     } catch (error) {
       console.error("Exception fetching chats:", error.message);
-      Alert.alert("Error", "Failed to load chats. Please try again.");
+      Alert.alert(t('error'), t('load_chats_error'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -354,7 +358,7 @@ export default function MessagesScreen({ navigation }) {
     const yesterday = new Date(now);
     yesterday.setDate(now.getDate() - 1);
     if (date.toDateString() === yesterday.toDateString()) {
-      return "Yesterday";
+      return t('yesterday');
     }
 
     // Otherwise return the date
@@ -409,10 +413,7 @@ export default function MessagesScreen({ navigation }) {
 
           <View style={styles.chatPreview}>
             <Text
-              style={[
-                styles.chatMessage,
-                unreadCount > 0 && styles.unreadMessage,
-              ]}
+              style={[styles.chatMessage, unreadCount > 0 && styles.unreadMessage]}
               numberOfLines={1}
             >
               {lastMessage ? lastMessage.content : "No messages yet"}
@@ -433,14 +434,7 @@ export default function MessagesScreen({ navigation }) {
   function renderHeader() {
     return (
       <View style={styles.header}>
-        {/* <TouchableOpacity  //Không cần tại có bottom tab
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
-        </TouchableOpacity> */}
-        <Text style={styles.headerTitle}>Đoạn chat</Text>
-        <View style={styles.headerRight} />
+        <Text style={styles.headerTitle}>{t('conversations')}</Text>
       </View>
     );
   }
@@ -449,15 +443,10 @@ export default function MessagesScreen({ navigation }) {
   function renderSearchBar() {
     return (
       <View style={styles.searchContainer}>
-        <Ionicons
-          name="search-outline"
-          size={20}
-          color="#666"
-          style={styles.searchIcon}
-        />
+        <Ionicons name="search-outline" size={20} color="#666" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search conversations..."
+          placeholder={t('search_conversations')}
           value={searchText}
           onChangeText={setSearchText}
           placeholderTextColor="#999"
@@ -484,18 +473,14 @@ export default function MessagesScreen({ navigation }) {
             {loading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#4A90E2" />
-                <Text style={styles.loadingText}>Loading conversations...</Text>
+                <Text style={styles.loadingText}>{t('loading_conversations')}</Text>
               </View>
             ) : filteredChats.length === 0 ? (
               <View style={styles.emptyState}>
-                <Ionicons
-                  name="chatbubble-ellipses-outline"
-                  size={64}
-                  color="#DDD"
-                />
-                <Text style={styles.emptyStateText}>No conversations yet</Text>
+                <Ionicons name="chatbubble-ellipses-outline" size={64} color="#DDD" />
+                <Text style={styles.emptyStateText}>{t('no_conversations')}</Text>
                 <Text style={styles.emptyStateSubtext}>
-                  {searchText ? "No results found" : "Start a new conversation"}
+                  {searchText ? t('no_results') : t('start_new_conversation')}
                 </Text>
               </View>
             ) : (
@@ -528,7 +513,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
     backgroundColor: "#fff",
     padding: 16,
     paddingTop: 20,
@@ -543,16 +528,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#F3F4F6",
   },
-  backButton: {
-    padding: 8,
-  },
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
     color: "#1F2937",
-  },
-  headerRight: {
-    width: 40,
   },
   searchContainer: {
     flexDirection: "row",
