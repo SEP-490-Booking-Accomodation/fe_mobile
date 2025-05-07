@@ -11,16 +11,19 @@ import {
   Dimensions,
   Modal,
   ScrollView,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CustomButton from "../../components/buttons/Button";
 import CustomInput from "../../components/TextInput";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRegisterMutation } from "../../api/authApi";
+import { useTranslation } from "react-i18next";
 
 const { height } = Dimensions.get("window");
 
 const RegisterScreen = () => {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
@@ -35,19 +38,19 @@ const RegisterScreen = () => {
 
   const handleRegister = async () => {
     if (!fullName || !phone || !email || !password || !confirmPassword) {
-      alert("Vui lòng nhập đầy đủ thông tin!");
+      alert(t("fill_all_fields"));
       return;
     }
     if (!/^\d{10}$/.test(phone)) {
-      alert("Số điện thoại không hợp lệ!");
+      alert(t("invalid_phone"));
       return;
     }
     if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
-      alert("Email không hợp lệ!");
+      alert(t("invalid_email"));
       return;
     }
     if (password.length < 8) {
-      alert("Mật khẩu phải chứa ít nhất 8 ký tự!");
+      alert(t("password_length"));
       return;
     }
 
@@ -57,17 +60,17 @@ const RegisterScreen = () => {
       (ageDiff === 16 &&
         new Date() < new Date(dob.setFullYear(dob.getFullYear() + 16)))
     ) {
-      alert("Bạn phải trên 16 tuổi để đăng ký!");
+      alert(t("age_requirement"));
       return;
     }
 
     if (dob > new Date()) {
-      alert("Ngày sinh không hợp lệ!");
+      alert(t("invalid_dob"));
       return;
     }
 
     if (password !== confirmPassword) {
-      alert("Mật khẩu và xác nhận mật khẩu không khớp!");
+      alert(t("password_mismatch"));
       return;
     }
 
@@ -86,10 +89,10 @@ const RegisterScreen = () => {
       const response = await register({ data: data }).unwrap();
       console.log("Register response:", response);
       alert("Đăng ký thành công!");
+      navigation.goBack();
       // navigation.navigate("Login");
     } catch (error) {
-      console.log("Register error:", error);
-      alert("Đăng ký thất bại!");
+      alert(t("register_failed"));
     } finally {
       setLoading(false);
     }
@@ -99,11 +102,11 @@ const RegisterScreen = () => {
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    return t("date_format", { day, month, year });
   };
 
   const showDatepicker = () => {
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === "ios") {
       setIsModalVisible(true);
     } else {
       setShowDatePicker(true);
@@ -112,10 +115,10 @@ const RegisterScreen = () => {
 
   const onDateChange = (event, selectedDate) => {
     // For Android, hiding is automatic after selection
-    if (Platform.OS === 'android') {
+    if (Platform.OS === "android") {
       setShowDatePicker(false);
     }
-    
+
     if (selectedDate) {
       setDob(selectedDate);
     }
@@ -142,17 +145,14 @@ const RegisterScreen = () => {
             bounces={false}
           >
             <View style={styles.header}>
-              <Text style={styles.title}>Đăng ký</Text>
-              <Text style={styles.subtitle}>
-                Bắt đầu hành trình của bạn: Đăng ký để khám phá
-              </Text>
+              <Text style={styles.title}>{t("register_title")}</Text>
+              <Text style={styles.subtitle}>{t("register_subtitle")}</Text>
             </View>
             <View style={styles.card}>
               <View style={styles.formContainer}>
-                {/* <View style={styles.dot} /> */}
                 <CustomInput
-                  label="Họ và tên"
-                  placeholder="Nhập họ và tên"
+                  label={t("full_name")}
+                  placeholder={t("enter_full_name")}
                   value={fullName}
                   onChangeText={setFullName}
                   autoCapitalize="words"
@@ -160,8 +160,8 @@ const RegisterScreen = () => {
                   inputContainerStyle={styles.input}
                 />
                 <CustomInput
-                  label="Số điện thoại"
-                  placeholder="Nhập số điện thoại"
+                  label={t("phone")}
+                  placeholder={t("enter_phone")}
                   value={phone}
                   onChangeText={setPhone}
                   keyboardType="phone-pad"
@@ -169,8 +169,8 @@ const RegisterScreen = () => {
                   inputContainerStyle={styles.input}
                 />
                 <CustomInput
-                  label="Email"
-                  placeholder="Nhập email"
+                  label={t("email")}
+                  placeholder={t("enter_email")}
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
@@ -179,7 +179,7 @@ const RegisterScreen = () => {
                   inputContainerStyle={styles.input}
                 />
                 <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Ngày sinh</Text>
+                  <Text style={styles.inputLabel}>{t("dob")}</Text>
                   <TouchableOpacity
                     style={[styles.input, styles.dateInput]}
                     onPress={showDatepicker}
@@ -187,13 +187,13 @@ const RegisterScreen = () => {
                     <Text
                       style={dob ? styles.dateText : styles.placeholderText}
                     >
-                      {dob ? formatDate(dob) : "Chọn ngày sinh"}
+                      {dob ? formatDate(dob) : t("select_dob")}
                     </Text>
                   </TouchableOpacity>
                 </View>
                 <CustomInput
-                  label="Mật khẩu"
-                  placeholder="Nhập mật khẩu"
+                  label={t("password")}
+                  placeholder={t("enter_password")}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry
@@ -202,8 +202,8 @@ const RegisterScreen = () => {
                   passwordIconColor="#6B7280"
                 />
                 <CustomInput
-                  label="Xác nhận mật khẩu"
-                  placeholder="Nhập lại mật khẩu"
+                  label={t("confirm_password")}
+                  placeholder={t("re_enter_password")}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   secureTextEntry
@@ -212,7 +212,7 @@ const RegisterScreen = () => {
                   passwordIconColor="#6B7280"
                 />
                 <CustomButton
-                  title="Đăng ký"
+                  title={t("register_button")}
                   backgroundColor="#1A2741"
                   disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
                   titleColor="#FFFFFF"
@@ -229,11 +229,11 @@ const RegisterScreen = () => {
                   onPress={handleRegister}
                 />
                 <View style={styles.signupContainer}>
-                  <Text style={styles.signupText}>Đã có tài khoản? </Text>
+                  <Text style={styles.signupText}>{t("have_account")} </Text>
                   <TouchableOpacity
                     onPress={() => navigation.navigate("Login")}
                   >
-                    <Text style={styles.signupButtonText}>Đăng nhập</Text>
+                    <Text style={styles.signupButtonText}>{t("login")}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -243,7 +243,7 @@ const RegisterScreen = () => {
       </View>
 
       {/* DatePicker for Android */}
-      {Platform.OS === 'android' && showDatePicker && (
+      {Platform.OS === "android" && showDatePicker && (
         <DateTimePicker
           value={dob}
           mode="date"
@@ -270,7 +270,7 @@ const RegisterScreen = () => {
               style={styles.confirmButton}
               onPress={confirmDate}
             >
-              <Text style={styles.confirmButtonText}>Xác nhận</Text>
+              <Text style={styles.confirmButtonText}>{t("confirm")}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -278,7 +278,6 @@ const RegisterScreen = () => {
     </ImageBackground>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {

@@ -1,8 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 
 export default function GoToPage() {
+  const { t } = useTranslation();
   const navigation = useNavigation();
 
   const goToDetailRentalLocation = () => {
@@ -19,14 +21,14 @@ export default function GoToPage() {
         style={styles.button}
         onPress={goToDetailRentalLocation}
       >
-        <Text style={styles.buttonText}>Go to Detail Rental Location</Text>
+        <Text style={styles.buttonText}>{t('go_to_detail')}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={[styles.button, styles.marginTop]}
         onPress={goToPolicies}
       >
-        <Text style={styles.buttonText}>Go to Policies</Text>
+        <Text style={styles.buttonText}>{t('go_to_policies')}</Text>
       </TouchableOpacity>
     </View>
   );

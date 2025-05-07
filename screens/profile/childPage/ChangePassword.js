@@ -16,9 +16,10 @@ import CustomInput from "../../../components/TextInput";
 import CustomButton from "../../../components/buttons/Button";
 import { useNavigation } from "@react-navigation/native";
 import {useUpdatePasswordMutation} from "../../../api/profileApi";
+import { useTranslation } from "react-i18next";
 
 export default function ChangePassword({ route }) {
-
+  const { t } = useTranslation(); 
   const navigation = useNavigation();
 
   // State for input values
@@ -36,15 +37,15 @@ export default function ChangePassword({ route }) {
      const response = await updatePasswordApi({updatedPassword: {currentPassword, newPassword}});
      console.log("Change password response:", response);
      if (response.data) {
-       Alert.alert("Thành công","Đổi mật khẩu thành công!");
+      Alert.alert(t('success'), t('password_change_success'));
        navigation.goBack();
      }
      else {
-      Alert.alert("Thất bại",response.error?.data?.message);
+      Alert.alert(t('failure'), response.error?.data?.message);
      }
     } catch (error) {
       console.error("Error changing password:", error); 
-      alert("Đã xảy ra lỗi không mong muốn, vui lòng thử lại.");
+      alert(t('unexpected_error'));
     }
   };
 
@@ -53,7 +54,7 @@ export default function ChangePassword({ route }) {
       <TouchableOpacity style={styles.arrowBack} onPress={() => navigation.goBack()}>
         <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
       </TouchableOpacity>
-      <Text style={styles.textHeader}>Thay đổi mật khẩu</Text>
+      <Text style={styles.textHeader}>{t('change_password')}</Text>
     </View>
   );
 
@@ -62,7 +63,7 @@ export default function ChangePassword({ route }) {
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
       <AntDesign name="arrowleft" size={20} color="black" />
       </TouchableOpacity>
-      <CustomButton style={{ width: "85%" }} title="Cập nhật" onPress={handlePasswordChange} />
+      <CustomButton style={{ width: "85%" }} title={t('update')} onPress={handlePasswordChange} />
     </View>
   );
 
@@ -74,7 +75,7 @@ export default function ChangePassword({ route }) {
           <ScrollView contentContainerStyle={styles.content}>
             <View style={styles.infoContainer}>
               {/* Current Password */}
-              <Text style={styles.label}>Mật khẩu hiện tại</Text>
+              <Text style={styles.label}>{t('current_password')}</Text>
               <CustomInput
                 placeholder="****************"
                 value={currentPassword}
@@ -89,7 +90,7 @@ export default function ChangePassword({ route }) {
               <View style={styles.spacing} />
 
               {/* New Password */}
-              <Text style={styles.label}>Mật khẩu mới</Text>
+              <Text style={styles.label}>{t('new_password')}</Text>
               <CustomInput
                 placeholder="****************"
                 value={newPassword}
@@ -104,7 +105,7 @@ export default function ChangePassword({ route }) {
               <View style={styles.spacing} />
 
               {/* Confirm New Password */}
-              <Text style={styles.label}>Nhập lại mật khẩu mới</Text>
+              <Text style={styles.label}>{t('confirm_password')}</Text>
               <CustomInput
                 placeholder="****************"
                 value={confirmPassword}
@@ -119,7 +120,7 @@ export default function ChangePassword({ route }) {
               <View style={styles.spacing} />
             </View>
             //TODO:  Chỗ này sau khi tắt bottom tab thì sễ để dưới dạng bottom bar ở dưới như header đang style hiện tại
-            <CustomButton title="Cập nhật" onPress={handlePasswordChange} />
+            <CustomButton title={t('update')} onPress={handlePasswordChange} />
           </ScrollView>
         </KeyboardAvoidingView>
       </View>

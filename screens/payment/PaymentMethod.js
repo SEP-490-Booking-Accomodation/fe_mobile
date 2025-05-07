@@ -7,15 +7,17 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 
 export default function PaymentMethod() {
+  const { t } = useTranslation();
   const [cardNumber, setCardNumber] = useState("");
   const [cardHolder, setCardHolder] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
   const [cvv, setCvv] = useState("");
 
   const handlePayment = () => {
-    alert("Thông tin thẻ đã được nhập!");
+    alert(t("card_info_saved"));
   };
 
   return (
@@ -24,9 +26,10 @@ export default function PaymentMethod() {
       <Image
         source={{
           uri: "https://www.sbv.gov.vn/webcenter/cs/groups/phongweb/documents/noidungtinh/c2j2/mdc3/~edisp/~export/SBVWEBAPP01SBV077333~12/420256-02.jpg",
-        }} // Thay bằng link ảnh thẻ thật
+        }}
         style={styles.cardImage}
       />
+
 
       {/* Hiển thị số thẻ trên ảnh (giả lập) */}
       <View style={styles.cardOverlay}>
@@ -34,16 +37,16 @@ export default function PaymentMethod() {
           {cardNumber ? cardNumber : "**** **** **** ****"}
         </Text>
         <Text style={styles.cardHolder}>
-          {cardHolder ? cardHolder.toUpperCase() : "CARDHOLDER NAME"}
+          {cardHolder ? cardHolder.toUpperCase() : t("cardholder_name")}
         </Text>
       </View>
 
       {/* Form nhập thông tin thẻ */}
-      <Text style={styles.title}>Nhập Thông Tin Thẻ</Text>
+      <Text style={styles.title}>{t("enter_card_info")}</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Số thẻ (Card Number)"
+        placeholder={t("card_number_placeholder")}
         keyboardType="numeric"
         maxLength={19}
         value={cardNumber}
@@ -57,9 +60,9 @@ export default function PaymentMethod() {
         }
       />
 
-      <TextInput
+<TextInput
         style={styles.input}
-        placeholder="Tên chủ thẻ (Cardholder Name)"
+        placeholder={t("cardholder_name_placeholder")}
         autoCapitalize="characters"
         value={cardHolder}
         onChangeText={setCardHolder}
@@ -68,7 +71,7 @@ export default function PaymentMethod() {
       <View style={styles.row}>
         <TextInput
           style={[styles.input, styles.halfInput]}
-          placeholder="MM/YY"
+          placeholder={t("expiry_date_placeholder")}
           keyboardType="numeric"
           maxLength={5}
           value={expiryDate}
@@ -77,7 +80,7 @@ export default function PaymentMethod() {
 
         <TextInput
           style={[styles.input, styles.halfInput]}
-          placeholder="CVV"
+          placeholder={t("cvv_placeholder")}
           keyboardType="numeric"
           maxLength={3}
           secureTextEntry
@@ -87,7 +90,7 @@ export default function PaymentMethod() {
       </View>
 
       <TouchableOpacity style={styles.button} onPress={handlePayment}>
-        <Text style={styles.buttonText}>Lưu thẻ</Text>
+        <Text style={styles.buttonText}>{t("save_card")}</Text>
       </TouchableOpacity>
     </View>
   );

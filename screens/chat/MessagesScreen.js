@@ -13,8 +13,12 @@ import {
 import { supabase } from "../../lib/supabase";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
+import { useSelector } from "react-redux";
+import NotAuth from "../auth/NotAuth";
+import { useTranslation } from "react-i18next";
 
 export default function MessagesScreen({ navigation }) {
+  const { t } = useTranslation();
   // State management
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +32,9 @@ export default function MessagesScreen({ navigation }) {
   const [username, setUsername] = useState(null);
   const [userLoaded, setUserLoaded] = useState(false);
   
+  // Redux state
+  const userAuth = useSelector((state) => state.auth?.userId);
+
   // Hooks
   const { loadIdChatPlatform } = useAsyncStorage();
 
@@ -35,17 +42,17 @@ export default function MessagesScreen({ navigation }) {
   useEffect(() => {
     const loadUserData = async () => {
       const user = await loadIdChatPlatform();
-      
+
       if (user !== null && user.length > 0) {
         const storedUser = user[0];
-        
+
         if (storedUser._id) setUserId(storedUser._id);
         if (storedUser.username) setUsername(storedUser.username);
       }
-      
+
       setUserLoaded(true);
     };
-    
+
     loadUserData();
   }, []);
 
@@ -58,18 +65,26 @@ export default function MessagesScreen({ navigation }) {
       // Subscribe to changes in the chats table
       const subscription = supabase
         .channel("public:chats")
-        .on("postgres_changes", { event: "*", schema: "public", table: "chats" }, () => {
-          fetchChats();
-        })
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "chats" },
+          () => {
+            fetchChats();
+          }
+        )
         .subscribe();
 
       // Subscribe to changes in the messages table
       const messagesSubscription = supabase
         .channel("public:messages")
-        .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, () => {
-          fetchLastMessages();
-          fetchUnreadCounts();
-        })
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "messages" },
+          () => {
+            fetchLastMessages();
+            fetchUnreadCounts();
+          }
+        )
         .subscribe();
 
       // Fetch initial data
@@ -98,7 +113,11 @@ export default function MessagesScreen({ navigation }) {
         // Check if any participant's username contains search text
         if (
           chat.participants &&
-          chat.participants.some((p) => p.username && p.username.toLowerCase().includes(searchText.toLowerCase()))
+          chat.participants.some(
+            (p) =>
+              p.username &&
+              p.username.toLowerCase().includes(searchText.toLowerCase())
+          )
         ) {
           return true;
         }
@@ -134,7 +153,7 @@ export default function MessagesScreen({ navigation }) {
       console.error("Exception updating online status:", e.message);
     }
   }
-  
+
   // Fetch all chats for the current user
   async function fetchChats() {
     if (!userId) {
@@ -165,12 +184,14 @@ export default function MessagesScreen({ navigation }) {
       // Then get the actual chat data
       const { data: chatData, error: chatError } = await supabase
         .from("chats")
-        .select(`
+        .select(
+          `
           id,
           name,
           created_at,
           chat_participants(user_id, profiles:user_id(id, username, is_online, last_seen))
-        `)
+        `
+        )
         .in("id", chatIds)
         .order("created_at", { ascending: false });
 
@@ -212,7 +233,7 @@ export default function MessagesScreen({ navigation }) {
       fetchUnreadCounts(chatIds);
     } catch (error) {
       console.error("Exception fetching chats:", error.message);
-      Alert.alert("Error", "Failed to load chats. Please try again.");
+      Alert.alert(t('error'), t('load_chats_error'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -302,10 +323,15 @@ export default function MessagesScreen({ navigation }) {
   // Navigate to chat screen
   function handlePressChat(chat) {
     // Get the other participant for 1-on-1 chats
-    const otherParticipant = chat.participants && chat.participants.length === 1 ? chat.participants[0] : null;
+    const otherParticipant =
+      chat.participants && chat.participants.length === 1
+        ? chat.participants[0]
+        : null;
 
     // Display name - use other participant's name for 1-on-1 chats
-    const displayName = otherParticipant ? otherParticipant.username : chat.name;
+    const displayName = otherParticipant
+      ? otherParticipant.username
+      : chat.name;
 
     navigation.navigate("Chat", {
       chatId: chat.id,
@@ -322,14 +348,17 @@ export default function MessagesScreen({ navigation }) {
 
     // Check if it's today
     if (date.toDateString() === now.toDateString()) {
-      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     }
 
     // Check if it's yesterday
     const yesterday = new Date(now);
     yesterday.setDate(now.getDate() - 1);
     if (date.toDateString() === yesterday.toDateString()) {
-      return "Yesterday";
+      return t('yesterday');
     }
 
     // Otherwise return the date
@@ -342,43 +371,54 @@ export default function MessagesScreen({ navigation }) {
     const unreadCount = unreadCounts[item.id] || 0;
 
     // Get the other participant for 1-on-1 chats
-    const otherParticipant = item.participants && item.participants.length === 1 ? item.participants[0] : null;
+    const otherParticipant =
+      item.participants && item.participants.length === 1
+        ? item.participants[0]
+        : null;
 
     // Display name - use other participant's name for 1-on-1 chats
-    const displayName = otherParticipant ? otherParticipant.username : item.name;
+    const displayName = otherParticipant
+      ? otherParticipant.username
+      : item.name;
 
     // Get online status
     const isOnline = otherParticipant ? otherParticipant.is_online : false;
 
     return (
-      <TouchableOpacity 
-        style={styles.chatItem} 
+      <TouchableOpacity
+        style={styles.chatItem}
         onPress={() => handlePressChat(item)}
         activeOpacity={0.7}
       >
         <View style={styles.avatarContainer}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{displayName.charAt(0).toUpperCase()}</Text>
+            <Text style={styles.avatarText}>
+              {displayName.charAt(0).toUpperCase()}
+            </Text>
           </View>
           {isOnline && <View style={styles.onlineIndicator} />}
         </View>
 
         <View style={styles.chatInfo}>
           <View style={styles.chatHeader}>
-            <Text style={styles.chatName} numberOfLines={1}>{displayName}</Text>
+            <Text style={styles.chatName} numberOfLines={1}>
+              {displayName}
+            </Text>
             <Text style={styles.chatTime}>
-              {lastMessage ? formatTime(lastMessage.created_at) : formatTime(item.created_at)}
+              {lastMessage
+                ? formatTime(lastMessage.created_at)
+                : formatTime(item.created_at)}
             </Text>
           </View>
-          
+
           <View style={styles.chatPreview}>
-            <Text 
-              style={[styles.chatMessage, unreadCount > 0 && styles.unreadMessage]} 
+            <Text
+              style={[styles.chatMessage, unreadCount > 0 && styles.unreadMessage]}
               numberOfLines={1}
             >
               {lastMessage ? lastMessage.content : "No messages yet"}
             </Text>
-            
+
             {unreadCount > 0 && (
               <View style={styles.unreadBadge}>
                 <Text style={styles.unreadText}>{unreadCount}</Text>
@@ -394,14 +434,7 @@ export default function MessagesScreen({ navigation }) {
   function renderHeader() {
     return (
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Conversations</Text>
-        <View style={styles.headerRight} />
+        <Text style={styles.headerTitle}>{t('conversations')}</Text>
       </View>
     );
   }
@@ -411,10 +444,10 @@ export default function MessagesScreen({ navigation }) {
     return (
       <View style={styles.searchContainer}>
         <Ionicons name="search-outline" size={20} color="#666" style={styles.searchIcon} />
-        <TextInput 
-          style={styles.searchInput} 
-          placeholder="Search conversations..." 
-          value={searchText} 
+        <TextInput
+          style={styles.searchInput}
+          placeholder={t('search_conversations')}
+          value={searchText}
           onChangeText={setSearchText}
           placeholderTextColor="#999"
         />
@@ -428,37 +461,43 @@ export default function MessagesScreen({ navigation }) {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        {renderHeader()}
-        {renderSearchBar()}
+    <>
+      {!userAuth ? (
+        <NotAuth />
+      ) : (
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.container}>
+            {renderHeader()}
+            {renderSearchBar()}
 
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#4A90E2" />
-            <Text style={styles.loadingText}>Loading conversations...</Text>
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#4A90E2" />
+                <Text style={styles.loadingText}>{t('loading_conversations')}</Text>
+              </View>
+            ) : filteredChats.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="chatbubble-ellipses-outline" size={64} color="#DDD" />
+                <Text style={styles.emptyStateText}>{t('no_conversations')}</Text>
+                <Text style={styles.emptyStateSubtext}>
+                  {searchText ? t('no_results') : t('start_new_conversation')}
+                </Text>
+              </View>
+            ) : (
+              <FlatList
+                data={filteredChats}
+                renderItem={renderChatItem}
+                keyExtractor={(item) => item.id.toString()}
+                refreshing={refreshing}
+                onRefresh={() => fetchChats()}
+                contentContainerStyle={styles.list}
+                showsVerticalScrollIndicator={false}
+              />
+            )}
           </View>
-        ) : filteredChats.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="chatbubble-ellipses-outline" size={64} color="#DDD" />
-            <Text style={styles.emptyStateText}>No conversations yet</Text>
-            <Text style={styles.emptyStateSubtext}>
-              {searchText ? "No results found" : "Start a new conversation"}
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            data={filteredChats}
-            renderItem={renderChatItem}
-            keyExtractor={(item) => item.id.toString()}
-            refreshing={refreshing}
-            onRefresh={() => fetchChats()}
-            contentContainerStyle={styles.list}
-            showsVerticalScrollIndicator={false}
-          />
-        )}
-      </View>
-    </SafeAreaView>
+        </SafeAreaView>
+      )}
+    </>
   );
 }
 
@@ -474,7 +513,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
     backgroundColor: "#fff",
     padding: 16,
     paddingTop: 20,
@@ -489,16 +528,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#F3F4F6",
   },
-  backButton: {
-    padding: 8,
-  },
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
     color: "#1F2937",
-  },
-  headerRight: {
-    width: 40,
   },
   searchContainer: {
     flexDirection: "row",

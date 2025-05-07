@@ -8,6 +8,8 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import {AntDesign} from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 const GuestCounter = ({
   title,
@@ -55,6 +57,7 @@ const GuestSelectionModal = ({
   onConfirm,
   maxPeople = 3,
 }) => {
+  const { t } = useTranslation();
   const [adults, setAdults] = useState(0);
   const [children, setChildren] = useState(0);
   const [infants, setInfants] = useState(0);
@@ -158,20 +161,22 @@ const GuestSelectionModal = ({
         <View style={styles.modalOverlay}>
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Số lượng người ở phòng</Text>
-              <Text style={styles.modalSubtitle}>Tối đa {maxPeople} người</Text>
+              <Text style={styles.modalTitle}>{t("guest_selection_title")}</Text>
+              <Text style={styles.modalSubtitle}>
+                {t("maximum_people", { maxPeople })}
+              </Text>
 
               <GuestCounter
-                title="Người lớn"
-                subtitle="Từ 18 tuổi trở lên"
+                title={t("adults")}
+                subtitle={t("adults_subtitle")}
                 value={adults}
                 onIncrement={() => handleIncrement("adults")}
                 onDecrement={() => handleDecrement("adults")}
                 maxValue={maxPeople - children - infants}
               />
               <GuestCounter
-                title="Trẻ em"
-                subtitle="Từ 2 đến 17 tuổi"
+                title={t("children")}
+                subtitle={t("children_subtitle")}
                 value={children}
                 onIncrement={() => handleIncrement("children")}
                 onDecrement={() => handleDecrement("children")}
@@ -180,7 +185,7 @@ const GuestSelectionModal = ({
 
               {isAtMaxCapacity && (
                 <Text style={styles.maxCapacityWarning}>
-                  Đã đạt giới hạn số người tối đa ({maxPeople})
+                  {t("max_capacity_warning", { maxPeople })}
                 </Text>
               )}
 
@@ -188,7 +193,7 @@ const GuestSelectionModal = ({
                 style={styles.confirmButton}
                 onPress={handleConfirm}
               >
-                <Text style={styles.confirmButtonText}>Tiếp tục</Text>
+                <Text style={styles.confirmButtonText}>{t("continue")}</Text>
               </TouchableOpacity>
             </View>
           </TouchableWithoutFeedback>

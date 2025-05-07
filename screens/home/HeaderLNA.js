@@ -9,6 +9,7 @@ import {
   Alert,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { useTranslation } from "react-i18next";
 
 const HeaderLNA = ({
   location = "Chọn thành phố",
@@ -21,6 +22,7 @@ const HeaderLNA = ({
   authData,
   displayUser,
 }) => {
+  const { t } = useTranslation();
   const isAuth = authData.isAuth;
   return (
     <View style={styles.headerContainer}>
@@ -34,7 +36,7 @@ const HeaderLNA = ({
           ellipsizeMode="tail"
           style={styles.locationText}
         >
-          {location || "Đang tải..."}
+          {location || t('loading')}
         </Text>
       </TouchableOpacity>
       {isAuth ? (
@@ -67,26 +69,29 @@ const HeaderLNA = ({
           </TouchableOpacity>
         </View>
       ) : (
-        userNotLoggedIn({ onLoginPress })
+        <UserNotLoggedIn onLoginPress={onLoginPress} />
       )}
     </View>
   );
 };
 
-function userNotLoggedIn({ onLoginPress }) {
+const UserNotLoggedIn = ({ onLoginPress }) => {
+  const { t } = useTranslation();
+
   const handleAlert = () => {
     Alert.alert(
-      "Bạn chưa đăng nhập",
-      "Vui lòng đăng nhập để sử dụng tính năng này",
+      t('not_logged_in'),
+      t('login_required'),
       [
         {
-          text: "Đăng nhập",
+          text: t('login'),
           onPress: () => onLoginPress(),
         },
-        { text: "Để sau" },
+        { text: t('later') },
       ]
     );
   };
+
   return (
     <View style={styles.notLogin}>
       <TouchableOpacity onPress={handleAlert}>
@@ -94,8 +99,7 @@ function userNotLoggedIn({ onLoginPress }) {
       </TouchableOpacity>
     </View>
   );
-}
-
+};
 const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: "row",

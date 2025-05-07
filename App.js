@@ -10,6 +10,8 @@ import store from "./redux/store";
 import { jwtDecode } from "jwt-decode";
 import dayjs from "dayjs";
 import { useRefreshTokenWithParamMutation } from "./api/authApi";
+import { I18nextProvider } from 'react-i18next';
+import i18n from './utils/i18n';
 
 export default function App() {
   useEffect(() => {
@@ -58,13 +60,15 @@ export default function App() {
   };
   return (
     <Provider store={store}>
-        <StatusBar animated={true} />
-        <NavigationContainer>
-          <AsyncStorageProvider>
-            <AuthLoader />
-            <AppStack />
-          </AsyncStorageProvider>
-        </NavigationContainer>
+      <I18nextProvider i18n={i18n}>
+          <StatusBar animated={true} />
+          <NavigationContainer>
+            <AsyncStorageProvider>
+              <AuthLoader />
+              <AppStack />
+            </AsyncStorageProvider>
+          </NavigationContainer>
+      </I18nextProvider>
     </Provider>
   );
 }
@@ -85,10 +89,17 @@ const AuthLoader = () => {
         console.log("Đã đăng xuất");
       } else if (authData) {
         // console.log("Đã đăng nhập");
-        const { userId, token, isAuth, userData, refreshToken } =
+        const { userId, token, isAuth, userData, refreshToken, customerId } =
           JSON.parse(authData);
         dispatch(
-          restoreAuth({ userId, token, isAuth, userData, refreshToken })
+          restoreAuth({
+            userId,
+            token,
+            isAuth,
+            userData,
+            refreshToken,
+            customerId,
+          })
         );
       }
 

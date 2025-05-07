@@ -9,21 +9,23 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { LineChart } from "react-native-chart-kit";
 import { Dimensions } from "react-native";
+import { useTranslation } from "react-i18next";
 
 const screenWidth = Dimensions.get("window").width;
 
-const transactions = [
-  { id: "1", type: "Nạp tiền", amount: "+500.000 đ", date: "02/02/2025" },
-  { id: "2", type: "Rút tiền", amount: "-200.000 đ", date: "01/02/2025" },
-  { id: "3", type: "Nạp tiền", amount: "+300.000 đ", date: "31/01/2025" },
-];
-
 export default function WalletScreen() {
+  const { t } = useTranslation();
+
+  const transactions = [
+    { id: "1", type: t('deposit'), amount: "+500.000 đ", date: "02/02/2025" },
+    { id: "2", type: t('withdraw'), amount: "-200.000 đ", date: "01/02/2025" },
+    { id: "3", type: t('deposit'), amount: "+300.000 đ", date: "31/01/2025" },
+  ];
   return (
     <View style={styles.container}>
       {/* Số dư tài khoản */}
       <View style={styles.balanceCard}>
-        <Text style={styles.balanceTitle}>Số dư tài khoản</Text>
+        <Text style={styles.balanceTitle}>{t('account_balance')}</Text>
         <Text style={styles.balanceAmount}>200.000 đ</Text>
       </View>
 
@@ -31,17 +33,17 @@ export default function WalletScreen() {
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button}>
           <Ionicons name="add-circle" size={24} color="white" />
-          <Text style={styles.buttonText}>Nạp tiền</Text>
+          <Text style={styles.buttonText}>{t('deposit')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button, styles.withdrawButton]}>
           <Ionicons name="remove-circle" size={24} color="white" />
-          <Text style={styles.buttonText}>Rút tiền</Text>
+          <Text style={styles.buttonText}>{t('withdraw')}</Text>
         </TouchableOpacity>
       </View>
 
       {/* Biểu đồ số dư */}
       <View style={styles.chartContainer}>
-        <Text style={styles.sectionTitle}>Biến động số dư</Text>
+        <Text style={styles.sectionTitle}>{t('balance_fluctuation')}</Text>
         <LineChart
           data={{
             labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
@@ -64,7 +66,7 @@ export default function WalletScreen() {
 
       {/* Lịch sử giao dịch */}
       <View style={styles.transactionContainer}>
-        <Text style={styles.sectionTitle}>Lịch sử giao dịch</Text>
+        <Text style={styles.sectionTitle}>{t('transaction_history')}</Text>
         <FlatList
           data={transactions}
           keyExtractor={(item) => item.id}
@@ -77,7 +79,7 @@ export default function WalletScreen() {
           )}
         />
         <TouchableOpacity style={styles.viewAllButton}>
-          <Text style={styles.viewAllText}>Xem tất cả</Text>
+          <Text style={styles.viewAllText}>{t('view_all')}</Text>
         </TouchableOpacity>
       </View>
     </View>

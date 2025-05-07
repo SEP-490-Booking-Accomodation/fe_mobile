@@ -10,9 +10,10 @@ import {
   Keyboard,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { useTranslation } from "react-i18next";
 
 const SearchField = ({
-  placeholder = "Tìm kiếm...",
+  placeholder = "search_placeholder",
   onChangeText,
   value,
   backIcon = true,
@@ -22,11 +23,12 @@ const SearchField = ({
   style,
   inputStyle,
 }) => {
+  const { t } = useTranslation();
   const navigation = useNavigation();
 
   const handleSearchPress = () => {
     navigation.goBack();
-    navigation.navigate("SearchScreen", { searchQuery: value }); // Change "PreviousScreen" to your actual screen name
+    navigation.navigate("SearchScreen", { searchQuery: value });
   };
 
   return (
@@ -54,11 +56,11 @@ const SearchField = ({
           />
           <TextInput
             style={[styles.input, inputStyle]}
-            placeholder={placeholder}
+            placeholder={t(placeholder)}
             placeholderTextColor="#aaa"
             onChangeText={onChangeText}
             value={value}
-            editable={false} // Ngăn không cho bàn phím mở
+            editable={false}
           />
         </View>
       </TouchableOpacity>
@@ -73,6 +75,7 @@ const SearchField = ({
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   wrapper: {

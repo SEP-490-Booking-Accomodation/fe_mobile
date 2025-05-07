@@ -13,22 +13,24 @@ import VerticalCard from "../../components/cards/VerticalCard";
 import Filter from "../../components/Filter";
 import { useGetAllRentalQuery } from "../../api/rentalLocationApi";
 import * as Location from "expo-location";
+import { useTranslation } from "react-i18next";
 
 const SearchResult = ({ route, navigation }) => {
+  const { t } = useTranslation();
   const query = route?.params?.query || "";
   const [userLocation, setUserLocation] = useState(null);
 
   const { data: rental, refetch: refetchRental } = useGetAllRentalQuery();
   const [refreshing, setRefreshing] = useState(false);
   const [selectedSortOption, setSelectedSortOption] = useState(
-    "Giá từ thấp đến cao"
+    t("price_low_to_high")
   );
 
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        console.log("Permission to access location was denied");
+        console.log(t("location_permission_denied"));
         return;
       }
 
@@ -48,9 +50,9 @@ const SearchResult = ({ route, navigation }) => {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const d = R * c;
     return d; // distance in km
@@ -68,7 +70,7 @@ const SearchResult = ({ route, navigation }) => {
     try {
       await refetchRental();
     } catch (error) {
-      console.error("Lỗi tải lại dữ liệu:", error);
+      console.error(t("data_refresh_error"), error);
     }
     setRefreshing(false);
   };
@@ -85,11 +87,11 @@ const SearchResult = ({ route, navigation }) => {
       const distance =
         userLocation && item.latitude && item.longitude
           ? getDistanceFromLatLonInKm(
-              userLocation.latitude,
-              userLocation.longitude,
-              item.latitude, // latitude
-              item.longitude // longitude
-            )
+            userLocation.latitude,
+            userLocation.longitude,
+            item.latitude, // latitude
+            item.longitude // longitude
+          )
           : null;
 
       return {
@@ -148,11 +150,11 @@ const SearchResult = ({ route, navigation }) => {
     }
 
     return filteredData.sort((a, b) => {
-      if (selectedSortOption === "Giá từ thấp đến cao") {
+      if (selectedSortOption === t("price_low_to_high")) {
         return a.minPrice - b.minPrice;
-      } else if (selectedSortOption === "Giá từ cao đến thấp") {
+      } else if (selectedSortOption === t("price_high_to_low")) {
         return b.minPrice - a.minPrice;
-      } else if (selectedSortOption === "Gần bạn nhất") {
+      } else if (selectedSortOption === t("nearest_you")) {
         return (a.distance ?? Infinity) - (b.distance ?? Infinity);
       }
       return 0;
@@ -163,7 +165,7 @@ const SearchResult = ({ route, navigation }) => {
     <SafeAreaView style={styles.container}>
       <SearchField
         style={styles.mh}
-        placeholder="Tìm kiếm điểm đến của bạn"
+        placeholder={t("search_destination")}
         onPressBack={() => navigation.goBack()}
         // onBackHome={() => navigation.}
         onPressFilterIcon={() => setIsFilterVisible(true)}
@@ -171,12 +173,16 @@ const SearchResult = ({ route, navigation }) => {
       />
 
       <View style={styles.sortContainer}>
-        <Text style={styles.textSort}>Sắp xếp theo</Text>
+        <Text style={styles.textSort}>{t("sort_by")}</Text>
         <Dropdown
-          data={["Giá từ thấp đến cao", "Giá từ cao đến thấp", "Gần bạn nhất"]}
+          data={[
+            t("price_low_to_high"),
+            t("price_high_to_low"),
+            t("nearest_you")
+          ]}
           selectedValue={selectedSortOption}
           onSelect={setSelectedSortOption}
-          placeholder="Chọn cách sắp xếp"
+          placeholder={t("select_sort_method")}
           style={styles.dropdown}
         />
       </View>
@@ -189,7 +195,7 @@ const SearchResult = ({ route, navigation }) => {
         {filteredAndSortedData.length === 0 && query ? (
           <View style={styles.noResultContainer}>
             <Text style={styles.noResultText}>
-              Không có kết quả tìm kiếm phù hợp!
+              {t("no_search_results")}
             </Text>
           </View>
         ) : (
@@ -205,8 +211,8 @@ const SearchResult = ({ route, navigation }) => {
                 key={item.id}
                 {...item}
                 initFavourite={false}
-                onFavouritePress={(isFav) => console.log("Yêu thích:", isFav)}
-                onCardPress={() => console.log("Đã nhấn vào card")}
+                onFavouritePress={(isFav) => console.log(t("favorite_status"), isFav)}
+                onCardPress={() => console.log(t("card_pressed"))}
               />
             );
           })

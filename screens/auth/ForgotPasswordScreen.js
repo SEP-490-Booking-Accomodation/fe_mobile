@@ -18,10 +18,12 @@ import CustomButton from "../../components/buttons/Button";
 import CustomInput from "../../components/TextInput";
 import IconButton from "../../components/buttons/IconButton";
 import { useForgetPasswordTokenMutation } from "../../api/authApi";
+import { useTranslation } from "react-i18next"; 
 
 const { height } = Dimensions.get("window");
 
 const ForgotPasswordScreen = () => {
+  const { t } = useTranslation(); 
   const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,33 +36,29 @@ const ForgotPasswordScreen = () => {
 
   const handleSendForgotPassword = () => {
     if (!validateEmail(email)) {
-      Alert.alert("Lỗi", "Email không hợp lệ.");
+      Alert.alert(t("error"), t("invalid_email"));
       return;
     }
 
     setLoading(true);
 
-    console.log("Đang gửi email");
     const dataForgot = { email: email };
     forgetPasswordToken({ data: dataForgot })
       .unwrap()
       .then((res) => {
-        console.log("res", res);
         setLoading(false);
         Alert.alert(
-          "Thành công",
-          "Vui lòng kiểm tra email để đặt lại mật khẩu.",
+          t("success"),
+          t("check_email"),
           [{ text: "OK", onPress: () => navigation.goBack() }]
         );
       })
       .catch((error) => {
         setLoading(false);
-        console.log("error", error);
-        Alert.alert("Lỗi", error.data.message);
-
-        // Alert.alert("Lỗi", "Gửi email thất bại, vui kiểm tra lại email.");
+        Alert.alert(t("error"), error.data.message);
       });
   };
+
 
   return (
     <ImageBackground
@@ -85,18 +83,17 @@ const ForgotPasswordScreen = () => {
                 style={styles.backButton}
               />
               <View style={styles.header}>
-                <Text style={styles.title}>Quên mật khẩu</Text>
+                <Text style={styles.title}>{t("forgot_password")}</Text>
                 <Text style={styles.subtitle}>
-                  Nhập email hoặc số điện thoại của bạn để khôi phục mật khẩu.
-                  {/* Nhập email hoặc số điện thoại của bạn để khôi phục mật khẩu. */}
+                  {t("forgot_password_instruction")}
                 </Text>
               </View>
               <View style={styles.card}>
                 <View style={styles.formContainer}>
                   <View style={styles.dot} />
                   <CustomInput
-                    label="Email hoặc Số điện thoại"
-                    placeholder="Nhập email hoặc số điện thoại"
+                    label={t("email_or_phone")}
+                    placeholder={t("enter_email_or_phone")}
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
@@ -105,7 +102,7 @@ const ForgotPasswordScreen = () => {
                     inputContainerStyle={styles.input}
                   />
                   <CustomButton
-                    title="Gửi"
+                    title={t("send")}
                     backgroundColor="#1A2741"
                     disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
                     titleColor="#FFFFFF"
@@ -116,11 +113,11 @@ const ForgotPasswordScreen = () => {
                     onPress={handleSendForgotPassword}
                   />
                   <View style={styles.signupContainer}>
-                    <Text style={styles.signupText}>Đã có tài khoản? </Text>
+                    <Text style={styles.signupText}>{t("have_account")} </Text>
                     <TouchableOpacity
                       onPress={() => navigation.navigate("Login")}
                     >
-                      <Text style={styles.signupButtonText}>Đăng nhập</Text>
+                      <Text style={styles.signupButtonText}>{t("login")}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>

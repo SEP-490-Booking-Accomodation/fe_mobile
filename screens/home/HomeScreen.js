@@ -16,6 +16,7 @@ import { useGetUserQuery } from "../../api/authApi";
 import { useGetAllRentalQuery } from "../../api/rentalLocationApi";
 import { ensureUserInDatabase } from "../../lib/supabase";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
+import { useTranslation } from "react-i18next";
 const cities = [
   "Hà Nội",
   "TP Hồ Chí Minh",
@@ -35,12 +36,14 @@ const cities = [
 ];
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const [location, setLocation] = useState("Đang lấy vị trí");
   const [address, setAddress] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [manualCity, setManualCity] = useState(null);
   const authData = useSelector((state) => state.auth);
+  const customerId = useSelector((state) => state.auth.customerId);
   const userId = authData.userId;
   const { data: user, refetch: refetchUser } = useGetUserQuery(userId);
   const { data: rental, refetch: refetchRental } = useGetAllRentalQuery();
@@ -84,10 +87,9 @@ export default function HomeScreen() {
     const getLocation = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        setErrorMsg("Quyền truy cập vị trí đã bị từ chối.");
+        setErrorMsg(t('permission_denied'));
         return;
       }
-
       try {
         const currentLocation = await Location.getCurrentPositionAsync({});
         setLocation(currentLocation.coords);
@@ -102,7 +104,7 @@ export default function HomeScreen() {
           setAddress(`${place.city || ""}, ${place.region || ""}`);
         }
       } catch (error) {
-        setErrorMsg("Không thể lấy thông tin địa điểm.");
+        setErrorMsg(t('location_info_error'));
       }
     };
 
@@ -146,7 +148,7 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container}>
       <>
         <HeaderLNA
-          location={manualCity || address || "Chọn thành phố"}
+          location={manualCity || address || t('select_city')}
           onNotificationPress={() => navigation.navigate("NotificationScreen")}
           onAvatarPress={() => navigation.navigate("ProfileScreen")}
           notificationCount={2}
@@ -171,16 +173,16 @@ export default function HomeScreen() {
           }
         >
           <Text style={[styles.textWelcome, styles.paddingVertical]}>
-            Chúc bạn có một chuyến đi vui vẻ trong kỳ nghỉ tuyệt vời!
+            {t('welcome_message')}
           </Text>
           <SearchField
             style={[styles.mh, styles.paddingVertical]}
-            placeholder="Tìm kiếm điểm đến của bạn"
+            placeholder={t('search_placeholder')}
             backIcon={false}
             filterIcon={false}
           />
           {loading ? (
-            <Text>Loading</Text>
+            <Text>{t('loading')}</Text>
           ) : (
             <LocationList
               rentalData={rental}

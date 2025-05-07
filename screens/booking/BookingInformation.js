@@ -17,8 +17,10 @@ import GuestSelector from "./components/GuestSelector";
 import BookingFooter from "./components/BookingFooter";
 import GuestSelectionModal from "./modals/GuestSelectionModal";
 import { useCheckAvailableRoomMutation } from "../../api/bookingApi";
+import { useTranslation } from "react-i18next";
 
 export default function BookingInformation({ route, navigation }) {
+  const { t } = useTranslation();
   const { accommodationTypeData, rentalData } = route.params || {};
 
   // Set isOverNight property from accommodationTypeData
@@ -126,13 +128,15 @@ export default function BookingInformation({ route, navigation }) {
     selectedDay.setHours(0, 0, 0, 0);
 
     if (selectedDay < today || selectedDay > tomorrow) {
-      Alert.alert("Lỗi", "Chỉ được chọn ngày hôm nay hoặc ngày mai.");
+      Alert.alert(
+        t("error"),
+        t("date_selection_error")
+      );
       closeDatePicker();
       return;
     }
-
+    closeDatePicker();
     setSelectedDate(date);
-
   };
 
   const handleTimeSelect = (time) => {
@@ -141,7 +145,7 @@ export default function BookingInformation({ route, navigation }) {
     selectedDateTime.setHours(time.getHours(), time.getMinutes(), 0);
 
     if (selectedDateTime < now) {
-      Alert.alert("Lỗi", "Vui lòng chọn thời gian trong tương lai.");
+      Alert.alert(t("error"), t("future_time_error"));
       closeTimePicker();
       return;
     }
@@ -154,12 +158,13 @@ export default function BookingInformation({ route, navigation }) {
       (selectedHour === OPENING_HOUR && selectedMinute < OPENING_MINUTE)
     ) {
       Alert.alert(
-        "Lỗi",
-        `Thời gian nhận phòng chỉ từ ${OPENING_HOUR}:${String(
-          OPENING_MINUTE
-        ).padStart(2, "0")} đến ${CLOSING_HOUR}:${String(
-          CLOSING_MINUTE
-        ).padStart(2, "0")}.`
+        t("error"),
+        t("opening_hours_error", {
+          openHour: OPENING_HOUR,
+          openMinute: String(OPENING_MINUTE).padStart(2, "0"),
+          closeHour: CLOSING_HOUR,
+          closeMinute: String(CLOSING_MINUTE).padStart(2, "0")
+        })
       );
       closeTimePicker();
       return;
@@ -199,9 +204,9 @@ export default function BookingInformation({ route, navigation }) {
       closeTimePicker();
       return;
     }
+    closeTimePicker();
 
     setSelectedTime(time);
-
   };
 
   const closeDatePicker = useCallback(() => {
@@ -230,20 +235,21 @@ export default function BookingInformation({ route, navigation }) {
 
   const formatGuestCount = () => {
     const total = guestCount.adults + guestCount.children + guestCount.infants;
-    if (total === 0) return "Chọn số lượng khách";
+    if (total === 0) return t("select_guest_count");
 
     const parts = [];
     if (guestCount.adults > 0) {
-      parts.push(`${guestCount.adults} người lớn`);
+      parts.push(t("adults_count", { count: guestCount.adults }));
     }
     if (guestCount.children > 0) {
-      parts.push(`${guestCount.children} trẻ em`);
+      parts.push(t("children_count", { count: guestCount.children }));
     }
     if (guestCount.infants > 0) {
-      parts.push(`${guestCount.infants} trẻ sơ sinh`);
+      parts.push(t("infants_count", { count: guestCount.infants }));
     }
     return parts.join(", ");
   };
+
 
   const formatMoney = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -266,14 +272,14 @@ export default function BookingInformation({ route, navigation }) {
       let errorMessage = "";
 
       if (!isValidDateTime()) {
-        errorMessage = "Vui lòng chọn thời gian trong tương lai.";
+        errorMessage = t("future_time_error");
       } else if (guestCount.adults + guestCount.children === 0) {
-        errorMessage = "Vui lòng chọn số lượng khách.";
+        errorMessage = t("guest_count_error");
       } else {
-        errorMessage = "Vui lòng điền đầy đủ thông tin cá nhân.";
+        errorMessage = t("missing_info_error");
       }
 
-      Alert.alert("Thiếu thông tin", errorMessage);
+      Alert.alert(t("missing_info_title"), errorMessage);
       return;
     }
     const checkInDateTime = `${formatDate(selectedDate)} ${formatTime(
@@ -302,23 +308,18 @@ export default function BookingInformation({ route, navigation }) {
             endTime: formatTime(endTime),
             endDate: formatDate(endTime),
             guests: guestCount,
-            // contact: formData,
             totalPrice: calculateTotalPrice(),
             rentalData: rentalData,
           },
         });
       } else {
-        Alert.alert("Xin lỗi", "Khung giờ hiện tại không còn phòng trống");
-
+        Alert.alert(t("sorry"), t("no_available_rooms"));
       }
-
-      return;
     } catch (error) {
       Alert.alert(
-        "Failed",
-        error.data?.message || "Đặt phòng thất bại, vui lòng thử lại sau"
+        t("failed"),
+        error.data?.message || t("booking_failed")
       );
-
     }
   };
 
@@ -381,7 +382,6 @@ export default function BookingInformation({ route, navigation }) {
         isFormValid={isFormValid}
       />
 
-      {/* Guest selection modal */}
       <GuestSelectionModal
         visible={isGuestModalVisible}
         onClose={() => setGuestModalVisible(false)}
@@ -391,6 +391,7 @@ export default function BookingInformation({ route, navigation }) {
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   safeArea: {

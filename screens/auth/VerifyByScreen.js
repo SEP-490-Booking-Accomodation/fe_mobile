@@ -13,10 +13,12 @@ import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../../components/buttons/Button';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import IconButton from '../../components/buttons/IconButton';
+import { useTranslation } from 'react-i18next'; 
 
 const { height } = Dimensions.get('window');
 
 const VerifyByScreen = () => {
+    const { t } = useTranslation(); 
     const navigation = useNavigation();
     const [selectedMethod, setSelectedMethod] = useState('phone');
 
@@ -32,9 +34,9 @@ const VerifyByScreen = () => {
                 >
                     <View style={styles.contentContainer}>
                         <View style={styles.header}>
-                            <Text style={styles.title}>Xác minh tài khoản</Text>
+                            <Text style={styles.title}>{t("verify_account_title")}</Text>
                             <Text style={styles.subtitle}>
-                                Tham gia hành trình khám phá: Đăng ký miễn phí
+                                {t("verify_account_subtitle")}
                             </Text>
                         </View>
                         <View style={styles.card}>
@@ -44,7 +46,9 @@ const VerifyByScreen = () => {
                                 onPress={() => setSelectedMethod('phone')}
                             >
                                 <Ionicons name="call" size={20} color="#34D399" style={styles.icon} />
-                                <Text style={styles.optionText}>Số điện thoại (********678)</Text>
+                                <Text style={styles.optionText}>
+                                    {t("phone_option", { number: "********678" })}
+                                </Text>
                                 <Ionicons
                                     name={selectedMethod === 'phone' ? 'radio-button-on' : 'radio-button-off'}
                                     size={20}
@@ -57,7 +61,9 @@ const VerifyByScreen = () => {
                                 onPress={() => setSelectedMethod('email')}
                             >
                                 <MaterialIcons name="email" size={20} color="#3B82F6" style={styles.icon} />
-                                <Text style={styles.optionText}>Email (user@gmail.com)</Text>
+                                <Text style={styles.optionText}>
+                                    {t("email_option", { email: "user@gmail.com" })}
+                                </Text>
                                 <Ionicons
                                     name={selectedMethod === 'email' ? 'radio-button-on' : 'radio-button-off'}
                                     size={20}
@@ -79,7 +85,7 @@ const VerifyByScreen = () => {
                                     style={styles.backIcon}
                                 />
                                 <CustomButton
-                                    title="Xác minh"
+                                    title={t("verify_button")}
                                     backgroundColor="#1A2741"
                                     titleColor="#FFFFFF"
                                     style={styles.verifyButton}

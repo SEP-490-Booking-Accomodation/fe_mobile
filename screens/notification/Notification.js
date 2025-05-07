@@ -2,11 +2,13 @@ import { StyleSheet, TouchableOpacity, SafeAreaView } from "react-native";
 import { useState } from "react";
 import { notificationData } from "./data/NotificationData";
 import NotificationList from "../../components/notification/NotificationList";
+import { useTranslation } from "react-i18next";
 
 import { View, Text } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
 export default function NotificationScreen({ navigation }) {
+  const { t } = useTranslation();
   const [notifications, setNotifications] = useState(notificationData);
 
   // Function to mark all notifications as read
@@ -26,7 +28,7 @@ export default function NotificationScreen({ navigation }) {
       >
         <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
       </TouchableOpacity>
-      <Text style={styles.textHeader}>Thông báo</Text>
+      <Text style={styles.textHeader}>{t('notifications')}</Text>
 
       <TouchableOpacity style={{ marginLeft: "auto" }} onPress={markAllAsRead}>
         <MaterialIcons name="checklist" size={24} color="#4E72E3" />

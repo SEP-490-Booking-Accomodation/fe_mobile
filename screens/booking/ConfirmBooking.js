@@ -10,7 +10,11 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import {
+  CommonActions,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import {AntDesign} from "@expo/vector-icons";
 import CustomButton from "../../components/buttons/Button";
 import PaymentConfirm from "./components/PaymentConfirm";
@@ -20,53 +24,37 @@ import dayjs from "dayjs";
 import { useGetCustomerByUserIdQuery } from "../../api/authApi";
 import CouponSelector from "./components/CouponSelector";
 import { useGetPolicyHashTagQuery } from "../../api/policySystemApi";
+import { useTranslation } from "react-i18next"; 
 
 export default function ConfirmBooking() {
+  const { t } = useTranslation();
   const authData = useSelector((state) => state.auth);
   const [paymentMethod, setPaymentMethod] = useState(1);
   const { data: customerData } = useGetCustomerByUserIdQuery(authData.userId);
+  const { data: getTimeRefundData } = useGetPolicyHashTagQuery("exRefund");
   const [selectedVoucher, setSelectedVoucher] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [finalTotal, setFinalTotal] = useState(0);
-  const { data: policyDataLoiNhuan } = useGetPolicyHashTagQuery("loinhuan");
   const [createBooking] = useCreateBookingMutation();
   const navigation = useNavigation();
   const route = useRoute();
   const { bookingData } = route.params || {};
-  const [phiDuyTri, setPhiDuyTri] = useState(0);
 
-  const loinhuan = policyDataLoiNhuan?.data?.[0];
-  const loinhuanbandau = loinhuan?.values?.[0];
+  const values = getTimeRefundData?.data?.[0]?.values || [];
+  let refundMinutes = values[0]?.val; // mặc định nếu không có
+  const bookingTime = dayjs(); // thời điểm tạo booking
+  const refundDeadline = bookingTime.add(refundMinutes, "minute");
+  // console.log(refundDeadline);
+  // console.log(bookingTime);
 
   useEffect(() => {
     if (bookingData) {
       calculateTotal();
     }
-  }, [bookingData, selectedVoucher, loinhuanbandau]);
-
-  useEffect(() => {
-    if (
-      bookingData?.totalPrice &&
-      loinhuanbandau?.val1 &&
-      loinhuanbandau?.unit == "percent"
-    ) {
-      const fee =
-        (bookingData.totalPrice * parseFloat(loinhuanbandau.val1)) / 100;
-      setPhiDuyTri(fee);
-    } else if (
-      bookingData?.totalPrice &&
-      loinhuanbandau?.val1 &&
-      loinhuanbandau?.unit == "vnd"
-    ) {
-      const fee = loinhuanbandau.val1;
-
-      setPhiDuyTri(fee);
-    }
-  }, [bookingData, loinhuanbandau]);
+  }, [bookingData, selectedVoucher]);
 
   const calculateTotal = () => {
     if (!bookingData) return;
-
     const originalTotal = bookingData.totalPrice;
     let discount = 0;
 
@@ -87,10 +75,8 @@ export default function ConfirmBooking() {
         selectedVoucher.discountBasedOn === "Fixed" ||
         selectedVoucher.discountBasedOn === "fixed"
       ) {
-        // Fixed discount
         discount = selectedVoucher?.amount;
 
-        // Make sure discount doesn't exceed the total
         if (discount > originalTotal) {
           discount = originalTotal;
         }
@@ -98,16 +84,7 @@ export default function ConfirmBooking() {
     }
 
     const priceAfterDiscount = originalTotal - discount;
-    // let fee = 0;
-    // if (loinhuanbandau?.val1 && loinhuanbandau.unit == "percent") {
-    //   fee = (priceAfterDiscount * parseFloat(loinhuanbandau.val1)) / 100;
-    //   setPhiDuyTri(fee);
-    // } else if (loinhuanbandau?.val1 && loinhuanbandau.unit == "vnd") {
-    //   fee = parseFloat(loinhuanbandau.val1);
-    //   setPhiDuyTri(fee);
-    // }
     setDiscountAmount(discount);
-    // setFinalTotal(priceAfterDiscount + fee);
     setFinalTotal(priceAfterDiscount);
   };
 
@@ -120,12 +97,12 @@ export default function ConfirmBooking() {
   if (!bookingData) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.header}>Không có dữ liệu đặt phòng</Text>
+        <Text style={styles.header}>{t("no_booking_data")}</Text>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backText}>Quay lại</Text>
+          <Text style={styles.backText}>{t("go_back")}</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -157,14 +134,13 @@ export default function ConfirmBooking() {
 
   const checkInDateTime = `${bookingData.date} ${bookingData.time}:00`;
   const checkOutDateTime = `${bookingData.date} ${bookingData.endTime}:00`;
-  console.log(checkInDateTime);
-  console.log(checkOutDateTime);
-  const policyId = policyDataLoiNhuan?.data?.[0].id;
-  console.log(policyId);
+  // console.log(checkInDateTime);
+  // console.log(checkOutDateTime);
+  // console.log(finalTotal);
 
   const handleConfirm = async () => {
     const formBooking = {
-      policySystemIds: policyId || ["67ebf15d828b69a4d279d960"],
+      // policySystemIds: policyId || ["67ebf15d828b69a4d279d960"],
       customerId: customerData.id,
       accommodationTypeId: typeRoom.id,
       couponId: selectedVoucher?.id || null,
@@ -183,41 +159,88 @@ export default function ConfirmBooking() {
       passwordRoom: "",
       note: bookingData.note || "",
       status: 8,
+      timeExpireRefund: refundDeadline,
       // discountAmount: discountAmount, // Add discount amount to the booking data
       totalPrice: finalTotal, // Add final total after discount
     };
+    // console.log(formBooking);
 
     try {
       const response = await createBooking({
         data: formBooking,
       }).unwrap();
 
-      navigation.navigate("BookingDetail", {
-        bookingData: {
-          ...bookingData,
-          discountAmount,
-          finalTotal,
-        },
-        bookingId: response.booking.id,
-      });
+      // navigation.navigate("BookingDetail", {
+      //   bookingId: response.booking.id,
+      // });
+
+      // navigation.reset({
+      //   index: 1,
+      //   routes: [
+      //     {
+      //       name: "MainTabs",
+      //       params: {
+      //         screen: "Ticket",
+      //         params: {
+      //           screen: "BookingDetail",
+      //           params: { bookingId: response.booking.id },
+      //         },
+      //       },
+      //     },
+      //   ],
+      // });
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 1,
+          routes: [
+            {
+              name: "MainTabs",
+              state: {
+                routes: [
+                  { name: "Home" },
+                  {
+                    name: "Ticket",
+                    state: {
+                      routes: [
+                        { name: "TicketList" },
+                        {
+                          name: "BookingDetail",
+                          params: { bookingId: response.booking.id },
+                        },
+                      ],
+                      index: 1,
+                    },
+                  },
+                ],
+                index: 1,
+              },
+            },
+          ],
+        })
+      );
     } catch (error) {
+      console.log(error);
+
       Alert.alert(
-        "Failed",
-        error.data?.message || "Đặt phòng thất bại, vui lòng thử lại sau"
+        t("failed"),
+        error.data?.message || t("booking_failed")
       );
     }
+  };
+  const handleConfirm1 = async () => {
+    console.log("Confirm");
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Xác nhận Đặt phòng</Text>
+      <Text style={styles.header}>{t("confirm_booking_title")}</Text>
       <ScrollView>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
         >
           <View style={styles.card}>
-            <Text style={styles.label}>Địa điểm:</Text>
+            <Text style={styles.label}>{t("location")}:</Text>
             <Text style={{ fontSize: 18 }}>{rentalData.name}</Text>
             <View>
               <Text style={styles.value}>{address}</Text>
@@ -225,32 +248,32 @@ export default function ConfirmBooking() {
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.label}>Loại phòng:</Text>
+            <Text style={styles.label}>{t("room_type")}:</Text>
             <Text style={{ fontSize: 18, fontWeight: "700" }}>
-              {typeRoom?.name ?? "Không có thông tin"}
+              {typeRoom?.name ?? t("no_info")}
             </Text>
             <View style={styles.jusBetween}>
-              <Text style={styles.value}>Giá giờ đầu: </Text>
+              <Text style={styles.value}>{t("base_price_text")}: </Text>
               <Text>{formatMoney(typeRoom?.basePrice)}</Text>
             </View>
             <View style={styles.jusBetween}>
-              <Text style={styles.value}>Giá giờ tiếp theo: </Text>
+              <Text style={styles.value}>{t("overtime_price")}: </Text>
               <Text>{formatMoney(typeRoom?.overtimeHourlyPrice)}</Text>
             </View>
             <View style={styles.jusBetween}>
-              <Text style={styles.value}>Tổng thời gian: </Text>
-              <Text>{bookingData?.duration}h</Text>
+              <Text style={styles.value}>{t("total_duration")}: </Text>
+              <Text>{bookingData?.duration}{t("h")}</Text>
             </View>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.label}>Thời gian thuê:</Text>
+            <Text style={styles.label}>{t("rental_time")}:</Text>
             <View style={styles.jusBetween}>
-              <Text style={styles.value}>Ngày: </Text>
+              <Text style={styles.value}>{t("date")}: </Text>
               <Text>{bookingData?.date}</Text>
             </View>
             <View style={styles.jusBetween}>
-              <Text style={styles.value}>Thời gian:</Text>
+              <Text style={styles.value}>{t("time")}:</Text>
               <Text>
                 {bookingData?.time} - {bookingData?.endTime}
               </Text>
@@ -258,13 +281,13 @@ export default function ConfirmBooking() {
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.label}>Số khách:</Text>
+            <Text style={styles.label}>{t("guests")}:</Text>
             <View style={styles.jusBetween}>
-              <Text style={styles.value}>Người lớn:</Text>
+              <Text style={styles.value}>{t("adults")}:</Text>
               <Text>{bookingData?.guests?.adults}</Text>
             </View>
             <View style={styles.jusBetween}>
-              <Text style={styles.value}>Trẻ em:</Text>
+              <Text style={styles.value}>{t("children")}:</Text>
               <Text>{bookingData?.guests?.children}</Text>
             </View>
           </View>
@@ -282,37 +305,25 @@ export default function ConfirmBooking() {
 
           {/* Summary section */}
           <View style={styles.card}>
-            <Text style={styles.label}>Tổng thanh toán:</Text>
+            <Text style={styles.label}>{t("payment_summary")}:</Text>
             <View style={styles.jusBetween}>
-              <Text style={styles.value}>Đơn giá phòng:</Text>
+              <Text style={styles.value}>{t("room_price")}:</Text>
               <Text>{formatMoney(bookingData.totalPrice)}</Text>
             </View>
 
             {selectedVoucher && (
               <View style={styles.jusBetween}>
                 <Text style={[styles.value, styles.discountText]}>
-                  Giảm giá:
+                  {t("discount")}:
                 </Text>
                 <Text style={styles.discountText}>
                   - {formatMoney(discountAmount)}
                 </Text>
               </View>
             )}
-            {/* <View style={styles.jusBetween}>
-              {loinhuanbandau?.unit == "percent" ? (
-                <Text style={styles.value}>
-                  Phí duy trì ({loinhuanbandau.val1}%)
-                </Text>
-              ) : loinhuanbandau?.unit == "vnd" ? (
-                <Text style={styles.value}>
-                  Phí duy trì ({loinhuanbandau.val1} VND)
-                </Text>
-              ) : null}
-              <Text>{formatMoney(phiDuyTri)}</Text>
-            </View> */}
 
             <View style={[styles.jusBetween, styles.totalRow]}>
-              <Text style={styles.totalText}>Thành tiền:</Text>
+              <Text style={styles.totalText}>{t("total_amount")}:</Text>
               <Text style={styles.totalAmount}>{formatMoney(finalTotal)}</Text>
             </View>
           </View>
@@ -327,13 +338,13 @@ export default function ConfirmBooking() {
           <AntDesign name="arrowleft" size={20} color="black" />
         </TouchableOpacity>
         <View>
-          <Text>Tổng</Text>
+          <Text>{t("total")}</Text>
           <Text style={styles.totalAmount}>{formatMoney(finalTotal)}</Text>
         </View>
         <CustomButton
           onPress={handleConfirm}
           style={{ width: "40%" }}
-          title="Thanh toán"
+          title={t("pay_now")}
         />
       </View>
     </SafeAreaView>

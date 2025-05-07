@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
@@ -16,8 +14,10 @@ import HorizontalCardMedium from "../../components/cards/HorizontalCardMedium";
 import SearchField from "../../components/SearchField";
 import Filter from "../../components/Filter";
 import { useGetAllRentalQuery } from "../../api/rentalLocationApi";
+import { useTranslation } from "react-i18next";
 
 const MapScreen = ({ navigation }) => {
+  const { t } = useTranslation();
   const mapRef = useRef(null);
 
   const [userLocation, setUserLocation] = useState(null);
@@ -44,9 +44,7 @@ const MapScreen = ({ navigation }) => {
         const { status } = await Location.requestForegroundPermissionsAsync();
 
         if (status !== "granted") {
-          setLocationError(
-            "Ứng dụng cần quyền truy cập vị trí để hiển thị bản đồ"
-          );
+          setLocationError(t('location_permission_required'));
           return;
         }
 
@@ -63,7 +61,7 @@ const MapScreen = ({ navigation }) => {
         });
       } catch (error) {
         console.error("Location error:", error);
-        setLocationError("Không thể xác định vị trí hiện tại");
+        setLocationError(t('location_current_error'));
       }
     };
 
@@ -80,9 +78,9 @@ const MapScreen = ({ navigation }) => {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(deg2rad(lat1)) *
-        Math.cos(deg2rad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
@@ -114,18 +112,17 @@ const MapScreen = ({ navigation }) => {
           closeHour: location.closeHour || "22:00",
           minPrice: location?.minPrice || 100000,
           maxPrice: location?.maxPrice || 500000,
-          location: `${location.address || ""}, ${location.ward || ""}, ${
-            location.district || ""
-          }, ${location.city || ""}`,
+          location: `${location.address || ""}, ${location.ward || ""}, ${location.district || ""
+            }, ${location.city || ""}`,
           rating: location.rating || "4.5",
           numOfReviews: location.numOfReviews || "10",
           distance: userLocation
             ? calculateDistance(
-                userLocation.latitude,
-                userLocation.longitude,
-                lat,
-                lng
-              ).toFixed(1)
+              userLocation.latitude,
+              userLocation.longitude,
+              lat,
+              lng
+            ).toFixed(1)
             : "N/A",
           destination: location,
         };
@@ -247,7 +244,7 @@ const MapScreen = ({ navigation }) => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4E72E3" />
-        <Text>Đang tải dữ liệu...</Text>
+        <Text>{t('loading_data')}</Text>
       </View>
     );
   }
@@ -255,11 +252,9 @@ const MapScreen = ({ navigation }) => {
   if (error) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Không thể tải dữ liệu địa điểm</Text>
-        <Text style={styles.errorSubText}>
-          Vui lòng kiểm tra kết nối mạng và thử lại
-        </Text>
-        <Button title="Thử lại" onPress={() => refetch()} color="#4E72E3" />
+        <Text style={styles.errorText}>{t('load_location_error')}</Text>
+        <Text style={styles.errorSubText}>{t('check_network')}</Text>
+        <Button title={t('retry')} onPress={() => refetch()} color="#4E72E3" />
       </View>
     );
   }
@@ -267,7 +262,7 @@ const MapScreen = ({ navigation }) => {
   if (!rentalLocations?.data?.length) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Không có dữ liệu địa điểm</Text>
+        <Text style={styles.errorText}>{t('no_location_data')}</Text>
         <Button title="Thử lại" onPress={() => refetch()} color="#4E72E3" />
       </View>
     );
@@ -276,7 +271,7 @@ const MapScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <SearchField
-        placeholder="Tìm kiếm điểm đến của bạn"
+        placeholder={t('search_destination')}
         onChangeText={setSearchText}
         value={searchText}
         backIcon
@@ -297,7 +292,7 @@ const MapScreen = ({ navigation }) => {
           <Marker coordinate={userLocation} onPress={handleUserLocationPress}>
             <View style={styles.userMarkerContainer}>
               <View style={styles.userMarkerCallout}>
-                <Text style={styles.userMarkerText}>Vị trí của bạn</Text>
+                <Text style={styles.userMarkerText}>{t('your_location')}</Text>
               </View>
               <View style={styles.userMarkerIconContainer}>
                 <View style={styles.userPinOuter}>
@@ -322,7 +317,7 @@ const MapScreen = ({ navigation }) => {
               style={[
                 styles.locationMarkerContainer,
                 selectedLocation?.id === location.id &&
-                  styles.selectedMarkerContainer,
+                styles.selectedMarkerContainer,
               ]}
             >
               {selectedLocation?.id === location.id && (
@@ -345,15 +340,13 @@ const MapScreen = ({ navigation }) => {
       </MapView>
 
       <View style={styles.listContainer}>
-        <Text style={styles.listTitle}>Điểm đến gần nhất (bán kính 5km)</Text>
+        <Text style={styles.listTitle}>{t('nearest_destinations')}</Text>
         <ScrollView
           style={styles.scrollContainer}
           contentContainerStyle={styles.scrollContentContainer}
         >
           {nearbyLocations.length === 0 ? (
-            <Text style={styles.noResultsText}>
-              Không có địa điểm nào phù hợp
-            </Text>
+            <Text style={styles.noResultsText}>{t('no_results_location')}</Text>
           ) : (
             nearbyLocations.map((location) => (
               <HorizontalCardMedium

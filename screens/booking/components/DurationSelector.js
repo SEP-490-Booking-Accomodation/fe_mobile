@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 
 const DurationSelector = ({
   selectedTime,
@@ -16,12 +17,13 @@ const DurationSelector = ({
   closingHour,
   closingMinute,
 }) => {
+  const { t } = useTranslation(); 
   const [availableDurations, setAvailableDurations] = useState([]);
 
   useEffect(() => {
     if (isOverNight) {
       // For overnight stays, allow durations up to 24 hours
-      setAvailableDurations([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24]);
+      setAvailableDurations([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
       return;
     }
 
@@ -75,21 +77,21 @@ const DurationSelector = ({
 
   return (
     <View>
-      <Text style={styles.sectionHeader}>Thời lượng sử dụng</Text>
+      <Text style={styles.sectionHeader}>{t("usage_duration")}</Text>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.durationScrollView}
       >
         {availableDurations
-          .filter(isDurationValid) // Hide invalid durations
+          .filter(isDurationValid)
           .map((hour) => (
             <TouchableOpacity
               key={hour}
               style={[
                 styles.durationButton,
                 selectedDuration === hour && styles.selectedDurationButton,
-                hour === 24 && styles.overnightButton, // Special style for overnight
+                hour === 24 && styles.overnightButton,
               ]}
               onPress={() => handleSelectDuration(hour)}
             >
@@ -99,7 +101,9 @@ const DurationSelector = ({
                   selectedDuration === hour && styles.selectedDurationText,
                 ]}
               >
-                {hour === 24 ? "Qua đêm" : `${hour} giờ`}
+                {hour === 24 
+                  ? t("overnight") 
+                  : t("hours", { count: hour })}
               </Text>
             </TouchableOpacity>
           ))}

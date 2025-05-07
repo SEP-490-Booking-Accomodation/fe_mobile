@@ -1,11 +1,13 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 const GuestSelector = ({ formatGuestCount, setGuestModalVisible }) => {
+  const { t } = useTranslation();
   return (
     <View style={styles.peopleRoom}>
-      <Text style={styles.sectionHeader}>Số lượng người ở phòng</Text>
+      <Text style={styles.sectionHeader}>{t("number_of_guests")}</Text>
       <TouchableOpacity
         style={styles.selectionButton}
         onPress={() => setGuestModalVisible(true)}

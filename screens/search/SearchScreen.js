@@ -11,8 +11,10 @@ import {
 import Icon from "react-native-vector-icons/Ionicons";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
 import HorizontalCardMedium from "../../components/cards/HorizontalCardMedium";
+import { useTranslation } from "react-i18next";
 
 const SearchScreen = ({ route, navigation }) => {
+  const { t } = useTranslation();
   const { searchHistory, addSearchTerm, clearSearchHistory, removeSearchTerm } =
     useAsyncStorage();
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,28 +24,26 @@ const SearchScreen = ({ route, navigation }) => {
   const exampleData = [
     {
       id: 1,
-      imageUrlLogo:
-        "https://cafebiz.cafebizcdn.vn/2018/12/22/photo-2-15454504530612141260827.jpg",
-      placeName: "Nhà Con Nhộng Bình Tân",
+      imageUrlLogo: "https://example.com/image1.jpg",
+      placeName: t('example_place_1'),
       openHour: "3:00",
       closeHour: "23:00",
       minPrice: "120.000",
       maxPrice: "1.400.000",
-      location: "Bình Tân, Hồ Chí Minh",
+      location: t('example_location_1'),
       rating: 5,
       numOfReviews: "12.5k",
       distance: "2.4",
     },
     {
       id: 2,
-      imageUrlLogo:
-        "https://cafebiz.cafebizcdn.vn/2018/12/22/photo-2-15454504530612141260827.jpg",
-      placeName: "Phòng Thương Gia",
+      imageUrlLogo: "https://example.com/image2.jpg",
+      placeName: t('example_place_2'),
       openHour: "6:00",
       closeHour: "22:00",
       minPrice: "250.000",
       maxPrice: "2.000.000",
-      location: "Quận 1, Hồ Chí Minh",
+      location: t('example_location_2'),
       rating: 4.8,
       numOfReviews: "8.3k",
       distance: "5.7",
@@ -52,8 +52,8 @@ const SearchScreen = ({ route, navigation }) => {
 
   const filteredHistory = searchTerm
     ? searchHistory.filter((item) =>
-        item.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      item.toLowerCase().includes(searchTerm.toLowerCase())
+    )
     : [];
 
   const handleSearch = () => {
@@ -113,7 +113,7 @@ const SearchScreen = ({ route, navigation }) => {
   const renderContent = () => {
     const sections = [
       {
-        title: "Lịch sử tìm kiếm",
+        title: t('search_history'),
         data: showAllHistory ? searchHistory : searchHistory.slice(0, 3),
         renderItem: renderHistoryItem,
         keyExtractor: (item, index) => index.toString(),
@@ -125,7 +125,7 @@ const SearchScreen = ({ route, navigation }) => {
                 style={styles.showMoreButton}
               >
                 <Text style={styles.showMoreText}>
-                  {showAllHistory ? "Ẩn bớt" : "Xem thêm"}
+                  {showAllHistory ? t('show_less') : t('show_more')}
                 </Text>
               </TouchableOpacity>
               {showAllHistory && searchHistory.length > 0 && (
@@ -133,7 +133,7 @@ const SearchScreen = ({ route, navigation }) => {
                   onPress={clearSearchHistory}
                   style={styles.clearHistoryButton}
                 >
-                  <Text style={styles.clearHistoryText}>Xóa tất cả</Text>
+                  <Text style={styles.clearHistoryText}>{t('clear_all')}</Text>
                 </TouchableOpacity>
               )}
             </>
@@ -191,7 +191,7 @@ const SearchScreen = ({ route, navigation }) => {
         </TouchableOpacity>
         <TextInput
           style={styles.searchInput}
-          placeholder="Nhập nội dung tìm kiếm"
+          placeholder={t('search_placeholder')}
           value={searchTerm}
           onChangeText={(text) => {
             setSearchTerm(text);
@@ -221,7 +221,7 @@ const SearchScreen = ({ route, navigation }) => {
               renderItem={renderHistoryItemOverlay}
             />
           ) : (
-            <Text style={styles.noResultsText}>Không có kết quả phù hợp</Text>
+            <Text style={styles.noResultsText}>{t('no_results')}</Text>
           )}
         </View>
       ) : (

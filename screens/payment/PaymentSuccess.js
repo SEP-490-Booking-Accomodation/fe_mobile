@@ -1,11 +1,13 @@
 import { useState, useRef } from "react"
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Image, SafeAreaView, Dimensions } from "react-native"
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get("window")
 const cardWidth = width * 0.9
 
 const PaymentSuccess = ({ route, navigation }) => {
+  const { t } = useTranslation();
   const [isFlipped, setIsFlipped] = useState(false)
   const animatedValue = useRef(new Animated.Value(0)).current
 
@@ -46,7 +48,6 @@ const PaymentSuccess = ({ route, navigation }) => {
       <TouchableOpacity style={styles.closeButton} onPress={() => navigation.navigate("HomeScreen")}>
         <Text style={styles.closeButtonText}><Ionicons name="close-circle-outline" size={24} color="white" /></Text>
       </TouchableOpacity>
-
       <View style={styles.mainContainer}>
         {/* Main Flipping Card */}
         <View style={styles.cardContainer}>
@@ -66,8 +67,8 @@ const PaymentSuccess = ({ route, navigation }) => {
                 <View style={styles.sparkle2} />
                 <View style={styles.sparkle3} />
               </View>
-              <Text style={styles.title}>Thanh toán thành công</Text>
-              <Text style={styles.subtitle}>Chúng tôi vừa gửi số tiền của bạn cho</Text>
+              <Text style={styles.title}>{t("payment_successful")}</Text>
+              <Text style={styles.subtitle}>{t("payment_sent_message")}</Text>
               <View style={styles.roomInfo}>
                 <Image
                   source={{
@@ -76,23 +77,21 @@ const PaymentSuccess = ({ route, navigation }) => {
                   style={styles.roomImage}
                 />
                 <View style={styles.roomDetails}>
-                  <Text style={styles.roomName}>Phòng 1</Text>
+                  <Text style={styles.roomName}>{roomName || t("room_default")}</Text>
                   <View style={styles.locationContainer}>
-                    <Text style={styles.location}>📍 Vũng Tàu</Text>
+                    <Text style={styles.location}>📍 {location || t("location_default")}</Text>
                   </View>
                 </View>
               </View>
 
               <View style={styles.amountSection}>
-                <Text style={styles.amountLabel}>Số tiền chuyển khoản</Text>
-                <Text style={styles.amount}>550.000đ</Text>
-                <Text style={styles.timestamp}>30/12/2024 — 9.41 am</Text>
+                <Text style={styles.amountLabel}>{t("amount_transferred")}</Text>
+                <Text style={styles.amount}>{amount || "550.000đ"}</Text>
+                <Text style={styles.timestamp}>{date || "30/12/2024"} — {time || "9.41 am"}</Text>
               </View>
 
-              <Text style={styles.timestamp}>30/12/2024 — 9.41</Text>
-
               <TouchableOpacity style={styles.detailButton} onPress={flipCard}>
-                <Text style={styles.detailButtonText}>Xem chi tiết</Text>
+                <Text style={styles.detailButtonText}>{t("view_details")}</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.leftNotch} />
@@ -117,39 +116,38 @@ const PaymentSuccess = ({ route, navigation }) => {
                   style={styles.roomImageBack}
                 />
                 <View style={styles.roomDetailsBack}>
-                  <Text style={styles.roomNameBack}>Phòng 1</Text>
+                  <Text style={styles.roomNameBack}>{roomName || t("room_default")}</Text>
                   <View style={styles.locationContainerBack}>
-                    <Text style={styles.locationBack}>📍 Vũng Tàu</Text>
+                    <Text style={styles.locationBack}>📍 {location || t("location_default")}</Text>
                   </View>
                 </View>
               </View>
 
               <View style={styles.detailGrid}>
                 <View style={styles.detailColumn}>
-                  <Text style={styles.detailLabel}>Ngày</Text>
-                  <Text style={styles.detailValue}>30.12.24</Text>
+                  <Text style={styles.detailLabel}>{t("date")}</Text>
+                  <Text style={styles.detailValue}>{date || "30.12.24"}</Text>
                 </View>
                 <View style={styles.detailColumn}>
-                  <Text style={styles.detailLabel}>Số người</Text>
-                  <Text style={styles.detailValue}>2</Text>
+                  <Text style={styles.detailLabel}>{t("guests")}</Text>
+                  <Text style={styles.detailValue}>{guests || "2"}</Text>
                 </View>
                 <View style={styles.detailColumn}>
-                  <Text style={styles.detailLabel}>Giờ</Text>
-                  <Text style={styles.detailValue}>12h</Text>
+                  <Text style={styles.detailLabel}>{t("time")}</Text>
+                  <Text style={styles.detailValue}>{time || "12h"}</Text>
                 </View>
                 <View style={styles.detailColumn}>
-                  <Text style={styles.detailLabel}>ID Number</Text>
-                  <Text style={styles.detailValue}>NG1011163</Text>
+                  <Text style={styles.detailLabel}>{t("id_number")}</Text>
+                  <Text style={styles.detailValue}>{idNumber || "NG1011163"}</Text>
                 </View>
               </View>
 
               <View style={styles.barcodeSection}>
-                {/* Add barcode component here */}
                 <View style={styles.barcodePlaceholder} />
               </View>
 
               <TouchableOpacity style={styles.detailButton} onPress={flipCard}>
-                <Text style={styles.detailButtonText}>Quay lại</Text>
+                <Text style={styles.detailButtonText}>{t("go_back")}</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.leftNotch} />
@@ -161,13 +159,12 @@ const PaymentSuccess = ({ route, navigation }) => {
         <View style={styles.bottomCard}>
           <View style={styles.bottomCardContent}>
             <View style={styles.customerInfo}>
-              <Text style={styles.customerLabel}>Họ tên</Text>
+              <Text style={styles.customerLabel}>{t("full_name")}</Text>
               <Text style={styles.customerName}>Zane Pham</Text>
-              <Text style={styles.totalLabel}>Tổng</Text>
-              <Text style={styles.totalAmount}>550.000đ</Text>
+              <Text style={styles.totalLabel}>{t("total")}</Text>
+              <Text style={styles.totalAmount}>{amount || "550.000đ"}</Text>
             </View>
             <View style={styles.qrCode}>
-              {/* Add QR code component here */}
               <View style={styles.qrPlaceholder} />
             </View>
           </View>

@@ -1,25 +1,28 @@
 import { Button, StyleSheet } from "react-native";
 import { Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 export function CheckLocation({ location, address, errorMsg, onRefresh }) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.content}>
-      <Text style={styles.title}>Vị trí hiện tại của bạn:</Text>
+      <Text style={styles.title}>{t('current_location')}</Text>
       {errorMsg ? (
-        <Text style={styles.error}>{errorMsg}</Text>
+        <Text style={styles.error}>{t(errorMsg)}</Text>
       ) : location ? (
         <>
           <Text style={styles.location}>
-            Latitude: {location.latitude}, Longitude: {location.longitude}
+            {t('latitude')}: {location.latitude}, {t('longitude')}: {location.longitude}
           </Text>
           <Text style={styles.address}>
-            Địa điểm: {address || "Đang tải..."}
+            {t('address')}: {address || t('loading_address')}
           </Text>
         </>
       ) : (
-        <Text style={styles.loading}>Đang lấy vị trí...</Text>
+        <Text style={styles.loading}>{t('loading_location')}</Text>
       )}
-      <Button title="Làm mới vị trí" onPress={onRefresh} />
+      <Button title={t('refresh_location_button')} onPress={onRefresh} />
     </View>
   );
 }
