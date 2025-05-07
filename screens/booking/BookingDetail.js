@@ -179,18 +179,11 @@ export default function BookingDetail() {
     );
   };
 
-  const handleGoHome = () => {
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [
-          {
-            name: "MainTabs",
-            state: { index: 0, routes: [{ name: "HomeScreen" }] },
-          },
-        ],
-      })
-    );
+  const handleViewTicket = () => {
+    navigation.navigate("Ticket", {
+      screen: "Ticket",
+    });
+
   };
 
   // ==============================
@@ -411,7 +404,7 @@ export default function BookingDetail() {
           shouldShowViewTicket() && (
             <CustomButton
               title="Xem vé"
-              onPress={handleGoHome}
+              onPress={handleViewTicket}
               style={styles.homeButton}
             />
           )

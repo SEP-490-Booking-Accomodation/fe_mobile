@@ -55,6 +55,7 @@ import HistoryScreen from "../screens/profile/childPage/HistoryScreen";
 import RatingHistory from "../screens/profile/childPage/RatingHistory";
 import TicketList from "../screens/ticket/TicketList";
 import BookingInformation from "../screens/booking/BookingInformation";
+import Ticket from "../screens/ticket/Ticket";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -80,6 +81,7 @@ const hideTabBarScreens = [
   "MapScreen",
   "TicketList",
   "HistoryScreen",
+  "Ticket"
 ];
 
 // AUTH STACK
@@ -256,6 +258,7 @@ const TicketStack = () => (
       component={BookingDetail}
       options={{ headerShown: false }}
     /> */}
+    <Stack.Screen name="Ticket" component={Ticket} /> 
   </Stack.Navigator>
 );
 
