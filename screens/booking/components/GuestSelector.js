@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Users } from "lucide-react-native";
+import { AntDesign } from "@expo/vector-icons";
 
 const GuestSelector = ({ formatGuestCount, setGuestModalVisible }) => {
   return (
@@ -11,7 +11,7 @@ const GuestSelector = ({ formatGuestCount, setGuestModalVisible }) => {
         onPress={() => setGuestModalVisible(true)}
       >
         <Text style={styles.selectionText}>{formatGuestCount()}</Text>
-        <Users size={24} color="#666" />
+        <AntDesign name="user" size={24} color="black" />
       </TouchableOpacity>
     </View>
   );

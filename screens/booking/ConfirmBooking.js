@@ -11,7 +11,7 @@ import {
   Alert,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { ArrowLeft } from "lucide-react-native";
+import {AntDesign} from "@expo/vector-icons";
 import CustomButton from "../../components/buttons/Button";
 import PaymentConfirm from "./components/PaymentConfirm";
 import { useCreateBookingMutation } from "../../api/bookingApi";
@@ -324,7 +324,7 @@ export default function ConfirmBooking() {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <ArrowLeft size={24} color="#000" />
+          <AntDesign name="arrowleft" size={20} color="black" />
         </TouchableOpacity>
         <View>
           <Text>Tổng</Text>

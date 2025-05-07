@@ -10,14 +10,11 @@ import {
   Linking,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import {
-  ArrowLeft,
-  Clock,
-  Users,
-  MapPin,
-  Bed,
-  CreditCard,
-} from "lucide-react-native";
+
+
+import { AntDesign } from "@expo/vector-icons"; //arrowleft
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+
 import CustomButton from "../../components/buttons/Button";
 import {
   useGetBookingByIdQuery,
@@ -234,7 +231,7 @@ export default function BookingDetail() {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <ArrowLeft size={24} color="#000" />
+          <AntDesign name="arrowleft" size={20} color="black" />
           <Text style={styles.backText}>Quay lại</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -255,7 +252,7 @@ export default function BookingDetail() {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <ArrowLeft size={24} color="#000" />
+          <AntDesign name="arrowleft" size={20} color="black" />
         </TouchableOpacity>
         <Text style={styles.header}>Chi tiết đặt phòng</Text>
         <View style={{ width: 24 }} />
@@ -285,7 +282,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <MapPin size={20} color="#ff385c" />
+          <AntDesign name="enviroment" size={20} color="black" />
             <Text style={styles.cardTitle}>Địa điểm</Text>
           </View>
           <Text style={styles.value}>{rentalData.name}</Text>
@@ -294,7 +291,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Bed size={20} color="#ff385c" />
+          <FontAwesome5 name="bed" size={20} color="black" />
             <Text style={styles.cardTitle}>Loại phòng</Text>
           </View>
           <Text style={styles.value}>
@@ -307,7 +304,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Clock size={20} color="#ff385c" />
+          <AntDesign name="clockcircle" size={20} color="black" />
             <Text style={styles.cardTitle}>Thời gian thuê</Text>
           </View>
           {/* <Text style={styles.value}>Ngày: {bookingData.checkInHour}</Text> */}
@@ -322,7 +319,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Users size={20} color="#ff385c" />
+            <AntDesign name="user" size={20} color="black" />
             <Text style={styles.cardTitle}>Số khách</Text>
           </View>
           <Text style={styles.value}>Người lớn: {bookingData.adultNumber}</Text>
@@ -340,7 +337,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <CreditCard size={20} color="#ff385c" />
+          <AntDesign name="creditcard" size={20} color="black" />
             <Text style={styles.cardTitle}>Thông tin thanh toán</Text>
           </View>
           <View style={styles.paymentRow}>

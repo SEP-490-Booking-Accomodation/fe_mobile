@@ -1,4 +1,4 @@
-import { icons } from "lucide-react-native";
+
 
 export const notificationData = [
   {

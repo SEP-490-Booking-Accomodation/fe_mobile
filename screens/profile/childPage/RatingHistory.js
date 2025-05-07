@@ -12,7 +12,7 @@ import {
     ActivityIndicator,
 } from "react-native"
 import { useNavigation } from "@react-navigation/native"
-import { ArrowLeft, Star, ChevronRight, Calendar } from "lucide-react-native"
+import { AntDesign } from "@expo/vector-icons"
 
 // Mock data for testing
 const MOCK_FEEDBACKS = [
@@ -146,7 +146,8 @@ export default function RatingHistory() {
         return (
             <View style={styles.starsContainer}>
                 {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
+                    
+                    <AntDesign name="star"
                         key={star}
                         size={16}
                         fill={star <= rating ? "#FFB800" : "transparent"}
@@ -165,7 +166,7 @@ export default function RatingHistory() {
             <View style={styles.detailContainer}>
                 <View style={styles.detailHeader}>
                     <TouchableOpacity onPress={handleBackToList} style={styles.backButton}>
-                        <ArrowLeft size={24} color="#000" />
+                    <AntDesign name="arrowleft" size={20} color="black" />
                     </TouchableOpacity>
                     <Text style={styles.detailHeaderTitle}>Chi tiết đánh giá</Text>
                     <View style={{ width: 24 }} />
@@ -187,7 +188,7 @@ export default function RatingHistory() {
                                 {selectedRating.bookingId?.accommodationId?.rentalLocationId?.city || "Địa điểm"}
                             </Text>
                             <View style={styles.ratingDateRow}>
-                                <Calendar size={14} color="#6B7280" />
+                                <AntDesign name="calendar" size={14} color="#6B7280" />
                                 <Text style={styles.ratingDate}>{formatDate(selectedRating.createdAt)}</Text>
                             </View>
                         </View>
@@ -230,7 +231,7 @@ export default function RatingHistory() {
                         onPress={() => handleViewBooking(selectedRating.bookingId.id)}
                     >
                         <Text style={styles.viewBookingText}>Xem chi tiết đặt phòng</Text>
-                        <ChevronRight size={20} color="#FFFFFF" />
+                        <AntDesign name="right" size={20} color="#FFFFFF" />
                     </TouchableOpacity>
                 </ScrollView>
             </View>
@@ -282,7 +283,7 @@ export default function RatingHistory() {
                                     <Text style={styles.ratingCardDate}>{formatDate(rating.createdAt)}</Text>
                                 </View>
                             </View>
-                            <ChevronRight size={20} color="#6B7280" />
+                            <AntDesign name="right" size={20} color="#6B7280" />
                         </View>
                         <Text style={styles.ratingCardContent} numberOfLines={2}>
                             {rating.content}

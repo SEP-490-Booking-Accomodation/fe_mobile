@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import { ArrowLeft } from "lucide-react-native";
+
 import CustomButton from "../../../components/buttons/Button";
 
 const PaymentConfirm = ({ setPaymentMethod }) => {

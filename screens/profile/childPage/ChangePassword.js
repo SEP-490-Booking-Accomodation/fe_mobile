@@ -10,7 +10,7 @@ import {
   Alert
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { ArrowLeft } from "lucide-react-native";
+import {AntDesign} from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 import CustomInput from "../../../components/TextInput";
 import CustomButton from "../../../components/buttons/Button";
@@ -60,7 +60,7 @@ export default function ChangePassword({ route }) {
   const renderFooter = () => (
     <View style={styles.footer}>
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <ArrowLeft size={24} color="#4E72E3" />
+      <AntDesign name="arrowleft" size={20} color="black" />
       </TouchableOpacity>
       <CustomButton style={{ width: "85%" }} title="Cập nhật" onPress={handlePasswordChange} />
     </View>

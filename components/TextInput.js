@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import { Eye, EyeOff } from 'lucide-react-native';
+import { Feather } from '@expo/vector-icons';
+
 
 const CustomInput = ({
   value,
@@ -42,9 +43,9 @@ const CustomInput = ({
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           {isPasswordVisible ? (
-            <EyeOff size={iconSize} color={passwordIconColor} />
+            <Feather name="eye-off" size={24} color="black" />
           ) : (
-            <Eye size={iconSize} color={passwordIconColor} />
+            <Feather name="eye" size={24} color="black" />
           )}
         </TouchableOpacity>
       </View>

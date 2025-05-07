@@ -4,8 +4,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { Alert, Linking, StatusBar } from "react-native";
 import { AsyncStorageProvider } from "./context/AsyncStorageContext";
 import AppStack from "./navigator/AppStack";
-import { StripeProvider } from "@stripe/stripe-react-native";
-import { STRIPE_PUBLIC_KEY } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { logout, refreshToken, restoreAuth } from "./redux/authSlice";
 import store from "./redux/store";
@@ -60,7 +58,6 @@ export default function App() {
   };
   return (
     <Provider store={store}>
-      <StripeProvider publishableKey={STRIPE_PUBLIC_KEY}>
         <StatusBar animated={true} />
         <NavigationContainer>
           <AsyncStorageProvider>
@@ -68,7 +65,6 @@ export default function App() {
             <AppStack />
           </AsyncStorageProvider>
         </NavigationContainer>
-      </StripeProvider>
     </Provider>
   );
 }

@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { ArrowLeft } from "lucide-react-native";
+
+import { AntDesign } from "@expo/vector-icons";
 import CustomButton from "../../../components/buttons/Button";
 
 const BookingFooter = ({
@@ -16,7 +17,7 @@ const BookingFooter = ({
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <ArrowLeft size={24} color="#000" />
+        <AntDesign name="arrowleft" size={20} color="black" />
       </TouchableOpacity>
       <View style={styles.priceContainer}>
         <Text style={styles.currencySymbol}>Tổng</Text>

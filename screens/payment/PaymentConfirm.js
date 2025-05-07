@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import CustomButton from '../../components/buttons/Button';
-import { ArrowLeft } from 'lucide-react-native';
+import { AntDesign } from '@expo/vector-icons';
 
 const PaymentConfirm = ({ route, navigation }) => {
   const [selectedPayment, setSelectedPayment] = useState('mean');
@@ -79,7 +79,7 @@ const PaymentConfirm = ({ route, navigation }) => {
           //handleReturnBack()
           navigation.goBack() 
         }>
-          <ArrowLeft size={24} color="#000" />
+          <AntDesign name="arrowleft" size={20} color="black" />
         </TouchableOpacity>
           <View>
             <Text>Tổng</Text>
