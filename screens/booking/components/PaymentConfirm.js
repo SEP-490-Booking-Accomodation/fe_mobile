@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import { ArrowLeft } from '@expo/vector-icons/AntDesign';
+import { AntDesign } from '@expo/vector-icons';
 import CustomButton from "../../../components/buttons/Button";
 import { useTranslation } from "react-i18next";
 
@@ -58,8 +58,8 @@ const PaymentConfirm = ({ setPaymentMethod }) => {
         >
           <Image source={method.image} style={styles.paymentIcon} />
           <View style={styles.paymentText}>
-          <Text style={styles.paymentTitle}>{t(method.labelKey)}</Text>
-          <Text style={styles.paymentSubtitle}>{t(method.sublabelKey)}</Text>
+            <Text style={styles.paymentTitle}>{t(method.labelKey)}</Text>
+            <Text style={styles.paymentSubtitle}>{t(method.sublabelKey)}</Text>
           </View>
           <View style={styles.radioOuter}>
             {selectedPayment === method.value && (
@@ -69,10 +69,10 @@ const PaymentConfirm = ({ setPaymentMethod }) => {
         </TouchableOpacity>
       ))}
       <View style={styles.securityBox}>
-        <Text style={styles.securityIcon}>🛡️</Text>
+        <AntDesign name="safety" size={24} color="#4caf50" />
         <View>
-        <Text style={styles.securityTitle}>{t("payment_guarantee")}</Text>
-        <Text style={styles.securityText}>{t("payment_guarantee_description")}</Text>
+          <Text style={styles.securityTitle}>{t("payment_guarantee")}</Text>
+          <Text style={styles.securityText}>{t("payment_guarantee_description")}</Text>
         </View>
       </View>
     </View>
@@ -146,10 +146,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     flexDirection: "row",
     alignItems: "center",
-  },
-  securityIcon: {
-    fontSize: 24,
-    marginRight: 12,
   },
   securityTitle: {
     color: "#4caf50",

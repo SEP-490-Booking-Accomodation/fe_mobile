@@ -9,7 +9,7 @@ import {
   Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { ArrowLeft, Calendar, Right } from '@expo/vector-icons/AntDesign';
+import { AntDesign } from '@expo/vector-icons';
 
 export default function RatingDetail({
   rating,
@@ -29,7 +29,7 @@ export default function RatingDetail({
     <View style={styles.detailContainer}>
       <View style={styles.detailHeader}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <ArrowLeft size={24} color="#000" />
+          <AntDesign name="left" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.detailHeaderTitle}>Chi tiết đánh giá</Text>
         <View style={{ width: 24 }} />
@@ -58,7 +58,7 @@ export default function RatingDetail({
                 "Địa điểm"}
             </Text>
             <View style={styles.ratingDateRow}>
-              <Calendar size={14} color="#6B7280" />
+              <AntDesign name="calendar" size={14} color="#6B7280" />
               <Text style={styles.ratingDate}>{rating.createdAt}</Text>
             </View>
           </View>
@@ -107,7 +107,7 @@ export default function RatingDetail({
           onPress={() => handleViewBooking(rating.bookingId.id)}
         >
           <Text style={styles.viewBookingText}>Xem chi tiết đặt phòng</Text>
-          <Right size={20} color="#FFFFFF" />
+          <AntDesign name="right" size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </ScrollView>
     </View>

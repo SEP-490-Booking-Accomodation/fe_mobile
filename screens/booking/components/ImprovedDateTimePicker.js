@@ -7,7 +7,7 @@ import {
   Alert,
   ScrollView,
 } from "react-native";
-import { Calendar, Clock } from '@expo/vector-icons/AntDesign';
+import { AntDesign } from '@expo/vector-icons';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useTranslation } from "react-i18next";
 
@@ -190,7 +190,7 @@ const ImprovedDateTimePicker = ({
         <Text style={[styles.dateTimeText, !selectedDate && styles.placeholderText]}>
           {selectedDate ? formatDate(selectedDate) : t("select_date")}
         </Text>
-        <Calendar style={styles.icon} size={24} color="#666" />
+        <AntDesign name="calendar" size={24} color="#666" />
       </TouchableOpacity>
 
       {/* Time selection */}
@@ -199,7 +199,7 @@ const ImprovedDateTimePicker = ({
         <Text style={[styles.dateTimeText, !selectedTime && styles.placeholderText]}>
           {selectedTime ? formatTime(selectedTime) : t("select_time")}
         </Text>
-        <Clock style={styles.icon} size={24} color="#666" />
+        <AntDesign name="clockcircle" size={24} color="#666" />
       </TouchableOpacity>
 
       {/* Duration selection */}

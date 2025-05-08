@@ -1,6 +1,6 @@
 import { SafeAreaView, StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, Image, Linking } from "react-native"
 import { useNavigation, useRoute } from "@react-navigation/native"
-import { ArrowLeft, ClockCircle, User, Environment, Home, CreditCard } from '@expo/vector-icons/AntDesign'
+import { AntDesign } from '@expo/vector-icons'
 import CustomButton from "../../components/buttons/Button"
 import { useGetBookingByIdQuery, useUpdateBookingMutation } from "../../api/bookingApi"
 import { useProcessMomoPaymentMutation } from "../../api/momoPayment"
@@ -222,7 +222,7 @@ export default function BookingDetail() {
       <SafeAreaView style={styles.container}>
         <Text style={styles.header}>{t("no_booking_data")}</Text>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <ArrowLeft size={24} color="#000" />
+          <AntDesign name="left" size={24} color="#000" />
           <Text style={styles.backText}>{t("go_back")}</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -246,7 +246,7 @@ export default function BookingDetail() {
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <ArrowLeft size={24} color="#000" />
+          <AntDesign name="left" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.header}>{t("booking_details")}</Text>
         <View style={{ width: 24 }} />
@@ -272,7 +272,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Environment size={20} color="#ff385c" />
+            <AntDesign name="enviroment" size={20} color="#ff385c" />
             <Text style={styles.cardTitle}>{t("location")}</Text>
           </View>
           <Text style={styles.value}>{rentalData.name}</Text>
@@ -281,7 +281,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Home size={20} color="#ff385c" />
+            <AntDesign name="home" size={20} color="#ff385c" />
             <Text style={styles.cardTitle}>{t("room_type")}</Text>
           </View>
           <Text style={styles.value}>{typeRoom?.name ?? t("no_info")}</Text>
@@ -290,7 +290,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <ClockCircle size={20} color="#ff385c" />
+            <AntDesign name="clockcircle" size={20} color="#ff385c" />
             <Text style={styles.cardTitle}>{t("rental_time")}</Text>
           </View>
           <Text style={styles.value}>{t("check_in")}: {bookingData.checkInHour}</Text>
@@ -300,7 +300,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <User size={20} color="#ff385c" />
+            <AntDesign name="user" size={20} color="#ff385c" />
             <Text style={styles.cardTitle}>{t("guests")}</Text>
           </View>
           <Text style={styles.value}>{t("adults")}: {bookingData.adultNumber}</Text>
@@ -318,7 +318,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <CreditCard size={20} color="#ff385c" />
+            <AntDesign name="creditcard" size={20} color="#ff385c" />
             <Text style={styles.cardTitle}>{t("payment_info")}</Text>
           </View>
           <View style={styles.paymentRow}>

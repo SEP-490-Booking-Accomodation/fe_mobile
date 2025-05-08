@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import CustomButton from "../../../components/buttons/Button";
 import CustomInput from "../../../components/TextInput";
 import { useUpdateUserMutation } from "../../../api/profileApi";
@@ -61,13 +62,15 @@ const AvatarUpload = ({ currentImage, onImageChange }) => {
   );
 };
 
-export default function EditInfo({ route, navigation }) {
+export default function EditInfo() {
   const { t } = useTranslation();
+  const navigation = useNavigation();
+  const route = useRoute();
   const userId = useSelector((state) => state.auth.userId);
   const [updateUserApi] = useUpdateUserMutation();
 
-  const [dataUser, setDataUser] = useState(route.params?.data);
-  const [image, setImage] = useState(dataUser?.userId?.avatarUrl[0] || "");
+  const [dataUser, setDataUser] = useState(route.params?.data || {});
+  const [image, setImage] = useState(dataUser?.userId?.avatarUrl?.[0] || "");
   const [fullName, setFullName] = useState(dataUser?.userId?.fullName || "");
   const [email, setEmail] = useState(dataUser?.userId?.email || "");
   const [phone, setPhone] = useState(dataUser?.userId?.phone || "");
@@ -79,7 +82,7 @@ export default function EditInfo({ route, navigation }) {
       email.trim() !== (dataUser?.userId?.email || "") ||
       fullName.trim() !== (dataUser?.userId?.fullName || "") ||
       phone.trim() !== (dataUser?.userId?.phone || "") ||
-      image !== (dataUser?.userId?.avatarUrl || "")
+      image !== (dataUser?.userId?.avatarUrl?.[0] || "")
     ) {
       setIsButtonSaveActive(true);
     } else {

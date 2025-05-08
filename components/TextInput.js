@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import { Eye, EyeOff } from '@expo/vector-icons/AntDesign';
+import { AntDesign } from '@expo/vector-icons';
 
 const CustomInput = ({
   value,
@@ -42,9 +42,9 @@ const CustomInput = ({
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           {isPasswordVisible ? (
-            <EyeOff size={iconSize} color={passwordIconColor} />
+            <AntDesign name="eyeo" size={iconSize} color={passwordIconColor} />
           ) : (
-            <Eye size={iconSize} color={passwordIconColor} />
+            <AntDesign name="eye" size={iconSize} color={passwordIconColor} />
           )}
         </TouchableOpacity>
       </View>

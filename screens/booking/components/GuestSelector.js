@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Users } from '@expo/vector-icons/AntDesign';
+import { AntDesign } from '@expo/vector-icons';
 import { useTranslation } from "react-i18next";
 
 const GuestSelector = ({ formatGuestCount, setGuestModalVisible }) => {
@@ -13,7 +13,7 @@ const GuestSelector = ({ formatGuestCount, setGuestModalVisible }) => {
         onPress={() => setGuestModalVisible(true)}
       >
         <Text style={styles.selectionText}>{formatGuestCount()}</Text>
-        <Users name="user" size={24} color="#666" />
+        <AntDesign name="user" size={24} color="#666" />
       </TouchableOpacity>
     </View>
   );

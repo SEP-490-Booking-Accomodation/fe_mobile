@@ -8,7 +8,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import { Minus, Plus } from '@expo/vector-icons/AntDesign';
+import { AntDesign } from '@expo/vector-icons';
 import { useTranslation } from "react-i18next";
 
 const GuestCounter = ({
@@ -33,7 +33,7 @@ const GuestCounter = ({
         onPress={onDecrement}
         disabled={value === 0}
       >
-        <Minus size={24} color={value === 0 ? "#ccc" : "#000"} />
+        <AntDesign name="minus" size={24} color={value === 0 ? "#ccc" : "#000"} />
       </TouchableOpacity>
       <Text style={styles.counterValue}>{value}</Text>
       <TouchableOpacity
@@ -44,7 +44,7 @@ const GuestCounter = ({
         onPress={onIncrement}
         disabled={value === maxValue}
       >
-        <Plus size={24} color={value === maxValue ? "#ccc" : "#000"} />
+        <AntDesign name="plus" size={24} color={value === maxValue ? "#ccc" : "#000"} />
       </TouchableOpacity>
     </View>
   </View>
