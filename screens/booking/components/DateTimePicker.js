@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Calendar, Clock } from "lucide-react-native";
+import { AntDesign } from '@expo/vector-icons';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useTranslation } from "react-i18next";
 
@@ -30,7 +30,7 @@ const DateTimePicker = ({
         >
           {selectedDate ? formatDate(selectedDate) : t("select_date")}
         </Text>
-        <Calendar style={styles.icon} size={24} color="#666" />
+        <AntDesign name="calendar" size={24} color="#666" />
       </TouchableOpacity>
 
       {/* Time selection */}
@@ -41,7 +41,7 @@ const DateTimePicker = ({
         >
           {selectedTime ? formatTime(selectedTime) : t("select_time")}
         </Text>
-        <Clock style={styles.icon} size={24} color="#666" />
+        <AntDesign name="clockcircle" size={24} color="#666" />
       </TouchableOpacity>
 
       {/* Display expected end time */}

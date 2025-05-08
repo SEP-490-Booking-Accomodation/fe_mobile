@@ -11,8 +11,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { ArrowLeft, Star, ChevronRight } from "lucide-react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { AntDesign } from '@expo/vector-icons';
 import RatingDetail from "./RatingDetail";
 import { useSelector } from "react-redux";
 import { useGetAllFeedbackByCustomerIdQuery } from "../../../../api/feedbackApi";
@@ -114,11 +113,12 @@ export default function RatingList() {
   const renderStars = (rating) => (
     <View style={styles.starsContainer}>
       {[1, 2, 3, 4, 5].map((star) => (
-        <Star
+        <AntDesign
           key={star}
+          name="star"
           size={16}
-          fill={star <= rating ? "#FFB800" : "transparent"}
           color={star <= rating ? "#FFB800" : "#D1D5DB"}
+          style={star <= rating ? { fill: "#FFB800" } : {}}
         />
       ))}
     </View>
@@ -130,7 +130,7 @@ export default function RatingList() {
         style={styles.arrowBack}
         onPress={() => navigation.goBack()}
       >
-        <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
+        <AntDesign name="left" size={24} color="#4E72E3" />
       </TouchableOpacity>
       <Text style={styles.textHeader}>Lịch sử đánh giá</Text>
     </View>
@@ -199,7 +199,7 @@ export default function RatingList() {
                     </Text>
                   </View>
                 </View>
-                <ChevronRight size={20} color="#6B7280" />
+                <AntDesign name="right" size={20} color="#6B7280" />
               </View>
             </TouchableOpacity>
           );

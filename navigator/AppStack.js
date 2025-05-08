@@ -151,12 +151,11 @@ const HomeStack = () => (
       component={PaymentConfirm}
       options={{ headerShown: false }}
     />
-    {/* <Stack.Screen
+    <Stack.Screen
       name="BookingDetail"
       component={BookingDetail}
       options={{ headerShown: false }}
-    /> */}
-
+    />
     <Stack.Screen
       name="PaymentSuccess"
       component={PaymentSuccess}

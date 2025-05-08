@@ -1,13 +1,13 @@
 import React from "react";
 import { SafeAreaView, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { ArrowLeft } from "lucide-react-native";
+import { AntDesign } from '@expo/vector-icons';
 
 export default function EmptyState({ onGoBack }) {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.text}>Không có dữ liệu đặt phòng</Text>
       <TouchableOpacity style={styles.backButton} onPress={onGoBack}>
-        <ArrowLeft size={24} color="#000" />
+        <AntDesign name="left" size={24} color="#000" />
         <Text style={styles.backText}>Quay lại</Text>
       </TouchableOpacity>
     </SafeAreaView>

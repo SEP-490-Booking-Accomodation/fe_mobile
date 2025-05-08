@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import CustomButton from '../../components/buttons/Button';
-import { ArrowLeft } from 'lucide-react-native';
+import { AntDesign } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 const PaymentConfirm = ({ route, navigation }) => {
   const { t } = useTranslation();
   const [selectedPayment, setSelectedPayment] = useState('mean');
-
 
   const renderHeader = () => (
     <View style={styles.header}>
@@ -21,7 +20,7 @@ const PaymentConfirm = ({ route, navigation }) => {
       onPress={() => setSelectedPayment(value)}
     >
       <View style={styles.paymentIcon}>
-        <Text>{value === 'mean' ? '📷' : '↔️'}</Text>
+        <AntDesign name={value === 'mean' ? 'wallet' : 'bank'} size={24} color="#666" />
       </View>
       <View style={styles.paymentText}>
         <Text style={styles.paymentTitle}>{t(label)}</Text>
@@ -65,7 +64,7 @@ const PaymentConfirm = ({ route, navigation }) => {
         </View>
 
         <View style={styles.securityBox}>
-          <Text style={styles.securityIcon}>🛡️</Text>
+          <AntDesign name="safety" size={24} color="#4caf50" />
           <View>
             <Text style={styles.securityTitle}>{t('payment_guarantee')}</Text>
             <Text style={styles.securityText}>
@@ -77,7 +76,6 @@ const PaymentConfirm = ({ route, navigation }) => {
 
       <View style={styles.bottomBar}>
         <View style={styles.totalSection}>
-          {/* ... back button remains the same */}
           <View>
             <Text>{t('total')}</Text>
             <Text style={styles.totalAmount}>550.000đ</Text>

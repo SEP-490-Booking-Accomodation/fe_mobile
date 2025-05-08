@@ -9,8 +9,7 @@ import {
   Platform,
   Alert
 } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
-import { ArrowLeft } from "lucide-react-native";
+import { AntDesign } from '@expo/vector-icons';
 import { useState, useEffect } from "react";
 import CustomInput from "../../../components/TextInput";
 import CustomButton from "../../../components/buttons/Button";
@@ -52,7 +51,7 @@ export default function ChangePassword({ route }) {
   const renderHeader = () => (
     <View style={styles.header}>
       <TouchableOpacity style={styles.arrowBack} onPress={() => navigation.goBack()}>
-        <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
+        <AntDesign name="left" size={24} color="#4E72E3" />
       </TouchableOpacity>
       <Text style={styles.textHeader}>{t('change_password')}</Text>
     </View>
@@ -61,7 +60,7 @@ export default function ChangePassword({ route }) {
   const renderFooter = () => (
     <View style={styles.footer}>
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <ArrowLeft size={24} color="#4E72E3" />
+        <AntDesign name="left" size={24} color="#4E72E3" />
       </TouchableOpacity>
       <CustomButton style={{ width: "85%" }} title={t('update')} onPress={handlePasswordChange} />
     </View>

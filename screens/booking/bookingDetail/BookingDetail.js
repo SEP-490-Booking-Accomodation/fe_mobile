@@ -169,7 +169,7 @@ export default function BookingDetail() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <BookingHeader navigation={navigation} />
+      <BookingHeader />
 
       <BookingStatusBar
         status={bookingData.status}
