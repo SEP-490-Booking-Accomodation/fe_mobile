@@ -1,5 +1,5 @@
 import React from "react";
-import { Users } from "lucide-react-native";
+import { Users } from '@expo/vector-icons/AntDesign';
 import InfoCard from "./InfoCard";
 import { InfoText } from "./InfoContent";
 

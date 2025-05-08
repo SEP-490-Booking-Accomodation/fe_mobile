@@ -15,7 +15,7 @@ import {
   useNavigation,
   useRoute,
 } from "@react-navigation/native";
-import { ArrowLeft } from "lucide-react-native";
+import { ArrowLeft } from '@expo/vector-icons/AntDesign';
 import CustomButton from "../../components/buttons/Button";
 import PaymentConfirm from "./components/PaymentConfirm";
 import { useCreateBookingMutation } from "../../api/bookingApi";

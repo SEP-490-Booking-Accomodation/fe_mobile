@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import CustomButton from '../../components/buttons/Button';
-import { ArrowLeft } from 'lucide-react-native';
+import { ArrowLeft } from '@expo/vector-icons/AntDesign';
 import { useTranslation } from 'react-i18next';
 
 const PaymentConfirm = ({ route, navigation }) => {

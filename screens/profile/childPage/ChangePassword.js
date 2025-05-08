@@ -10,7 +10,7 @@ import {
   Alert
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { ArrowLeft } from "lucide-react-native";
+import { ArrowLeft } from '@expo/vector-icons/AntDesign';
 import { useState, useEffect } from "react";
 import CustomInput from "../../../components/TextInput";
 import CustomButton from "../../../components/buttons/Button";

@@ -9,7 +9,7 @@ import {
   Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { ArrowLeft, Calendar, ChevronRight } from "lucide-react-native";
+import { ArrowLeft, Calendar, Right } from '@expo/vector-icons/AntDesign';
 
 export default function RatingDetail({
   rating,
@@ -107,7 +107,7 @@ export default function RatingDetail({
           onPress={() => handleViewBooking(rating.bookingId.id)}
         >
           <Text style={styles.viewBookingText}>Xem chi tiết đặt phòng</Text>
-          <ChevronRight size={20} color="#FFFFFF" />
+          <Right size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </ScrollView>
     </View>

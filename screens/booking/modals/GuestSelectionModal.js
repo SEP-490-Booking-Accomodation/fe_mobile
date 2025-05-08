@@ -8,7 +8,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import { Minus, Plus } from "lucide-react-native";
+import { Minus, Plus } from '@expo/vector-icons/AntDesign';
 import { useTranslation } from "react-i18next";
 
 const GuestCounter = ({

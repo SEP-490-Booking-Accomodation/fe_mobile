@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { CreditCard, Info } from "lucide-react-native";
+import { CreditCard, Info } from '@expo/vector-icons/AntDesign';
 import InfoCard from "./InfoCard";
 import { formatMoney, getPaymentMethodText } from "../../../utils/formatters";
 import { BOOKING_STATUS } from "./Constants";
@@ -32,7 +32,7 @@ export default function PaymentInfo({ bookingData }) {
 
   return (
     <InfoCard
-      icon={<CreditCard size={20} color="#ff385c" />}
+      icon={<CreditCard name="creditcard" size={20} color="#ff385c" />}
       title="Thông tin thanh toán"
     >
       <PaymentRow
@@ -68,7 +68,7 @@ export default function PaymentInfo({ bookingData }) {
 
       {(isRefundEligible() || isRefundExpired()) && (
         <View style={styles.refundStatusContainer}>
-          <Info size={16} color={isRefundEligible() ? "#28a745" : "#aaa"} />
+          <Info name="infocirlce" size={16} color={isRefundEligible() ? "#28a745" : "#aaa"} />
           <Text
             style={[
               styles.refundStatusText,

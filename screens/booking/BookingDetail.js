@@ -1,6 +1,6 @@
 import { SafeAreaView, StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, Image, Linking } from "react-native"
 import { useNavigation, useRoute } from "@react-navigation/native"
-import { ArrowLeft, Clock, Users, MapPin, Bed, CreditCard } from "lucide-react-native"
+import { ArrowLeft, ClockCircle, User, Environment, Home, CreditCard } from '@expo/vector-icons/AntDesign'
 import CustomButton from "../../components/buttons/Button"
 import { useGetBookingByIdQuery, useUpdateBookingMutation } from "../../api/bookingApi"
 import { useProcessMomoPaymentMutation } from "../../api/momoPayment"
@@ -272,7 +272,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <MapPin size={20} color="#ff385c" />
+            <Environment size={20} color="#ff385c" />
             <Text style={styles.cardTitle}>{t("location")}</Text>
           </View>
           <Text style={styles.value}>{rentalData.name}</Text>
@@ -281,7 +281,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Bed size={20} color="#ff385c" />
+            <Home size={20} color="#ff385c" />
             <Text style={styles.cardTitle}>{t("room_type")}</Text>
           </View>
           <Text style={styles.value}>{typeRoom?.name ?? t("no_info")}</Text>
@@ -290,7 +290,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Clock size={20} color="#ff385c" />
+            <ClockCircle size={20} color="#ff385c" />
             <Text style={styles.cardTitle}>{t("rental_time")}</Text>
           </View>
           <Text style={styles.value}>{t("check_in")}: {bookingData.checkInHour}</Text>
@@ -300,7 +300,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Users size={20} color="#ff385c" />
+            <User size={20} color="#ff385c" />
             <Text style={styles.cardTitle}>{t("guests")}</Text>
           </View>
           <Text style={styles.value}>{t("adults")}: {bookingData.adultNumber}</Text>

@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { ArrowLeft, Star, ChevronRight } from "lucide-react-native";
+import { ArrowLeft, Star, Right } from '@expo/vector-icons/AntDesign';
 import { MaterialIcons } from "@expo/vector-icons";
 import RatingDetail from "./RatingDetail";
 import { useSelector } from "react-redux";
@@ -199,7 +199,7 @@ export default function RatingList() {
                     </Text>
                   </View>
                 </View>
-                <ChevronRight size={20} color="#6B7280" />
+                <Right size={20} color="#6B7280" />
               </View>
             </TouchableOpacity>
           );

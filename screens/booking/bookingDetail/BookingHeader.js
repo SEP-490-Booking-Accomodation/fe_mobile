@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { ArrowLeft } from "lucide-react-native";
+import { ArrowLeft } from '@expo/vector-icons/AntDesign';
 
 export default function BookingHeader({ navigation }) {
   return (
