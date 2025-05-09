@@ -82,6 +82,10 @@ const hideTabBarScreens = [
   //"TicketList",
   "HistoryScreen",
   "RatingList",
+  "ChangePassword",
+  "FavouriteList",
+  "ProfileScreen",
+  "EditInfo"
 ];
 
 // AUTH STACK
@@ -394,7 +398,7 @@ const MainTabNavigator = () => {
         options={{
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <Feather name="user" size={24} color={color} />
+            <Feather name="settings" size={24} color={color} />
           ),
         }}
       />
