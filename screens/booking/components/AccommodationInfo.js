@@ -33,10 +33,12 @@ const AccommodationInfo = ({
         {rentalData?.data.openHour} - {rentalData?.data.closeHour}
       </Text>
       <Text style={styles.infoText}>
-        {t("max_people_count", { count: accommodationTypeData?.data?.maxPeopleNumber })}
+        {t("max_people_count", {
+          count: accommodationTypeData?.data?.maxPeopleNumber
+        })}
       </Text>
       <Text style={styles.infoText}>
-        {t("base_price", { 
+        {t("base_price", {
           price: formatMoney(accommodationTypeData?.data?.basePrice),
           unit: t("hour")
         })}
@@ -44,7 +46,7 @@ const AccommodationInfo = ({
       <Text style={styles.infoText}>
         {t("overtime_price_unit", {
           price: formatMoney(accommodationTypeData?.data?.overtimeHourlyPrice),
-          unit: t("hour")
+          unit: t("hour") 
         })}
       </Text>
     </View>

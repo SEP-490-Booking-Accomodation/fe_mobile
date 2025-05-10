@@ -56,13 +56,23 @@ export default function CouponSelector({
           ? `${coupon.amount}%`
           : `${formatCurrency(coupon.amount)}`;
 
-      const description =
-        coupon.discountBasedOn.toLowerCase() === "percentage"
-          ? t("discount_percentage", {
-              amount: coupon.amount,
-              max: coupon.maxDiscount ? formatCurrency(coupon.maxDiscount) : "",
-            })
-          : t("discount_fixed", { amount: formatCurrency(coupon.amount) });
+      let description = "";
+      if (coupon.discountBasedOn.toLowerCase() === "percentage") {
+        if (coupon.maxDiscount) {
+          description = t("discount_percentage_with_max", {
+            amount: coupon.amount,
+            max: formatCurrency(coupon.maxDiscount),
+          });
+        } else {
+          description = t("discount_percentage_no_max", {
+            amount: coupon.amount,
+          });
+        }
+      } else {
+        description = t("discount_fixed", { 
+          amount: formatCurrency(coupon.amount) 
+        });
+      }
 
       const isCurrentlyValid =
         startDate <= currentDate && currentDate <= endDate;
@@ -87,15 +97,12 @@ export default function CouponSelector({
     setProcessedCoupons(processed);
   };
 
-  // Helper to convert Vietnamese date format to ISO
   const convertVNDateToISO = (vnDate) => {
-    // VN format: "28/02/2025 15:30:45"
     const [datePart, timePart] = vnDate.split(" ");
     const [day, month, year] = datePart.split("/");
     return `${year}-${month}-${day}T${timePart || "00:00:00"}`;
   };
 
-  // Helper to format currency
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -107,7 +114,7 @@ export default function CouponSelector({
   };
 
   const handleSelectVoucher = (voucher) => {
-    if (!voucher.isSelectable) return; // Prevent selecting future vouchers
+    if (!voucher.isSelectable) return; 
     setSelectedVoucher(voucher);
     setModalVisible(false);
   };

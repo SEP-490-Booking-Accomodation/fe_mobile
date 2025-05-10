@@ -64,7 +64,7 @@ const PaymentConfirm = ({ route, navigation }) => {
         </View>
 
         <View style={styles.securityBox}>
-          <AntDesign name="safety" size={24} color="#4caf50" />
+          <AntDesign name="Safety" size={24} color="#4caf50" />
           <View>
             <Text style={styles.securityTitle}>{t('payment_guarantee')}</Text>
             <Text style={styles.securityText}>
