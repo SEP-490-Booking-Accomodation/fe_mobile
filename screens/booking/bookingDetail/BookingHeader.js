@@ -2,8 +2,10 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
+import { useTranslation } from 'react-i18next'; 
 
 export default function BookingHeader() {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   
   return (
@@ -14,7 +16,7 @@ export default function BookingHeader() {
       >
         <AntDesign name="left" size={24} color="#000" />
       </TouchableOpacity>
-      <Text style={styles.header}>Chi tiết đặt phòng</Text>
+      <Text style={styles.header}>{t('booking_details')}</Text>
       <View style={{ width: 24 }} />
     </View>
   );

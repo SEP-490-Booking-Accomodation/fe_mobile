@@ -11,6 +11,7 @@ import { CommonActions } from "@react-navigation/native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import Constants from "expo-constants";
+import { useTranslation } from 'react-i18next';
 
 import {
   useGetBookingByIdQuery,
@@ -34,6 +35,7 @@ import EmptyState from "./EmptyState";
 import dayjs from "dayjs";
 
 export default function BookingDetail() {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const route = useRoute();
   const { bookingId } = route.params || {};
@@ -62,13 +64,18 @@ export default function BookingDetail() {
     const prodUrl = `mean://payment/callback?status=success&orderId=${bookingData.id}`;
     const returnUrl = process.env.NODE_ENV === "development" ? devUrl : prodUrl;
 
+    const description = t('payment_description', {
+      id: bookingData.id,
+      price: totalPrice
+    });
+
     if (bookingData.paymentMethod === 1) {
       try {
         const response = await processMomoPayment({
           data: {
             bookingId: bookingData.id,
             amount: bookingData.totalPrice,
-            description: `Thanh toán đặt phòng ${bookingData.id} qua Momo ${totalPrice}`,
+            description: description,
             returnUrlFE: returnUrl,
             orderIdFE: "MOMO" + new Date().getTime(),
           },
@@ -80,23 +87,23 @@ export default function BookingDetail() {
             refetch();
           }, 3000);
         } else {
-          Alert.alert("Lỗi", "Không thể tạo thanh toán Momo");
+          Alert.alert(t('error'), t('payment_create_failed'));
         }
       } catch (error) {
         console.error("Thanh toán thất bại:", error);
-        Alert.alert("Lỗi", "Thanh toán Momo thất bại");
+        Alert.alert(t('error'), t('payment_failed'));
       }
     }
   };
 
   const handleCancel = () => {
     Alert.alert(
-      "Xác nhận hủy đặt phòng",
-      "Bạn có chắc chắn muốn hủy đặt phòng này không?",
+      t('cancel_confirmation_title'),
+      t('cancel_confirmation_message'),
       [
-        { text: "Không", style: "cancel" },
+        { text: t('no'), style: "cancel" },
         {
-          text: "Có, hủy đặt phòng",
+          text: t('yes_cancel_booking'),
           onPress: async () => {
             try {
               // Kiểm tra nếu hoàn tiền
@@ -122,18 +129,17 @@ export default function BookingDetail() {
               }).unwrap();
 
               Alert.alert(
-                "Thành công",
+                t('success'),
                 isRefundAvailable
-                  ? "Đã gửi yêu cầu hoàn tiền và hủy đặt phòng."
-                  : "Đã hủy đặt phòng thành công.",
+                  ? t('cancel_refund_success')
+                  : t('cancel_success'),
                 [{ text: "OK", onPress: () => refetch() }]
               );
             } catch (error) {
               console.error("Error cancelling booking:", error);
               Alert.alert(
-                "Lỗi",
-                error.data?.message ||
-                  "Không thể hủy đặt phòng. Vui lòng thử lại sau."
+                t('error'),
+                error.data?.message || t('cancel_failed')
               );
             }
           },
