@@ -9,6 +9,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const ITEM_HEIGHT = 50;
 const VISIBLE_ITEMS = 5;
@@ -22,6 +23,7 @@ const DateTimePicker = ({ onSelect }) => {
     hour: 0,
     minute: 0,
   });
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('TODAY');
 
   // Generate arrays for each column
@@ -139,26 +141,31 @@ const DateTimePicker = ({ onSelect }) => {
     </ScrollView>
   );
 
+  const renderTabs = () => (
+    <View style={styles.header}>
+      <TouchableOpacity
+        style={[styles.tab, activeTab === 'TODAY' && styles.activeTab]}
+        onPress={() => handleTabPress('TODAY')}
+      >
+        <Text style={[styles.tabText, activeTab === 'TODAY' && styles.activeTabText]}>
+          {t('today')}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.tab, activeTab === 'TOMORROW' && styles.activeTab]}
+        onPress={() => handleTabPress('TOMORROW')}
+      >
+        <Text style={[styles.tabText, activeTab === 'TOMORROW' && styles.activeTabText]}>
+          {t('tomorrow')}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'TODAY' && styles.activeTab]}
-          onPress={() => handleTabPress('TODAY')}
-        >
-          <Text style={[styles.tabText, activeTab === 'TODAY' && styles.activeTabText]}>
-            TODAY
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'TOMORROW' && styles.activeTab]}
-          onPress={() => handleTabPress('TOMORROW')}
-        >
-          <Text style={[styles.tabText, activeTab === 'TOMORROW' && styles.activeTabText]}>
-            TOMORROW
-          </Text>
-        </TouchableOpacity>
-      </View>
+      {renderTabs()}
 
       <View style={styles.pickerContainer}>
         <View style={styles.selectionOverlay} />

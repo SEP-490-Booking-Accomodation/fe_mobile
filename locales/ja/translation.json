@@ -310,7 +310,7 @@
     "times": "回",
     "collapse": "折りたたむ",
     "read_more": "続きを読む",
-    "per_hour": "/時間",
+    "per_hour": "đ/時間",
     "profile": "プロフィール",
     "logout": "ログアウト",
     "logout_confirmation": "このアカウントからログアウトしますか？",
@@ -408,5 +408,17 @@
     "max_guests_warning": "最大{{maxGuests}}名までです",
     "adult_age": "18歳以上",
     "child_age": "2歳から17歳",
-    "infant_age": "2歳未満"
+    "infant_age": "2歳未満",
+    "open_hours": "営業時間",
+    "inactive_status": "非アクティブ",
+    "open_hours_from_to": "営業時間 ({{openHour}} - {{closeHour}})",
+    "paused_status": "一時停止",
+    "unknown_status": "不明",
+    "distance_away": "約{{distance}} km先",
+    "today": "今日",
+    "tomorrow": "明日",
+    "search_placeholder_input": "検索...",
+    "new": "新着",
+    "error_loading_notifications": "通知の読み込みエラー",
+    "no_notifications": "通知がありません"
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { useTranslation } from "react-i18next";
 
 export default function SimpleVerticalCard(props) {
   const {
@@ -12,6 +13,8 @@ export default function SimpleVerticalCard(props) {
     numberOfReview,
     onCardPress,
   } = props;
+
+  const { t } = useTranslation();
 
   const loadingGif = "https://i.gifer.com/WMDx.gif";
   const fallbackImage =
@@ -70,7 +73,7 @@ export default function SimpleVerticalCard(props) {
         <View style={styles.ratingContainer}>
           <Icon name="star" size={16} color={"#ffc907"} />
           <Text style={styles.ratingText}>
-            {ratingPoint} ({numberOfReview} reviews)
+            {ratingPoint} ({numberOfReview}  {t("reviews_count")})
           </Text>
         </View>
       </View>

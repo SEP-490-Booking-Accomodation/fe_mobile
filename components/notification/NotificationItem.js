@@ -2,9 +2,11 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useMarkNotificationAsReadMutation } from "../../api/notificationApi";
+import { useTranslation } from "react-i18next"; 
 
 
 const NotificationItem = ({ id, iconName, title, time, message, status }) => {
+  const { t } = useTranslation();
   const [markAsRead] = useMarkNotificationAsReadMutation();
   const handlePress = () => {
     if (status === "unread") {
@@ -33,10 +35,10 @@ const NotificationItem = ({ id, iconName, title, time, message, status }) => {
         </Text>
       </View>
       {status === "unread" && (
-        <View style={styles.unreadBadge}>
-          <Text style={styles.unreadBadgeText}>New</Text>
-        </View>
-      )}
+      <View style={styles.unreadBadge}>
+        <Text style={styles.unreadBadgeText}>{t('new')}</Text>
+      </View>
+    )}
     </TouchableOpacity>
   );
 };

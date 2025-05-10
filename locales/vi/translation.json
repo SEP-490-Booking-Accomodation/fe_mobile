@@ -408,5 +408,17 @@
     "max_guests_warning": "Tối đa chỉ {{maxGuests}} người được phép",
     "adult_age": "Từ 18 tuổi trở lên",
     "child_age": "Từ 2 đến 17 tuổi",
-    "infant_age": "Dưới 2 tuổi"
+    "infant_age": "Dưới 2 tuổi",
+    "open_hours": "Mở cửa",
+    "inactive_status": "Không hoạt động",
+    "open_hours_from_to": "Mở cửa ({{openHour}} - {{closeHour}})",
+    "paused_status": "Tạm ngưng",
+    "unknown_status": "Không xác định",
+    "distance_away": "Cách bạn khoảng {{distance}} km",
+    "today": "Hôm nay",
+    "tomorrow": "Ngày mai",
+    "search_placeholder_input": "Tìm kiếm...",
+    "new": "Mới",
+    "error_loading_notifications": "Lỗi tải thông báo",
+    "no_notifications": "Không có thông báo"
 }

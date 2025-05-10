@@ -311,7 +311,7 @@
     "times": "times",
     "collapse": "Collapse",
     "read_more": "Read more",
-    "per_hour": "/hour",
+    "per_hour": "đ/hour",
     "profile": "Profile",
     "logout": "Logout",
     "logout_confirmation": "Are you sure you want to log out of this account?",
@@ -409,5 +409,17 @@
     "max_guests_warning": "Maximum of {{maxGuests}} people allowed",
     "adult_age": "Ages 18 and above",
     "child_age": "Ages 2 to 17",
-    "infant_age": "Under 2 years old"
+    "infant_age": "Under 2 years old",
+    "open_hours": "Open",
+    "inactive_status": "Inactive",
+    "open_hours_from_to": "Open ({{openHour}} - {{closeHour}})",
+    "paused_status": "Paused",
+    "unknown_status": "Unknown",
+    "distance_away": "About {{distance}} km away",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "search_placeholder_input": "Search...",
+    "new": "New",
+    "error_loading_notifications": "Error loading notifications",
+    "no_notifications": "No notifications"
 }

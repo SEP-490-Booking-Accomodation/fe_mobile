@@ -1,6 +1,7 @@
 import React from "react";
 import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { useTranslation } from "react-i18next";
 
 /**
  * HorizontalCardSmall Component
@@ -23,6 +24,7 @@ export default function HorizontalCardSmall({
   tagName,
   onPress,
 }) {
+  const { t } = useTranslation();
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <Image
@@ -44,7 +46,7 @@ export default function HorizontalCardSmall({
         <View style={styles.ratingContainer}>
           <Icon name="star" size={20} color={"#ffc907"} />
           <Text style={styles.ratingText}>
-            {rating} ({numOfReviews} đánh giá)
+            {rating} ({numOfReviews}  {t("reviews_count")})
           </Text>
         </View>
       </View>
