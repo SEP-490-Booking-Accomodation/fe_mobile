@@ -10,6 +10,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { logout } from "../../redux/authSlice";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import CustomButton from "../../components/buttons/Button";
+import { Ionicons } from "@expo/vector-icons"; 
 
 const UserProfile = ({ user, isLoading, navigation }) => {
   const { t } = useTranslation();
@@ -27,6 +29,10 @@ const UserProfile = ({ user, isLoading, navigation }) => {
     // navigation.replace("SettingList");
   };
 
+  const handleProfileNavigation = () => {
+    navigation.navigate('Home', { screen: 'ProfileScreen' });
+  };
+
   if (isLoading) {
     return <ActivityIndicator size="large" color="#1A2741" />;
   }
@@ -34,65 +40,88 @@ const UserProfile = ({ user, isLoading, navigation }) => {
   return (
     <View style={styles.userInfo}>
       {currentUser ? (
-        <View style={styles.userContainer}>
+        <TouchableOpacity 
+          style={styles.userContainer}
+          onPress={handleProfileNavigation}
+          activeOpacity={0.7}
+        >
           <Image source={{ uri: currentUser.avatar }} style={styles.avatar} />
-          <View style={{ marginLeft: 12 }}>
+          <View style={{ marginLeft: 12, flex: 1 }}>
             <Text style={styles.username}>{currentUser.name}</Text>
             <Text style={styles.email}>{currentUser.email}</Text>
           </View>
-        </View>
+          <Ionicons name="chevron-forward" size={20} color="#4E72E3" />
+        </TouchableOpacity>
       ) : null}
+
       {storedToken && currentUser ? (
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>{t("logout")}</Text>
-        </TouchableOpacity>
+        <CustomButton
+          onPress={handleLogout}
+          title={t("logout")}
+          style={styles.logoutButton}
+          backgroundColor="#4E72E3"
+          titleColor="#FFFFFF"
+        />
       ) : (
-        <TouchableOpacity
-          style={styles.loginButton}
+        <CustomButton
           onPress={() => navigation.navigate("Auth")}
-        >
-          <Text style={styles.loginText}>{t("login")}</Text>
-        </TouchableOpacity>
+          title={t("login")}
+          style={styles.loginButton}
+          backgroundColor="#1A2741"
+          textColor="#fff"
+        />
       )}
-      {/* <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Đăng xuất</Text>
-      </TouchableOpacity> */}
     </View>
   );
 };
 
 const styles = {
   userInfo: {
-    // padding: 20,
-    borderRadius: 12,
-    // alignItems: "center",
     marginBottom: 20,
   },
-  avatar: { width: 50, height: 50, borderRadius: 25 },
-  username: { fontSize: 16, fontWeight: "bold" },
-  email: { fontSize: 14, color: "#6b7280" },
+  avatar: { 
+    width: 50, 
+    height: 50, 
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  username: { 
+    fontSize: 18, 
+    fontWeight: "bold",
+    color: "#1A2741",
+    marginBottom: 4,
+  },
+  email: { 
+    fontSize: 14, 
+    color: "#6b7280",
+    letterSpacing: 0.2,
+  },
   loginButton: {
-    backgroundColor: "#1A2741",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
     marginTop: 10,
   },
-  loginText: { color: "#fff", fontWeight: "bold" },
   logoutButton: {
-    backgroundColor: "#E63946",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
     marginTop: 10,
   },
-  logoutText: { color: "#fff", fontWeight: "bold" },
   userContainer: {
     backgroundColor: "#f0f4ff",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 20,
     marginTop: 10,
     flexDirection: "row",
+    alignItems: "center",
+    shadowColor: "#4E72E3",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: "#e6eeff",
   },
 };
 
