@@ -272,7 +272,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <AntDesign name="enviroment" size={20} color="#ff385c" />
+            <AntDesign name="enviroment" size={20} color="#4E72E3" />
             <Text style={styles.cardTitle}>{t("location")}</Text>
           </View>
           <Text style={styles.value}>{rentalData.name}</Text>
@@ -281,7 +281,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <AntDesign name="home" size={20} color="#ff385c" />
+            <AntDesign name="home" size={20} color="#4E72E3" />
             <Text style={styles.cardTitle}>{t("room_type")}</Text>
           </View>
           <Text style={styles.value}>{typeRoom?.name ?? t("no_info")}</Text>
@@ -290,7 +290,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <AntDesign name="clockcircle" size={20} color="#ff385c" />
+            <AntDesign name="clockcircle" size={20} color="#4E72E3" />
             <Text style={styles.cardTitle}>{t("rental_time")}</Text>
           </View>
           <Text style={styles.value}>{t("check_in")}: {bookingData.checkInHour}</Text>
@@ -300,7 +300,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <AntDesign name="user" size={20} color="#ff385c" />
+            <AntDesign name="user" size={20} color="#4E72E3" />
             <Text style={styles.cardTitle}>{t("guests")}</Text>
           </View>
           <Text style={styles.value}>{t("adults")}: {bookingData.adultNumber}</Text>
@@ -318,7 +318,7 @@ export default function BookingDetail() {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <AntDesign name="creditcard" size={20} color="#ff385c" />
+            <AntDesign name="creditcard" size={20} color="#4E72E3" />
             <Text style={styles.cardTitle}>{t("payment_info")}</Text>
           </View>
           <View style={styles.paymentRow}>
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
   },
   statusValue: {
     fontWeight: "bold",
-    color: "#ff385c",
+    color: "#4E72E3",
   },
   imageContainer: {
     height: 200,
@@ -497,7 +497,7 @@ const styles = StyleSheet.create({
   totalValue: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#ff385c",
+    color: "#4E72E3",
   },
   footer: {
     marginTop: 16,
@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   payButton: {
-    backgroundColor: "#ff385c",
+    backgroundColor: "#4E72E3",
     height: 50,
     borderRadius: 12,
     flex: 2, // Takes up 2/3 of the space

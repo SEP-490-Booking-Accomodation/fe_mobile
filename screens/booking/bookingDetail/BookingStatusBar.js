@@ -1,18 +1,24 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { getStatusText, getPaymentStatusText } from "../../../utils/formatters";
+import { useTranslation } from "react-i18next";
 
 export default function BookingStatusBar({ status, paymentStatus }) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.statusBar}>
       <Text style={styles.statusText}>
-        Trạng thái:
-        <Text style={styles.statusValue}>{getStatusText(status)}</Text>
-      </Text>
-      <Text style={styles.statusText}>
-        Thanh toán:
+        {t('status_label') + " "}
         <Text style={styles.statusValue}>
-          {getPaymentStatusText(paymentStatus)}
+          {t(getStatusText(status))}
+        </Text>
+      </Text>
+      
+      <Text style={styles.statusText}>
+        {t('payment_label') + " "}
+        <Text style={styles.statusValue}>
+          {t(getPaymentStatusText(paymentStatus))}
         </Text>
       </Text>
     </View>
@@ -39,6 +45,6 @@ const styles = StyleSheet.create({
   },
   statusValue: {
     fontWeight: "bold",
-    color: "#ff385c",
+    color: "#4E72E3",
   },
 });

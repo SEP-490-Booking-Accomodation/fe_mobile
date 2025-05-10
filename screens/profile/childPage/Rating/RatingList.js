@@ -16,8 +16,10 @@ import RatingDetail from "./RatingDetail";
 import { useSelector } from "react-redux";
 import { useGetAllFeedbackByCustomerIdQuery } from "../../../../api/feedbackApi";
 import { useGetAccommodationTypeByIdQuery } from "../../../../api/accommodationTypeApi";
+import { useTranslation } from 'react-i18next';
 
 export default function RatingList() {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const [selectedRating, setSelectedRating] = useState(null);
@@ -132,7 +134,7 @@ export default function RatingList() {
       >
         <AntDesign name="left" size={24} color="#4E72E3" />
       </TouchableOpacity>
-      <Text style={styles.textHeader}>Lịch sử đánh giá</Text>
+      <Text style={styles.textHeader}>{t('rating_history')}</Text>
     </View>
   );
 
@@ -140,8 +142,8 @@ export default function RatingList() {
     if (isLoading) {
       return (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#ff385c" />
-          <Text style={styles.loadingText}>Đang tải dữ liệu...</Text>
+          <ActivityIndicator size="large" color="#4E72E3" />
+          <Text style={styles.loadingText}>{t('loading_data')}</Text>
         </View>
       );
     }
@@ -149,7 +151,7 @@ export default function RatingList() {
     if (!feedbacks || feedbacks.length === 0) {
       return (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Bạn chưa có đánh giá nào</Text>
+          <Text style={styles.emptyText}>{t('no_ratings')}</Text>
         </View>
       );
     }
@@ -161,8 +163,8 @@ export default function RatingList() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#ff385c"]}
-            tintColor="#ff385c"
+            colors={["#4E72E3"]}
+            tintColor="#4E72E3"
           />
         }
       >
@@ -186,11 +188,11 @@ export default function RatingList() {
                 <View style={styles.ratingCardInfo}>
                   <Text style={styles.ratingCardTitle} numberOfLines={1}>
                     {rating.bookingId?.accommodationId?.accommodationTypeId
-                      ?.name || "Phòng"}
+                      ?.name ||  t('default_room_type')}
                   </Text>
                   <Text style={styles.ratingCardLocation} numberOfLines={1}>
                     {rating.bookingId?.accommodationId?.rentalLocationId
-                      ?.city || "Địa điểm"}
+                      ?.city || t('default_location')}
                   </Text>
                   <View style={styles.ratingCardStars}>
                     {renderStars(rating.rating)}

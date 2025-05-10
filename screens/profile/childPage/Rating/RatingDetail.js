@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 export default function RatingDetail({
   rating,
@@ -17,6 +18,7 @@ export default function RatingDetail({
   formatDate,
   renderStars,
 }) {
+  const { t } = useTranslation(); 
   const navigation = useNavigation();
 
   const handleViewBooking = (bookingId) => {
@@ -31,7 +33,7 @@ export default function RatingDetail({
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <AntDesign name="left" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.detailHeaderTitle}>Chi tiết đánh giá</Text>
+        <Text style={styles.detailHeaderTitle}>{t('rating_details_title')}</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -51,11 +53,11 @@ export default function RatingDetail({
           <View style={styles.accommodationInfo}>
             <Text style={styles.accommodationName}>
               {rating.bookingId?.accommodationId?.accommodationTypeId?.name ||
-                "Phòng"}
+                t('default_room_type')}
             </Text>
             <Text style={styles.accommodationLocation}>
               {rating.bookingId?.accommodationId?.rentalLocationId?.city ||
-                "Địa điểm"}
+                t('default_location')}
             </Text>
             <View style={styles.ratingDateRow}>
               <AntDesign name="calendar" size={14} color="#6B7280" />
@@ -65,7 +67,7 @@ export default function RatingDetail({
         </View>
 
         <View style={styles.ratingSection}>
-          <Text style={styles.sectionTitle}>Đánh giá của bạn</Text>
+          <Text style={styles.sectionTitle}>{t('default_location')}</Text>
           <View style={styles.ratingBox}>
             <View style={styles.ratingHeader}>
               <Text style={styles.ratingValue}>{rating.rating.toFixed(1)}</Text>
@@ -75,7 +77,7 @@ export default function RatingDetail({
 
             {rating.images && rating.images.length > 0 && (
               <View style={styles.ratingImages}>
-                <Text style={styles.imagesTitle}>Hình ảnh</Text>
+                <Text style={styles.imagesTitle}>{t('images_label')}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   {rating.images.map((image, index) => (
                     <Image
@@ -92,7 +94,7 @@ export default function RatingDetail({
 
         {rating.contentReply && (
           <View style={styles.replySection}>
-            <Text style={styles.sectionTitle}>Phản hồi từ chủ nhà</Text>
+            <Text style={styles.sectionTitle}>{t('host_response')}</Text>
             <View style={styles.replyBox}>
               <Text style={styles.replyContent}>{rating.contentReply}</Text>
               <Text style={styles.replyDate}>
@@ -106,7 +108,7 @@ export default function RatingDetail({
           style={styles.viewBookingButton}
           onPress={() => handleViewBooking(rating.bookingId.id)}
         >
-          <Text style={styles.viewBookingText}>Xem chi tiết đặt phòng</Text>
+          <Text style={styles.viewBookingText}>{t('view_booking_button')}</Text>
           <AntDesign name="right" size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </ScrollView>
@@ -264,7 +266,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#ff385c",
+    backgroundColor: "#4E72E3",
     borderRadius: 12,
     padding: 16,
     marginTop: 16,

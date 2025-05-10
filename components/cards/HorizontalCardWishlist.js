@@ -9,6 +9,7 @@ import {
 import Icon from "react-native-vector-icons/MaterialIcons";
 import React from "react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 //#region How to use this components
 /**
  * @example
@@ -43,6 +44,7 @@ const HorizontalCardWishlist = ({
   onCardPress = () => {},
   onPress,
 }) => {
+  const { t } = useTranslation();
   const [isFavourite, setIsFavourite] = useState(initFavourite);
   const handleFavouritePress = () => {
     const newValue = !isFavourite;
@@ -63,11 +65,11 @@ const HorizontalCardWishlist = ({
         <Text style={styles.title}>{placeName}</Text>
         <View style={styles.openingHourContainer}>
           <Text style={styles.openHourText}>
-            Mở cửa ({openHour} - {closeHour})
+          {t("open_hours")} ({openHour} - {closeHour})
           </Text>
         </View>
         <Text style={styles.priceRange}>
-          {minPrice}đ - {maxPrice}đ
+          {minPrice} {t("currency")} - {maxPrice} {t("currency")}
         </Text>
         <View style={styles.locationContainer}>
           <Icon name="location-on" size={20} color="#4e72e3" />
@@ -76,7 +78,7 @@ const HorizontalCardWishlist = ({
         <View style={styles.ratingContainer}>
           <Icon name="star" size={20} color="#ffc907" />
           <Text style={styles.ratingText}>
-            {rating} ({numOfReviews} đánh giá)
+            {rating} ({numOfReviews}  {t("reviews_count")})
           </Text>
         </View>
       </View>

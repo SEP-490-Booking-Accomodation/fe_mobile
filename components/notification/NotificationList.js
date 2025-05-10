@@ -12,8 +12,10 @@ import Icon from "react-native-vector-icons/Ionicons";
 import NotificationItem from "./NotificationItem";
 import { useGetNotificationsByUserQuery } from "../../api/notificationApi";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 const NotificationList = () => {
+  const { t } = useTranslation();
   const userId = useSelector((state) => state.auth?.userId);
   const {
     data: notifications,
@@ -26,7 +28,7 @@ const NotificationList = () => {
   }
 
   if (error) {
-    return <Text style={styles.error}>Error loading notifications</Text>;
+    return <Text style={styles.error}>{t('error_loading_notifications')}</Text>;
   }
 
   const transformedData = notifications?.data?.map((notification) => ({
@@ -53,7 +55,7 @@ const NotificationList = () => {
         />
       )}
       contentContainerStyle={styles.listContainer}
-      ListEmptyComponent={<Text style={styles.empty}>No notifications</Text>}
+      ListEmptyComponent={<Text style={styles.empty}>{t('no_notifications')}</Text>}
     />
   );
 };

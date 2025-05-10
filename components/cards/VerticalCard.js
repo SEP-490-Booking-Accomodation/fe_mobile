@@ -3,6 +3,7 @@ import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import PropTypes from "prop-types";
 import { useNavigation } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 export default function VerticalCard({
   id,
   imageUrl,
@@ -18,9 +19,10 @@ export default function VerticalCard({
   numberOfReview = 0,
   distance,
   initFavourite = false,
-  onFavouritePress = () => {},
+  onFavouritePress = () => { },
   // onCardPress = () => {},
 }) {
+  const { t } = useTranslation();
   const loadingGif = "https://i.gifer.com/WMDx.gif";
   const fallbackImage =
     "https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png";
@@ -91,21 +93,21 @@ export default function VerticalCard({
         {/* Opening Hours */}
         {status === 2 || status === 5 || status === 1 ? (
           <View style={styles.inactiveStatusContainer}>
-            <Text style={styles.openHoursText}>Không hoạt động</Text>
+            <Text style={styles.openHoursText}>{t("inactive_status")}</Text>
           </View>
         ) : status === 3 ? (
           <View style={styles.activeStatusContainer}>
             <Text style={styles.openHoursText}>
-              Mở cửa ({openHour} - {closeHour})
+              {t("open_hours_from_to", { openHour, closeHour })}
             </Text>
           </View>
         ) : status === 4 ? (
           <View style={styles.pauseStatusContainer}>
-            <Text style={styles.openHoursText}>Tạm ngưng</Text>
+            <Text style={styles.openHoursText}>{t("paused_status")}</Text>
           </View>
         ) : (
           <View style={styles.notStatusContainer}>
-            <Text style={styles.openHoursText}>Không xác định </Text>
+            <Text style={styles.openHoursText}>{t("unknown_status")}</Text>
           </View>
         )}
       </View>
@@ -114,10 +116,10 @@ export default function VerticalCard({
       <View style={styles.contentContainer}>
         <View style={styles.nameContainer}>
           <Text style={styles.title}>{placeName}</Text>
-          {isOverNight ? <Text style={styles.isOverNight}>Qua đêm</Text> : null}
+          {isOverNight ? <Text style={styles.isOverNight}>{t("overnight")}</Text> : null}
         </View>
         <Text style={styles.priceRange}>
-          {minPrice} - {maxPrice} đ/h
+          {minPrice} - {maxPrice} {t("per_hour")}
         </Text>
 
         <View style={styles.locationContainer}>
@@ -133,14 +135,14 @@ export default function VerticalCard({
         <View style={styles.distanceContainer}>
           {distance != null && (
             <Text style={styles.distanceText}>
-              Cách bạn khoảng {distance.toFixed(1)} km
+              {t("distance_away", { distance: distance.toFixed(1) })}
             </Text>
           )}
         </View>
         <View style={styles.ratingContainer}>
           <Icon name="star" size={20} color={"#ffc907"} />
           <Text style={styles.ratingText}>
-            {ratingPoint} ({numberOfReview} đánh giá)
+            {ratingPoint} ({numberOfReview} {t("reviews_count")})
           </Text>
         </View>
       </View>

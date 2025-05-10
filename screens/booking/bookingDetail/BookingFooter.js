@@ -3,6 +3,7 @@ import { View, StyleSheet, Alert, Text } from "react-native";
 import dayjs from "dayjs";
 import { BOOKING_STATUS, PAYMENT_STATUS } from "./Constants";
 import CustomButton from "../../../components/buttons/Button";
+import { useTranslation } from 'react-i18next';
 
 export default function BookingFooter({
   bookingData,
@@ -11,6 +12,7 @@ export default function BookingFooter({
   onGoHome,
   isUpdating,
 }) {
+  const { t } = useTranslation();
   const status = Number(bookingData?.status);
   const paymentStatus = Number(bookingData?.paymentStatus);
   const refundDeadline = bookingData?.timeExpireRefund;
@@ -42,25 +44,25 @@ export default function BookingFooter({
 
       if (isRefundAvailable()) {
         Alert.alert(
-          "Hoàn và Hủy đặt phòng",
-          `Bạn sẽ được hoàn tiền nếu hủy trước ${refundTime}. Bạn chắc chắn muốn hủy?`,
+          t('refund_cancel_title'),
+          t('refund_cancel_message', { time: refundTime }),
           [
-            { text: "Không", style: "cancel" },
-            { text: "Có", onPress: onCancel },
+            { text: t('no'), style: "cancel" },
+            { text: t('yes'), onPress: onCancel },
           ]
         );
       } else {
         Alert.alert(
-          "Đã quá hạn hoàn tiền",
-          `Bạn đã quá hạn hoàn tiền (sau ${refundTime}). Bạn vẫn muốn hủy?`,
+          t('refund_overdue_title'),
+          t('refund_overdue_message', { time: refundTime }),
           [
-            { text: "Không", style: "cancel" },
-            { text: "Hủy vẫn tiếp tục", onPress: onCancel },
+            { text: t('no'), style: "cancel" },
+            { text: t('cancel_anyway'), onPress: onCancel },
           ]
         );
       }
     } else {
-      onCancel(); // Chưa thanh toán thì hủy bình thường
+      onCancel();
     }
   };
 
@@ -70,10 +72,10 @@ export default function BookingFooter({
         <View style={styles.buttonRow}>
           {/* Nếu đã thanh toán và còn hoàn tiền thì hiện nút "Hoàn và Hủy" */}
           {shouldShowCancel() &&
-          paymentStatus === PAYMENT_STATUS.PAID &&
-          isRefundAvailable() ? (
+            paymentStatus === PAYMENT_STATUS.PAID &&
+            isRefundAvailable() ? (
             <CustomButton
-              title="Hoàn và Hủy đặt phòng"
+              title={t('refund_cancel_button')}
               onPress={handleCancelPress}
               titleColor="#EF4444"
               style={styles.cancelButton}
@@ -84,9 +86,9 @@ export default function BookingFooter({
           ) : (
             shouldShowCancel() && (
               <CustomButton
-                title="Hủy"
+                title={t('cancel_button')}
                 onPress={handleCancelPress}
-                titleColor="#EF4444"
+                titleColor="#4E72E3"
                 style={styles.cancelButton}
                 textStyle={styles.cancelButtonText}
                 loading={isUpdating}
@@ -97,7 +99,7 @@ export default function BookingFooter({
 
           {shouldShowPayNow() && (
             <CustomButton
-              title="Thanh toán ngay"
+              title={t('pay_now_button')}
               onPress={onPayment}
               style={styles.payButton}
               textStyle={styles.payButtonText}
@@ -108,21 +110,22 @@ export default function BookingFooter({
         </View>
       )}
 
+
       {paymentStatus === PAYMENT_STATUS.PAID && refundDeadline && (
         <Text style={styles.refundNote}>
           {isRefundAvailable()
-            ? `* Hủy trước ${dayjs(refundDeadline).format(
-                "HH:mm DD/MM"
-              )} sẽ được hoàn tiền.`
-            : `* Đã quá hạn hoàn tiền (sau ${dayjs(refundDeadline).format(
-                "HH:mm DD/MM"
-              )}).`}
+            ? t('refund_note_available', {
+              time: dayjs(refundDeadline).format("HH:mm DD/MM")
+            })
+            : t('refund_note_overdue', {
+              time: dayjs(refundDeadline).format("HH:mm DD/MM")
+            })}
         </Text>
       )}
 
       {shouldShowViewTicket() && (
         <CustomButton
-          title="Xem vé"
+          title={t('view_ticket_button')}
           onPress={onGoHome}
           style={styles.homeButton}
         />
@@ -142,7 +145,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   payButton: {
-    backgroundColor: "#ff385c",
+    backgroundColor: "#4E72E3",
     height: 50,
     borderRadius: 12,
     flex: 2,
@@ -156,24 +159,24 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#EF4444",
+    borderColor: "#4E72E3",
     flex: 1,
     marginRight: 8,
   },
   cancelButtonText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#EF4444",
+    color: "#4E72E3",
   },
   homeButton: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "#4E72E3",
     height: 50,
     borderRadius: 12,
     marginTop: 10,
   },
   refundNote: {
     marginTop: 8,
-    color: "#EF4444",
+    color: "#4E72E3",
     fontSize: 13,
     fontStyle: "italic",
   },

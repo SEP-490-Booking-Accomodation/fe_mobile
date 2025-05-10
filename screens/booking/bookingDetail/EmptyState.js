@@ -1,14 +1,17 @@
 import React from "react";
 import { SafeAreaView, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { AntDesign } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 export default function EmptyState({ onGoBack }) {
+  const { t } = useTranslation();
+
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.text}>Không có dữ liệu đặt phòng</Text>
+      <Text style={styles.text}>{t('no_booking_data')}</Text>
       <TouchableOpacity style={styles.backButton} onPress={onGoBack}>
         <AntDesign name="left" size={24} color="#000" />
-        <Text style={styles.backText}>Quay lại</Text>
+        <Text style={styles.backText}>{t('go_back')}</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

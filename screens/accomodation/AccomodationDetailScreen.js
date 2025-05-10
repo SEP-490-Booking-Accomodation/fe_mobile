@@ -206,7 +206,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
         <View style={styles.detailRow}>
           <MaterialIcons name="access-time" size={20} color="#4e72e3" />
           <Text style={styles.detailText}>
-            {t("overtime_price")}: {accommodationTypeData.overtimePrice}đ/giờ
+            {t("overtime_price")}: {accommodationTypeData.overtimePrice} {t("per_hour")}
           </Text>
         </View>
         <View style={styles.detailRow}>
@@ -218,7 +218,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
         <View style={styles.reviewContainer}>
           <MaterialIcons name="star" size={20} color="#ffc907" />
           <Text style={styles.ratingText}>
-            {`${accommodationTypeData.rating} (${accommodationTypeData.reviewCount} Reviews)`}
+            {`${accommodationTypeData.rating} (${accommodationTypeData.reviewCount} ${t('reviews')})`}
           </Text>
         </View>
       </View>

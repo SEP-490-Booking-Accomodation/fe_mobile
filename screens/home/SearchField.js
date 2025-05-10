@@ -10,9 +10,10 @@ import {
   Keyboard,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { useTranslation } from 'react-i18next';
 
 const SearchField = ({
-  placeholder = "Tìm kiếm...",
+  placeholder = t('search_placeholder'),
   onChangeText,
   value,
   backIcon = true,
@@ -22,6 +23,7 @@ const SearchField = ({
   style,
   inputStyle,
 }) => {
+  const { t } = useTranslation(); 
   const navigation = useNavigation();
   const handleSearchPress = () => {
     navigation.navigate("SearchScreen", {
