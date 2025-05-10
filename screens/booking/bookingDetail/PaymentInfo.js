@@ -34,7 +34,7 @@ export default function PaymentInfo({ bookingData }) {
 
   return (
     <InfoCard
-      icon={<AntDesign name="creditcard" size={20} color="#ff385c" />}
+      icon={<AntDesign name="creditcard" size={20} color="#4E72E3" />}
       title={t('payment_info_title')}
     >
       <PaymentRow
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   totalValue: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#ff385c",
+    color: "#4E72E3",
   },
   refundStatusContainer: {
     flexDirection: "row",

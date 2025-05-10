@@ -88,7 +88,7 @@ export default function BookingFooter({
               <CustomButton
                 title={t('cancel_button')}
                 onPress={handleCancelPress}
-                titleColor="#EF4444"
+                titleColor="#4E72E3"
                 style={styles.cancelButton}
                 textStyle={styles.cancelButtonText}
                 loading={isUpdating}
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   payButton: {
-    backgroundColor: "#ff385c",
+    backgroundColor: "#4E72E3",
     height: 50,
     borderRadius: 12,
     flex: 2,
@@ -159,24 +159,24 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#EF4444",
+    borderColor: "#4E72E3",
     flex: 1,
     marginRight: 8,
   },
   cancelButtonText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#EF4444",
+    color: "#4E72E3",
   },
   homeButton: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "#4E72E3",
     height: 50,
     borderRadius: 12,
     marginTop: 10,
   },
   refundNote: {
     marginTop: 8,
-    color: "#EF4444",
+    color: "#4E72E3",
     fontSize: 13,
     fontStyle: "italic",
   },

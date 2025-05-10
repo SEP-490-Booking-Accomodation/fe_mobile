@@ -8,7 +8,7 @@ export default function GuestsInfo({ adultNumber, childNumber }) {
   const { t } = useTranslation();
   return (
     <InfoCard 
-      icon={<AntDesign name="user" size={20} color="#ff385c" />} 
+      icon={<AntDesign name="user" size={20} color="#4E72E3" />} 
       title={t('guests')}
     >
       <InfoText>{t('adults')}: {adultNumber}</InfoText>

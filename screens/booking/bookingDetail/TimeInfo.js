@@ -8,7 +8,7 @@ export default function TimeInfo({ bookingData }) {
   const { t } = useTranslation();
   return (
     <InfoCard 
-      icon={<AntDesign name="clockcircle" size={20} color="#ff385c" />} 
+      icon={<AntDesign name="clockcircle" size={20} color="#4E72E3" />} 
       title={t('rental_time')}
     >
       <InfoText>{t('check_in')}: {bookingData.checkInHour}</InfoText>

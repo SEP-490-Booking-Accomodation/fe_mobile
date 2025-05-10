@@ -9,7 +9,7 @@ export default function LocationInfo({ rentalData }) {
   const address = `${rentalData.address} ${rentalData.ward}, ${rentalData.district}, ${rentalData.city}`;
   
   return (
-    <InfoCard icon={<AntDesign name="enviroment" size={20} color="#ff385c" />} title={t('location')}>
+    <InfoCard icon={<AntDesign name="enviroment" size={20} color="#4E72E3" />} title={t('location')}>
       <InfoText>{rentalData.name}</InfoText>
       <InfoSecondaryText>{address}</InfoSecondaryText>
     </InfoCard>

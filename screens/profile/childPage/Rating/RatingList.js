@@ -142,7 +142,7 @@ export default function RatingList() {
     if (isLoading) {
       return (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#ff385c" />
+          <ActivityIndicator size="large" color="#4E72E3" />
           <Text style={styles.loadingText}>{t('loading_data')}</Text>
         </View>
       );
@@ -163,8 +163,8 @@ export default function RatingList() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#ff385c"]}
-            tintColor="#ff385c"
+            colors={["#4E72E3"]}
+            tintColor="#4E72E3"
           />
         }
       >
