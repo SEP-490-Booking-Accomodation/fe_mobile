@@ -421,5 +421,12 @@
     "search_placeholder_input": "Search...",
     "new": "New",
     "error_loading_notifications": "Error loading notifications",
-    "no_notifications": "No notifications"
+    "no_notifications": "No notifications",
+    "ongoing": "Ongoing",
+    "booking": "Booking",
+    "pending_payment": "Pending Payment",
+    "paid": "Paid",
+    "refunded": "Refunded",
+    "people": "people",
+    "rebook": "Rebook"
 }

@@ -420,5 +420,12 @@
     "search_placeholder_input": "Tìm kiếm...",
     "new": "Mới",
     "error_loading_notifications": "Lỗi tải thông báo",
-    "no_notifications": "Không có thông báo"
+    "no_notifications": "Không có thông báo",
+    "ongoing": "Đang diễn ra",
+    "booking": "Đặt chỗ",
+    "pending_payment": "Chờ thanh toán",
+    "paid": "Đã thanh toán",
+    "refunded": "Hoàn tiền",
+    "people": "người",
+    "rebook": "Đặt lại"
 }

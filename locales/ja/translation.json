@@ -420,5 +420,12 @@
     "search_placeholder_input": "検索...",
     "new": "新着",
     "error_loading_notifications": "通知の読み込みエラー",
-    "no_notifications": "通知がありません"
+    "no_notifications": "通知がありません",
+    "ongoing": "進行中",
+    "booking": "予約",
+    "pending_payment": "支払い待ち",
+    "paid": "支払い済み",
+    "refunded": "返金済み",
+    "people": "人",
+    "rebook": "再予約"
 }

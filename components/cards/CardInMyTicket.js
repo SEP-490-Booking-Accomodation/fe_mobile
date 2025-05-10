@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useState } from "react";
 import CustomButton from "../buttons/Button"; // Assume your CustomButton here
+import { useTranslation } from 'react-i18next';
 
 const PAYMENT_STATUS = Object.freeze({
   BOOKING: 1,
@@ -23,22 +24,23 @@ export default function CardInMyTicket(props) {
     status,
     paymentStatus,
     feedbackId,
-    onViewDetail = () => {},
-    onReviewAction = () => {},
-    onCancelAction = () => {},
-    onRebookingAction = () => {},
+    onViewDetail = () => { },
+    onReviewAction = () => { },
+    onCancelAction = () => { },
+    onRebookingAction = () => { },
   } = props;
+  const { t } = useTranslation();
 
   const [loading, setLoading] = useState(false);
 
   const getStatusInfo = () => {
     switch (status) {
       case "-1":
-        return { text: "Đã hủy", color: "#EF4444" };
+        return { text: t('cancelled'), color: "#EF4444" };
       case "0":
-        return { text: "Đang diễn ra", color: "#10B981" };
+        return { text: t('ongoing'), color: "#10B981" };
       case "1":
-        return { text: "Hoàn tất", color: "#6366F1" };
+        return { text: t('completed'), color: "#6366F1" };
       default:
         return { text: "N/A", color: "#6B7280" };
     }
@@ -47,15 +49,15 @@ export default function CardInMyTicket(props) {
   const getPaymentStatusInfo = () => {
     switch (paymentStatus) {
       case PAYMENT_STATUS.BOOKING:
-        return { text: "Đặt chỗ", color: "#F59E0B" };
+        return { text: t('booking'), color: "#F59E0B" };
       case PAYMENT_STATUS.PENDING:
-        return { text: "Chờ thanh toán", color: "#FBBF24" };
+        return { text: t('pending_payment'), color: "#FBBF24" };
       case PAYMENT_STATUS.PAID:
-        return { text: "Đã thanh toán", color: "#10B981" };
+        return { text: t('paid'), color: "#10B981" };
       case PAYMENT_STATUS.REFUND:
-        return { text: "Hoàn tiền", color: "#6366F1" };
+        return { text: t('refunded'), color: "#6366F1" };
       case PAYMENT_STATUS.FAILED:
-        return { text: "Thất bại", color: "#EF4444" };
+        return { text: t('failed'), color: "#EF4444" };
       default:
         return null;
     }
@@ -116,7 +118,7 @@ export default function CardInMyTicket(props) {
 
               <View style={styles.infoRow}>
                 <Icon name="people" size={16} color="#4B84F5" />
-                <Text style={styles.infoText}>{maxPeople} người</Text>
+                <Text style={styles.infoText}>{maxPeople} {t('people')}</Text>
               </View>
             </View>
 
@@ -128,7 +130,7 @@ export default function CardInMyTicket(props) {
           <View style={styles.buttonContainer}>
             {status === "-1" ? (
               <CustomButton
-                title="Đặt lại"
+                title={t('rebook')}
                 backgroundColor="#fef2f2"
                 disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
                 titleColor="#101828"
@@ -140,7 +142,7 @@ export default function CardInMyTicket(props) {
               />
             ) : status === "0" ? (
               <CustomButton
-                title="Xem chi tiết"
+                title={t('view_details')}
                 backgroundColor="#101828"
                 disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
                 titleColor="#ffffff"
@@ -152,7 +154,7 @@ export default function CardInMyTicket(props) {
               />
             ) : status === "1" && feedbackId === null ? (
               <CustomButton
-                title="Đánh giá"
+                title={t('review')}
                 backgroundColor="#dadada"
                 disabledBackgroundColor="rgba(26, 39, 65, 0.5)"
                 titleColor="#101828"
