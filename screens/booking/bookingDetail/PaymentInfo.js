@@ -42,16 +42,16 @@ export default function PaymentInfo({ bookingData }) {
         value={t(getPaymentMethodText(bookingData.paymentMethod))}
       />
       <PaymentRow
-        label={t('base_price')}
-        value={`${formatMoney(bookingData.basePrice)} ${t('per_hour')}`}
+        label={t('base_price_text')}
+        value={`${formatMoney(bookingData.basePrice)} ${t('hour')}`}
       />
       <PaymentRow
         label={t('overtime_price')}
-        value={`${formatMoney(bookingData.overtimeHourlyPrice)} ${t('per_hour')}`}
+        value={`${formatMoney(bookingData.overtimeHourlyPrice)} ${t('hour')}`}
       />
       <PaymentRow
         label={t('rental_hours')}
-        value={`${bookingData.durationBookingHour} ${t('hours')}`}
+        value={`${bookingData.durationBookingHour} ${t('hour')}`}
       />
       <View style={[styles.paymentRow, styles.totalRow]} />
       <PaymentRow 

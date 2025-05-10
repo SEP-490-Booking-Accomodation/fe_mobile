@@ -3,6 +3,7 @@ import { SafeAreaView, Text, StyleSheet } from "react-native";
 import { useTranslation } from 'react-i18next';
 
 export default function LoadingState() {
+  const { t } = useTranslation();
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.text}>{t('loading')}</Text>

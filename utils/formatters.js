@@ -4,36 +4,36 @@ export const formatMoney = (amount) =>
     currency: "VND",
   }).format(amount);
 
-export const getStatusText = (status) => {
-  const statusMap = {
-    1: "Xác nhận",
-    2: "Cần Check-in",
-    3: "Check-in",
-    4: "Cần Check-out",
-    5: "Check-out",
-    6: "Đã hủy",
-    7: "Hoàn thành",
-    8: "Chờ",
+  export const getStatusText = (status) => {
+    const statusMap = {
+      1: "status_confirmed",
+      2: "status_need_checkin",
+      3: "status_checked_in",
+      4: "status_need_checkout",
+      5: "status_checked_out",
+      6: "status_cancelled",
+      7: "status_completed",
+      8: "status_pending",
+    };
+    return statusMap[status] || "status_unknown";
   };
-  return statusMap[status] || "Không xác định";
-};
 
-export const getPaymentMethodText = (method) => {
-  const methodMap = {
-    1: "Momo",
-    2: "Ví Mean",
-    3: "Test",
+  export const getPaymentMethodText = (method) => {
+    const methodMap = {
+      1: "payment_method_momo",   
+      2: "payment_method_mean",       
+      3: "payment_method_test",      
+    };
+    return methodMap[method] || "payment_method_unknown"; 
   };
-  return methodMap[method] || "Không xác định";
-};
 
 export const getPaymentStatusText = (status) => {
   const statusMap = {
-    1: "Chờ thanh toán",
-    2: "Chờ thanh toán",
-    3: "Đã thanh toán",
-    4: "Yêu cầu hoàn tiền",
-    5: "Thất bại",
+    1: "payment_pending",
+    2: "payment_pending",
+    3: "payment_paid",
+    4: "payment_refunded",
+    5: "payment_failed",
   };
-  return statusMap[status] || "Không xác định";
+  return statusMap[status] || "status_unknown";
 };
