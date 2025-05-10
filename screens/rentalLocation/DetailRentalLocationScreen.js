@@ -342,7 +342,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               </View>
               <View style={styles.ratingContainer}>
                 <Icon name="star" size={20} color="#ffc907" />
-                <Text style={styles.ratingText}>4.5 (120 Reviews)</Text>
+                <Text style={styles.ratingText}>4.5 (120 {t("reviews_count")})</Text>
               </View>
               <Text style={styles.description}>
                 {isDescriptionExpanded
