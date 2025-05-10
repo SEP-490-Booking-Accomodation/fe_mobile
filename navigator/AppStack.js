@@ -310,18 +310,14 @@ const MainTabNavigator = () => {
           }
 
           return {
-            position: "absolute",
-            bottom: 40,
-            left: 20,
-            right: 20,
             backgroundColor: "#1C1C1E",
             borderRadius: 30,
             height: 60,
-            paddingHorizontal: 20,
-            paddingVertical: 20,
+            marginHorizontal: 20,
+            marginBottom: 20,
+            paddingVertical: 10,
             borderTopWidth: 0,
             elevation: 0,
-            marginHorizontal: 20,
           };
         })(),
         tabBarActiveTintColor: "#FFFFFF",
@@ -377,7 +373,7 @@ const MainTabNavigator = () => {
                   <Ionicons name="map" size={24} color={color} />
                 ),
               }}
-              // onPress={() => navigation.navigate("Map")}
+            // onPress={() => navigation.navigate("Map")}
             />
           ),
         }}
