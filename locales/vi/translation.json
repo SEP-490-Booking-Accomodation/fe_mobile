@@ -457,5 +457,8 @@
     "images_label": "Hình ảnh",
     "view_booking_button": "Xem chi tiết đặt phòng",
     "login_now_btn": "Đăng nhập ngay",
-    "please_login_to_continue": "Vui lòng đăng nhập để tiếp tục sử dụng tính năng này."
+    "please_login_to_continue": "Vui lòng đăng nhập để tiếp tục sử dụng tính năng này.",
+    "no_data_available": "Không có dữ liệu",
+    "top_rated": "Được đánh giá cao",
+    "recent": "Gần đây"
 }

@@ -457,5 +457,8 @@
     "images_label": "画像",
     "view_booking_button": "予約詳細を見る",
     "login_now_btn": "今すぐログイン",
-    "please_login_to_continue": "この機能を引き続き使用するには、ログインしてください。"
+    "please_login_to_continue": "この機能を引き続き使用するには、ログインしてください。",
+    "no_data_available": "データがありません",
+    "top_rated": "高評価",
+    "recent": "最近"
 }
