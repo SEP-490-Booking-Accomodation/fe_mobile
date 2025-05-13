@@ -455,5 +455,7 @@
     "default_room_type": "部屋",
     "default_location": "場所",
     "images_label": "画像",
-    "view_booking_button": "予約詳細を見る"
+    "view_booking_button": "予約詳細を見る",
+    "login_now_btn": "今すぐログイン",
+    "please_login_to_continue": "この機能を引き続き使用するには、ログインしてください。"
 }
