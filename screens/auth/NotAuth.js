@@ -14,7 +14,7 @@ export default function NotAuth() {
 
   return (
     <View style={styles.container}>
-      <MaterialIcons name="error-outline" size={64} color="#ff6b6b" />
+      <MaterialIcons name="error-outline" size={64} color="#4E72E3" />
       <Text style={styles.title}>{t("not_logged_in")}</Text>
       <Text style={styles.subtitle}>
       {t("please_login_to_continue")}
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 24,
-    backgroundColor: "#ff6b6b",
+    backgroundColor: "#4E72E3",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 12,
