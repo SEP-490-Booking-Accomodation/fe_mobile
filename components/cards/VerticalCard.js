@@ -19,7 +19,7 @@ export default function VerticalCard({
   numberOfReview = 0,
   distance,
   initFavourite = false,
-  onFavouritePress = () => { },
+  onFavouritePress = () => {},
   // onCardPress = () => {},
 }) {
   const { t } = useTranslation();
@@ -52,6 +52,9 @@ export default function VerticalCard({
   };
   const onCardPress = () => {
     navigate.navigate("DetailRentalLocation", { rentalId: id });
+  };
+  const formatMoney = (value) => {
+    return value.toLocaleString("vi-VN");
   };
 
   return (
@@ -116,10 +119,17 @@ export default function VerticalCard({
       <View style={styles.contentContainer}>
         <View style={styles.nameContainer}>
           <Text style={styles.title}>{placeName}</Text>
-          {isOverNight ? <Text style={styles.isOverNight}>{t("overnight")}</Text> : null}
+          {isOverNight ? (
+            <Text style={styles.isOverNight}>{t("overnight")}</Text>
+          ) : null}
         </View>
         <Text style={styles.priceRange}>
-          {minPrice} - {maxPrice} {t("per_hour")}
+          {minPrice == maxPrice
+            ? formatMoney(minPrice) + t("per_hour")
+            : formatMoney(minPrice) +
+              " - " +
+              formatMoney(maxPrice) +
+              t("per_hour")}
         </Text>
 
         <View style={styles.locationContainer}>
