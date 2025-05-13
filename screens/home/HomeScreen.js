@@ -17,23 +17,6 @@ import { useGetAllRentalQuery } from "../../api/rentalLocationApi";
 import { ensureUserInDatabase } from "../../lib/supabase";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
 import { useTranslation } from "react-i18next";
-const cities = [
-  "Hà Nội",
-  "TP Hồ Chí Minh",
-  "Đà Nẵng",
-  "Hải Phòng",
-  "Cần Thơ",
-  "Huế",
-  "Nha Trang",
-  "Đà Lạt",
-  "Vũng Tàu",
-  "Quy Nhơn",
-  "Buôn Ma Thuột",
-  "Phan Thiết",
-  "Hạ Long",
-  "Vinh",
-  "Pleiku",
-];
 
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -87,7 +70,7 @@ export default function HomeScreen() {
     const getLocation = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        setErrorMsg(t('permission_denied'));
+        setErrorMsg(t("permission_denied"));
         return;
       }
       try {
@@ -104,7 +87,7 @@ export default function HomeScreen() {
           setAddress(`${place.city || ""}, ${place.region || ""}`);
         }
       } catch (error) {
-        setErrorMsg(t('location_info_error'));
+        setErrorMsg(t("location_info_error"));
       }
     };
 
@@ -148,7 +131,7 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container}>
       <>
         <HeaderLNA
-          location={manualCity || address || t('select_city')}
+          location={manualCity || address || t("select_city")}
           onNotificationPress={() => navigation.navigate("NotificationScreen")}
           onAvatarPress={() => navigation.navigate("ProfileScreen")}
           notificationCount={2}
@@ -173,16 +156,16 @@ export default function HomeScreen() {
           }
         >
           <Text style={[styles.textWelcome, styles.paddingVertical]}>
-            {t('welcome_message')}
+            {t("welcome_message")}
           </Text>
           <SearchField
             style={[styles.mh, styles.paddingVertical]}
-            placeholder={t('search_placeholder')}
+            placeholder={t("search_placeholder")}
             backIcon={false}
             filterIcon={false}
           />
           {loading ? (
-            <Text>{t('loading')}</Text>
+            <Text>{t("loading")}</Text>
           ) : (
             <LocationList
               rentalData={rental}

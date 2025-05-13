@@ -24,7 +24,7 @@ import { loginSuccess } from "../../redux/authSlice";
 import { useTranslation } from "react-i18next";
 
 const OTPVerificationScreen = () => {
-  const { t } = useTranslation(); 
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const route = useRoute();
   const dispatch = useDispatch();
@@ -65,7 +65,7 @@ const OTPVerificationScreen = () => {
 
     try {
       const res = await verifyEmailOtp({ data: verifyData }).unwrap();
-      
+
       dispatch(
         loginSuccess({
           userId: id,
