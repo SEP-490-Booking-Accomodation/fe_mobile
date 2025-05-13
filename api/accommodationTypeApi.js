@@ -8,12 +8,12 @@ export const accommodationTypeApi = baseApi.injectEndpoints({
             providesTags: ["AccommodationType"],
         }),
         getAllAccommodationTypes: builder.query({
-            query: (ownerId) => {
-              const url = "/accommodation-type/all-accommodation-types";
-              return ownerId ? `${url}?ownerId=${ownerId}` : url;
+            query: (rentalLocationId) => {
+                const url = "/accommodation-type/all-accommodation-types";
+                return rentalLocationId ? `${url}?rentalLocationId=${rentalLocationId}` : url;
             },
             providesTags: ["AccommodationType"],
-          }),
+        }),
     }),
 });
 
