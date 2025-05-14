@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   maxCapacityWarning: {
-    color: "#ff6b6b",
+    color: "#4E72E3",
     fontSize: 14,
     textAlign: "center",
     marginTop: 16,

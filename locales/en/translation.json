@@ -456,5 +456,10 @@
     "default_room_type": "Room",
     "default_location": "Location",
     "images_label": "Images",
-    "view_booking_button": "View Booking Details"
+    "view_booking_button": "View Booking Details",
+    "login_now_btn": "Login Now",
+    "please_login_to_continue": "Please log in to continue using this feature.",
+    "no_data_available": "No data available",
+    "top_rated": "Top rated",
+    "recent": "Recent"
 }

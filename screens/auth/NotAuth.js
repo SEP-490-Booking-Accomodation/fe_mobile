@@ -2,8 +2,10 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import React from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 
 export default function NotAuth() {
+  const { t } = useTranslation();
   const navigation = useNavigation();
 
   const handleLogin = () => {
@@ -12,14 +14,14 @@ export default function NotAuth() {
 
   return (
     <View style={styles.container}>
-      <MaterialIcons name="error-outline" size={64} color="#ff6b6b" />
-      <Text style={styles.title}>Bạn chưa đăng nhập</Text>
+      <MaterialIcons name="error-outline" size={64} color="#4E72E3" />
+      <Text style={styles.title}>{t("not_logged_in")}</Text>
       <Text style={styles.subtitle}>
-        Vui lòng đăng nhập để tiếp tục sử dụng tính năng này.
+      {t("please_login_to_continue")}
       </Text>
 
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Đăng nhập ngay</Text>
+        <Text style={styles.buttonText}>{t("login_now_btn")}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -47,7 +49,7 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 24,
-    backgroundColor: "#ff6b6b",
+    backgroundColor: "#4E72E3",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 12,

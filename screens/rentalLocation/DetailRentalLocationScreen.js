@@ -45,7 +45,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     data: accommodationTypesData,
     isLoading: isAccommodationLoading,
     isError: isAccommodationError
-  } = useGetAllAccommodationTypesQuery(ownerId || "");
+  } = useGetAllAccommodationTypesQuery(locationId || "");
   const isLoading = isRentalLoading || isAccommodationLoading;
   const isError = isRentalError || isAccommodationError;
 
