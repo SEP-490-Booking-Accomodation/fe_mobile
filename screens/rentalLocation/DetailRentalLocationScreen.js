@@ -11,13 +11,18 @@ import {
   ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import AsyncStorage, { useAsyncStorage } from "../../context/AsyncStorageContext";
+import AsyncStorage, {
+  useAsyncStorage,
+} from "../../context/AsyncStorageContext";
 import MultiSelectButtonGroup from "../../components/buttons/MultiSelectButtonGroup";
 import Tag from "../../components/Tag";
 import SimpleVerticalCard from "../../components/cards/SimpleVerticalCard";
 import { Button } from "react-native-elements";
 import { MaterialIcons } from "@expo/vector-icons";
-import { ensureUserInDatabaseWithoutAsyncStorage, newChat } from "../../lib/supabase";
+import {
+  ensureUserInDatabaseWithoutAsyncStorage,
+  newChat,
+} from "../../lib/supabase";
 import { useGetAllFeedbackByRentalIdQuery } from "../../api/feedbackApi";
 import { useGetAverageFeedbackByRentalIdQuery } from "../../api/feedbackApi";
 import { useGetRentalLocationByIdQuery } from "../../api/rentalLocationApi";
@@ -30,13 +35,15 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const { loadIdChatPlatform } = useAsyncStorage();
   const { rentalId: locationId } = route.params;
 
-  const { data: feedbackDataList } = useGetAllFeedbackByRentalIdQuery(locationId);
-  const { data: feedbackAverage } = useGetAverageFeedbackByRentalIdQuery(locationId);
+  const { data: feedbackDataList } =
+    useGetAllFeedbackByRentalIdQuery(locationId);
+  const { data: feedbackAverage } =
+    useGetAverageFeedbackByRentalIdQuery(locationId);
 
   const {
     data: rentalData,
     isLoading: isRentalLoading,
-    isError: isRentalError
+    isError: isRentalError,
   } = useGetRentalLocationByIdQuery(locationId);
 
   const ownerId = rentalData?.data?.ownerId?._id;
@@ -44,7 +51,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const {
     data: accommodationTypesData,
     isLoading: isAccommodationLoading,
-    isError: isAccommodationError
+    isError: isAccommodationError,
   } = useGetAllAccommodationTypesQuery(locationId || "");
   const isLoading = isRentalLoading || isAccommodationLoading;
   const isError = isRentalError || isAccommodationError;
@@ -71,7 +78,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
       </View>
     );
   }
-
 
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedServices, setSelectedServices] = useState([]);
@@ -131,7 +137,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     );
   };
 
-
   const ratingCounts = (feedbackDataList || []).reduce((acc, review) => {
     const rating = review.rating;
     console.log(acc);
@@ -140,9 +145,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     }
     return acc;
   }, {});
-
-
-
 
   const renderReview = () => {
     const totalReviews = feedbackDataList?.length || 1;
@@ -167,13 +169,12 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
                   <Text style={styles.ratingNumber}>{rating}</Text>
                   <View style={styles.ratingBarBackground}>
                     <View
-                      style={[
-                        styles.ratingBar,
-                        { width: `${percentage}%` },
-                      ]}
+                      style={[styles.ratingBar, { width: `${percentage}%` }]}
                     />
                   </View>
-                  <Text style={styles.ratingCount}>{count} {t("times")}</Text>
+                  <Text style={styles.ratingCount}>
+                    {count} {t("times")}
+                  </Text>
                 </View>
               );
             })}
@@ -189,11 +190,26 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               <View style={styles.reviewHeader}>
                 <View style={styles.reviewerDetails}>
                   <Text style={styles.reviewerName}>
-                    {review.bookingId?.customerId?.userId?.fullName && review.bookingId?.customerId?.userId?.fullName.length <= 1
-                      ? '*'
+                    {review.bookingId?.customerId?.userId?.fullName &&
+                    review.bookingId?.customerId?.userId?.fullName.length <= 1
+                      ? "*"
                       : `${review.bookingId?.customerId?.userId?.fullName
-                        .slice(0, Math.floor(review.bookingId?.customerId?.userId?.fullName?.length / 2))
-                        .replace(/./g, '*')}${review.bookingId?.customerId?.userId?.fullName?.slice(Math.floor(review.bookingId?.customerId?.userId?.fullName?.length / 2))}`}
+                          .slice(
+                            0,
+                            Math.floor(
+                              review.bookingId?.customerId?.userId?.fullName
+                                ?.length / 2
+                            )
+                          )
+                          .replace(
+                            /./g,
+                            "*"
+                          )}${review.bookingId?.customerId?.userId?.fullName?.slice(
+                          Math.floor(
+                            review.bookingId?.customerId?.userId?.fullName
+                              ?.length / 2
+                          )
+                        )}`}
                   </Text>
 
                   <View style={styles.starContainer}>
@@ -229,7 +245,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
         </ScrollView>
       </View>
     );
-  }
+  };
 
   const handleMoreOptions = () => {
     Alert.alert(t("more_options"), t("choose_action"), [
@@ -243,7 +259,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     navigation.navigate("DetailAccomodation", {
       accommodationTypeId: accommodationType._id,
       rentalData: rentalData,
-      rentalName: rentalData?.data?.name
+      rentalName: rentalData?.data?.name,
     });
   };
 
@@ -273,17 +289,16 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const filteredAccommodationTypes =
     selectedServices.length > 0
       ? (accommodationTypesData?.data || []).filter((accommodation) =>
-        accommodation.serviceIds?.some((service) =>
-          selectedServices.includes(service.name)
+          accommodation.serviceIds?.some((service) =>
+            selectedServices.includes(service.name)
+          )
         )
-      )
       : accommodationTypesData?.data || [];
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.mainContainer}>
         <View style={styles.fixedHeaderActions}>
-
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Icon name="arrow-back" size={24} color="#333" />
           </TouchableOpacity>
@@ -305,12 +320,12 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
         </View>
         <View>
           {rentalData.data?.status === 4 && (
-            <View style={[styles.banner, { backgroundColor: '#FFA500' }]}>
+            <View style={[styles.banner, { backgroundColor: "#FFA500" }]}>
               <Text style={styles.bannerText}>{t("temporarily_paused")}</Text>
             </View>
           )}
           {rentalData.data?.status === 5 && (
-            <View style={[styles.banner, { backgroundColor: '#ccc' }]}>
+            <View style={[styles.banner, { backgroundColor: "#ccc" }]}>
               <Text style={styles.bannerText}>{t("inactive")}</Text>
             </View>
           )}
@@ -342,7 +357,9 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               </View>
               <View style={styles.ratingContainer}>
                 <Icon name="star" size={20} color="#ffc907" />
-                <Text style={styles.ratingText}>4.5 (120 {t("reviews_count")})</Text>
+                <Text style={styles.ratingText}>
+                  4.5 (120 {t("reviews_count")})
+                </Text>
               </View>
               <Text style={styles.description}>
                 {isDescriptionExpanded
@@ -386,6 +403,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
             </View>
           )}
           <View style={styles.card}>
+            {/* {console.log(filteredAccommodationTypes)} */}
             {filteredAccommodationTypes.map((accommodationType) => (
               <SimpleVerticalCard
                 key={accommodationType._id}
@@ -396,7 +414,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
                 onCardPress={() => handleCardPress(accommodationType)}
               />
             ))}
-
           </View>
         </ScrollView>
       </View>
@@ -541,15 +558,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f9fa",
   },
   banner: {
-    width: '100%',
+    width: "100%",
     padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   bannerText: {
-    color: '#000',
-    fontWeight: 'bold',
+    color: "#000",
+    fontWeight: "bold",
   },
   container: {
     flex: 1,
@@ -643,8 +660,8 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   card: {
-    marginBottom: 20
-  }
+    marginBottom: 20,
+  },
 });
 
 export default DetailRentalLocationScreen;

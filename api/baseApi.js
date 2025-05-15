@@ -5,6 +5,7 @@ export const baseApi = createApi({
   reducerPath: "baseApi",
   baseQuery: fetchBaseQuery({
     baseUrl: "http://192.168.1.165:5000/api",
+    // baseUrl: "https://mean-capsuleroom-webapp.azurewebsites.net/api",
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth.token;
       // console.log("Current Token:", token);
