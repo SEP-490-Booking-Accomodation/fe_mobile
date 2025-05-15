@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Provider, useDispatch } from "react-redux";
 import { NavigationContainer } from "@react-navigation/native";
-import { Alert, Linking, StatusBar } from "react-native";
+import { Alert, Linking, StatusBar, Platform, UIManager } from "react-native";
 import { AsyncStorageProvider } from "./context/AsyncStorageContext";
 import AppStack from "./navigator/AppStack";
 import { STRIPE_PUBLIC_KEY } from "@env";
@@ -59,6 +59,13 @@ export default function App() {
       }
     }
   };
+
+  if (
+    Platform.OS === "android" &&
+    UIManager.setLayoutAnimationEnabledExperimental
+  ) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+  }
   return (
     <Provider store={store}>
       <I18nextProvider i18n={i18n}>
