@@ -17,8 +17,8 @@ export default function SimpleVerticalCard(props) {
   const { t } = useTranslation();
 
   const loadingGif = "https://i.gifer.com/WMDx.gif";
-  const fallbackImage =
-    "https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png";
+  // const fallbackImage =
+  //   "https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png";
 
   const [currentImage, setCurrentImage] = useState(imageUrl);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,10 +26,10 @@ export default function SimpleVerticalCard(props) {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (isLoading) {
-        setCurrentImage(fallbackImage);
+        // setCurrentImage(fallbackImage);
         setIsLoading(false);
       }
-    }, 3000);
+    }, 1000);
 
     return () => clearTimeout(timeout);
   }, [isLoading]);
@@ -41,21 +41,20 @@ export default function SimpleVerticalCard(props) {
       activeOpacity={0.97}
     >
       <View style={styles.imageContainer}>
-        {isLoading && currentImage !== fallbackImage && (
+        {/* {isLoading && currentImage && (
           <Image
             source={{ uri: loadingGif }}
             style={styles.image}
             resizeMode="center"
           />
-        )}
+        )} */}
 
         <Image
           source={{ uri: currentImage }}
           style={[styles.image, isLoading ? styles.hidden : {}]}
           resizeMode="cover"
-          onLoad={() => setIsLoading(false)}
+          // onLoad={() => setIsLoading(false)}
           onError={() => {
-            setCurrentImage(fallbackImage);
             setIsLoading(false);
           }}
         />
@@ -73,7 +72,7 @@ export default function SimpleVerticalCard(props) {
         <View style={styles.ratingContainer}>
           <Icon name="star" size={16} color={"#ffc907"} />
           <Text style={styles.ratingText}>
-            {ratingPoint} ({numberOfReview}  {t("reviews_count")})
+            {ratingPoint} ({numberOfReview} {t("reviews_count")})
           </Text>
         </View>
       </View>

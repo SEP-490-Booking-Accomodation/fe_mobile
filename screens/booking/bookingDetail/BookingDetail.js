@@ -11,7 +11,9 @@ import { CommonActions } from "@react-navigation/native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import Constants from "expo-constants";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
+import { RefreshControl } from "react-native";
+import { useState } from "react";
 
 import {
   useGetBookingByIdQuery,
@@ -39,6 +41,15 @@ export default function BookingDetail() {
   const navigation = useNavigation();
   const route = useRoute();
   const { bookingId } = route.params || {};
+  const [refreshing, setRefreshing] = useState(false);
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const {
     data: bookingData,
@@ -64,9 +75,9 @@ export default function BookingDetail() {
     const prodUrl = `mean://payment/callback?status=success&orderId=${bookingData.id}`;
     const returnUrl = process.env.NODE_ENV === "development" ? devUrl : prodUrl;
 
-    const description = t('payment_description', {
+    const description = t("payment_description", {
       id: bookingData.id,
-      price: totalPrice
+      price: totalPrice,
     });
 
     if (bookingData.paymentMethod === 1) {
@@ -87,23 +98,24 @@ export default function BookingDetail() {
             refetch();
           }, 3000);
         } else {
-          Alert.alert(t('error'), t('payment_create_failed'));
+          Alert.alert(t("error"), t("payment_create_failed"));
         }
+        console.log(response);
       } catch (error) {
         console.error("Thanh toán thất bại:", error);
-        Alert.alert(t('error'), t('payment_failed'));
+        Alert.alert(t("error"), t("payment_failed"));
       }
     }
   };
 
   const handleCancel = () => {
     Alert.alert(
-      t('cancel_confirmation_title'),
-      t('cancel_confirmation_message'),
+      t("cancel_confirmation_title"),
+      t("cancel_confirmation_message"),
       [
-        { text: t('no'), style: "cancel" },
+        { text: t("no"), style: "cancel" },
         {
-          text: t('yes_cancel_booking'),
+          text: t("yes_cancel_booking"),
           onPress: async () => {
             try {
               // Kiểm tra nếu hoàn tiền
@@ -129,17 +141,17 @@ export default function BookingDetail() {
               }).unwrap();
 
               Alert.alert(
-                t('success'),
+                t("success"),
                 isRefundAvailable
-                  ? t('cancel_refund_success')
-                  : t('cancel_success'),
+                  ? t("cancel_refund_success")
+                  : t("cancel_success"),
                 [{ text: "OK", onPress: () => refetch() }]
               );
             } catch (error) {
               console.error("Error cancelling booking:", error);
               Alert.alert(
-                t('error'),
-                error.data?.message || t('cancel_failed')
+                t("error"),
+                error.data?.message || t("cancel_failed")
               );
             }
           },
@@ -170,8 +182,8 @@ export default function BookingDetail() {
     return <EmptyState onGoBack={() => navigation.goBack()} />;
   }
 
-  const rentalData = bookingData.accommodationId.rentalLocationId;
-  const typeRoom = bookingData.accommodationId.accommodationTypeId;
+  const rentalData = bookingData?.accommodationId?.rentalLocationId;
+  const typeRoom = bookingData?.accommodationId?.accommodationTypeId;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -180,19 +192,19 @@ export default function BookingDetail() {
       <BookingStatusBar
         status={bookingData.status}
         paymentStatus={bookingData.paymentStatus}
+        note={bookingData.note}
       />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
       >
-        <BookingImage
-          imageUrl={
-            rentalData.image && rentalData.image.length > 0
-              ? rentalData.image[0]
-              : null
-          }
-        />
+        {typeRoom.image && typeRoom.image.length > 0 && (
+          <BookingImage imageUrl={typeRoom.image[0]} />
+        )}
 
         <LocationInfo rentalData={rentalData} />
         <RoomTypeInfo typeRoom={typeRoom} />

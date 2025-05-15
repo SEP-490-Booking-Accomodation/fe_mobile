@@ -1,10 +1,10 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign } from "@expo/vector-icons";
 import InfoCard from "./InfoCard";
 import { formatMoney, getPaymentMethodText } from "../../../utils/formatters";
 import { BOOKING_STATUS } from "./Constants";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 export default function PaymentInfo({ bookingData }) {
   const { t } = useTranslation();
@@ -35,37 +35,34 @@ export default function PaymentInfo({ bookingData }) {
   return (
     <InfoCard
       icon={<AntDesign name="creditcard" size={20} color="#4E72E3" />}
-      title={t('payment_info_title')}
+      title={t("payment_info_title")}
     >
       <PaymentRow
-        label={t('payment_method')}
+        label={t("payment_method")}
         value={t(getPaymentMethodText(bookingData.paymentMethod))}
       />
       <PaymentRow
-        label={t('base_price_text')}
-        value={`${formatMoney(bookingData.basePrice)} ${t('hour')}`}
+        label={t("base_price_text")}
+        value={`${formatMoney(bookingData.basePrice)} ${t("hour")}`}
       />
       <PaymentRow
-        label={t('overtime_price')}
-        value={`${formatMoney(bookingData.overtimeHourlyPrice)} ${t('hour')}`}
+        label={t("overtime_price")}
+        value={`${formatMoney(bookingData.overtimeHourlyPrice)} ${t("hour")}`}
       />
       <PaymentRow
-        label={t('rental_hours')}
-        value={`${bookingData.durationBookingHour} ${t('hour')}`}
+        label={t("rental_hours")}
+        value={`${bookingData.durationBookingHour} ${t("hour")}`}
       />
       <View style={[styles.paymentRow, styles.totalRow]} />
-      <PaymentRow 
-        label={t('subtotal')} 
-        value={formatMoney(totalPriceHour)}
-      />
+      <PaymentRow label={t("subtotal")} value={formatMoney(totalPriceHour)} />
       {couponId && (
         <PaymentRow
-          label={t('discount')}
+          label={t("discount")}
           value={formatMoney(couponId?.amount)}
         />
       )}
       <View style={[styles.paymentRow, styles.totalRow]}>
-        <Text style={styles.totalLabel}>{t('total')}</Text>
+        <Text style={styles.totalLabel}>{t("total")}</Text>
         <Text style={styles.totalValue}>
           {formatMoney(bookingData?.totalPrice)}
         </Text>
@@ -73,12 +70,18 @@ export default function PaymentInfo({ bookingData }) {
 
       {(isRefundEligible() || isRefundExpired()) && (
         <View style={styles.refundStatusContainer}>
-          <AntDesign name="infocirlce" 
-            size={16} 
-            color={isRefundEligible() ? "#28a745" : "#aaa"} 
+          <AntDesign
+            name="infocirlce"
+            size={16}
+            color={isRefundEligible() ? "#28a745" : "#aaa"}
           />
-          <Text style={[styles.refundStatusText, { color: isRefundEligible() ? "#28a745" : "#aaa" }]}>
-            {isRefundEligible() ? t('refund_available') : t('refund_expired')}
+          <Text
+            style={[
+              styles.refundStatusText,
+              { color: isRefundEligible() ? "#28a745" : "#aaa" },
+            ]}
+          >
+            {isRefundEligible() ? t("refund_available") : t("refund_expired")}
           </Text>
         </View>
       )}
