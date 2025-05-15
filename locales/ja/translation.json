@@ -461,5 +461,8 @@
   "no_data_available": "データがありません",
   "top_rated": "高評価",
   "recent": "最近",
-  "note_label": "注記"
+  "note_label": "注記",
+  "accommodation_types": "部屋",
+  "services": "サービス"
+
 }
