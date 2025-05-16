@@ -30,14 +30,18 @@ export default function BookingFooter({
   const shouldShowPayNow = () =>
     [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED].includes(status) &&
     paymentStatus === PAYMENT_STATUS.PENDING;
-
   const shouldShowViewTicket = () => !shouldShowCancel() && !shouldShowPayNow();
-
   const isRefundAvailable = () => {
     if (!refundDeadline) return false;
-    const now = dayjs();
-    const deadline = dayjs(refundDeadline);
-    return now.isBefore(deadline);
+    const deadline = refundDeadline;
+    const now = dayjs().format("DD/MM/YYYY HH:mm:ss");
+
+
+    console.log(deadline);
+    console.log(now);
+
+    return now < deadline;
+
   };
 
   const shouldShowCheckIn = () => {
@@ -168,10 +172,12 @@ export default function BookingFooter({
         <Text style={styles.refundNote}>
           {isRefundAvailable()
             ? t("refund_note_available", {
-                time: dayjs(refundDeadline).format("HH:mm DD/MM"),
+                // time: dayjs(refundDeadline).format("HH:mm DD/MM"),
+                time: refundDeadline,
               })
             : t("refund_note_overdue", {
-                time: dayjs(refundDeadline).format("HH:mm DD/MM"),
+                time: refundDeadline,
+                // time: dayjs(refundDeadline).format("HH:mm DD/MM"),
               })}
         </Text>
       )}
