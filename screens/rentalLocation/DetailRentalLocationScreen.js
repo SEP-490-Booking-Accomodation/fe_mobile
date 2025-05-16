@@ -34,7 +34,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const [user, setUser] = useState({});
   const { loadIdChatPlatform } = useAsyncStorage();
   const { rentalId: locationId } = route.params;
-  const [activeTab, setActiveTab] = useState("reviews"); // Add state for active tab
+  const [activeTab, setActiveTab] = useState("accommodation_types"); // Add state for active tab
   const [isServicesExpanded, setIsServicesExpanded] = useState(false); // Add state for services collapse
 
   const { data: feedbackDataList } =
@@ -450,22 +450,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
             <TouchableOpacity
               style={[
                 styles.tabButton,
-                activeTab === "reviews" && styles.activeTabButton,
-              ]}
-              onPress={() => setActiveTab("reviews")}
-            >
-              <Text
-                style={[
-                  styles.tabButtonText,
-                  activeTab === "reviews" && styles.activeTabText,
-                ]}
-              >
-                {t("reviews")}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.tabButton,
                 activeTab === "accommodation_types" && styles.activeTabButton,
               ]}
               onPress={() => setActiveTab("accommodation_types")}
@@ -479,13 +463,29 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
                 {t("accommodation_types")}
               </Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                activeTab === "reviews" && styles.activeTabButton,
+              ]}
+              onPress={() => setActiveTab("reviews")}
+            >
+              <Text
+                style={[
+                  styles.tabButtonText,
+                  activeTab === "reviews" && styles.activeTabText,
+                ]}
+              >
+                {t("reviews")}
+              </Text>
+            </TouchableOpacity>
           </View>
 
           {/* Tab Content */}
           <View style={styles.tabContent}>
-            {activeTab === "reviews"
-              ? renderReview()
-              : renderAccommodationTypes()}
+            {activeTab === "accommodation_types"
+              ? renderAccommodationTypes()
+              : renderReview()}
           </View>
         </ScrollView>
       </View>
