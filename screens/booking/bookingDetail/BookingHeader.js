@@ -1,22 +1,22 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { useTranslation } from 'react-i18next'; 
+import { useTranslation } from "react-i18next";
 
 export default function BookingHeader() {
   const { t } = useTranslation();
   const navigation = useNavigation();
-  
+
   return (
     <View style={styles.headerContainer}>
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.goBack()}
+        onPress={() => navigation.navigate("TicketList")}
       >
         <AntDesign name="left" size={24} color="#000" />
       </TouchableOpacity>
-      <Text style={styles.header}>{t('booking_details')}</Text>
+      <Text style={styles.header}>{t("booking_details")}</Text>
       <View style={{ width: 24 }} />
     </View>
   );

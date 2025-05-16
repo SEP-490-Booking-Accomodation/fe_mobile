@@ -200,8 +200,9 @@ export default function TicketList() {
 
   const handleViewDetail = (id) => {
     console.log("View detail", id);
-    // Navigate to details page
+    //Navigate to details page
     navigation.navigate("BookingDetail", { bookingId: id });
+    //navigation.navigate("TicketDetail", { bookingId: id });
   };
 
   const handleCancel = (id) => {
@@ -328,6 +329,7 @@ export default function TicketList() {
                     price={booking.price}
                     dateCompleted={booking.dateCompleted}
                     status={booking.status}
+                    paymentStatus={booking.paymentStatus}
                     feedbackId={booking.feedbackId}
                     onViewDetail={() => handleViewDetail(booking.id)}
                     onCancelAction={() => handleCancel(booking.id)}

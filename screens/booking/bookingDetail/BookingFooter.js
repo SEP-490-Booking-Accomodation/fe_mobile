@@ -6,12 +6,13 @@ import { useTranslation } from "react-i18next";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 
 dayjs.extend(customParseFormat);
+import { useRoute } from "@react-navigation/native";
 
 export default function BookingFooter({
   bookingData,
   onCancel,
   onPayment,
-  onGoHome,
+  onViewTicketDetail,
   onCheckIn,
   onCheckOut,
   isLoadingBtn,
@@ -21,7 +22,8 @@ export default function BookingFooter({
   const status = Number(bookingData?.status);
   const paymentStatus = Number(bookingData?.paymentStatus);
   const refundDeadline = bookingData?.timeExpireRefund;
-
+  const route = useRoute();
+  const { bookingId } = route.params || {};
   const shouldShowCancel = () =>
     [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED].includes(status) &&
     [
@@ -204,14 +206,14 @@ export default function BookingFooter({
               />
               <CustomButton
                 title={t("view_ticket_button")}
-                onPress={onGoHome}
+                onPress={onViewTicketDetail}
                 style={styles.viewTicketButton}
               />
             </View>
           ) : (
             <CustomButton
               title={t("view_ticket_button")}
-              onPress={onGoHome}
+              onPress={onViewTicketDetail}
               style={styles.homeButton}
             />
           )}

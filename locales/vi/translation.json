@@ -463,6 +463,10 @@
   "recent": "Gần đây",
   "note_label": "Ghi chú",
   "accommodation_types": "Loại phòng",
-  "services": "Dịch vụ"
+  "services": "Dịch vụ",
+  "check_out_success" : "Trả phòng thành công. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.",
+  "check_out_failed" : "Trả phòng thất bại! Hãy thử lại sau.",
+  "check_in_success" : "Nhận phòng thành công. Chúc bạn có một kỳ nghỉ vui vẻ.",
+  "check_in_failed" : "Nhận phòng thất bại! Hãy thử lại sau."
 
 }

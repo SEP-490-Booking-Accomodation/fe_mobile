@@ -56,6 +56,7 @@ import RatingList from "../screens/profile/childPage/Rating/RatingList";
 import RatingDetail from "../screens/profile/childPage/Rating/RatingDetail";
 import TicketList from "../screens/ticket/TicketList";
 import BookingInformation from "../screens/booking/BookingInformation";
+import TicketDetail from "../screens/ticket/TicketDetail";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -85,7 +86,8 @@ const hideTabBarScreens = [
   "ChangePassword",
   "FavouriteList",
   "ProfileScreen",
-  "EditInfo"
+  "EditInfo",
+  "TicketDetail",
 ];
 
 // AUTH STACK
@@ -267,6 +269,7 @@ const TicketStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="TicketList" component={TicketList} />
     <Stack.Screen name="BookingDetail" component={BookingDetail} />
+    <Stack.Screen name="TicketDetail" component={TicketDetail} />
   </Stack.Navigator>
 );
 // Custom Middle Button Component
@@ -373,7 +376,7 @@ const MainTabNavigator = () => {
                   <Ionicons name="map" size={24} color={color} />
                 ),
               }}
-            // onPress={() => navigation.navigate("Map")}
+              // onPress={() => navigation.navigate("Map")}
             />
           ),
         }}
