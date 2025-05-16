@@ -1,79 +1,148 @@
-import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+"use client";
+
+import { useState } from "react";
+import { View, Text, StyleSheet } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import CustomButton from "../buttons/Button";
-import QRCodeComponent from "./QRCode";
 
-const TicketCard = ({ mode, onShowPassword, onHidePassword, password }) => {
-  const isShowingPassword = mode === "show-password";
+const TicketCard = ({ isPasswordViewable, password, bookingData }) => {
+  const [showPassword, setShowPassword] = useState(false);
+
+  if (!bookingData) {
+    return (
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <Text>No booking data available</Text>
+      </View>
+    );
+  }
+
+  const handleShowPassword = () => {
+    setShowPassword(true);
+  };
+
+  const handleHidePassword = () => {
+    setShowPassword(false);
+  };
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    return dateString.split(" ")[0];
+  };
+
+  // Format time for display
+  const formatTime = (dateString) => {
+    if (!dateString) return "";
+    return dateString.split(" ")[1];
+  };
 
   return (
     <View style={styles.container}>
+      {/* Main Card */}
       <View style={styles.card}>
         {/* Room Info */}
         <View style={styles.roomInfo}>
-          <Text style={styles.roomName}>Phòng 1 - Phòng con</Text>
+          {/* Line 1: Rental Name */}
+          <Text style={styles.roomName}>
+            {bookingData.accommodationId?.rentalLocationId?.name || ""}
+          </Text>
 
+          {/* Line 2: Full Address */}
           <View style={styles.locationContainer}>
             <Icon name="location-on" size={16} color="#4E72E3" />
-            <Text style={styles.locationText}>Vũng Tàu</Text>
+            <Text style={styles.locationText}>
+              {`${
+                bookingData.accommodationId?.rentalLocationId?.address || ""
+              }, ${
+                bookingData.accommodationId?.rentalLocationId?.ward || ""
+              }, ${
+                bookingData.accommodationId?.rentalLocationId?.district || ""
+              }, ${bookingData.accommodationId?.rentalLocationId?.city || ""}`}
+            </Text>
           </View>
 
+          {/* Line 3: Room Type */}
           <View style={styles.tagContainer}>
-            <Text style={styles.tagText}>Trương Gia Đình</Text>
-          </View>
-
-          <View style={styles.ratingContainer}>
-            <Icon name="star" size={16} color="#FFC907" />
-            <Text style={styles.ratingText}>4.8 (120 lượt đánh giá)</Text>
+            <Text style={styles.tagText}>
+              {bookingData.accommodationId?.accommodationTypeId?.name || ""}
+            </Text>
           </View>
         </View>
 
         {/* Info Grid */}
-        <View style={styles.infoGrid}>
-          <View style={styles.infoColumn}>
+        <View style={styles.infoSection}>
+          {/* Line 5: Booking Date - Number of people */}
+          <View style={styles.infoRow}>
             <View style={styles.infoItem}>
               <Text style={styles.infoLabel}>Ngày đặt</Text>
-              <Text style={styles.infoValue}>30.12.24</Text>
+              <Text style={styles.infoValue}>
+                {formatDate(bookingData.createdAt)}
+              </Text>
             </View>
-
             <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Giờ</Text>
-              <Text style={styles.infoValue}>2h</Text>
-            </View>
-
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Check-In</Text>
-              <Text style={styles.infoValue}>30.12.24 - 12:30</Text>
+              <Text style={styles.infoLabel}>Số người</Text>
+              <View style={styles.peopleContainer}>
+                <Icon name="person" size={14} color="#4E72E3" />
+                <Text style={styles.infoValue}>
+                  {bookingData.adultNumber || 0}
+                </Text>
+                <Text style={styles.infoValue}>/</Text>
+                <Icon name="child-care" size={14} color="#4E72E3" />
+                <Text style={styles.infoValue}>
+                  {bookingData.childNumber || 0}
+                </Text>
+              </View>
             </View>
           </View>
 
-          <View style={styles.infoColumn}>
+          {/* Line 6: Check-in Check-out */}
+          <View style={styles.infoRow}>
             <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Số người</Text>
-              <Text style={styles.infoValue}>2</Text>
+              <Text style={styles.infoLabel}>Check-in</Text>
+              <Text style={styles.infoValue}>
+                {formatDate(bookingData.checkInHour)} -{" "}
+                {formatTime(bookingData.checkInHour)}
+              </Text>
             </View>
-
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>ID Number</Text>
-              <Text style={styles.infoValue}>NG1011163</Text>
-            </View>
-
             <View style={styles.infoItem}>
               <Text style={styles.infoLabel}>Check-out</Text>
-              <Text style={styles.infoValue}>30.12.24 - 14:30</Text>
+              <Text style={styles.infoValue}>
+                {formatDate(bookingData.checkOutHour)} -{" "}
+                {formatTime(bookingData.checkOutHour)}
+              </Text>
+            </View>
+          </View>
+
+          {/* Line 7: Duration - Room No */}
+          <View style={styles.infoRow}>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Thời hạn ở</Text>
+              <Text style={styles.infoValue}>
+                {bookingData.durationBookingHour || 0} tiếng
+              </Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Room No.</Text>
+              <Text style={styles.infoValue}>
+                {bookingData.accommodationId?.roomNo || ""}
+              </Text>
             </View>
           </View>
         </View>
 
         {/* Password Section */}
         <View style={styles.passwordContainer}>
-          {isShowingPassword ? (
+          {showPassword ? (
             <>
               <Text style={styles.passwordText}>{password}</Text>
               <CustomButton
                 title="Ẩn mật khẩu"
-                onPress={onHidePassword}
+                onPress={handleHidePassword}
                 backgroundColor="#1E293B"
                 variant="filled"
                 size="medium"
@@ -83,33 +152,38 @@ const TicketCard = ({ mode, onShowPassword, onHidePassword, password }) => {
           ) : (
             <CustomButton
               title="Hiện mật khẩu"
-              onPress={onShowPassword}
+              onPress={handleShowPassword}
               backgroundColor="#1E293B"
               variant="filled"
               size="medium"
-              style={[styles.passwordButton, styles.showPasswordButton]}
+              disabled={!isPasswordViewable}
+              style={styles.passwordButton}
             />
           )}
         </View>
       </View>
 
-      {/* Footer */}
-      <View style={styles.footer}>
-        <View style={styles.userInfo}>
-          <Text style={styles.userInfoLabel}>Họ tên</Text>
-          <Text style={styles.userInfoValue}>Zane Pham</Text>
+      {/* User Info Card */}
+      <View style={styles.userInfoCard}>
+        <Text style={styles.userInfoLabel}>Họ và tên</Text>
+        <Text style={styles.userInfoValue}>
+          {bookingData.customerId?.userId?.fullName || ""}
+        </Text>
 
-          <Text style={styles.userInfoLabel}>Tổng</Text>
-          <Text style={styles.userInfoValue}>550.000đ</Text>
-        </View>
+        <Text style={styles.userInfoLabel}>SĐT:</Text>
+        <Text style={styles.userInfoValue}>
+          {/* Phone number would be here if available in the API response */}
+        </Text>
+      </View>
 
-        <QRCodeComponent
-          value={`TICKET:NG1011163:${password}`}
-          size={80}
-          enableLinearGradient={false}
-          color="#000"
-          backgroundColor="#FFF"
-        />
+      {/* Total Amount Card */}
+      <View style={styles.totalCard}>
+        <Text style={styles.totalLabel}>Tổng tiền:</Text>
+        <Text style={styles.totalValue}>
+          {new Intl.NumberFormat("vi-VN")
+            .format(bookingData.totalPrice || 0)
+            .replace(".", ",") + " đ"}
+        </Text>
       </View>
     </View>
   );
@@ -118,7 +192,7 @@ const TicketCard = ({ mode, onShowPassword, onHidePassword, password }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
   },
   card: {
     backgroundColor: "white",
@@ -129,6 +203,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    marginBottom: 16,
   },
   roomInfo: {
     marginBottom: 20,
@@ -137,20 +212,23 @@ const styles = StyleSheet.create({
     borderBottomColor: "#F3F4F6",
   },
   roomName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#1F2937",
     marginBottom: 8,
   },
   locationContainer: {
     flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
+    alignItems: "flex-start",
+    marginBottom: 12,
+    flexWrap: "wrap",
   },
   locationText: {
     fontSize: 14,
-    color: "#4B5563",
+    color: "#6B7280",
     marginLeft: 4,
+    flex: 1,
+    flexWrap: "wrap",
   },
   tagContainer: {
     backgroundColor: "#EEF2FF",
@@ -164,24 +242,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#4E72E3",
   },
-  ratingContainer: {
+  infoSection: {
+    marginBottom: 20,
+  },
+  infoRow: {
     flexDirection: "row",
-    alignItems: "center",
-  },
-  ratingText: {
-    fontSize: 12,
-    color: "#6B7280",
-    marginLeft: 4,
-  },
-  infoGrid: {
-    flexDirection: "row",
-    marginBottom: 24,
-  },
-  infoColumn: {
-    flex: 1,
+    justifyContent: "space-between",
+    marginBottom: 16,
   },
   infoItem: {
-    marginBottom: 16,
+    flex: 1,
   },
   infoLabel: {
     fontSize: 12,
@@ -192,6 +262,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     color: "#1F2937",
+  },
+  peopleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
   },
   passwordContainer: {
     alignItems: "center",
@@ -206,32 +281,19 @@ const styles = StyleSheet.create({
   },
   passwordButton: {
     minWidth: 160,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
+    borderRadius: 100,
+    backgroundColor: "#1E293B",
   },
-  showPasswordButton: {
-    // Add a blue glow/shadow effect for the "Hiện mật khẩu" button
-    shadowColor: "#4E72E3",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 15,
-    elevation: 8,
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+  userInfoCard: {
     backgroundColor: "white",
-    padding: 16,
     borderRadius: 20,
-    marginTop: 16,
-    marginBottom: 16, // Reduced from 70 since we're not adding the bottom nav
-  },
-  userInfo: {
-    flex: 1,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    marginBottom: 16,
   },
   userInfoLabel: {
     fontSize: 12,
@@ -242,7 +304,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     color: "#1F2937",
-    marginBottom: 8,
+    marginBottom: 12,
+  },
+  totalCard: {
+    backgroundColor: "white",
+    padding: 16,
+    borderRadius: 20,
+    marginBottom: 16,
+  },
+  totalLabel: {
+    fontSize: 14,
+    color: "#9CA3AF",
+    marginBottom: 4,
+  },
+  totalValue: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1F2937",
   },
 });
 

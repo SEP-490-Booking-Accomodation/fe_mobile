@@ -1,5 +1,3 @@
-"use client";
-
 import {
   SafeAreaView,
   StyleSheet,
@@ -8,13 +6,13 @@ import {
   Linking,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { CommonActions } from "@react-navigation/native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import Constants from "expo-constants";
 import { useTranslation } from "react-i18next";
 import { RefreshControl } from "react-native";
 import { useState } from "react";
+import dayjs from "dayjs";
 
 import {
   useGetBookingByIdQuery,
@@ -35,7 +33,6 @@ import PaymentInfo from "./PaymentInfo";
 import BookingFooter from "./BookingFooter";
 import LoadingState from "./LoadingState";
 import EmptyState from "./EmptyState";
-import dayjs from "dayjs";
 
 export default function BookingDetail() {
   const { t } = useTranslation();
@@ -172,18 +169,10 @@ export default function BookingDetail() {
     );
   };
 
-  const handleGoHome = () => {
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [
-          {
-            name: "MainTabs",
-            state: { index: 0, routes: [{ name: "HomeScreen" }] },
-          },
-        ],
-      })
-    );
+  const handleViewTicketDetail = () => {
+    navigation.navigate("TicketDetail", {
+      bookingId: bookingData.id,
+    });
   };
 
   const handleCheckIn = async () => {
@@ -210,6 +199,58 @@ export default function BookingDetail() {
   };
 
   const handleCheckOut = async () => {
+    // Check if current time is before checkout time
+    const currentTime = new Date();
+    const checkOutTime = bookingData.checkOutHour
+      ? new Date(bookingData.checkOutHour)
+      : null;
+
+    // If checkout time exists and current time is before checkout time
+    if (checkOutTime && currentTime < checkOutTime) {
+      // Calculate remaining time
+      const remainingMs = checkOutTime.getTime() - currentTime.getTime();
+      const remainingMinutes = Math.floor(remainingMs / (1000 * 60));
+      const remainingHours = Math.floor(remainingMinutes / 60);
+      const mins = remainingMinutes % 60;
+
+      // Format remaining time message
+      let timeMessage = "";
+      if (remainingHours > 0) {
+        timeMessage = `${remainingHours} ${
+          remainingHours === 1 ? t("hour") : t("hours")
+        }`;
+        if (mins > 0) {
+          timeMessage += ` ${mins} ${mins === 1 ? t("minute") : t("minutes")}`;
+        }
+      } else {
+        timeMessage = `${mins} ${mins === 1 ? t("minute") : t("minutes")}`;
+      }
+
+      // Show confirmation dialog
+      Alert.alert(
+        t("early_checkout_title") || "Early Checkout",
+        t("early_checkout_message", { time: timeMessage }) ||
+          `You still have ${timeMessage} remaining. Are you sure you want to check out now?`,
+        [
+          {
+            text: t("cancel") || "Cancel",
+            style: "cancel",
+          },
+          {
+            text: t("proceed") || "Proceed",
+            onPress: () => performCheckout(),
+          },
+        ],
+        { cancelable: true }
+      );
+    } else {
+      // If current time is after checkout time or checkout time doesn't exist, proceed directly
+      performCheckout();
+    }
+  };
+
+  // Extracted the actual checkout logic to a separate function
+  const performCheckout = async () => {
     setIsCheckingOut(true);
     try {
       const updatedBookingData = {
@@ -282,7 +323,7 @@ export default function BookingDetail() {
         bookingData={bookingData}
         onCancel={handleCancel}
         onPayment={handlePayment}
-        onGoHome={handleGoHome}
+        onViewTicketDetail={handleViewTicketDetail}
         onCheckIn={handleCheckIn}
         onCheckOut={handleCheckOut}
         isUpdating={isUpdating || isCheckingIn || isCheckingOut}

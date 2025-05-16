@@ -329,6 +329,7 @@ export default function TicketList() {
                     price={booking.price}
                     dateCompleted={booking.dateCompleted}
                     status={booking.status}
+                    paymentStatus={booking.paymentStatus}
                     feedbackId={booking.feedbackId}
                     onViewDetail={() => handleViewDetail(booking.id)}
                     onCancelAction={() => handleCancel(booking.id)}

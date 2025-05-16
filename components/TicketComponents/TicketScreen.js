@@ -1,22 +1,19 @@
-import React, { useState } from "react";
-import { View, StyleSheet, StatusBar, Platform } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+"use client";
+
+import { useState } from "react";
+import { View, StyleSheet, StatusBar, Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import TicketCard from "./TicketCard";
 import IconButton from "./IconButton";
 import HelpModal from "./HelpModal";
 
 const TicketScreen = ({
-  mode = "show-password",
-  onShowPassword,
-  onHidePassword,
   onClose,
-  password = "TDOXPLAR20103",
+  isPasswordViewable = false,
+  password = "",
+  bookingData,
 }) => {
   const [helpModalVisible, setHelpModalVisible] = useState(false);
-  const insets = useSafeAreaInsets();
 
   const handleHelpPress = () => {
     setHelpModalVisible(true);
@@ -25,6 +22,22 @@ const TicketScreen = ({
   const handleCloseHelp = () => {
     setHelpModalVisible(false);
   };
+
+  if (!bookingData) {
+    return (
+      <SafeAreaView style={[styles.container]}>
+        <StatusBar barStyle="light-content" backgroundColor="#7B9EF0" />
+        <View
+          style={[
+            styles.content,
+            { justifyContent: "center", alignItems: "center" },
+          ]}
+        >
+          <Text style={{ color: "#FFFFFF" }}>No booking data available</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.container]}>
@@ -41,10 +54,9 @@ const TicketScreen = ({
         </View>
 
         <TicketCard
-          mode={mode}
-          onShowPassword={onShowPassword}
-          onHidePassword={onHidePassword}
+          isPasswordViewable={isPasswordViewable}
           password={password}
+          bookingData={bookingData}
         />
       </View>
 
@@ -70,9 +82,19 @@ const styles = StyleSheet.create({
   },
   helpButton: {
     backgroundColor: "rgba(0, 0, 0, 0.2)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
   closeButton: {
     backgroundColor: "rgba(0, 0, 0, 0.2)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
