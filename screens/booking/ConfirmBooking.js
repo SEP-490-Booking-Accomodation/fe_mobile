@@ -15,7 +15,7 @@ import {
   useNavigation,
   useRoute,
 } from "@react-navigation/native";
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign } from "@expo/vector-icons";
 import CustomButton from "../../components/buttons/Button";
 import PaymentConfirm from "./components/PaymentConfirm";
 import { useCreateBookingMutation } from "../../api/bookingApi";
@@ -24,7 +24,7 @@ import dayjs from "dayjs";
 import { useGetCustomerByUserIdQuery } from "../../api/authApi";
 import CouponSelector from "./components/CouponSelector";
 import { useGetPolicyHashTagQuery } from "../../api/policySystemApi";
-import { useTranslation } from "react-i18next"; 
+import { useTranslation } from "react-i18next";
 
 export default function ConfirmBooking() {
   const { t } = useTranslation();
@@ -39,6 +39,7 @@ export default function ConfirmBooking() {
   const navigation = useNavigation();
   const route = useRoute();
   const { bookingData } = route.params || {};
+  const [isLoading, setIsLoading] = useState(false);
 
   const values = getTimeRefundData?.data?.[0]?.values || [];
   let refundMinutes = values[0]?.val; // mặc định nếu không có
@@ -139,6 +140,8 @@ export default function ConfirmBooking() {
   // console.log(finalTotal);
 
   const handleConfirm = async () => {
+    setIsLoading(true);
+
     const formBooking = {
       // policySystemIds: policyId || ["67ebf15d828b69a4d279d960"],
       customerId: customerData.id,
@@ -149,6 +152,7 @@ export default function ConfirmBooking() {
       overtimeHourlyPrice: typeRoom.overtimeHourlyPrice,
       checkInHour: checkInDateTime,
       checkOutHour: checkOutDateTime,
+      rentalLocationId: rentalData.id,
       confirmDate: null,
       paymentMethod: paymentMethod,
       paymentStatus: 2,
@@ -221,15 +225,14 @@ export default function ConfirmBooking() {
     } catch (error) {
       console.log(error);
 
-      Alert.alert(
-        t("failed"),
-        error.data?.message || t("booking_failed")
-      );
+      Alert.alert(t("failed"), error.data?.message || t("booking_failed"));
+    } finally {
+      setIsLoading(false);
     }
   };
-  const handleConfirm1 = async () => {
-    console.log("Confirm");
-  };
+  // const handleConfirm1 = async () => {
+  //   console.log("Confirm");
+  // };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -262,7 +265,10 @@ export default function ConfirmBooking() {
             </View>
             <View style={styles.jusBetween}>
               <Text style={styles.value}>{t("total_duration")}: </Text>
-              <Text>{bookingData?.duration}{t("h")}</Text>
+              <Text>
+                {bookingData?.duration}
+                {t("h")}
+              </Text>
             </View>
           </View>
 
@@ -345,6 +351,7 @@ export default function ConfirmBooking() {
           onPress={handleConfirm}
           style={{ width: "40%" }}
           title={t("pay_now")}
+          disabled={isLoading}
         />
       </View>
     </SafeAreaView>

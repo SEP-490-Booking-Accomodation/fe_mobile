@@ -3,13 +3,14 @@ import { View, StyleSheet, Alert, Text } from "react-native";
 import dayjs from "dayjs";
 import { BOOKING_STATUS, PAYMENT_STATUS } from "./Constants";
 import CustomButton from "../../../components/buttons/Button";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 export default function BookingFooter({
   bookingData,
   onCancel,
   onPayment,
   onGoHome,
+  isLoadingBtn,
   isUpdating,
 }) {
   const { t } = useTranslation();
@@ -44,20 +45,20 @@ export default function BookingFooter({
 
       if (isRefundAvailable()) {
         Alert.alert(
-          t('refund_cancel_title'),
-          t('refund_cancel_message', { time: refundTime }),
+          t("refund_cancel_title"),
+          t("refund_cancel_message", { time: refundTime }),
           [
-            { text: t('no'), style: "cancel" },
-            { text: t('yes'), onPress: onCancel },
+            { text: t("no"), style: "cancel" },
+            { text: t("yes"), onPress: onCancel },
           ]
         );
       } else {
         Alert.alert(
-          t('refund_overdue_title'),
-          t('refund_overdue_message', { time: refundTime }),
+          t("refund_overdue_title"),
+          t("refund_overdue_message", { time: refundTime }),
           [
-            { text: t('no'), style: "cancel" },
-            { text: t('cancel_anyway'), onPress: onCancel },
+            { text: t("no"), style: "cancel" },
+            { text: t("cancel_anyway"), onPress: onCancel },
           ]
         );
       }
@@ -72,10 +73,10 @@ export default function BookingFooter({
         <View style={styles.buttonRow}>
           {/* Nếu đã thanh toán và còn hoàn tiền thì hiện nút "Hoàn và Hủy" */}
           {shouldShowCancel() &&
-            paymentStatus === PAYMENT_STATUS.PAID &&
-            isRefundAvailable() ? (
+          paymentStatus === PAYMENT_STATUS.PAID &&
+          isRefundAvailable() ? (
             <CustomButton
-              title={t('refund_cancel_button')}
+              title={t("refund_cancel_button")}
               onPress={handleCancelPress}
               titleColor="#EF4444"
               style={styles.cancelButton}
@@ -86,7 +87,7 @@ export default function BookingFooter({
           ) : (
             shouldShowCancel() && (
               <CustomButton
-                title={t('cancel_button')}
+                title={t("cancel_button")}
                 onPress={handleCancelPress}
                 titleColor="#4E72E3"
                 style={styles.cancelButton}
@@ -99,33 +100,32 @@ export default function BookingFooter({
 
           {shouldShowPayNow() && (
             <CustomButton
-              title={t('pay_now_button')}
+              title={t("pay_now_button")}
               onPress={onPayment}
               style={styles.payButton}
               textStyle={styles.payButtonText}
               loading={false}
-              disabled={isUpdating}
+              disabled={isLoadingBtn}
             />
           )}
         </View>
       )}
 
-
       {paymentStatus === PAYMENT_STATUS.PAID && refundDeadline && (
         <Text style={styles.refundNote}>
           {isRefundAvailable()
-            ? t('refund_note_available', {
-              time: dayjs(refundDeadline).format("HH:mm DD/MM")
-            })
-            : t('refund_note_overdue', {
-              time: dayjs(refundDeadline).format("HH:mm DD/MM")
-            })}
+            ? t("refund_note_available", {
+                time: dayjs(refundDeadline).format("HH:mm DD/MM"),
+              })
+            : t("refund_note_overdue", {
+                time: dayjs(refundDeadline).format("HH:mm DD/MM"),
+              })}
         </Text>
       )}
 
       {shouldShowViewTicket() && (
         <CustomButton
-          title={t('view_ticket_button')}
+          title={t("view_ticket_button")}
           onPress={onGoHome}
           style={styles.homeButton}
         />

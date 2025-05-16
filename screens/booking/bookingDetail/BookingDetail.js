@@ -42,6 +42,8 @@ export default function BookingDetail() {
   const route = useRoute();
   const { bookingId } = route.params || {};
   const [refreshing, setRefreshing] = useState(false);
+  const [isLoadingBtn, setIsLoadingBtn] = useState(false);
+
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
@@ -67,6 +69,8 @@ export default function BookingDetail() {
   );
 
   const handlePayment = async () => {
+    setIsLoadingBtn(true);
+
     if (!bookingData) return;
     const totalPrice =
       bookingData.basePrice +
@@ -96,14 +100,19 @@ export default function BookingDetail() {
           Linking.openURL(response.deeplink);
           setTimeout(() => {
             refetch();
+            setIsLoadingBtn(false);
           }, 3000);
         } else {
           Alert.alert(t("error"), t("payment_create_failed"));
+          setIsLoadingBtn(false);
         }
-        console.log(response);
+        // console.log(response);
       } catch (error) {
         console.error("Thanh toán thất bại:", error);
         Alert.alert(t("error"), t("payment_failed"));
+        // setIsLoadingBtn(false);
+      } finally {
+        // setIsLoadingBtn(false);
       }
     }
   };
@@ -225,6 +234,7 @@ export default function BookingDetail() {
         onPayment={handlePayment}
         onGoHome={handleGoHome}
         isUpdating={isUpdating}
+        isLoadingBtn={isLoadingBtn}
       />
     </SafeAreaView>
   );
