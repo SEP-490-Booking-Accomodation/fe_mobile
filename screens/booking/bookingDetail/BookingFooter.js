@@ -3,6 +3,9 @@ import dayjs from "dayjs";
 import { BOOKING_STATUS, PAYMENT_STATUS } from "./Constants";
 import CustomButton from "../../../components/buttons/Button";
 import { useTranslation } from "react-i18next";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 export default function BookingFooter({
   bookingData,
@@ -31,17 +34,22 @@ export default function BookingFooter({
     [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED].includes(status) &&
     paymentStatus === PAYMENT_STATUS.PENDING;
   const shouldShowViewTicket = () => !shouldShowCancel() && !shouldShowPayNow();
+
   const isRefundAvailable = () => {
     if (!refundDeadline) return false;
-    const deadline = refundDeadline;
-    const now = dayjs().format("DD/MM/YYYY HH:mm:ss");
 
+    const deadline = dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss");
+    const now = dayjs();
 
-    console.log(deadline);
-    console.log(now);
+    console.log(typeof deadline); // string
+    console.log(
+      deadline.isValid()
+        ? deadline.format("DD/MM/YYYY HH:mm:ss")
+        : "Invalid Date"
+    );
+    console.log(now.format("DD/MM/YYYY HH:mm:ss"));
 
-    return now < deadline;
-
+    return now.isBefore(deadline);
   };
 
   const shouldShowCheckIn = () => {
