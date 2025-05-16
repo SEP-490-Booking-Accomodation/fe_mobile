@@ -188,9 +188,9 @@ export default function TicketList() {
 
   const handleViewDetail = (id) => {
     console.log("View detail", id);
-    // Navigate to details page
-    //navigation.navigate("BookingDetail", { bookingId: id });
-    navigation.navigate("TicketDetail", { bookingId: id });
+    //Navigate to details page
+    navigation.navigate("BookingDetail", { bookingId: id });
+    //navigation.navigate("TicketDetail", { bookingId: id });
   };
 
   const handleCancel = (id) => {
