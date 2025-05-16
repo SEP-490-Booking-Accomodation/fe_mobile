@@ -152,6 +152,7 @@ export default function ConfirmBooking() {
       overtimeHourlyPrice: typeRoom.overtimeHourlyPrice,
       checkInHour: checkInDateTime,
       checkOutHour: checkOutDateTime,
+      rentalLocationId: rentalData.id,
       confirmDate: null,
       paymentMethod: paymentMethod,
       paymentStatus: 2,
