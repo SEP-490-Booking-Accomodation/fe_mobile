@@ -3,6 +3,9 @@ import dayjs from "dayjs";
 import { BOOKING_STATUS, PAYMENT_STATUS } from "./Constants";
 import CustomButton from "../../../components/buttons/Button";
 import { useTranslation } from "react-i18next";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 import { useRoute } from "@react-navigation/native";
 
 export default function BookingFooter({
@@ -32,13 +35,22 @@ export default function BookingFooter({
   const shouldShowPayNow = () =>
     [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED].includes(status) &&
     paymentStatus === PAYMENT_STATUS.PENDING;
-
   const shouldShowViewTicket = () => !shouldShowCancel() && !shouldShowPayNow();
 
   const isRefundAvailable = () => {
     if (!refundDeadline) return false;
+
+    const deadline = dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss");
     const now = dayjs();
-    const deadline = dayjs(refundDeadline);
+
+    console.log(typeof deadline); // string
+    console.log(
+      deadline.isValid()
+        ? deadline.format("DD/MM/YYYY HH:mm:ss")
+        : "Invalid Date"
+    );
+    console.log(now.format("DD/MM/YYYY HH:mm:ss"));
+
     return now.isBefore(deadline);
   };
 
@@ -170,10 +182,12 @@ export default function BookingFooter({
         <Text style={styles.refundNote}>
           {isRefundAvailable()
             ? t("refund_note_available", {
-                time: dayjs(refundDeadline).format("HH:mm DD/MM"),
+                // time: dayjs(refundDeadline).format("HH:mm DD/MM"),
+                time: refundDeadline,
               })
             : t("refund_note_overdue", {
-                time: dayjs(refundDeadline).format("HH:mm DD/MM"),
+                time: refundDeadline,
+                // time: dayjs(refundDeadline).format("HH:mm DD/MM"),
               })}
         </Text>
       )}
