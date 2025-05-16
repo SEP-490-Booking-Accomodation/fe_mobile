@@ -462,5 +462,7 @@
   "no_data_available": "No data available",
   "top_rated": "Top rated",
   "recent": "Recent",
-  "note_label": "Note"
+  "note_label": "Note",
+  "accommodation_types": "Accommodation Type",
+  "services" : "Services"
 }

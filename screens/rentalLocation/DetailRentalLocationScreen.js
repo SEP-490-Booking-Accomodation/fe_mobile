@@ -34,6 +34,8 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const [user, setUser] = useState({});
   const { loadIdChatPlatform } = useAsyncStorage();
   const { rentalId: locationId } = route.params;
+  const [activeTab, setActiveTab] = useState("accommodation_types"); // Add state for active tab
+  const [isServicesExpanded, setIsServicesExpanded] = useState(false); // Add state for services collapse
 
   const { data: feedbackDataList } =
     useGetAllFeedbackByRentalIdQuery(locationId);
@@ -153,10 +155,10 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
         <View style={styles.ratingSummaryContainer}>
           <View style={styles.ratingAverageContainer}>
             <Text style={styles.averageRating}>
-              {feedbackAverage?.averageRating.toFixed(1)}
+              {feedbackAverage?.averageRating?.toFixed(1) || "0.0"}
             </Text>
             <Text style={styles.totalReviews}>
-              {feedbackAverage?.totalFeedbacks} {t("reviews_count")}
+              {feedbackAverage?.totalFeedbacks || 0} {t("reviews_count")}
             </Text>
           </View>
           <View style={styles.ratingBreakdownContainer}>
@@ -247,6 +249,77 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     );
   };
 
+  const renderAccommodationTypes = () => {
+    const filteredAccommodationTypes =
+      selectedServices.length > 0
+        ? (accommodationTypesData?.data || []).filter((accommodation) =>
+            accommodation.serviceIds?.some((service) =>
+              selectedServices.includes(service.name)
+            )
+          )
+        : accommodationTypesData?.data || [];
+
+    return (
+      <View style={styles.accommodationContainer}>
+        {allServices.length > 0 && (
+          <View>
+            <TouchableOpacity
+              style={styles.servicesHeader}
+              onPress={() => setIsServicesExpanded(!isServicesExpanded)}
+            >
+              <Text style={styles.servicesHeaderText}>{t("services")}</Text>
+              <Icon
+                name={
+                  isServicesExpanded
+                    ? "keyboard-arrow-up"
+                    : "keyboard-arrow-down"
+                }
+                size={24}
+                color="#4e72e3"
+              />
+            </TouchableOpacity>
+
+            {isServicesExpanded && (
+              <View style={styles.multiSelectButtonGroup}>
+                <MultiSelectButtonGroup
+                  items={allServices}
+                  selectedIndexes={allServices
+                    .map((service) =>
+                      selectedServices.includes(service)
+                        ? allServices.indexOf(service)
+                        : -1
+                    )
+                    .filter((index) => index !== -1)}
+                  onChange={(selectedIndexes) => {
+                    setSelectedServices(
+                      selectedIndexes.map((index) => allServices[index])
+                    );
+                  }}
+                  activeButtonStyle={styles.activeButton}
+                  inactiveButtonStyle={styles.inactiveButton}
+                  activeTextStyle={styles.activeText}
+                  inactiveTextStyle={styles.inactiveText}
+                />
+              </View>
+            )}
+          </View>
+        )}
+        <View style={styles.card}>
+          {filteredAccommodationTypes.map((accommodationType) => (
+            <SimpleVerticalCard
+              key={accommodationType._id}
+              imageUrl={accommodationType.image?.[0]}
+              placeName={accommodationType.name}
+              price={`${accommodationType.basePrice}${t("per_hour")}`}
+              location={`${rental.address}, ${rental.ward} , ${rental.district}, ${rental.city}`}
+              onCardPress={() => handleCardPress(accommodationType)}
+            />
+          ))}
+        </View>
+      </View>
+    );
+  };
+
   const handleMoreOptions = () => {
     Alert.alert(t("more_options"), t("choose_action"), [
       { text: t("share"), onPress: () => console.log("Share pressed") },
@@ -285,15 +358,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 
   const rental = rentalData.data;
   const accommodationTypes = rental.accommodationTypeIds.data || [];
-
-  const filteredAccommodationTypes =
-    selectedServices.length > 0
-      ? (accommodationTypesData?.data || []).filter((accommodation) =>
-          accommodation.serviceIds?.some((service) =>
-            selectedServices.includes(service.name)
-          )
-        )
-      : accommodationTypesData?.data || [];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -358,7 +422,9 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               <View style={styles.ratingContainer}>
                 <Icon name="star" size={20} color="#ffc907" />
                 <Text style={styles.ratingText}>
-                  4.5 (120 {t("reviews_count")})
+                  {feedbackAverage?.averageRating?.toFixed(1) || "0.0"} (
+                  {feedbackAverage?.totalFeedbacks || 0} {t("reviews_count")}
+                  {")"}
                 </Text>
               </View>
               <Text style={styles.description}>
@@ -378,42 +444,48 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               </Text>
             </View>
           </View>
-          {renderReview()}
-          {allServices.length > 0 && (
-            <View style={styles.multiSelectButtonGroup}>
-              <MultiSelectButtonGroup
-                items={allServices}
-                selectedIndexes={allServices
-                  .map((service) =>
-                    selectedServices.includes(service)
-                      ? allServices.indexOf(service)
-                      : -1
-                  )
-                  .filter((index) => index !== -1)}
-                onChange={(selectedIndexes) => {
-                  setSelectedServices(
-                    selectedIndexes.map((index) => allServices[index])
-                  );
-                }}
-                activeButtonStyle={styles.activeButton}
-                inactiveButtonStyle={styles.inactiveButton}
-                activeTextStyle={styles.activeText}
-                inactiveTextStyle={styles.inactiveText}
-              />
-            </View>
-          )}
-          <View style={styles.card}>
-            {/* {console.log(filteredAccommodationTypes)} */}
-            {filteredAccommodationTypes.map((accommodationType) => (
-              <SimpleVerticalCard
-                key={accommodationType._id}
-                imageUrl={accommodationType.image?.[0]}
-                placeName={accommodationType.name}
-                price={`${accommodationType.basePrice}${t("per_hour")}`}
-                location={`${rental.address}, ${rental.ward} , ${rental.district}, ${rental.city}`}
-                onCardPress={() => handleCardPress(accommodationType)}
-              />
-            ))}
+
+          {/* Tab Navigation */}
+          <View style={styles.tabContainer}>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                activeTab === "accommodation_types" && styles.activeTabButton,
+              ]}
+              onPress={() => setActiveTab("accommodation_types")}
+            >
+              <Text
+                style={[
+                  styles.tabButtonText,
+                  activeTab === "accommodation_types" && styles.activeTabText,
+                ]}
+              >
+                {t("accommodation_types")}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                activeTab === "reviews" && styles.activeTabButton,
+              ]}
+              onPress={() => setActiveTab("reviews")}
+            >
+              <Text
+                style={[
+                  styles.tabButtonText,
+                  activeTab === "reviews" && styles.activeTabText,
+                ]}
+              >
+                {t("reviews")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Tab Content */}
+          <View style={styles.tabContent}>
+            {activeTab === "accommodation_types"
+              ? renderAccommodationTypes()
+              : renderReview()}
           </View>
         </ScrollView>
       </View>
@@ -435,17 +507,19 @@ const styles = StyleSheet.create({
     paddingTop: 72,
   },
   reviewsContainer: {
-    padding: 16,
+    padding: 8,
   },
-
+  accommodationContainer: {
+    padding: 8,
+  },
   commentsScrollView: {
     maxHeight: 300,
-    marginTop: 16,
+    marginTop: 8,
   },
   ratingSummaryContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 8,
   },
   ratingAverageContainer: {
     alignItems: "center",
@@ -464,7 +538,7 @@ const styles = StyleSheet.create({
   },
   ratingBreakdownContainer: {
     flex: 1,
-    marginLeft: 16,
+    marginLeft: 8,
   },
   ratingRow: {
     flexDirection: "row",
@@ -490,7 +564,7 @@ const styles = StyleSheet.create({
   },
   reviewCard: {
     backgroundColor: "#fff",
-    padding: 16,
+    padding: 8,
     borderRadius: 12,
     marginBottom: 16,
   },
@@ -563,7 +637,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
   bannerText: {
     color: "#000",
     fontWeight: "bold",
@@ -661,6 +734,49 @@ const styles = StyleSheet.create({
   },
   card: {
     marginBottom: 20,
+  },
+  // Tab styles
+  tabContainer: {
+    flexDirection: "row",
+    marginBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  activeTabButton: {
+    borderBottomWidth: 2,
+    borderBottomColor: "#4E72E3",
+  },
+  tabButtonText: {
+    fontSize: 16,
+    color: "#666",
+  },
+  activeTabText: {
+    color: "#4E72E3",
+    fontWeight: "600",
+  },
+  tabContent: {
+    flex: 1,
+  },
+  // Services collapsible styles
+  servicesHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+    marginBottom: 12,
+  },
+  servicesHeaderText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
   },
 });
 

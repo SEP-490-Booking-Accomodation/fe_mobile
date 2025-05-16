@@ -461,5 +461,8 @@
   "no_data_available": "Không có dữ liệu",
   "top_rated": "Được đánh giá cao",
   "recent": "Gần đây",
-  "note_label": "Ghi chú"
+  "note_label": "Ghi chú",
+  "accommodation_types": "Loại phòng",
+  "services": "Dịch vụ"
+
 }
