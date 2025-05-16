@@ -11,7 +11,10 @@ import { useState, useEffect } from "react";
 import CustomButton from "../../components/buttons/Button";
 import CardInMyTicket from "../../components/cards/CardInMyTicket";
 import { useSelector } from "react-redux";
-import { useGetAllBookingByCustomerIdQuery } from "../../api/bookingApi";
+import {
+  useGetAllBookingByCustomerIdQuery,
+  useUpdateBookingMutation,
+} from "../../api/bookingApi";
 import { useGetCustomerByUserIdQuery } from "../../api/authApi";
 import ReviewModal from "./modals/ReviewModal";
 import { useTranslation } from "react-i18next";
@@ -46,6 +49,7 @@ export default function TicketList() {
     const [year, time] = yearAndTime.split(" ");
     return new Date(`${year}-${month}-${day}T${time}`);
   };
+  const [updateBooking, { isLoading: isUpdating }] = useUpdateBookingMutation();
 
   const { data: customerData } = useGetCustomerByUserIdQuery(authData.userId);
   const [createFeedback] = useCreateFeedbackMutation();
@@ -54,8 +58,6 @@ export default function TicketList() {
     isLoading,
     refetch,
   } = useGetAllBookingByCustomerIdQuery(customerData?.id);
-
-  console.log("bookingData", bookingData);
   const mapStatusToFilterCategory = (status) => {
     switch (status) {
       case BOOKING_STATUS.CONFIRMED:
@@ -135,6 +137,7 @@ export default function TicketList() {
   };
 
   const handleSubmitReview = async (reviewData) => {
+    console.log("Submit review", reviewData);
     const requestData = {
       bookingId: reviewData.bookingId,
       content: reviewData.content,
@@ -147,7 +150,16 @@ export default function TicketList() {
 
     try {
       const result = await createFeedback({ data: requestData });
+      const updatedBookingData = {
+        ...bookingData,
+        status: BOOKING_STATUS.COMPLETED,
+      };
+      console.log("Updated booking data", updatedBookingData);
 
+      await updateBooking({
+        id: reviewData.bookingId,
+        data: updatedBookingData,
+      }).unwrap();
       setLocalBookings((prevBookings) =>
         prevBookings.map((booking) =>
           booking.id === reviewData.bookingId
