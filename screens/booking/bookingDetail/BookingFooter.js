@@ -1,4 +1,3 @@
-import React from "react";
 import { View, StyleSheet, Alert, Text } from "react-native";
 import dayjs from "dayjs";
 import { BOOKING_STATUS, PAYMENT_STATUS } from "./Constants";
@@ -10,6 +9,8 @@ export default function BookingFooter({
   onCancel,
   onPayment,
   onGoHome,
+  onCheckIn,
+  onCheckOut,
   isLoadingBtn,
   isUpdating,
 }) {
@@ -37,6 +38,40 @@ export default function BookingFooter({
     const now = dayjs();
     const deadline = dayjs(refundDeadline);
     return now.isBefore(deadline);
+  };
+
+  const shouldShowCheckIn = () => {
+    if (
+      status !== BOOKING_STATUS.CONFIRMED ||
+      paymentStatus !== PAYMENT_STATUS.PAID
+    ) {
+      return false;
+    }
+
+    // Check if current date equals check-in date
+    const currentDate = dayjs().format("YYYY-MM-DD");
+    const checkInDate = dayjs(bookingData?.checkInTime).format("YYYY-MM-DD");
+
+    return currentDate === checkInDate;
+  };
+
+  const isCheckInButtonClickable = () => {
+    if (!shouldShowCheckIn()) return false;
+
+    const currentTime = dayjs();
+    const checkInTime = dayjs(bookingData?.checkInTime);
+    const checkOutTime = dayjs(bookingData?.checkOutTime);
+
+    // Check if current time is between check-in time and check-out time
+    return (
+      currentTime.isAfter(checkInTime) ||
+      currentTime.isSame(checkInTime) ||
+      (currentTime.isAfter(checkInTime) && currentTime.isBefore(checkOutTime))
+    );
+  };
+
+  const shouldShowCheckOut = () => {
+    return status === BOOKING_STATUS.CHECKEDIN;
   };
 
   const handleCancelPress = () => {
@@ -69,9 +104,9 @@ export default function BookingFooter({
 
   return (
     <View style={styles.footer}>
-      {(shouldShowCancel() || shouldShowPayNow()) && (
+      {(shouldShowCancel() || shouldShowPayNow() || shouldShowCheckIn()) && (
         <View style={styles.buttonRow}>
-          {/* Nếu đã thanh toán và còn hoàn tiền thì hiện nút "Hoàn và Hủy" */}
+          {/* Cancel button */}
           {shouldShowCancel() &&
           paymentStatus === PAYMENT_STATUS.PAID &&
           isRefundAvailable() ? (
@@ -79,7 +114,7 @@ export default function BookingFooter({
               title={t("refund_cancel_button")}
               onPress={handleCancelPress}
               titleColor="#EF4444"
-              style={styles.cancelButton}
+              style={[styles.cancelButton, shouldShowCheckIn() && { flex: 1 }]}
               textStyle={styles.cancelButtonText}
               loading={isUpdating}
               disabled={isUpdating}
@@ -90,7 +125,10 @@ export default function BookingFooter({
                 title={t("cancel_button")}
                 onPress={handleCancelPress}
                 titleColor="#4E72E3"
-                style={styles.cancelButton}
+                style={[
+                  styles.cancelButton,
+                  shouldShowCheckIn() && { flex: 1 },
+                ]}
                 textStyle={styles.cancelButtonText}
                 loading={isUpdating}
                 disabled={isUpdating}
@@ -98,6 +136,21 @@ export default function BookingFooter({
             )
           )}
 
+          {/* Check-in button - placed in the button row */}
+          {shouldShowCheckIn() && (
+            <CustomButton
+              title={t("check_in")}
+              onPress={isCheckInButtonClickable() ? onCheckIn : undefined}
+              style={[
+                styles.checkInButton,
+                !isCheckInButtonClickable() && styles.disabledCheckInButton,
+              ]}
+              textStyle={styles.checkInButtonText}
+              disabled={!isCheckInButtonClickable()}
+            />
+          )}
+
+          {/* Pay now button */}
           {shouldShowPayNow() && (
             <CustomButton
               title={t("pay_now_button")}
@@ -124,16 +177,37 @@ export default function BookingFooter({
       )}
 
       {shouldShowViewTicket() && (
-        <CustomButton
-          title={t("view_ticket_button")}
-          onPress={onGoHome}
-          style={styles.homeButton}
-        />
+        <>
+          {shouldShowCheckOut() ? (
+            <View style={styles.buttonRow}>
+              <CustomButton
+                title={t("check_out")}
+                onPress={onCheckOut}
+                style={styles.checkOutButton}
+                textStyle={styles.checkInButtonText}
+                loading={isUpdating}
+                disabled={isUpdating}
+              />
+              <CustomButton
+                title={t("view_ticket_button")}
+                onPress={onGoHome}
+                style={styles.viewTicketButton}
+              />
+            </View>
+          ) : (
+            <CustomButton
+              title={t("view_ticket_button")}
+              onPress={onGoHome}
+              style={styles.homeButton}
+            />
+          )}
+        </>
       )}
     </View>
   );
 }
 
+// Update the styles to ensure the buttons look good side by side
 const styles = StyleSheet.create({
   footer: {
     marginTop: 16,
@@ -161,7 +235,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#4E72E3",
     flex: 1,
-    marginRight: 8,
   },
   cancelButtonText: {
     fontSize: 16,
@@ -179,5 +252,33 @@ const styles = StyleSheet.create({
     color: "#4E72E3",
     fontSize: 13,
     fontStyle: "italic",
+  },
+  checkInButton: {
+    backgroundColor: "#4E72E3",
+    height: 50,
+    borderRadius: 12,
+    flex: 1,
+  },
+  disabledCheckInButton: {
+    backgroundColor: "#A0AEC0",
+  },
+  checkInButtonText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+  },
+  checkOutButton: {
+    backgroundColor: "#4E72E3",
+    height: 50,
+    borderRadius: 12,
+    flex: 1,
+    marginRight: 5,
+  },
+  viewTicketButton: {
+    backgroundColor: "#4E72E3",
+    height: 50,
+    borderRadius: 12,
+    flex: 1,
+    marginLeft: 5,
   },
 });

@@ -1,7 +1,8 @@
+"use client";
+
 import {
   SafeAreaView,
   StyleSheet,
-  View,
   ScrollView,
   Alert,
   Linking,
@@ -43,6 +44,8 @@ export default function BookingDetail() {
   const { bookingId } = route.params || {};
   const [refreshing, setRefreshing] = useState(false);
   const [isLoadingBtn, setIsLoadingBtn] = useState(false);
+  const [isCheckingIn, setIsCheckingIn] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -183,6 +186,52 @@ export default function BookingDetail() {
     );
   };
 
+  const handleCheckIn = async () => {
+    setIsCheckingIn(true);
+    try {
+      const updatedBookingData = {
+        ...bookingData,
+        status: BOOKING_STATUS.CHECKEDIN,
+      };
+
+      await updateBooking({
+        id: bookingId,
+        data: updatedBookingData,
+      }).unwrap();
+      Alert.alert(t("success"), t("check_in_success"), [
+        { text: "OK", onPress: () => refetch() },
+      ]);
+    } catch (error) {
+      console.error("Error checking in:", error);
+      Alert.alert(t("error"), error.data?.message || t("check_in_failed"));
+    } finally {
+      setIsCheckingIn(false);
+    }
+  };
+
+  const handleCheckOut = async () => {
+    setIsCheckingOut(true);
+    try {
+      const updatedBookingData = {
+        ...bookingData,
+        status: BOOKING_STATUS.CHECKEDOUT,
+      };
+
+      await updateBooking({
+        id: bookingId,
+        data: updatedBookingData,
+      }).unwrap();
+      Alert.alert(t("success"), t("check_out_success"), [
+        { text: "OK", onPress: () => refetch() },
+      ]);
+    } catch (error) {
+      console.error("Error checking out:", error);
+      Alert.alert(t("error"), error.data?.message || t("check_out_failed"));
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
+
   if (isLoading) {
     return <LoadingState />;
   }
@@ -193,6 +242,7 @@ export default function BookingDetail() {
 
   const rentalData = bookingData?.accommodationId?.rentalLocationId;
   const typeRoom = bookingData?.accommodationId?.accommodationTypeId;
+  const password = bookingData?.passwordRoom;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -216,7 +266,7 @@ export default function BookingDetail() {
         )}
 
         <LocationInfo rentalData={rentalData} />
-        <RoomTypeInfo typeRoom={typeRoom} />
+        <RoomTypeInfo typeRoom={typeRoom} password={password} />
         <TimeInfo bookingData={bookingData} />
 
         <GuestsInfo
@@ -233,7 +283,9 @@ export default function BookingDetail() {
         onCancel={handleCancel}
         onPayment={handlePayment}
         onGoHome={handleGoHome}
-        isUpdating={isUpdating}
+        onCheckIn={handleCheckIn}
+        onCheckOut={handleCheckOut}
+        isUpdating={isUpdating || isCheckingIn || isCheckingOut}
         isLoadingBtn={isLoadingBtn}
       />
     </SafeAreaView>
