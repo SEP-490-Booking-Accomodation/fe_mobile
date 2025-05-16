@@ -42,9 +42,11 @@ export default function ConfirmBooking() {
   const [isLoading, setIsLoading] = useState(false);
 
   const values = getTimeRefundData?.data?.[0]?.values || [];
-  let refundMinutes = values[0]?.val; // mặc định nếu không có
+  let refundMinutes = values[0]?.val || 20; // mặc định nếu không có
   const bookingTime = dayjs(); // thời điểm tạo booking
   const refundDeadline = bookingTime.add(refundMinutes, "minute");
+  const refundDeadlineISO = refundDeadline.toISOString();
+
   // console.log(refundDeadline);
   // console.log(bookingTime);
 
@@ -163,7 +165,8 @@ export default function ConfirmBooking() {
       passwordRoom: "",
       note: bookingData.note || "",
       status: 8,
-      timeExpireRefund: refundDeadline,
+      // timeExpireRefund: refundDeadline,
+      timeExpireRefund: refundDeadlineISO,
       // discountAmount: discountAmount, // Add discount amount to the booking data
       totalPrice: finalTotal, // Add final total after discount
     };
