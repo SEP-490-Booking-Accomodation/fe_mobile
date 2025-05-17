@@ -464,5 +464,9 @@
   "recent": "Recent",
   "note_label": "Note",
   "accommodation_types": "Accommodation Type",
-  "services" : "Services"
+  "services" : "Services",
+  "check_out_success" : "Check-out successful",
+  "check_out_failed" : "Check-out failed",
+  "check_in_success" : "Check-in successful",
+  "check_in_failed" : "Check-in failed"
 }
