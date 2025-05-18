@@ -467,6 +467,18 @@
   "check_out_success" : "Trả phòng thành công. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.",
   "check_out_failed" : "Trả phòng thất bại! Hãy thử lại sau.",
   "check_in_success" : "Nhận phòng thành công. Chúc bạn có một kỳ nghỉ vui vẻ.",
-  "check_in_failed" : "Nhận phòng thất bại! Hãy thử lại sau."
-
+  "check_in_failed" : "Nhận phòng thất bại! Hãy thử lại sau.",
+  "report_issue": "Báo cáo sự cố",
+  "reason_for_report": "Lý do báo cáo",
+  "inappropriate_content": "Nội dung không phù hợp",
+  "spam": "Spam",
+  "false_information": "Thông tin sai lệch",
+  "other": "Khác",
+  "fraud": "Lừa đảo",
+  "offensive_behavior": "Hành vi xúc phạm",
+  "evidence_images": "Hình ảnh chứng cứ",
+  "add_up_to_three_images": "Thêm tối đa 3 hình ảnh",
+  "add_image": "Thêm hình ảnh",
+  "report_rental_name": "Báo cáo căn hộ",
+  "submit_report": "Gửi báo cáo"
 }
