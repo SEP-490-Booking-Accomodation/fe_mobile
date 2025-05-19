@@ -1,12 +1,12 @@
-import { View, StyleSheet, Alert, Text } from "react-native";
-import dayjs from "dayjs";
-import { BOOKING_STATUS, PAYMENT_STATUS } from "./Constants";
-import CustomButton from "../../../components/buttons/Button";
-import { useTranslation } from "react-i18next";
-import customParseFormat from "dayjs/plugin/customParseFormat";
+import { View, StyleSheet, Alert, Text } from "react-native"
+import dayjs from "dayjs"
+import { BOOKING_STATUS, PAYMENT_STATUS } from "./Constants"
+import CustomButton from "../../../components/buttons/Button"
+import { useTranslation } from "react-i18next"
+import customParseFormat from "dayjs/plugin/customParseFormat"
 
-dayjs.extend(customParseFormat);
-import { useRoute } from "@react-navigation/native";
+dayjs.extend(customParseFormat)
+import { useRoute } from "@react-navigation/native"
 
 export default function BookingFooter({
   bookingData,
@@ -18,112 +18,112 @@ export default function BookingFooter({
   isLoadingBtn,
   isUpdating,
 }) {
-  const { t } = useTranslation();
-  const status = Number(bookingData?.status);
-  const paymentStatus = Number(bookingData?.paymentStatus);
-  const refundDeadline = bookingData?.timeExpireRefund;
-  const route = useRoute();
-  const { bookingId } = route.params || {};
+  const { t } = useTranslation()
+  const status = Number(bookingData?.status)
+  const paymentStatus = Number(bookingData?.paymentStatus)
+  const refundDeadline = bookingData?.timeExpireRefund
+  const route = useRoute()
+  const { bookingId } = route.params || {}
   const shouldShowCancel = () =>
     [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED].includes(status) &&
-    [
-      PAYMENT_STATUS.BOOKING,
-      PAYMENT_STATUS.PENDING,
-      PAYMENT_STATUS.PAID,
-    ].includes(paymentStatus);
+    [PAYMENT_STATUS.BOOKING, PAYMENT_STATUS.PENDING, PAYMENT_STATUS.PAID].includes(paymentStatus)
 
   const shouldShowPayNow = () =>
-    [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED].includes(status) &&
-    paymentStatus === PAYMENT_STATUS.PENDING;
-  const shouldShowViewTicket = () => !shouldShowCancel() && !shouldShowPayNow();
+    [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED].includes(status) && paymentStatus === PAYMENT_STATUS.PENDING
+  const shouldShowViewTicket = () => !shouldShowCancel() && !shouldShowPayNow()
 
   const isRefundAvailable = () => {
-    if (!refundDeadline) return false;
+    if (!refundDeadline) return false
 
-    const deadline = dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss");
-    const now = dayjs();
+    try {
+      const deadline = dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss")
+      const now = dayjs()
 
-    console.log(typeof deadline); // string
-    console.log(
-      deadline.isValid()
-        ? deadline.format("DD/MM/YYYY HH:mm:ss")
-        : "Invalid Date"
-    );
-    console.log(now.format("DD/MM/YYYY HH:mm:ss"));
+      if (!deadline.isValid()) {
+        console.log("Invalid date format:", refundDeadline)
+        return false
+      }
 
-    return now.isBefore(deadline);
-  };
+      return now.isBefore(deadline)
+    } catch (error) {
+      console.log("Error parsing refund deadline:", error)
+      return false
+    }
+  }
 
   const shouldShowCheckIn = () => {
-    if (
-      status !== BOOKING_STATUS.CONFIRMED ||
-      paymentStatus !== PAYMENT_STATUS.PAID
-    ) {
-      return false;
+    if (status !== BOOKING_STATUS.CONFIRMED || paymentStatus !== PAYMENT_STATUS.PAID) {
+      return false
     }
 
     // Check if current date equals check-in date
-    const currentDate = dayjs().format("YYYY-MM-DD");
-    const checkInDate = dayjs(bookingData?.checkInTime).format("YYYY-MM-DD");
+    const currentDate = dayjs().format("YYYY-MM-DD")
+    const checkInDate = dayjs(bookingData?.checkInTime).format("YYYY-MM-DD")
 
-    return currentDate === checkInDate;
-  };
+    return currentDate === checkInDate
+  }
 
   const isCheckInButtonClickable = () => {
-    if (!shouldShowCheckIn()) return false;
+    if (!shouldShowCheckIn()) return false
 
-    const currentTime = dayjs();
-    const checkInTime = dayjs(bookingData?.checkInTime);
-    const checkOutTime = dayjs(bookingData?.checkOutTime);
+    const currentTime = dayjs()
+    const checkInTime = dayjs(bookingData?.checkInTime)
+    const checkOutTime = dayjs(bookingData?.checkOutTime)
 
     // Check if current time is between check-in time and check-out time
     return (
       currentTime.isAfter(checkInTime) ||
       currentTime.isSame(checkInTime) ||
       (currentTime.isAfter(checkInTime) && currentTime.isBefore(checkOutTime))
-    );
-  };
+    )
+  }
 
   const shouldShowCheckOut = () => {
-    return status === BOOKING_STATUS.CHECKEDIN;
-  };
+    return status === BOOKING_STATUS.CHECKEDIN
+  }
 
   const handleCancelPress = () => {
     if (paymentStatus === PAYMENT_STATUS.PAID && refundDeadline) {
-      const refundTime = dayjs(refundDeadline).format("HH:mm DD/MM/YYYY");
+      const refundTime = dayjs(refundDeadline).format("HH:mm DD/MM/YYYY")
 
       if (isRefundAvailable()) {
         Alert.alert(
           t("refund_cancel_title"),
-          t("refund_cancel_message", { time: refundTime }),
+          t("refund_cancel_message", {
+            time: dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss").isValid()
+              ? dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss").format("HH:mm DD/MM/YYYY")
+              : refundDeadline,
+          }),
           [
             { text: t("no"), style: "cancel" },
             { text: t("yes"), onPress: onCancel },
-          ]
-        );
+          ],
+        )
       } else {
         Alert.alert(
           t("refund_overdue_title"),
-          t("refund_overdue_message", { time: refundTime }),
+          t("refund_overdue_message", {
+            time: dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss").isValid()
+              ? dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss").format("HH:mm DD/MM/YYYY")
+              : refundDeadline,
+          }),
           [
             { text: t("no"), style: "cancel" },
             { text: t("cancel_anyway"), onPress: onCancel },
-          ]
-        );
+          ],
+        )
       }
     } else {
-      onCancel();
+      onCancel()
     }
-  };
+  }
 
   return (
     <View style={styles.footer}>
       {(shouldShowCancel() || shouldShowPayNow() || shouldShowCheckIn()) && (
         <View style={styles.buttonRow}>
           {/* Cancel button */}
-          {shouldShowCancel() &&
-          paymentStatus === PAYMENT_STATUS.PAID &&
-          isRefundAvailable() ? (
+          {shouldShowCancel() && paymentStatus === PAYMENT_STATUS.PAID && isRefundAvailable() ? (
             <CustomButton
               title={t("refund_cancel_button")}
               onPress={handleCancelPress}
@@ -141,10 +141,7 @@ export default function BookingFooter({
                 title={t("cancel_button")}
                 onPress={handleCancelPress}
                 titleColor="#4E72E3"
-                style={[
-                  styles.cancelButton,
-                  shouldShowCheckIn() && { flex: 1 },
-                ]}
+                style={[styles.cancelButton, shouldShowCheckIn() && { flex: 1 }]}
                 textStyle={styles.cancelButtonText}
                 loading={isUpdating}
                 disabled={isUpdating}
@@ -157,10 +154,7 @@ export default function BookingFooter({
             <CustomButton
               title={t("check_in")}
               onPress={isCheckInButtonClickable() ? onCheckIn : undefined}
-              style={[
-                styles.checkInButton,
-                !isCheckInButtonClickable() && styles.disabledCheckInButton,
-              ]}
+              style={[styles.checkInButton, !isCheckInButtonClickable() && styles.disabledCheckInButton]}
               textStyle={styles.checkInButtonText}
               disabled={!isCheckInButtonClickable()}
             />
@@ -184,12 +178,14 @@ export default function BookingFooter({
         <Text style={styles.refundNote}>
           {isRefundAvailable()
             ? t("refund_note_available", {
-                // time: dayjs(refundDeadline).format("HH:mm DD/MM"),
-                time: refundDeadline,
+                time: dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss").isValid()
+                  ? dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss").format("HH:mm DD/MM/YYYY")
+                  : refundDeadline,
               })
             : t("refund_note_overdue", {
-                time: refundDeadline,
-                // time: dayjs(refundDeadline).format("HH:mm DD/MM"),
+                time: dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss").isValid()
+                  ? dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss").format("HH:mm DD/MM/YYYY")
+                  : refundDeadline,
               })}
         </Text>
       )}
@@ -213,16 +209,12 @@ export default function BookingFooter({
               />
             </View>
           ) : (
-            <CustomButton
-              title={t("view_ticket_button")}
-              onPress={onViewTicketDetail}
-              style={styles.homeButton}
-            />
+            <CustomButton title={t("view_ticket_button")} onPress={onViewTicketDetail} style={styles.homeButton} />
           )}
         </>
       )}
     </View>
-  );
+  )
 }
 
 // Update the styles to ensure the buttons look good side by side
@@ -260,8 +252,8 @@ const styles = StyleSheet.create({
     color: "#4E72E3",
   },
   multilineButtonText: {
-    textAlign: 'center',
-    flexWrap: 'wrap',
+    textAlign: "center",
+    flexWrap: "wrap",
     lineHeight: 20,
   },
   homeButton: {
@@ -304,4 +296,4 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 5,
   },
-});
+})
