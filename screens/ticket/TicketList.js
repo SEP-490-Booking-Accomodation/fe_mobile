@@ -107,7 +107,7 @@ export default function TicketList() {
       nameRoom: booking?.accommodationId?.accommodationTypeId.name,
       placeName: booking?.accommodationId?.rentalLocationId?.city,
       maxPeople: booking.adultNumber + booking.childNumber,
-      price: booking.basePrice.toLocaleString("vi-VN") + " VND",
+      price: booking.totalPrice.toLocaleString("vi-VN") + " VND",
       dateCompleted: booking.checkOutHour,
       dateCheckin: booking.checkInHour,
       dateBooked: booking.createdAt,
@@ -189,8 +189,8 @@ export default function TicketList() {
     localBookings.length > 0
       ? localBookings
       : bookingData?.bookings
-      ? convertBookingsData(bookingData.bookings)
-      : [];
+        ? convertBookingsData(bookingData.bookings)
+        : [];
 
   const renderHeader = () => (
     <View style={styles.header}>
@@ -227,8 +227,8 @@ export default function TicketList() {
     activeTab.value === "0"
       ? convertedBookings
       : convertedBookings.filter(
-          (booking) => booking.bookingStatus === activeTab.key
-        );
+        (booking) => booking.bookingStatus === activeTab.key
+      );
 
   return (
     <SafeAreaView style={styles.container}>

@@ -129,9 +129,11 @@ export default function BookingFooter({
               onPress={handleCancelPress}
               titleColor="#EF4444"
               style={[styles.cancelButton, shouldShowCheckIn() && { flex: 1 }]}
-              textStyle={styles.cancelButtonText}
+              textStyle={[styles.cancelButtonText, styles.multilineButtonText]}
               loading={isUpdating}
               disabled={isUpdating}
+              numberOfLines={2}
+              adjustsFontSizeToFit={true}
             />
           ) : (
             shouldShowCancel() && (
@@ -256,6 +258,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "#4E72E3",
+  },
+  multilineButtonText: {
+    textAlign: 'center',
+    flexWrap: 'wrap',
+    lineHeight: 20,
   },
   homeButton: {
     backgroundColor: "#4E72E3",
