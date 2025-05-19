@@ -6,7 +6,7 @@ const MoreOptionsModal = ({
   visible,
   onClose,
   onShare,
-  onReport,
+  onReport, // We'll keep this prop to avoid breaking existing code, but won't use it
   t, // translation function
 }) => {
   const handleShare = () => {
@@ -14,10 +14,7 @@ const MoreOptionsModal = ({
     onClose();
   };
 
-  const handleReport = () => {
-    if (onReport) onReport();
-    onClose();
-  };
+  // We're removing the handleReport function and the report option from the UI
 
   return (
     <Modal
@@ -40,10 +37,7 @@ const MoreOptionsModal = ({
               <Text style={styles.modalOptionText}>{t("share")}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.modalOption} onPress={handleReport}>
-              <Icon name="flag" size={20} color="#333" />
-              <Text style={styles.modalOptionText}>{t("report")}</Text>
-            </TouchableOpacity>
+            {/* Report option removed */}
 
             <TouchableOpacity
               style={[styles.modalOption, styles.cancelOption]}

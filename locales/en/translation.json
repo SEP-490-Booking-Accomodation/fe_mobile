@@ -477,5 +477,11 @@
   "three_images_required": "3 images required",
   "add_image": "Add Image",
   "report_rental_name": "Reporting Rental Name",
-  "submit_report": "Submit Report"
+  "submit_report": "Submit Report",
+  "describe_issue_in_detail": "Please describe the issue in detail",
+  "3_more_needed": "3 more images needed",
+  "booking_id": "Booking ID",
+  "rental_name": "Rental Name",
+  "accomodation_type" : "Accommodation Type",
+  "roomNo" : "Room No"
 }

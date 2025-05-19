@@ -284,10 +284,20 @@ export default function BookingDetail() {
   const rentalData = bookingData?.accommodationId?.rentalLocationId;
   const typeRoom = bookingData?.accommodationId?.accommodationTypeId;
   const password = bookingData?.passwordRoom;
-
+  const bId = bookingData?.id;
+  const rentalName = rentalData?.name;
+  const accommodationType =
+    bookingData?.accommodationId?.accommodationTypeId?.name || "";
+  const roomNo = bookingData?.accommodationId?.roomNo || "";
+  console.log("room", roomNo);
   return (
     <SafeAreaView style={styles.container}>
-      <BookingHeader />
+      <BookingHeader
+        bookingId={bId}
+        rentalName={rentalName}
+        accommodationType={accommodationType}
+        roomNo={roomNo}
+      />
 
       <BookingStatusBar
         status={bookingData.status}

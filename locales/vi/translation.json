@@ -477,8 +477,9 @@
   "fraud": "Lừa đảo",
   "offensive_behavior": "Hành vi xúc phạm",
   "evidence_images": "Hình ảnh chứng cứ",
-  "add_up_to_three_images": "Thêm tối đa 3 hình ảnh",
+  "three_images_required": "Thêm tối thiểu 3 hình ảnh",
   "add_image": "Thêm hình ảnh",
   "report_rental_name": "Báo cáo căn hộ",
-  "submit_report": "Gửi báo cáo"
+  "submit_report": "Gửi báo cáo",
+  "describe_issue_in_detail" : "Mô tả sự cố chi tiết"
 }

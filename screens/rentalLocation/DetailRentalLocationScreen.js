@@ -28,11 +28,10 @@ import { useGetAverageFeedbackByRentalIdQuery } from "../../api/feedbackApi";
 import { useGetRentalLocationByIdQuery } from "../../api/rentalLocationApi";
 import { useGetAllAccommodationTypesQuery } from "../../api/accommodationTypeApi";
 import { useTranslation } from "react-i18next";
-// No need to import openReviewModal, we'll define it in the component
 
-// Import the modal components
-import MoreOptionsModal from "./modals/MoreOptionModal";
-import ReportModal from "./modals/ReportModal";
+// Import only the MoreOptionsModal component
+import MoreOptionsModal from "../booking/modals/MoreOptionModal";
+// Removed ReportModal import
 
 const DetailRentalLocationScreen = ({ route, navigation }) => {
   const { t } = useTranslation();
@@ -48,7 +47,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 
   // Modal visibility states
   const [moreOptionsModalVisible, setMoreOptionsModalVisible] = useState(false);
-  const [reportModalVisible, setReportModalVisible] = useState(false);
+  // Removed reportModalVisible state
 
   // State for the review image modal
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
@@ -173,55 +172,8 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     // Implement your share functionality here
   };
 
-  // Update the handleReport function to show the report modal
-  const handleReport = () => {
-    setReportModalVisible(true);
-  };
-
-  // Add this function to handle report submission
-  const handleReportSubmit = (reportData) => {
-    console.log("Report submitted:", reportData);
-    // Add more detailed logging to debug the issue
-    console.log("Report reason:", reportData.reason);
-    console.log("Report description:", reportData.description);
-    console.log("Report images:", reportData.images);
-
-    // Show a success message to the user
-    Alert.alert(t("report_submitted"), t("thank_you_for_your_report"), [
-      { text: t("ok"), onPress: () => console.log("Report alert closed") },
-    ]);
-
-    // Add missing translation keys for the ReportModal
-    const missingTranslations = {
-      three_images_required: "Three images are required",
-      please_add_three_images: "Please add exactly 3 images",
-      more_needed: "more needed",
-      not_enough_images: "Not enough images",
-      please_select_exactly: "Please select exactly {{count}} more images",
-      try_again: "Try again",
-      images_complete: "Images complete",
-      all_required_images_added: "All required images have been added",
-    };
-
-    // For demonstration purposes, we're adding these translations directly
-    // In a real app, you would add these to your i18n translation files
-    Object.keys(missingTranslations).forEach((key) => {
-      if (!t(key)) {
-        // This is a simple mock implementation for missing translations
-        t[key] = missingTranslations[key];
-      }
-    });
-
-    // Here you would typically send the report to your backend
-    // For example:
-    // api.submitReport(locationId, reportData)
-    //   .then(response => {
-    //     console.log("Report submitted successfully");
-    //   })
-    //   .catch(error => {
-    //     console.error("Error submitting report:", error);
-    //   });
-  };
+  // Removed handleReport function
+  // Removed handleReportSubmit function
 
   const ratingCounts = (feedbackDataList || []).reduce((acc, review) => {
     const rating = review.rating;
@@ -565,25 +517,13 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
           </View>
         </ScrollView>
 
-        {/* Add the MoreOptionsModal component */}
+        {/* Modified MoreOptionsModal component without report option */}
         <MoreOptionsModal
           visible={moreOptionsModalVisible}
           onClose={() => setMoreOptionsModalVisible(false)}
           onShare={handleShare}
-          onReport={handleReport}
           t={t}
         />
-
-        {/* Add the ReportModal component */}
-        <ReportModal
-          visible={reportModalVisible}
-          onClose={() => setReportModalVisible(false)}
-          onSubmit={handleReportSubmit}
-          t={t}
-          rentalName={rental?.name || ""}
-        />
-
-        {/* Review Image Modal */}
         <Modal
           animationType="fade"
           transparent={true}

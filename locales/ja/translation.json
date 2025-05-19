@@ -476,6 +476,10 @@
   "add_image": "画像を追加",
   "report_rental_name" : "報告する場所名",
   "submit_report": "報告を送信",
-  "three_images_required": "最大3枚の画像を追加"
-
+  "three_images_required": "最大3枚の画像を追加",
+  "describe_issue_in_detail" : "問題を詳しく説明してください",
+  "booking_id": "予約ID",
+  "rental_name": "宿泊施設名",
+  "accommodation_type" : "宿泊施設タイプ",
+  "roomNo" : "部屋番号"
 }
