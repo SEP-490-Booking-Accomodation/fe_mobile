@@ -481,5 +481,8 @@
   "add_image": "Thêm hình ảnh",
   "report_rental_name": "Báo cáo căn hộ",
   "submit_report": "Gửi báo cáo",
-  "describe_issue_in_detail" : "Mô tả sự cố chi tiết"
+  "describe_issue_in_detail" : "Mô tả sự cố chi tiết",
+  "min3_max10_images_required": "Thêm tối thiểu 3 và tối đa 10 hình ảnh",
+  "more_needed": "ảnh cần thiết"
+
 }

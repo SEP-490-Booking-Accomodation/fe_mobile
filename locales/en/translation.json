@@ -479,9 +479,10 @@
   "report_rental_name": "Reporting Rental Name",
   "submit_report": "Submit Report",
   "describe_issue_in_detail": "Please describe the issue in detail",
-  "3_more_needed": "3 more images needed",
+  "more_needed": "more images needed",
   "booking_id": "Booking ID",
   "rental_name": "Rental Name",
   "accomodation_type" : "Accommodation Type",
-  "roomNo" : "Room No"
+  "roomNo" : "Room No",
+  "min3_max10_images_required": "3-10 images required"
 }

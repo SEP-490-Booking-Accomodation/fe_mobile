@@ -22,6 +22,9 @@ import { decode } from "base64-arraybuffer";
 import { useCreateReportMutation } from "../../../api/reportApi"; // Import the API mutation hook
 import AlertModal from "./AlertModal";
 
+const MIN_IMAGES = 3;
+const MAX_IMAGES = 10;
+
 const ReportModal = ({
   visible,
   onClose,
@@ -30,6 +33,7 @@ const ReportModal = ({
   rentalName,
   bookingId,
   accommodationType,
+  roomNo,
 }) => {
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
@@ -71,7 +75,8 @@ const ReportModal = ({
     validation_error: "Validation Error",
     please_select_reason: "Please select a reason for your report",
     description_too_short: "Description must be at least 10 characters long",
-    please_add_three_images: "Please add exactly 3 images",
+    please_add_min_images: "Please add at least 3 images",
+    too_many_images_error: "You can add a maximum of 10 images",
     add_images: "Add Images",
     cancel: "Cancel",
     ok: "OK",
@@ -80,6 +85,9 @@ const ReportModal = ({
     report_submitted: "Report Submitted",
     report_submission_success: "Your report has been submitted successfully.",
     report_submission_failed: "Failed to submit report. Please try again.",
+    min3_max10_images_required: "Please add between 3 and 10 images",
+    image_limit_reached: "Image limit reached",
+    max_images_reached: "You've reached the maximum of 10 images",
   };
 
   // Safe translation function that falls back to our defaults
@@ -165,7 +173,25 @@ const ReportModal = ({
     if (!hasPermission) return;
 
     try {
-      const imagesNeeded = 3 - images.length;
+      // Calculate how many more images can be added
+      const imagesNeeded = MAX_IMAGES - images.length;
+
+      if (imagesNeeded <= 0) {
+        showAlert(
+          "image_limit_reached",
+          safeT("max_images_reached"),
+          [
+            {
+              text: "ok",
+              onPress: () => setAlertModalVisible(false),
+              primary: true,
+            },
+          ],
+          "warning"
+        );
+        return;
+      }
+
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -176,10 +202,10 @@ const ReportModal = ({
       });
 
       if (!result.canceled && result.assets) {
-        if (images.length + result.assets.length > 3) {
+        if (images.length + result.assets.length > MAX_IMAGES) {
           showAlert(
             "too_many_images",
-            "max_three_images",
+            safeT("too_many_images_error"),
             [
               {
                 text: "ok",
@@ -207,10 +233,11 @@ const ReportModal = ({
 
         setImages([...images, ...localImages]);
 
-        if (images.length + result.assets.length === 3) {
+        // Show a message if they've reached the maximum
+        if (images.length + result.assets.length >= MAX_IMAGES) {
           showAlert(
-            "images_complete",
-            "all_required_images_added",
+            "image_limit_reached",
+            safeT("max_images_reached"),
             [
               {
                 text: "ok",
@@ -218,7 +245,7 @@ const ReportModal = ({
                 primary: true,
               },
             ],
-            "check-circle"
+            "info"
           );
         }
       }
@@ -259,6 +286,23 @@ const ReportModal = ({
     }
 
     try {
+      // Check if we've reached the maximum number of images
+      if (images.length >= MAX_IMAGES) {
+        showAlert(
+          "image_limit_reached",
+          safeT("max_images_reached"),
+          [
+            {
+              text: "ok",
+              onPress: () => setAlertModalVisible(false),
+              primary: true,
+            },
+          ],
+          "warning"
+        );
+        return;
+      }
+
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
         aspect: [4, 3],
@@ -266,10 +310,10 @@ const ReportModal = ({
       });
 
       if (!result.canceled && result.assets) {
-        if (images.length >= 3) {
+        if (images.length >= MAX_IMAGES) {
           showAlert(
-            "too_many_images",
-            "max_three_images",
+            "image_limit_reached",
+            safeT("max_images_reached"),
             [
               {
                 text: "ok",
@@ -296,6 +340,22 @@ const ReportModal = ({
         );
 
         setImages([...images, ...localImages]);
+
+        // Show a message if they've reached the maximum
+        if (images.length + result.assets.length >= MAX_IMAGES) {
+          showAlert(
+            "image_limit_reached",
+            safeT("max_images_reached"),
+            [
+              {
+                text: "ok",
+                onPress: () => setAlertModalVisible(false),
+                primary: true,
+              },
+            ],
+            "info"
+          );
+        }
       }
     } catch (error) {
       console.error("Error taking photo:", error);
@@ -386,6 +446,7 @@ const ReportModal = ({
     console.log("Submit button pressed");
     console.log("Selected reason index:", selectedReasonIndex);
     console.log("Description length:", description.trim().length);
+    console.log("Images count:", images.length);
 
     // Validate inputs
     if (selectedReasonIndex === null) {
@@ -440,24 +501,29 @@ const ReportModal = ({
       return;
     }
 
-    if (images.length < 3) {
+    // Check if there are at least MIN_IMAGES
+    if (images.length < MIN_IMAGES) {
       console.log("Validation failed: Not enough images");
 
       // Use native Alert as a direct fallback
-      Alert.alert("Validation Error", "Please add exactly 3 images", [
-        {
-          text: "Add Images",
-          onPress: () => showImageOptions(),
-        },
-        {
-          text: "Cancel",
-        },
-      ]);
+      Alert.alert(
+        "Validation Error",
+        `Please add at least ${MIN_IMAGES} images`,
+        [
+          {
+            text: "Add Images",
+            onPress: () => showImageOptions(),
+          },
+          {
+            text: "Cancel",
+          },
+        ]
+      );
 
       // Also try the custom alert
       showAlert(
         "validation_error",
-        "please_add_three_images",
+        "please_add_min_images",
         [
           {
             text: "add_images",
@@ -470,6 +536,33 @@ const ReportModal = ({
           {
             text: "cancel",
             onPress: () => setAlertModalVisible(false),
+          },
+        ],
+        "error-outline"
+      );
+      return;
+    }
+
+    // Check if there are too many images
+    if (images.length > MAX_IMAGES) {
+      console.log("Validation failed: Too many images");
+
+      // Use native Alert as a direct fallback
+      Alert.alert(
+        "Validation Error",
+        `You can add a maximum of ${MAX_IMAGES} images`,
+        [{ text: "OK" }]
+      );
+
+      // Also try the custom alert
+      showAlert(
+        "validation_error",
+        "too_many_images_error",
+        [
+          {
+            text: "ok",
+            onPress: () => setAlertModalVisible(false),
+            primary: true,
           },
         ],
         "error-outline"
@@ -532,6 +625,9 @@ const ReportModal = ({
         reason: reportReasons[selectedReasonIndex],
         isReviewed: false,
         images: uploadedImageUrls,
+        // Optional fields can be left empty
+        replyBy: "",
+        contentReply: "",
       };
 
       console.log("Report data prepared:", reportData);
@@ -603,10 +699,10 @@ const ReportModal = ({
   };
 
   const showImageOptions = () => {
-    if (images.length >= 3) {
+    if (images.length >= MAX_IMAGES) {
       showAlert(
         "image_limit_reached",
-        "max_three_images",
+        safeT("max_images_reached"),
         [
           {
             text: "ok",
@@ -619,9 +715,9 @@ const ReportModal = ({
       return;
     }
 
-    const imagesNeeded = 3 - images.length;
+    const imagesNeeded = MAX_IMAGES - images.length;
     setImagePickerModalVisible(true);
-    console.log(`${imagesNeeded} more images needed`);
+    console.log(`${imagesNeeded} more images can be added`);
   };
 
   // Effect to handle API errors
@@ -688,6 +784,10 @@ const ReportModal = ({
                     {accommodationType || "N/A"}
                   </Text>
                 </Text>
+                <Text style={styles.reportingText}>
+                  {safeT("roomNo")}:{" "}
+                  <Text style={styles.reportingValue}>{roomNo || "N/A"}</Text>
+                </Text>
               </View>
 
               <Text style={styles.sectionTitle}>
@@ -732,7 +832,8 @@ const ReportModal = ({
                 {safeT("evidence_images")}
               </Text>
               <Text style={styles.helperText}>
-                {safeT("three_images_required")} ({images.length}/3)
+                {safeT("min3_max10_images_required")} ({images.length}/
+                {MAX_IMAGES})
               </Text>
 
               <View style={styles.imagesContainer}>
@@ -751,7 +852,7 @@ const ReportModal = ({
                   </View>
                 ))}
 
-                {images.length < 3 && (
+                {images.length < MAX_IMAGES && (
                   <TouchableOpacity
                     style={styles.addImageButton}
                     onPress={showImageOptions}
@@ -762,7 +863,8 @@ const ReportModal = ({
                       color="#4e72e3"
                     />
                     <Text style={styles.addImageText}>
-                      {safeT("add_image")} ({3 - images.length}{" "}
+                      {safeT("add_image")} (
+                      {Math.max(MIN_IMAGES - images.length, 0)}{" "}
                       {safeT("more_needed")})
                     </Text>
                   </TouchableOpacity>

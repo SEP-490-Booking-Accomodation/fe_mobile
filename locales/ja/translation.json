@@ -481,5 +481,8 @@
   "booking_id": "予約ID",
   "rental_name": "宿泊施設名",
   "accommodation_type" : "宿泊施設タイプ",
-  "roomNo" : "部屋番号"
+  "roomNo" : "部屋番号",
+  "min3_max10_images_required": "3〜10枚の画像を追加してください",
+  "3_more_needed": "3枚以上必要",
+  "more_needed": "もっと必要"
 }
