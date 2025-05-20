@@ -464,8 +464,8 @@
   "recent": "Recent",
   "note_label": "Note",
   "accommodation_types": "Accommodation Type",
-  "yes": "Yes"
-  "services" : "Services",
+  "yes": "Yes",
+  "services": "Services",
   "report_issue": "Report Issue",
   "reason_for_report": "Reason for Report",
   "inappropriate_content": "Inappropriate Content",
@@ -483,7 +483,7 @@
   "more_needed": "more images needed",
   "booking_id": "Booking ID",
   "rental_name": "Rental Name",
-  "accomodation_type" : "Accommodation Type",
-  "roomNo" : "Room No",
+  "accomodation_type": "Accommodation Type",
+  "roomNo": "Room No",
   "min3_max10_images_required": "3-10 images required"
 }

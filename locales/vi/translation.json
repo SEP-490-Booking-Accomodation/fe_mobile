@@ -464,10 +464,10 @@
   "note_label": "Ghi chú",
   "accommodation_types": "Loại phòng",
   "services": "Dịch vụ",
-  "check_out_success" : "Trả phòng thành công. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.",
-  "check_out_failed" : "Trả phòng thất bại! Hãy thử lại sau.",
-  "check_in_success" : "Nhận phòng thành công. Chúc bạn có một kỳ nghỉ vui vẻ.",
-  "check_in_failed" : "Nhận phòng thất bại! Hãy thử lại sau.",
+  "check_out_success": "Trả phòng thành công. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.",
+  "check_out_failed": "Trả phòng thất bại! Hãy thử lại sau.",
+  "check_in_success": "Nhận phòng thành công. Chúc bạn có một kỳ nghỉ vui vẻ.",
+  "check_in_failed": "Nhận phòng thất bại! Hãy thử lại sau.",
   "report_issue": "Báo cáo sự cố",
   "reason_for_report": "Lý do báo cáo",
   "inappropriate_content": "Nội dung không phù hợp",
@@ -481,15 +481,8 @@
   "add_image": "Thêm hình ảnh",
   "report_rental_name": "Báo cáo căn hộ",
   "submit_report": "Gửi báo cáo",
-  "describe_issue_in_detail" : "Mô tả sự cố chi tiết",
+  "describe_issue_in_detail": "Mô tả sự cố chi tiết",
   "min3_max10_images_required": "Thêm tối thiểu 3 và tối đa 10 hình ảnh",
-  "more_needed": "ảnh cần thiết"
-
-}
-
-  "check_out_success": "Trả phòng thành công. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.",
-  "check_out_failed": "Trả phòng thất bại! Hãy thử lại sau.",
-  "check_in_success": "Nhận phòng thành công. Chúc bạn có một kỳ nghỉ vui vẻ.",
-  "check_in_failed": "Nhận phòng thất bại! Hãy thử lại sau.",
+  "more_needed": "ảnh cần thiết",
   "yes": "Có"
 }
