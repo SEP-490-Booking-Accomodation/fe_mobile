@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import {
   ScrollView,
   View,
@@ -6,9 +8,10 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  Alert,
   SafeAreaView,
   ActivityIndicator,
+  Alert,
+  Modal,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage, {
@@ -19,23 +22,44 @@ import Tag from "../../components/Tag";
 import SimpleVerticalCard from "../../components/cards/SimpleVerticalCard";
 import { Button } from "react-native-elements";
 import { MaterialIcons } from "@expo/vector-icons";
-import {
-  ensureUserInDatabaseWithoutAsyncStorage,
-  newChat,
-} from "../../lib/supabase";
+import { newChat } from "../../lib/supabase";
 import { useGetAllFeedbackByRentalIdQuery } from "../../api/feedbackApi";
 import { useGetAverageFeedbackByRentalIdQuery } from "../../api/feedbackApi";
 import { useGetRentalLocationByIdQuery } from "../../api/rentalLocationApi";
 import { useGetAllAccommodationTypesQuery } from "../../api/accommodationTypeApi";
 import { useTranslation } from "react-i18next";
 
+// Import only the MoreOptionsModal component
+import MoreOptionsModal from "../booking/modals/MoreOptionModal";
+// Removed ReportModal import
+
 const DetailRentalLocationScreen = ({ route, navigation }) => {
   const { t } = useTranslation();
   const [user, setUser] = useState({});
   const { loadIdChatPlatform } = useAsyncStorage();
   const { rentalId: locationId } = route.params;
-  const [activeTab, setActiveTab] = useState("accommodation_types"); // Add state for active tab
-  const [isServicesExpanded, setIsServicesExpanded] = useState(false); // Add state for services collapse
+  const [activeTab, setActiveTab] = useState("accommodation_types");
+  const [isServicesExpanded, setIsServicesExpanded] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [selectedServices, setSelectedServices] = useState([]);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [allServices, setAllServices] = useState([]);
+
+  // Modal visibility states
+  const [moreOptionsModalVisible, setMoreOptionsModalVisible] = useState(false);
+  // Removed reportModalVisible state
+
+  // State for the review image modal
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [selectedReviewImage, setSelectedReviewImage] = useState(null);
+
+  // Function to open the review image modal
+  const openReviewModal = (imageIndex, reviewImages) => {
+    if (reviewImages && reviewImages[imageIndex]) {
+      setSelectedReviewImage(reviewImages[imageIndex].source);
+      setReviewModalVisible(true);
+    }
+  };
 
   const { data: feedbackDataList } =
     useGetAllFeedbackByRentalIdQuery(locationId);
@@ -58,19 +82,45 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const isLoading = isRentalLoading || isAccommodationLoading;
   const isError = isRentalError || isAccommodationError;
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userData = await loadIdChatPlatform();
-        if (userData) {
-          setUser(userData[0]);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
+  const fetchUser = async () => {
+    try {
+      const userData = await loadIdChatPlatform();
+      if (userData) {
+        setUser(userData[0]);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  const loadFavoriteStatus = async () => {
+    const favoriteStatus = await AsyncStorage.getItem(
+      `favoriteStatus_${locationId}`
+    );
+    if (favoriteStatus !== null) {
+      setIsFavorite(JSON.parse(favoriteStatus));
+    }
+  };
+
+  const updateServices = () => {
+    if (accommodationTypesData?.data) {
+      const services = new Set();
+      accommodationTypesData.data.forEach((accommodation) => {
+        if (accommodation.serviceIds) {
+          accommodation.serviceIds.forEach((service) => {
+            services.add(service.name);
+          });
+        }
+      });
+      setAllServices(Array.from(services));
+    }
+  };
+
+  useEffect(() => {
     fetchUser();
-  }, []);
+    loadFavoriteStatus();
+    updateServices();
+  }, [locationId]);
 
   if (!locationId) {
     return (
@@ -81,10 +131,15 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     );
   }
 
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [selectedServices, setSelectedServices] = useState([]);
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const [allServices, setAllServices] = useState([]);
+  const toggleFavorite = async () => {
+    const newStatus = !isFavorite;
+    setIsFavorite(newStatus);
+    await AsyncStorage.setItem(
+      `favoriteStatus_${locationId}`,
+      JSON.stringify(newStatus)
+    );
+  };
+
   const handleChatPress = async () => {
     try {
       const currentUser = user;
@@ -106,38 +161,19 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     }
   };
 
-  useEffect(() => {
-    const loadFavoriteStatus = async () => {
-      const favoriteStatus = await AsyncStorage.getItem(
-        `favoriteStatus_${locationId}`
-      );
-      if (favoriteStatus !== null) {
-        setIsFavorite(JSON.parse(favoriteStatus));
-      }
-    };
-    loadFavoriteStatus();
-  }, [locationId]);
-  useEffect(() => {
-    if (accommodationTypesData?.data) {
-      const services = new Set();
-      accommodationTypesData.data.forEach((accommodation) => {
-        if (accommodation.serviceIds) {
-          accommodation.serviceIds.forEach((service) => {
-            services.add(service.name);
-          });
-        }
-      });
-      setAllServices(Array.from(services));
-    }
-  }, [accommodationTypesData]);
-  const toggleFavorite = async () => {
-    const newStatus = !isFavorite;
-    setIsFavorite(newStatus);
-    await AsyncStorage.setItem(
-      `favoriteStatus_${locationId}`,
-      JSON.stringify(newStatus)
-    );
+  // Update the handleMoreOptions function to show the modal
+  const handleMoreOptions = () => {
+    setMoreOptionsModalVisible(true);
   };
+
+  // Add these handler functions for the modal actions
+  const handleShare = () => {
+    console.log("Share pressed");
+    // Implement your share functionality here
+  };
+
+  // Removed handleReport function
+  // Removed handleReportSubmit function
 
   const ratingCounts = (feedbackDataList || []).reduce((acc, review) => {
     const rating = review.rating;
@@ -234,7 +270,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
                   {review.images.map((image, imgIndex) => (
                     <TouchableOpacity
                       key={imgIndex}
-                      onPress={() => openReviewModal(imgIndex)}
+                      onPress={() => openReviewModal(imgIndex, review.images)}
                     >
                       <Image source={image.source} style={styles.reviewImage} />
                     </TouchableOpacity>
@@ -318,14 +354,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
         </View>
       </View>
     );
-  };
-
-  const handleMoreOptions = () => {
-    Alert.alert(t("more_options"), t("choose_action"), [
-      { text: t("share"), onPress: () => console.log("Share pressed") },
-      { text: t("report"), onPress: () => console.log("Report pressed") },
-      { text: t("cancel"), style: "cancel" },
-    ]);
   };
 
   const handleCardPress = (accommodationType) => {
@@ -488,11 +516,40 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               : renderReview()}
           </View>
         </ScrollView>
+
+        {/* Modified MoreOptionsModal component without report option */}
+        <MoreOptionsModal
+          visible={moreOptionsModalVisible}
+          onClose={() => setMoreOptionsModalVisible(false)}
+          onShare={handleShare}
+          t={t}
+        />
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={reviewModalVisible}
+          onRequestClose={() => setReviewModalVisible(false)}
+        >
+          <View style={styles.reviewModalOverlay}>
+            <TouchableOpacity
+              style={styles.reviewModalCloseButton}
+              onPress={() => setReviewModalVisible(false)}
+            >
+              <Icon name="close" size={24} color="#fff" />
+            </TouchableOpacity>
+            <Image
+              source={selectedReviewImage}
+              style={styles.reviewModalImage}
+              resizeMode="contain"
+            />
+          </View>
+        </Modal>
       </View>
     </SafeAreaView>
   );
 };
 
+// Styles remain the same
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -777,6 +834,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#333",
+  },
+  reviewModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  reviewModalImage: {
+    width: "90%",
+    height: "80%",
+    borderRadius: 8,
+  },
+  reviewModalCloseButton: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    zIndex: 1,
+    padding: 8,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: 20,
   },
 });
 
