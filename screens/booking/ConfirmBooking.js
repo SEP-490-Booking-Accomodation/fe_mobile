@@ -364,7 +364,7 @@ export default function ConfirmBooking() {
         <CustomButton
           onPress={handleConfirm}
           style={{ width: "40%" }}
-          title={t("pay_now")}
+          title={t("book_now")}
           disabled={isLoading}
         />
       </View>

@@ -463,6 +463,26 @@
   "recent": "最近",
   "note_label": "注記",
   "accommodation_types": "部屋",
-  "services": "サービス"
-
+  "services": "サービス",
+  "report_issue": "問題を報告",
+  "reason_for_report": "報告理由",
+  "inappropriate_content": "不適切なコンテンツ",
+  "spam": "スパム",
+  "false_information": "虚偽の情報",
+  "other": "その他",
+  "fraud": "詐欺",
+  "offensive_behavior": "攻撃的な行動",
+  "evidence_images": "証拠画像",
+  "add_image": "画像を追加",
+  "report_rental_name": "報告する場所名",
+  "submit_report": "報告を送信",
+  "three_images_required": "最大3枚の画像を追加",
+  "describe_issue_in_detail": "問題を詳しく説明してください",
+  "booking_id": "予約ID",
+  "rental_name": "宿泊施設名",
+  "accommodation_type": "宿泊施設タイプ",
+  "roomNo": "部屋番号",
+  "min3_max10_images_required": "3〜10枚の画像を追加してください",
+  "3_more_needed": "3枚以上必要",
+  "more_needed": "もっと必要"
 }
