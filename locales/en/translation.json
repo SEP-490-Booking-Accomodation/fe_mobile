@@ -485,5 +485,7 @@
   "rental_name": "Rental Name",
   "accomodation_type": "Accommodation Type",
   "roomNo": "Room No",
-  "min3_max10_images_required": "3-10 images required"
+  "min3_max10_images_required": "3-10 images required",
+  "open_hr": "Open",
+  "close_hr": "Closed"
 }

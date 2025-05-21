@@ -484,5 +484,7 @@
   "roomNo": "部屋番号",
   "min3_max10_images_required": "3〜10枚の画像を追加してください",
   "3_more_needed": "3枚以上必要",
-  "more_needed": "もっと必要"
+  "more_needed": "もっと必要",
+  "open_hr": "開店",
+  "close_hr": "閉店"
 }
