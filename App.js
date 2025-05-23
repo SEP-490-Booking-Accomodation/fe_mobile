@@ -13,6 +13,7 @@ import dayjs from "dayjs";
 import { useRefreshTokenWithParamMutation } from "./api/authApi";
 import { I18nextProvider } from "react-i18next";
 import i18n from "./utils/i18n";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function App() {
   useEffect(() => {

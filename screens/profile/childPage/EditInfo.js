@@ -17,17 +17,18 @@ import CustomInput from "../../../components/TextInput";
 import { useUpdateUserMutation } from "../../../api/profileApi";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-
+import { uploadAvatar } from "../../../lib/supabase";
 
 const AvatarUpload = ({ currentImage, onImageChange }) => {
   const { t } = useTranslation();
+
   const pickImage = async () => {
     try {
       if (Platform.OS !== "web") {
         const { status } =
           await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
-          alert(t('permission_required'));
+          alert(t("permission_required"));
           return;
         }
       }
@@ -40,10 +41,26 @@ const AvatarUpload = ({ currentImage, onImageChange }) => {
       });
 
       if (!result.canceled && result.assets.length > 0) {
-        onImageChange(result.assets[0].uri);
+        const imageUri = result.assets[0].uri;
+        console.log("Selected image URI:", imageUri);
+        if (!uploadAvatar) {
+          throw new Error("uploadAvatar function is not defined");
+        }
+        const newImageUrl = await uploadAvatar(imageUri, currentImage);
+        console.log("New image URL:", newImageUrl);
+        onImageChange(newImageUrl);
       }
     } catch (error) {
-      alert(t('general_error'));
+      console.error("Image upload error:", error.message);
+      let errorMessage = t("general_error");
+      if (error.message.includes("empty")) {
+        errorMessage = t("image_empty_error") || "Selected image is empty";
+      } else if (error.message.includes("permission")) {
+        errorMessage = t("permission_error") || "Storage permission denied";
+      } else if (error.message.includes("network")) {
+        errorMessage = t("network_error") || "Network error, please try again";
+      }
+      alert(errorMessage);
     }
   };
 
@@ -76,7 +93,6 @@ export default function EditInfo() {
   const [phone, setPhone] = useState(dataUser?.userId?.phone || "");
   const [isButtonSaveActive, setIsButtonSaveActive] = useState(false);
 
-  console.log(image);
   useEffect(() => {
     if (
       email.trim() !== (dataUser?.userId?.email || "") ||
@@ -107,11 +123,12 @@ export default function EditInfo() {
         updatedUser: { fullName, email, phone, avatarUrl: image },
       }).unwrap();
 
-      console.log(t('update_success'));
+      console.log(t("update_success"));
       setIsButtonSaveActive(false);
       navigation.navigate("ProfileScreen");
     } catch (error) {
-      alert(t('general_error'));
+      console.error("Update error:", error);
+      alert(t("general_error"));
     }
   };
 
@@ -120,7 +137,7 @@ export default function EditInfo() {
       <TouchableOpacity onPress={() => navigation.goBack()}>
         <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
       </TouchableOpacity>
-      <Text style={styles.textHeader}>{t('edit_profile')}</Text>
+      <Text style={styles.textHeader}>{t("edit_profile")}</Text>
     </View>
   );
 
@@ -129,21 +146,23 @@ export default function EditInfo() {
       {renderHeader()}
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.imageContainer}>
-          <AvatarUpload currentImage={image} onImageChange={handleImageChange} />
+          <AvatarUpload
+            currentImage={image}
+            onImageChange={handleImageChange}
+          />
         </View>
         <View style={styles.infoContainer}>
-        <Text style={styles.label}>{t('full_name')}</Text>
+          <Text style={styles.label}>{t("full_name")}</Text>
           <CustomInput value={fullName} onChangeText={setFullName} />
           <View style={styles.spacing} />
-          <Text style={styles.label}>{t('email')}</Text>
+          <Text style={styles.label}>{t("email")}</Text>
           <CustomInput value={email} onChangeText={setEmail} />
           <View style={styles.spacing} />
-          <Text style={styles.label}>{t('phone_number')}</Text>
+          <Text style={styles.label}>{t("phone_number")}</Text>
           <CustomInput value={phone} onChangeText={setPhone} />
         </View>
-        //TODO:  Chỗ này sau khi tắt bottom tab thì sễ để dưới dạng bottom bar ở dưới như header đang style hiện tại
         <CustomButton
-          title={t('update_info')}
+          title={t("update_info")}
           disabled={!isButtonSaveActive}
           onPress={handleUpdateInfo}
         />
