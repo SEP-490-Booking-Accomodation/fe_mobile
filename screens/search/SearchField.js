@@ -1,6 +1,6 @@
-import { AntDesign } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import React from "react";
+import { AntDesign } from "@expo/vector-icons"
+import { useNavigation } from "@react-navigation/native"
+import React from "react"
 import {
   View,
   TextInput,
@@ -8,62 +8,94 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
-} from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
-import { useTranslation } from "react-i18next";
+} from "react-native"
+import Icon from "react-native-vector-icons/Ionicons"
+import { useTranslation } from "react-i18next"
 
 const SearchField = ({
   placeholder = "search_placeholder",
   onChangeText,
+  onSubmitEditing,
   value,
   backIcon = true,
   filterIcon = true,
   onPressBack,
+  onPressBackIcon,
   onPressFilterIcon = () => {},
   style,
   inputStyle,
+  editable = true,
+  enableSearch = false,
 }) => {
-  const { t } = useTranslation();
-  const navigation = useNavigation();
+  const { t } = useTranslation()
+  const navigation = useNavigation()
 
   const handleSearchPress = () => {
-    navigation.goBack();
-    navigation.navigate("SearchScreen", { searchQuery: value });
-  };
+    if (enableSearch) {
+      return
+    }
+    navigation.goBack()
+    navigation.navigate("SearchScreen", { searchQuery: value })
+  }
+
+  const handleBackPress = () => {
+    if (onPressBackIcon) {
+      onPressBackIcon()
+    } else if (onPressBack) {
+      onPressBack()
+    } else {
+      navigation.goBack()
+    }
+  }
+
+  const handleSubmit = () => {
+    if (onSubmitEditing) {
+      onSubmitEditing()
+    }
+    Keyboard.dismiss()
+  }
 
   return (
     <View style={[styles.wrapper, style]}>
       {backIcon && (
-        <TouchableOpacity
-          onPress={onPressBack}
-          style={styles.iconBackContainer}
-        >
+        <TouchableOpacity onPress={handleBackPress} style={styles.iconBackContainer}>
           <View style={styles.iconBack}>
             <Icon name="arrow-back-outline" size={24} color="#fff" />
           </View>
         </TouchableOpacity>
       )}
-      <TouchableOpacity
-        style={styles.touchSearchContainer}
-        onPress={onPressBack}
-      >
+      
+      {enableSearch ? (
         <View style={styles.searchContainer}>
-          <Icon
-            name="search-outline"
-            size={20}
-            color="#666"
-            style={styles.searchIcon}
-          />
+          <Icon name="search-outline" size={20} color="#666" style={styles.searchIcon} />
           <TextInput
             style={[styles.input, inputStyle]}
             placeholder={t(placeholder)}
             placeholderTextColor="#aaa"
             onChangeText={onChangeText}
+            onSubmitEditing={handleSubmit}
             value={value}
-            editable={false}
+            editable={editable}
+            returnKeyType="search"
+            autoCapitalize="none"
+            autoCorrect={false}
           />
         </View>
-      </TouchableOpacity>
+      ) : (
+        <TouchableOpacity style={styles.touchSearchContainer} onPress={handleSearchPress}>
+          <View style={styles.searchContainer}>
+            <Icon name="search-outline" size={20} color="#666" style={styles.searchIcon} />
+            <TextInput
+              style={[styles.input, inputStyle]}
+              placeholder={t(placeholder)}
+              placeholderTextColor="#aaa"
+              onChangeText={onChangeText}
+              value={value}
+              editable={false}
+            />
+          </View>
+        </TouchableOpacity>
+      )}
 
       {filterIcon && (
         <TouchableOpacity onPress={onPressFilterIcon}>
@@ -73,9 +105,8 @@ const SearchField = ({
         </TouchableOpacity>
       )}
     </View>
-  );
-};
-
+  )
+}
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -131,6 +162,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#6F8EF1",
     marginLeft: 20,
   },
-});
+})
 
-export default SearchField;
+export default SearchField

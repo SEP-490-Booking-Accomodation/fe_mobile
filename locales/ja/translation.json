@@ -486,5 +486,8 @@
   "3_more_needed": "3枚以上必要",
   "more_needed": "もっと必要",
   "open_hr": "開店",
-  "close_hr": "閉店"
+  "close_hr": "閉店",
+  "search_results_for": "検索結果: ",
+  "no_results_for" : "結果が見つかりませんでした",
+  "filter_applied" : "フィルターを適用済み"
 }

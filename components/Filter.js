@@ -1,44 +1,80 @@
-import React, { useState, useRef } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
-  PanResponder,
-  Animated,
-  Dimensions,
-} from "react-native";
-import MultiSlider from "@ptomasroos/react-native-multi-slider";
-import ButtonGroup from "../components/buttons/ButtonGroup";
-import MultiSelectButtonGroup from "../components/buttons/MultiSelectButtonGroup";
-import CustomButton from "../components/buttons/Button";
-import { useTranslation } from "react-i18next";
+import { useState, useRef, useEffect } from "react"
+import { View, Text, StyleSheet, Modal, TouchableOpacity, PanResponder, Animated, Dimensions } from "react-native"
+import MultiSlider from "@ptomasroos/react-native-multi-slider"
+import ButtonGroup from "../components/buttons/ButtonGroup"
+import MultiSelectButtonGroup from "../components/buttons/MultiSelectButtonGroup"
+import CustomButton from "../components/buttons/Button"
+import { useTranslation } from "react-i18next"
 
-const Filter = ({ visible, onClose, onApply }) => {
-  const { t } = useTranslation();
-  const [priceRange, setPriceRange] = useState([100000, 100000000]);
-  const [selectedRating, setSelectedRating] = useState(null);
-  const [selectedAmenities, setSelectedAmenities] = useState([]);
-  const screenWidth = Dimensions.get("window").width;
-  const sliderWidth = screenWidth - 40;
+const Filter = ({ visible, onClose, onApply, rentalLocations = [] }) => {
+  const { t } = useTranslation()
+  const [priceRange, setPriceRange] = useState([100000, 100000000])
+  const [selectedRating, setSelectedRating] = useState(null)
+  const [selectedAmenities, setSelectedAmenities] = useState([])
+  const screenWidth = Dimensions.get("window").width
+  const sliderWidth = screenWidth - 40
 
-  const translateY = useRef(new Animated.Value(0)).current;
+  const [minMaxPrices, setMinMaxPrices] = useState({
+    min: 100000,
+    max: 100000000,
+  })
+
+  useEffect(() => {
+    if (rentalLocations && rentalLocations.length > 0) {
+      console.log("Rental locations received in filter:", rentalLocations)
+
+      const ratingFields = rentalLocations.map((rental) => ({
+        id: rental._id || rental.id,
+        name: rental.name || rental.placeName,
+        rating: rental.rating,
+        averageRating: rental.averageRating,
+        ratingPoint: rental.ratingPoint,
+      }))
+      console.log("Rating fields in rentals:", ratingFields)
+
+      let minPrice = Number.MAX_SAFE_INTEGER
+      let maxPrice = 0
+
+      rentalLocations.forEach((rental) => {
+        const min = typeof rental.minPrice === "number" ? rental.minPrice : Number.parseFloat(rental.minPrice) || 100000
+        const max = typeof rental.maxPrice === "number" ? rental.maxPrice : Number.parseFloat(rental.maxPrice) || 500000
+
+        if (min < minPrice && min > 0) minPrice = min
+        if (max > maxPrice) maxPrice = max
+      })
+
+      if (minPrice === Number.MAX_SAFE_INTEGER) minPrice = 100000
+      if (maxPrice === 0) maxPrice = 1000000
+
+      if (maxPrice <= minPrice) maxPrice = minPrice * 10
+
+      console.log("Price range calculated:", minPrice, maxPrice)
+
+      setMinMaxPrices({
+        min: minPrice,
+        max: maxPrice,
+      })
+
+      setPriceRange([minPrice, maxPrice])
+    }
+  }, [rentalLocations])
+
+  const translateY = useRef(new Animated.Value(0)).current
 
   const handleReset = () => {
-    setPriceRange([100000, 100000000]);
-    setSelectedRating(null);
-    setSelectedAmenities([]);
-  };
+    setPriceRange([minMaxPrices.min, minMaxPrices.max])
+    setSelectedRating(null)
+    setSelectedAmenities([])
+  }
 
   const handleApply = () => {
     onApply({
       priceRange,
       selectedRating,
       selectedAmenities,
-    });
-    onClose();
-  };
+    })
+    onClose()
+  }
 
   const panResponder = useRef(
     PanResponder.create({
@@ -46,29 +82,26 @@ const Filter = ({ visible, onClose, onApply }) => {
       onMoveShouldSetPanResponder: () => true,
       onPanResponderMove: (e, gestureState) => {
         if (gestureState.dy > 0) {
-          translateY.setValue(gestureState.dy);
+          translateY.setValue(gestureState.dy)
         }
       },
       onPanResponderRelease: (e, gestureState) => {
         if (gestureState.dy > 100) {
-          onClose();
+          onClose()
         } else {
           Animated.spring(translateY, {
             toValue: 0,
             useNativeDriver: true,
-          }).start();
+          }).start()
         }
       },
-    })
-  ).current;
+    }),
+  ).current
 
   return (
     <Modal visible={visible} animationType="slide" transparent={true}>
       <View style={styles.modalBackground}>
-        <Animated.View
-          style={[styles.container, { transform: [{ translateY }] }]}
-          {...panResponder.panHandlers}
-        >
+        <Animated.View style={[styles.container, { transform: [{ translateY }] }]} {...panResponder.panHandlers}>
           <View style={styles.dot} />
           <View style={styles.header}>
             <Text style={styles.headerText}>{t("advanced_filter")}</Text>
@@ -103,9 +136,9 @@ const Filter = ({ visible, onClose, onApply }) => {
               <MultiSlider
                 values={priceRange}
                 onValuesChange={setPriceRange}
-                min={100000}
-                max={100000000}
-                step={100000}
+                min={minMaxPrices.min}
+                max={minMaxPrices.max}
+                step={10000}
                 allowOverlap={false}
                 snapped
                 selectedStyle={{
@@ -133,13 +166,7 @@ const Filter = ({ visible, onClose, onApply }) => {
             <Text style={styles.sectionTitle}>{t("rating")}</Text>
             <View style={styles.line} />
             <ButtonGroup
-              items={[
-                `1 ${t("star")}`,
-                `2 ${t("star")}`,
-                `3 ${t("star")}`,
-                `4 ${t("star")}`,
-                `5 ${t("star")}`
-              ]}
+              items={[`1 ${t("star")}`, `2 ${t("star")}`, `3 ${t("star")}`, `4 ${t("star")}`, `5 ${t("star")}`]}
               selectedIndex={selectedRating}
               onChange={setSelectedRating}
               containerStyle={styles.buttonGroupContainer}
@@ -199,8 +226,8 @@ const Filter = ({ visible, onClose, onApply }) => {
         </Animated.View>
       </View>
     </Modal>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   modalBackground: {
@@ -356,6 +383,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3F3F3",
     marginVertical: 10,
   },
-});
+})
 
-export default Filter;
+export default Filter
