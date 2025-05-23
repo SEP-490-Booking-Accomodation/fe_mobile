@@ -96,8 +96,8 @@ const MapScreen = ({ navigation }) => {
           placeName: location.name,
           openHour: location.openHour || "08:00",
           closeHour: location.closeHour || "22:00",
-          minPrice: location?.minPrice || 100000,
-          maxPrice: location?.maxPrice || 500000,
+          minPrice: location?.minPrice ?? 100000,
+          maxPrice: location?.maxPrice ?? 500000,
           location: `${location.address || ""}, ${location.ward || ""}, ${location.district || ""
             }, ${location.city || ""}`,
           rating: location.rating || "4.5",
@@ -137,15 +137,18 @@ const MapScreen = ({ navigation }) => {
           if (distance > 5) return false
         }
 
-        const minPrice =
-          typeof location.minPrice === "number" ? location.minPrice : Number.parseFloat(location.minPrice) || 100000
-        const maxPrice =
-          typeof location.maxPrice === "number" ? location.maxPrice : Number.parseFloat(location.maxPrice) || 500000
+        const min = typeof location.minPrice === 'number'
+          ? location.minPrice
+          : Number.parseFloat(location.minPrice ?? 100000);
+
+        const max = typeof location.maxPrice === 'number'
+          ? location.maxPrice
+          : Number.parseFloat(location.maxPrice ?? 500000);
 
         const isInPriceRange =
-          (minPrice >= filters.priceRange[0] && minPrice <= filters.priceRange[1]) ||
-          (maxPrice >= filters.priceRange[0] && maxPrice <= filters.priceRange[1]) ||
-          (minPrice <= filters.priceRange[0] && maxPrice >= filters.priceRange[1])
+          (min >= filters.priceRange[0] && min <= filters.priceRange[1]) ||
+          (max >= filters.priceRange[0] && max <= filters.priceRange[1]) ||
+          (min <= filters.priceRange[0] && max >= filters.priceRange[1]);
 
         let isRatingMatch = true
         if (filters.selectedRating !== null) {
