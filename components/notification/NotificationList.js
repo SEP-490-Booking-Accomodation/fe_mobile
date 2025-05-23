@@ -1,4 +1,3 @@
-// HomeScreen.js
 import React from "react";
 import {
   View,
@@ -17,21 +16,31 @@ import { useTranslation } from "react-i18next";
 const NotificationList = () => {
   const { t } = useTranslation();
   const userId = useSelector((state) => state.auth?.userId);
-  const {
-    data: notifications,
-    isLoading,
-    error,
-  } = useGetNotificationsByUserQuery(userId);
+  const { data, isLoading, error, refetch } = useGetNotificationsByUserQuery(userId, { skip: !userId });
 
   if (isLoading) {
     return <ActivityIndicator size="large" style={styles.loading} />;
   }
 
   if (error) {
-    return <Text style={styles.error}>{t('error_loading_notifications')}</Text>;
+    if (error.status === 404) {
+      return <Text style={styles.empty}>{t('no_notifications')}</Text>;
+    }
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.error}>{t('error_loading_notifications')}</Text>
+        <TouchableOpacity onPress={refetch}>
+          <Text style={styles.retryText}>{t('retry')}</Text>
+        </TouchableOpacity>
+      </View>
+    );
   }
 
-  const transformedData = notifications?.data?.map((notification) => ({
+  if (!data?.data || data.data.length === 0) {
+    return <Text style={styles.empty}>{t('no_notifications')}</Text>;
+  }
+
+  const transformedData = data.data.map((notification) => ({
     id: notification._id,
     icon: getNotificationIcon(notification.type),
     title: notification.title,
@@ -44,18 +53,8 @@ const NotificationList = () => {
     <FlatList
       data={transformedData}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => (
-        <NotificationItem
-          id={item.id}
-          iconName={item.icon}
-          title={item.title}
-          time={item.time}
-          message={item.message}
-          status={item.status}
-        />
-      )}
+      renderItem={({ item }) => <NotificationItem {...item} />}
       contentContainerStyle={styles.listContainer}
-      ListEmptyComponent={<Text style={styles.empty}>{t('no_notifications')}</Text>}
     />
   );
 };
@@ -91,6 +90,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 20,
     color: "#666",
+  },
+  errorContainer: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  retryText: {
+    color: '#4E72E3',
+    marginTop: 10,
+    fontWeight: 'bold',
   },
 });
 
