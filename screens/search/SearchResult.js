@@ -1,100 +1,96 @@
-import { useEffect, useState, useMemo } from "react"
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, RefreshControl, Keyboard } from "react-native"
-import SearchField from "../search/SearchField"
-import Dropdown from "../../components/DropDown"
-import VerticalCard from "../../components/cards/VerticalCard"
-import Filter from "../../components/Filter"
-import { useGetAllRentalQuery } from "../../api/rentalLocationApi"
-import * as Location from "expo-location"
-import { useTranslation } from "react-i18next"
+import { useEffect, useState, useMemo } from "react";
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, RefreshControl, Keyboard } from "react-native";
+import SearchField from "../search/SearchField";
+import Dropdown from "../../components/DropDown";
+import VerticalCard from "../../components/cards/VerticalCard";
+import Filter from "../../components/Filter";
+import { useGetAllRentalQuery } from "../../api/rentalLocationApi";
+import * as Location from "expo-location";
+import { useTranslation } from "react-i18next";
 
 const SearchResult = ({ route, navigation }) => {
-  const { t } = useTranslation()
-  const initialQuery = route?.params?.query || ""
-  const [searchText, setSearchText] = useState(initialQuery)
-  const [userLocation, setUserLocation] = useState(null)
-  const [isSearching, setIsSearching] = useState(!!initialQuery)
-  const [appliedFilterParams, setAppliedFilterParams] = useState(null)
+  const { t } = useTranslation();
+  const initialQuery = route?.params?.query || "";
+  const [searchText, setSearchText] = useState(initialQuery);
+  const [userLocation, setUserLocation] = useState(null);
+  const [isSearching, setIsSearching] = useState(!!initialQuery);
+  const [appliedFilterParams, setAppliedFilterParams] = useState(null);
 
-  const { data: rental, refetch: refetchRental } = useGetAllRentalQuery()
-  const [refreshing, setRefreshing] = useState(false)
-  const [selectedSortOption, setSelectedSortOption] = useState(t("price_low_to_high"))
+  const { data: rental, refetch: refetchRental } = useGetAllRentalQuery();
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedSortOption, setSelectedSortOption] = useState(t("price_low_to_high"));
 
   useEffect(() => {
-    ; (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync()
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        console.log(t("location_permission_denied"))
-        return
+        console.log(t("location_permission_denied"));
+        return;
       }
 
-      const location = await Location.getCurrentPositionAsync({})
+      const location = await Location.getCurrentPositionAsync({});
       setUserLocation({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-      })
-    })()
-  }, [])
+      });
+    })();
+  }, []);
 
   const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
-    const toRad = (value) => (value * Math.PI) / 180
-    const R = 6371 // Radius of the earth in km
-    const dLat = toRad(lat2 - lat1)
-    const dLon = toRad(lon2 - lon1)
+    const toRad = (value) => (value * Math.PI) / 180;
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    const d = R * c
-    return d // distance in km
-  }
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
 
-  const [isFilterVisible, setIsFilterVisible] = useState(false)
-  const [filterParams, setFilterParams] = useState({
-    priceRange: [0, 1000000000],
-    selectedRating: null,
-    selectedAmenities: [],
-  })
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
 
   const onRefresh = async () => {
-    setRefreshing(true)
+    setRefreshing(true);
     try {
-      await refetchRental()
+      await refetchRental();
     } catch (error) {
-      console.error(t("data_refresh_error"), error)
+      console.error(t("data_refresh_error"), error);
     }
-    setRefreshing(false)
-  }
+    setRefreshing(false);
+  };
 
   const handleSearchChange = (text) => {
-    setSearchText(text)
-    setIsSearching(false)
-  }
+    setSearchText(text);
+    setIsSearching(false);
+  };
 
   const handleSearchSubmit = () => {
-    setIsSearching(true)
-    Keyboard.dismiss()
-    console.log("Searching for:", searchText)
-  }
+    setAppliedFilterParams(null); 
+    setIsSearching(true);
+    Keyboard.dismiss();
+  };
+
+  const parsePrice = (price) => {
+    if (typeof price === "number") return price;
+    return Number.parseFloat(String(price).replace(/[^0-9.]/g, "")) || 0;
+  };
 
   const rentalDisplay = useMemo(() => {
-    if (!rental?.data) return []
+    if (!rental?.data) return [];
 
     return rental.data
       .filter((item) => item.status === 3)
       .map((item) => {
-        console.log(item.latitude)
-        console.log(item.longitude)
-
         const distance =
           userLocation && item.latitude && item.longitude
             ? getDistanceFromLatLonInKm(
-              userLocation.latitude,
-              userLocation.longitude,
-              item.latitude, // latitude
-              item.longitude, // longitude
-            )
-            : null
+                userLocation.latitude,
+                userLocation.longitude,
+                item.latitude,
+                item.longitude
+              )
+            : null;
 
         return {
           id: item._id,
@@ -104,67 +100,66 @@ const SearchResult = ({ route, navigation }) => {
           placeName: item.name,
           isOverNight: item.isOverNight,
           status: item.status,
-          minPrice: item.minPrice || 0,
-          maxPrice: item.maxPrice || 0,
+          minPrice: parsePrice(item.minPrice),
+          maxPrice: parsePrice(item.maxPrice),
           address: item.address,
           ward: item.ward,
           district: item.district,
           city: item.city,
           location: `${item.address}, ${item.ward}, ${item.district}, ${item.city}`,
-          ratingPoint: item.averageRating,
+          ratingPoint: item.averageRating || 0,
           numberOfReview: item.totalFeedbacks,
           distance: distance,
-        }
-      })
-  }, [rental, userLocation])
+          amenities: item.amenities || [],
+        };
+      });
+  }, [rental, userLocation]);
 
   const filteredAndSortedData = useMemo(() => {
-    let filteredData = rentalDisplay
+    let filteredData = rentalDisplay;
 
-    // Xử lý search trước
-    if (searchText && isSearching) {
-      const searchLower = searchText.toLowerCase()
-      filteredData = filteredData.filter((item) =>
-        item.placeName.toLowerCase().includes(searchLower)
-      )
-    }
+    filteredData = filteredData.filter((item) => {
+      const searchMatch = !isSearching || 
+        item.placeName.toLowerCase().includes(searchText.toLowerCase());
+      
+      const filterMatch = appliedFilterParams
+        ? (() => {
+            const priceInRange = 
+              (item.minPrice >= appliedFilterParams.priceRange[0] && 
+               item.minPrice <= appliedFilterParams.priceRange[1]) ||
+              (item.maxPrice >= appliedFilterParams.priceRange[0] && 
+               item.maxPrice <= appliedFilterParams.priceRange[1]) ||
+              (item.minPrice <= appliedFilterParams.priceRange[0] && 
+               item.maxPrice >= appliedFilterParams.priceRange[1]);
 
-    // Áp dụng filter chỉ khi có params từ người dùng
-    if (appliedFilterParams) {
-      filteredData = filteredData.filter((item) => {
-        const minPrice = typeof item.minPrice === "number" ? item.minPrice : Number.parseFloat(item.minPrice) || 0
-        const maxPrice = typeof item.maxPrice === "number" ? item.maxPrice : Number.parseFloat(item.maxPrice) || 0
+            const ratingMatch = appliedFilterParams.selectedRating !== null
+              ? (item.ratingPoint || 0) >= (appliedFilterParams.selectedRating + 0.1)
+              : true;
 
-        const priceInRange =
-          (minPrice >= appliedFilterParams.priceRange[0] && minPrice <= appliedFilterParams.priceRange[1]) ||
-          (maxPrice >= appliedFilterParams.priceRange[0] && maxPrice <= appliedFilterParams.priceRange[1]) ||
-          (minPrice <= appliedFilterParams.priceRange[0] && maxPrice >= appliedFilterParams.priceRange[1])
+            const amenitiesMatch = appliedFilterParams.selectedAmenities.length > 0
+              ? appliedFilterParams.selectedAmenities.every((amenity) =>
+                  item.amenities.includes(amenity)
+                )
+              : true;
 
-        const ratingMatch = appliedFilterParams.selectedRating !== null
-          ? (item.ratingPoint || 0) >= (appliedFilterParams.selectedRating + 0.1)
-          : true
+            return priceInRange && ratingMatch && amenitiesMatch;
+          })()
+        : true;
 
-        const amenitiesMatch = appliedFilterParams.selectedAmenities.length > 0
-          ? appliedFilterParams.selectedAmenities.every(amenity =>
-            item.amenities?.includes(amenity) || false
-          )
-          : true
-
-        return priceInRange && ratingMatch && amenitiesMatch
-      })
-    }
+      return searchMatch && filterMatch;
+    });
 
     return filteredData.sort((a, b) => {
       if (selectedSortOption === t("price_low_to_high")) {
-        return (Number.parseFloat(a.minPrice) || 0) - (Number.parseFloat(b.minPrice) || 0)
+        return a.minPrice - b.minPrice;
       } else if (selectedSortOption === t("price_high_to_low")) {
-        return (Number.parseFloat(b.minPrice) || 0) - (Number.parseFloat(a.minPrice) || 0)
+        return b.minPrice - a.minPrice;
       } else if (selectedSortOption === t("nearest_you")) {
-        return (a.distance ?? Number.POSITIVE_INFINITY) - (b.distance ?? Number.POSITIVE_INFINITY)
+        return (a.distance ?? Number.POSITIVE_INFINITY) - (b.distance ?? Number.POSITIVE_INFINITY);
       }
-      return 0
-    })
-  }, [searchText, isSearching, selectedSortOption, rentalDisplay, filterParams])
+      return 0;
+    });
+  }, [searchText, isSearching, selectedSortOption, rentalDisplay, appliedFilterParams]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -206,18 +201,15 @@ const SearchResult = ({ route, navigation }) => {
                 ({filteredAndSortedData.length})
               </Text>
             )}
-            {filteredAndSortedData.map((item) => {
-              console.log("Khoảng cách đến", item.placeName, "là:", item.distance)
-              return (
-                <VerticalCard
-                  key={item.id}
-                  {...item}
-                  initFavourite={false}
-                  onFavouritePress={(isFav) => console.log(t("favorite_status"), isFav)}
-                  onCardPress={() => console.log(t("card_pressed"))}
-                />
-              )
-            })}
+            {filteredAndSortedData.map((item) => (
+              <VerticalCard
+                key={item.id}
+                {...item}
+                initFavourite={false}
+                onFavouritePress={(isFav) => console.log(t("favorite_status"), isFav)}
+                onCardPress={() => navigation.navigate("RentalDetail", { id: item.id })}
+              />
+            ))}
           </>
         )}
       </ScrollView>
@@ -226,14 +218,15 @@ const SearchResult = ({ route, navigation }) => {
         visible={isFilterVisible}
         onClose={() => setIsFilterVisible(false)}
         onApply={(params) => {
-          setAppliedFilterParams(params)
-          setIsFilterVisible(false)
+          setAppliedFilterParams(params);
+          setIsFilterVisible(false);
         }}
         rentalLocations={rental?.data || []}
+        appliedFilters={appliedFilterParams}
       />
     </SafeAreaView>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -275,6 +268,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginVertical: 10,
   },
-})
+});
 
-export default SearchResult
+export default SearchResult;
