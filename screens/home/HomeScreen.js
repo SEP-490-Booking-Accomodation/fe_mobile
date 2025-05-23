@@ -4,6 +4,8 @@ import {
   SafeAreaView,
   ScrollView,
   RefreshControl,
+  ActivityIndicator,
+  View
 } from "react-native";
 import { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
@@ -165,7 +167,9 @@ export default function HomeScreen() {
             filterIcon={false}
           />
           {loading ? (
-            <Text>{t("loading")}</Text>
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#3357FF" />
+            </View>
           ) : (
             <LocationList
               rentalData={rental}
@@ -276,4 +280,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     letterSpacing: 0.5,
   },
+  loadingContainer: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  paddingVertical: 100, 
+},
 });

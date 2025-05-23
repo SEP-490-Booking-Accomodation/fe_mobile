@@ -4,6 +4,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import PropTypes from "prop-types";
 import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
+
 export default function VerticalCard({
   id,
   imageUrl,
@@ -19,7 +20,7 @@ export default function VerticalCard({
   numberOfReview = 0,
   distance,
   initFavourite = false,
-  onFavouritePress = () => {},
+  onFavouritePress = () => { },
   // onCardPress = () => {},
 }) {
   const { t } = useTranslation();
@@ -31,6 +32,7 @@ export default function VerticalCard({
   const navigate = useNavigation();
   const [isLoading, setIsLoading] = useState(true); // Trạng thái tải ảnh
   const [currentImage, setCurrentImage] = useState(imageUrl);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     let timeout = setTimeout(() => {
@@ -43,6 +45,39 @@ export default function VerticalCard({
     return () => clearTimeout(timeout);
   }, [isLoading]);
 
+  useEffect(() => {
+    const checkOpenStatus = () => {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+
+      const [openHourValue, openMinuteValue] = openHour.split(':').map(Number);
+      const [closeHourValue, closeMinuteValue] = closeHour.split(':').map(Number);
+
+      const currentTimeInMinutes = currentHour * 60 + currentMinute;
+      const openTimeInMinutes = openHourValue * 60 + openMinuteValue;
+      const closeTimeInMinutes = closeHourValue * 60 + closeMinuteValue;
+
+      if (closeTimeInMinutes < openTimeInMinutes) {
+        setIsOpen(
+          currentTimeInMinutes >= openTimeInMinutes ||
+          currentTimeInMinutes <= closeTimeInMinutes
+        );
+      } else {
+        setIsOpen(
+          currentTimeInMinutes >= openTimeInMinutes &&
+          currentTimeInMinutes <= closeTimeInMinutes
+        );
+      }
+    };
+
+    checkOpenStatus();
+
+    const intervalId = setInterval(checkOpenStatus, 60000);
+
+    return () => clearInterval(intervalId);
+  }, [openHour, closeHour, isOverNight]);
+
   const handleFavouritePress = () => {
     const newValue = !isFavourite;
     setIsFavourite(newValue);
@@ -50,9 +85,11 @@ export default function VerticalCard({
       onFavouritePress(newValue);
     }
   };
+
   const onCardPress = () => {
     navigate.navigate("DetailRentalLocation", { rentalId: id });
   };
+
   const formatMoney = (value) => {
     return value.toLocaleString("vi-VN");
   };
@@ -99,9 +136,9 @@ export default function VerticalCard({
             <Text style={styles.openHoursText}>{t("inactive_status")}</Text>
           </View>
         ) : status === 3 ? (
-          <View style={styles.activeStatusContainer}>
+          <View style={isOpen ? styles.activeStatusContainer : styles.closedStatusContainer}>
             <Text style={styles.openHoursText}>
-              {t("open_hours_from_to", { openHour, closeHour })}
+              {isOpen ? t("open_hr") : t("close_hr")} ({openHour} - {closeHour})
             </Text>
           </View>
         ) : status === 4 ? (
@@ -127,9 +164,9 @@ export default function VerticalCard({
           {minPrice == maxPrice
             ? formatMoney(minPrice) + t("per_hour")
             : formatMoney(minPrice) +
-              " - " +
-              formatMoney(maxPrice) +
-              t("per_hour")}
+            " - " +
+            formatMoney(maxPrice) +
+            t("per_hour")}
         </Text>
 
         <View style={styles.locationContainer}>
@@ -321,5 +358,16 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 12,
     color: "#00000099",
+  },
+  hidden: {
+    display: "none",
+  },
+  closedStatusContainer: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#FF4B26",
+    borderTopLeftRadius: 16,
+    borderBottomRightRadius: 13,
   },
 });
