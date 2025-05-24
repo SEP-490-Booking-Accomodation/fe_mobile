@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import PropTypes from "prop-types";
-import { useNavigation } from "@react-navigation/native";
-import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react"
+import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native"
+import Icon from "react-native-vector-icons/MaterialIcons"
+import PropTypes from "prop-types"
+import { useNavigation } from "@react-navigation/native"
+import { useTranslation } from "react-i18next"
 
 export default function VerticalCard({
   id,
@@ -20,121 +20,111 @@ export default function VerticalCard({
   numberOfReview = 0,
   distance,
   initFavourite = false,
-  onFavouritePress = () => { },
+  onFavouritePress = () => {},
 }) {
-  const { t } = useTranslation();
-  const loadingGif = "https://i.gifer.com/WMDx.gif";
-  const fallbackImage = "https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png";
+  const { t } = useTranslation()
+  const loadingGif = "https://i.gifer.com/WMDx.gif"
+  const fallbackImage = "https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png"
 
-  const [isFavourite, setIsFavourite] = useState(initFavourite);
-  const navigate = useNavigation();
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentImage, setCurrentImage] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const [isFavourite, setIsFavourite] = useState(initFavourite)
+  const navigate = useNavigation()
+  const [isLoading, setIsLoading] = useState(true)
+  const [currentImage, setCurrentImage] = useState("")
+  const [isOpen, setIsOpen] = useState(false)
+  const [imageError, setImageError] = useState(false)
 
   useEffect(() => {
     if (imageUrl) {
-      const firstImage = Array.isArray(imageUrl) ? imageUrl[0] : imageUrl;
+      const firstImage = Array.isArray(imageUrl) ? imageUrl[0] : imageUrl
 
-      if (firstImage && (firstImage.startsWith('http://') || firstImage.startsWith('https://'))) {
-        setCurrentImage(firstImage);
+      if (firstImage && (firstImage.startsWith("http://") || firstImage.startsWith("https://"))) {
+        setCurrentImage(firstImage)
       } else {
-        setCurrentImage(fallbackImage);
-        setImageError(true);
+        setCurrentImage(fallbackImage)
+        setImageError(true)
       }
     } else {
-      setCurrentImage(fallbackImage);
-      setImageError(true);
+      setCurrentImage(fallbackImage)
+      setImageError(true)
     }
-  }, [imageUrl, fallbackImage]);
+  }, [imageUrl, fallbackImage])
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (isLoading && !imageError) {
-        setCurrentImage(fallbackImage);
-        setIsLoading(false);
-        setImageError(true);
+        setCurrentImage(fallbackImage)
+        setIsLoading(false)
+        setImageError(true)
       }
-    }, 10000);
+    }, 10000)
 
-    return () => clearTimeout(timeout);
-  }, [isLoading, imageError, fallbackImage]);
+    return () => clearTimeout(timeout)
+  }, [isLoading, imageError, fallbackImage])
 
   useEffect(() => {
     const checkOpenStatus = () => {
-      const now = new Date();
-      const currentHour = now.getHours();
-      const currentMinute = now.getMinutes();
+      const now = new Date()
+      const currentHour = now.getHours()
+      const currentMinute = now.getMinutes()
 
-      const [openHourValue, openMinuteValue] = openHour.split(':').map(Number);
-      const [closeHourValue, closeMinuteValue] = closeHour.split(':').map(Number);
+      const [openHourValue, openMinuteValue] = openHour.split(":").map(Number)
+      const [closeHourValue, closeMinuteValue] = closeHour.split(":").map(Number)
 
-      const currentTimeInMinutes = currentHour * 60 + currentMinute;
-      const openTimeInMinutes = openHourValue * 60 + openMinuteValue;
-      const closeTimeInMinutes = closeHourValue * 60 + closeMinuteValue;
+      const currentTimeInMinutes = currentHour * 60 + currentMinute
+      const openTimeInMinutes = openHourValue * 60 + openMinuteValue
+      const closeTimeInMinutes = closeHourValue * 60 + closeMinuteValue
 
       if (closeTimeInMinutes < openTimeInMinutes) {
-        setIsOpen(
-          currentTimeInMinutes >= openTimeInMinutes ||
-          currentTimeInMinutes <= closeTimeInMinutes
-        );
+        setIsOpen(currentTimeInMinutes >= openTimeInMinutes || currentTimeInMinutes <= closeTimeInMinutes)
       } else {
-        setIsOpen(
-          currentTimeInMinutes >= openTimeInMinutes &&
-          currentTimeInMinutes <= closeTimeInMinutes
-        );
+        setIsOpen(currentTimeInMinutes >= openTimeInMinutes && currentTimeInMinutes <= closeTimeInMinutes)
       }
-    };
+    }
 
-    checkOpenStatus();
-    const intervalId = setInterval(checkOpenStatus, 60000);
-    return () => clearInterval(intervalId);
-  }, [openHour, closeHour, isOverNight]);
+    checkOpenStatus()
+    const intervalId = setInterval(checkOpenStatus, 60000)
+    return () => clearInterval(intervalId)
+  }, [openHour, closeHour, isOverNight])
 
   const handleFavouritePress = () => {
-    const newValue = !isFavourite;
-    setIsFavourite(newValue);
+    const newValue = !isFavourite
+    setIsFavourite(newValue)
     if (onFavouritePress) {
-      onFavouritePress(newValue);
+      onFavouritePress(newValue)
     }
-  };
+  }
 
   const onCardPress = () => {
-    navigate.navigate("DetailRentalLocation", { rentalId: id });
-  };
+    navigate.navigate("DetailRentalLocation", { rentalId: id })
+  }
 
   const formatMoney = (value) => {
-    return value.toLocaleString("vi-VN");
-  };
+    return value.toLocaleString("vi-VN")
+  }
+
+  const renderPriceRange = () => {
+    return `${formatMoney(minPrice)} - ${formatMoney(maxPrice)}${t("per_hour") || "đ/giờ"}`
+  }
 
   const handleImageLoad = () => {
-    setIsLoading(false);
-    setImageError(false);
-  };
+    setIsLoading(false)
+    setImageError(false)
+  }
 
   const handleImageError = () => {
     if (!imageError) {
-      setCurrentImage(fallbackImage);
-      setImageError(true);
+      setCurrentImage(fallbackImage)
+      setImageError(true)
     }
-    setIsLoading(false);
-  };
+    setIsLoading(false)
+  }
 
   return (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={onCardPress}
-      activeOpacity={0.97}
-    >
+    <TouchableOpacity style={styles.card} onPress={onCardPress} activeOpacity={0.97}>
       <View style={styles.imageContainer}>
         {isLoading && !imageError && (
           <View style={styles.loadingContainer}>
-            <Image
-              source={{ uri: loadingGif }}
-              style={styles.loadingImage}
-              resizeMode="center"
-            />
+            <Image source={{ uri: loadingGif }} style={styles.loadingImage} resizeMode="center" />
           </View>
         )}
 
@@ -147,11 +137,7 @@ export default function VerticalCard({
         />
 
         {/* Favourite Button */}
-        <TouchableOpacity
-          style={styles.favouriteContainer}
-          onPress={handleFavouritePress}
-          activeOpacity={0.8}
-        >
+        <TouchableOpacity style={styles.favouriteContainer} onPress={handleFavouritePress} activeOpacity={0.8}>
           <Icon
             name={isFavourite ? "favorite" : "favorite-border"}
             size={24}
@@ -183,33 +169,21 @@ export default function VerticalCard({
       <View style={styles.contentContainer}>
         <View style={styles.nameContainer}>
           <Text style={styles.title}>{placeName}</Text>
-          {isOverNight ? (
-            <Text style={styles.isOverNight}>{t("overnight")}</Text>
-          ) : null}
+          {isOverNight ? <Text style={styles.isOverNight}>{t("overnight")}</Text> : null}
         </View>
 
-        <Text style={styles.priceRange}>
-          {minPrice == maxPrice
-            ? formatMoney(minPrice) + t("per_hour")
-            : formatMoney(minPrice) + " - " + formatMoney(maxPrice) + t("per_hour")}
-        </Text>
+        <Text style={styles.priceRange}>{renderPriceRange()}</Text>
 
         <View style={styles.locationContainer}>
           <Icon name="location-on" size={20} color={"#4e72e3"} />
-          <Text
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            style={styles.locationText}
-          >
+          <Text numberOfLines={1} ellipsizeMode="tail" style={styles.locationText}>
             {location}
           </Text>
         </View>
 
         <View style={styles.distanceContainer}>
           {distance != null && (
-            <Text style={styles.distanceText}>
-              {t("distance_away", { distance: distance.toFixed(1) })}
-            </Text>
+            <Text style={styles.distanceText}>{t("distance_away", { distance: distance.toFixed(1) })}</Text>
           )}
         </View>
 
@@ -221,15 +195,11 @@ export default function VerticalCard({
         </View>
       </View>
     </TouchableOpacity>
-  );
+  )
 }
 
 VerticalCard.propTypes = {
-  imageUrl: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-    PropTypes.arrayOf(PropTypes.string)
-  ]).isRequired,
+  imageUrl: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.arrayOf(PropTypes.string)]).isRequired,
   openHour: PropTypes.string,
   closeHour: PropTypes.string,
   placeName: PropTypes.string,
@@ -241,7 +211,7 @@ VerticalCard.propTypes = {
   initFavourite: PropTypes.bool,
   onFavouritePress: PropTypes.func,
   onCardPress: PropTypes.func,
-};
+}
 
 const styles = StyleSheet.create({
   card: {
@@ -402,4 +372,4 @@ const styles = StyleSheet.create({
   hidden: {
     opacity: 0,
   },
-});
+})
