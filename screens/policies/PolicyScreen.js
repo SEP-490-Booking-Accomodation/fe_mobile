@@ -37,7 +37,7 @@ const PolicyScreen = () => {
           keyExtractor={(item) => item?.id.toString()}
           renderItem={({ item }) => (
             <PolicyItem
-              iconName="notifications"
+              iconName="policy"
               title={item.name}
               time={item.createdAt}
               message={item.description}

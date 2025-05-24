@@ -1,13 +1,12 @@
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
 
 const PolicyItem = ({ iconName, title, time, message, onPress }) => {
   return (
     <TouchableOpacity onPress={onPress} style={styles.container} activeOpacity={0.7}>
       <View style={styles.iconContainer}>
-        <Icon name={iconName} size={24} color="#4E72E3" />
+        <MaterialIcons name={iconName} size={24} color="#4E72E3" />
       </View>
       <View style={styles.contentContainer}>
         <View style={styles.headerContainer}>
