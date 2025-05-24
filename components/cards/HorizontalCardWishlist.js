@@ -17,8 +17,8 @@ import { useTranslation } from "react-i18next";
             placeName = {"Nhà con nhộng giá rẻ Bình Tân"}
             openHour = {"3:00"}
             closeHour = {"23:00"}
-            minPrice = {"120.000"}
-            maxPrice = {"1.400.000"}
+            minPrice = {120000}
+            maxPrice = {1400000}
             location = {"Bình Tân, HCM"}
             rating = {"5"}
             numOfReviews = {"12.5k"}
@@ -36,8 +36,8 @@ const HorizontalCardWishlist = ({
   placeName,
   openHour = "00:00",
   closeHour = "23:59",
-  minPrice,
-  maxPrice,
+  minPrice = 0,
+  maxPrice = 0,
   location,
   rating,
   numOfReviews,
@@ -91,6 +91,14 @@ const HorizontalCardWishlist = ({
     }
   };
 
+  const formatMoney = (value) => {
+    return value.toLocaleString("vi-VN");
+  };
+
+  const renderPriceRange = () => {
+    return `${formatMoney(minPrice)} - ${formatMoney(maxPrice)}${t("per_hour") || "đ/giờ"}`;
+  };
+
   const getStatusContainer = () => {
     if (status === 2 || status === 5 || status === 1) {
       return styles.inactiveStatusContainer;
@@ -130,7 +138,7 @@ const HorizontalCardWishlist = ({
           </Text>
         </View>
         <Text style={styles.priceRange}>
-          {minPrice} {t("currency")} - {maxPrice} {t("currency")}
+          {renderPriceRange()}
         </Text>
         <View style={styles.locationContainer}>
           <Icon name="location-on" size={20} color="#4e72e3" />
@@ -199,19 +207,19 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   activeStatusContainer: {
-    backgroundColor: "#12B347",
+    backgroundColor: "#12B347", 
   },
   closedStatusContainer: {
     backgroundColor: "#FF4B26", 
   },
   inactiveStatusContainer: {
-    backgroundColor: "rgb(209, 57, 27)", 
+    backgroundColor: "rgb(209, 57, 27)",
   },
   pauseStatusContainer: {
     backgroundColor: "rgb(221, 188, 0)", 
   },
   notStatusContainer: {
-    backgroundColor: "rgb(40, 40, 40)", 
+    backgroundColor: "rgb(40, 40, 40)",
   },
   openHourText: {
     color: "white",
