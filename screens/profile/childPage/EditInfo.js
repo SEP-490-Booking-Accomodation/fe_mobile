@@ -237,6 +237,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 16,
+    // padding: 16,
   },
 });
