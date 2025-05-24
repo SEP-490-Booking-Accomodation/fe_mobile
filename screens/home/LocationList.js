@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   viewAllButton: {
     backgroundColor: "#4E72E3",
     padding: 16,
-    borderRadius: 8,
+    borderRadius: 100,
     alignItems: "center",
     justifyContent: "center",
     marginHorizontal: 20,

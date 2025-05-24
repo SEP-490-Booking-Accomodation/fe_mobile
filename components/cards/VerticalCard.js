@@ -36,7 +36,7 @@ export default function VerticalCard({
   useEffect(() => {
     if (imageUrl) {
       const firstImage = Array.isArray(imageUrl) ? imageUrl[0] : imageUrl;
-      
+
       if (firstImage && (firstImage.startsWith('http://') || firstImage.startsWith('https://'))) {
         setCurrentImage(firstImage);
       } else {
@@ -56,7 +56,7 @@ export default function VerticalCard({
         setIsLoading(false);
         setImageError(true);
       }
-    }, 10000); 
+    }, 10000);
 
     return () => clearTimeout(timeout);
   }, [isLoading, imageError, fallbackImage]);
@@ -187,7 +187,7 @@ export default function VerticalCard({
             <Text style={styles.isOverNight}>{t("overnight")}</Text>
           ) : null}
         </View>
-        
+
         <Text style={styles.priceRange}>
           {minPrice == maxPrice
             ? formatMoney(minPrice) + t("per_hour")
@@ -204,7 +204,7 @@ export default function VerticalCard({
             {location}
           </Text>
         </View>
-        
+
         <View style={styles.distanceContainer}>
           {distance != null && (
             <Text style={styles.distanceText}>
@@ -212,7 +212,7 @@ export default function VerticalCard({
             </Text>
           )}
         </View>
-        
+
         <View style={styles.ratingContainer}>
           <Icon name="star" size={20} color={"#ffc907"} />
           <Text style={styles.ratingText}>
@@ -226,8 +226,8 @@ export default function VerticalCard({
 
 VerticalCard.propTypes = {
   imageUrl: PropTypes.oneOfType([
-    PropTypes.string, 
-    PropTypes.number, 
+    PropTypes.string,
+    PropTypes.number,
     PropTypes.arrayOf(PropTypes.string)
   ]).isRequired,
   openHour: PropTypes.string,
