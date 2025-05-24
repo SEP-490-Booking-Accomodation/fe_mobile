@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, ActivityIndicator } from "react-nativ
 import PolicyItem from "../../components/policies/PolicyItem";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { useLazyGetAllPoliciesQuery } from "../../api/policySystemApi";
 import { useTranslation } from "react-i18next";
 
@@ -23,12 +23,7 @@ const PolicyScreen = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.headerContainer}>
-                <MaterialIcons
-                    name="arrow-back"
-                    size={24}
-                    color="#4E72E3"
-                    onPress={() => navigation.goBack()}
-                />
+                <AntDesign name="left" size={24} color="#4E72E3" onPress={() => navigation.goBack()} />
                 <Text style={styles.header}>{t("policies")}</Text>
             </View>
 

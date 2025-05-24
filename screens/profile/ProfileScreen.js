@@ -10,7 +10,7 @@ import {
   Modal,
   TouchableWithoutFeedback,
 } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
@@ -73,7 +73,7 @@ export default function ProfileScreen() {
         style={styles.arrowBack}
         onPress={() => navigation.goBack()}
       >
-        <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
+        <AntDesign name="left" size={24} color="#4E72E3" />
       </TouchableOpacity>
       <Text style={styles.textHeader}>{t('profile')}</Text>
     </View>

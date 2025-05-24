@@ -12,7 +12,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import MapWithPopup from "../../components/MapWithPopup";
 import CustomButton from "../../components/buttons/Button";
 import Tag from "../../components/Tag";
@@ -163,10 +163,10 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
   const renderHeader = () => (
     <View style={styles.header}>
       <TouchableOpacity onPress={() => navigation.goBack()}>
-        <MaterialIcons name="arrow-back" size={24} color="#333" />
+        <AntDesign name="left" size={24} color="#4E72E3" />
       </TouchableOpacity>
       <TouchableOpacity onPress={handleMoreOptions}>
-        <MaterialIcons name="more-vert" size={24} color="#333" />
+        <MaterialIcons name="more-vert" size={24} color="#4E72E3" />
       </TouchableOpacity>
     </View>
   );

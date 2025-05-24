@@ -9,7 +9,7 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import CustomButton from "../../../components/buttons/Button";
@@ -117,13 +117,21 @@ export default function EditInfo() {
 
   const renderHeader = () => (
     <View style={styles.header}>
-      <TouchableOpacity onPress={() => navigation.goBack()}>
+      {/* <TouchableOpacity onPress={() => navigation.goBack()}>
         <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <Text style={styles.textHeader}>{t('edit_profile')}</Text>
     </View>
   );
 
+  const renderFooter = () => (
+    <View style={styles.footer}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <AntDesign name="left" size={24} color="#4E72E3" />
+      </TouchableOpacity>
+      <CustomButton style={{ width: "85%" }} title={t('update')} onPress={handleUpdateInfo} />
+    </View>
+  );
   return (
     <SafeAreaView style={styles.container}>
       {renderHeader()}
@@ -132,7 +140,7 @@ export default function EditInfo() {
           <AvatarUpload currentImage={image} onImageChange={handleImageChange} />
         </View>
         <View style={styles.infoContainer}>
-        <Text style={styles.label}>{t('full_name')}</Text>
+          <Text style={styles.label}>{t('full_name')}</Text>
           <CustomInput value={fullName} onChangeText={setFullName} />
           <View style={styles.spacing} />
           <Text style={styles.label}>{t('email')}</Text>
@@ -141,13 +149,14 @@ export default function EditInfo() {
           <Text style={styles.label}>{t('phone_number')}</Text>
           <CustomInput value={phone} onChangeText={setPhone} />
         </View>
-        //TODO:  Chỗ này sau khi tắt bottom tab thì sễ để dưới dạng bottom bar ở dưới như header đang style hiện tại
-        <CustomButton
+        
+        {/* <CustomButton
           title={t('update_info')}
           disabled={!isButtonSaveActive}
           onPress={handleUpdateInfo}
-        />
+        /> */}
       </ScrollView>
+      {renderFooter()}
     </SafeAreaView>
   );
 }
@@ -205,5 +214,29 @@ const styles = StyleSheet.create({
   },
   spacing: {
     padding: 4,
+  },
+   footer: {
+    position: "absolute",
+    bottom: 20,
+    left: 0,
+    right: 0,
+    width: "100%",
+    padding: 20,
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderColor: "#4E72E3",
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
   },
 });

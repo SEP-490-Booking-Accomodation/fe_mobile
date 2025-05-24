@@ -50,9 +50,9 @@ export default function ChangePassword({ route }) {
 
   const renderHeader = () => (
     <View style={styles.header}>
-      <TouchableOpacity style={styles.arrowBack} onPress={() => navigation.goBack()}>
+      {/* <TouchableOpacity style={styles.arrowBack} onPress={() => navigation.goBack()}>
         <AntDesign name="left" size={24} color="#4E72E3" />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <Text style={styles.textHeader}>{t('change_password')}</Text>
     </View>
   );
@@ -118,8 +118,7 @@ export default function ChangePassword({ route }) {
               
               <View style={styles.spacing} />
             </View>
-            //TODO:  Chỗ này sau khi tắt bottom tab thì sễ để dưới dạng bottom bar ở dưới như header đang style hiện tại
-            <CustomButton title={t('update')} onPress={handlePasswordChange} />
+            {/* <CustomButton title={t('update')} onPress={handlePasswordChange} /> */}
           </ScrollView>
         </KeyboardAvoidingView>
       </View>
