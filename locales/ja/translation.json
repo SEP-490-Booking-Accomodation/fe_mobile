@@ -489,5 +489,6 @@
   "close_hr": "閉店",
   "search_results_for": "検索結果: ",
   "no_results_for" : "結果が見つかりませんでした",
-  "filter_applied" : "フィルターを適用済み"
+  "filter_applied" : "フィルターを適用済み",
+  "filtered_results": "フィルター済みの結果"
 }

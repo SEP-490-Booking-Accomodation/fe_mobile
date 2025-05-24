@@ -489,5 +489,6 @@
   "close_hr": "Đóng Cửa",
   "search_results_for" : "Kết quả tìm kiếm cho:",
   "no_results_for" : "Không tìm thấy kết quả",
-  "filter_applied" : "Đã áp dụng bộ lọc"
+  "filter_applied" : "Đã áp dụng bộ lọc",
+  "filtered_results": "Kết quả đã lọc"
 }

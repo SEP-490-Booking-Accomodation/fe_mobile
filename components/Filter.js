@@ -15,47 +15,45 @@ const Filter = ({ visible, onClose, onApply, rentalLocations = [] }) => {
   const sliderWidth = screenWidth - 40
 
   const [minMaxPrices, setMinMaxPrices] = useState({
-    min: 100000,
-    max: 100000000,
+    min: 0,
+    max: 10000,
   })
 
   useEffect(() => {
-    if (rentalLocations && rentalLocations.length > 0) {
-      console.log("Rental locations received in filter:", rentalLocations)
-
-      const ratingFields = rentalLocations.map((rental) => ({
-        id: rental._id || rental.id,
-        name: rental.name || rental.placeName,
-        rating: rental.rating,
-        averageRating: rental.averageRating,
-        ratingPoint: rental.ratingPoint,
-      }))
-      console.log("Rating fields in rentals:", ratingFields)
-
-      let minPrice = Number.MAX_SAFE_INTEGER
-      let maxPrice = 0
+    if (rentalLocations?.length > 0) {
+      let validMinPrices = []
+      let validMaxPrices = []
 
       rentalLocations.forEach((rental) => {
-        const min = typeof rental.minPrice === "number" ? rental.minPrice : Number.parseFloat(rental.minPrice) || 100000
-        const max = typeof rental.maxPrice === "number" ? rental.maxPrice : Number.parseFloat(rental.maxPrice) || 500000
+        const min = typeof rental.minPrice === 'number' 
+          ? rental.minPrice 
+          : Number.parseFloat(rental.minPrice) || 0
+        
+        const max = typeof rental.maxPrice === 'number' 
+          ? rental.maxPrice 
+          : Number.parseFloat(rental.maxPrice) || 0
 
-        if (min < minPrice && min > 0) minPrice = min
-        if (max > maxPrice) maxPrice = max
+        if (!isNaN(min) && min >= 0) validMinPrices.push(min)
+        if (!isNaN(max) && max >= 0) validMaxPrices.push(max)
       })
 
-      if (minPrice === Number.MAX_SAFE_INTEGER) minPrice = 100000
-      if (maxPrice === 0) maxPrice = 1000000
+      const calculatedMin = validMinPrices.length > 0 
+        ? Math.min(...validMinPrices) 
+        : 0
+        
+      const calculatedMax = validMaxPrices.length > 0 
+        ? Math.max(...validMaxPrices) 
+        : 10000 
 
-      if (maxPrice <= minPrice) maxPrice = minPrice * 10
-
-      console.log("Price range calculated:", minPrice, maxPrice)
+      const finalMax = calculatedMax > calculatedMin 
+        ? calculatedMax 
+        : calculatedMin + 10000
 
       setMinMaxPrices({
-        min: minPrice,
-        max: maxPrice,
+        min: calculatedMin,
+        max: finalMax,
       })
-
-      setPriceRange([minPrice, maxPrice])
+      setPriceRange([calculatedMin, finalMax])
     }
   }, [rentalLocations])
 
@@ -137,8 +135,8 @@ const Filter = ({ visible, onClose, onApply, rentalLocations = [] }) => {
                 values={priceRange}
                 onValuesChange={setPriceRange}
                 min={minMaxPrices.min}
-                max={minMaxPrices.max}
-                step={10000}
+                max={Math.max(minMaxPrices.max, minMaxPrices.min + 10000)}
+                step={1000}
                 allowOverlap={false}
                 snapped
                 selectedStyle={{

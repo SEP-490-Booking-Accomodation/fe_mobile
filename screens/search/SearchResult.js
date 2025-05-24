@@ -66,7 +66,7 @@ const SearchResult = ({ route, navigation }) => {
   };
 
   const handleSearchSubmit = () => {
-    setAppliedFilterParams(null); 
+    setAppliedFilterParams(null);
     setIsSearching(true);
     Keyboard.dismiss();
   };
@@ -85,11 +85,11 @@ const SearchResult = ({ route, navigation }) => {
         const distance =
           userLocation && item.latitude && item.longitude
             ? getDistanceFromLatLonInKm(
-                userLocation.latitude,
-                userLocation.longitude,
-                item.latitude,
-                item.longitude
-              )
+              userLocation.latitude,
+              userLocation.longitude,
+              item.latitude,
+              item.longitude
+            )
             : null;
 
         return {
@@ -119,31 +119,31 @@ const SearchResult = ({ route, navigation }) => {
     let filteredData = rentalDisplay;
 
     filteredData = filteredData.filter((item) => {
-      const searchMatch = !isSearching || 
+      const searchMatch = !isSearching ||
         item.placeName.toLowerCase().includes(searchText.toLowerCase());
-      
+
       const filterMatch = appliedFilterParams
         ? (() => {
-            const priceInRange = 
-              (item.minPrice >= appliedFilterParams.priceRange[0] && 
-               item.minPrice <= appliedFilterParams.priceRange[1]) ||
-              (item.maxPrice >= appliedFilterParams.priceRange[0] && 
-               item.maxPrice <= appliedFilterParams.priceRange[1]) ||
-              (item.minPrice <= appliedFilterParams.priceRange[0] && 
-               item.maxPrice >= appliedFilterParams.priceRange[1]);
+          const priceInRange =
+            (item.minPrice >= appliedFilterParams.priceRange[0] &&
+              item.minPrice <= appliedFilterParams.priceRange[1]) ||
+            (item.maxPrice >= appliedFilterParams.priceRange[0] &&
+              item.maxPrice <= appliedFilterParams.priceRange[1]) ||
+            (item.minPrice <= appliedFilterParams.priceRange[0] &&
+              item.maxPrice >= appliedFilterParams.priceRange[1]);
 
-            const ratingMatch = appliedFilterParams.selectedRating !== null
-              ? (item.ratingPoint || 0) >= (appliedFilterParams.selectedRating + 0.1)
-              : true;
+          const ratingMatch = appliedFilterParams.selectedRating !== null
+            ? (item.ratingPoint || 0) >= (appliedFilterParams.selectedRating + 0.1)
+            : true;
 
-            const amenitiesMatch = appliedFilterParams.selectedAmenities.length > 0
-              ? appliedFilterParams.selectedAmenities.every((amenity) =>
-                  item.amenities.includes(amenity)
-                )
-              : true;
+          const amenitiesMatch = appliedFilterParams.selectedAmenities.length > 0
+            ? appliedFilterParams.selectedAmenities.every((amenity) =>
+              item.amenities.includes(amenity)
+            )
+            : true;
 
-            return priceInRange && ratingMatch && amenitiesMatch;
-          })()
+          return priceInRange && ratingMatch && amenitiesMatch;
+        })()
         : true;
 
       return searchMatch && filterMatch;
@@ -185,7 +185,7 @@ const SearchResult = ({ route, navigation }) => {
         />
       </View>
 
-      <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+      <ScrollView style={styles.padding} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         {filteredAndSortedData.length === 0 ? (
           <View style={styles.noResultContainer}>
             <Text style={styles.noResultText}>
@@ -233,6 +233,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+  padding: { paddingHorizontal: 5 },
   mh: {
     marginHorizontal: 10,
     marginVertical: 10,

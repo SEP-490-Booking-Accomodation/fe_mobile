@@ -21,29 +21,45 @@ export default function VerticalCard({
   distance,
   initFavourite = false,
   onFavouritePress = () => { },
-  // onCardPress = () => {},
 }) {
   const { t } = useTranslation();
   const loadingGif = "https://i.gifer.com/WMDx.gif";
-  const fallbackImage =
-    "https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png";
+  const fallbackImage = "https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png";
 
   const [isFavourite, setIsFavourite] = useState(initFavourite);
   const navigate = useNavigation();
-  const [isLoading, setIsLoading] = useState(true); // Trạng thái tải ảnh
-  const [currentImage, setCurrentImage] = useState(imageUrl);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentImage, setCurrentImage] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
-    let timeout = setTimeout(() => {
-      if (isLoading) {
+    if (imageUrl) {
+      const firstImage = Array.isArray(imageUrl) ? imageUrl[0] : imageUrl;
+      
+      if (firstImage && (firstImage.startsWith('http://') || firstImage.startsWith('https://'))) {
+        setCurrentImage(firstImage);
+      } else {
+        setCurrentImage(fallbackImage);
+        setImageError(true);
+      }
+    } else {
+      setCurrentImage(fallbackImage);
+      setImageError(true);
+    }
+  }, [imageUrl, fallbackImage]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (isLoading && !imageError) {
         setCurrentImage(fallbackImage);
         setIsLoading(false);
+        setImageError(true);
       }
-    }, 5000); // 3 giây
+    }, 10000); 
 
     return () => clearTimeout(timeout);
-  }, [isLoading]);
+  }, [isLoading, imageError, fallbackImage]);
 
   useEffect(() => {
     const checkOpenStatus = () => {
@@ -72,9 +88,7 @@ export default function VerticalCard({
     };
 
     checkOpenStatus();
-
     const intervalId = setInterval(checkOpenStatus, 60000);
-
     return () => clearInterval(intervalId);
   }, [openHour, closeHour, isOverNight]);
 
@@ -94,30 +108,44 @@ export default function VerticalCard({
     return value.toLocaleString("vi-VN");
   };
 
+  const handleImageLoad = () => {
+    setIsLoading(false);
+    setImageError(false);
+  };
+
+  const handleImageError = () => {
+    if (!imageError) {
+      setCurrentImage(fallbackImage);
+      setImageError(true);
+    }
+    setIsLoading(false);
+  };
+
   return (
     <TouchableOpacity
       style={styles.card}
       onPress={onCardPress}
       activeOpacity={0.97}
     >
-      {/* Image Section */}
       <View style={styles.imageContainer}>
-        {isLoading &&
-          currentImage !== fallbackImage &&
-          // <Image
-          //   source={{ uri: loadingGif }}
-          //   style={styles.image}
-          //   resizeMode="center"
-          // />
-          null}
+        {isLoading && !imageError && (
+          <View style={styles.loadingContainer}>
+            <Image
+              source={{ uri: loadingGif }}
+              style={styles.loadingImage}
+              resizeMode="center"
+            />
+          </View>
+        )}
 
         <Image
           source={{ uri: currentImage }}
-          style={[styles.image, isLoading ? styles.hidden : {}]}
+          style={[styles.image, isLoading && !imageError ? styles.hidden : {}]}
           resizeMode="cover"
-          onLoad={() => setIsLoading(false)}
-          onError={() => setIsLoading(false)} // Nếu lỗi, ẩn GIF
+          onLoad={handleImageLoad}
+          onError={handleImageError}
         />
+
         {/* Favourite Button */}
         <TouchableOpacity
           style={styles.favouriteContainer}
@@ -130,7 +158,7 @@ export default function VerticalCard({
             color={isFavourite ? "#FF4B26" : "#666666"}
           />
         </TouchableOpacity>
-        {/* Opening Hours */}
+
         {status === 2 || status === 5 || status === 1 ? (
           <View style={styles.inactiveStatusContainer}>
             <Text style={styles.openHoursText}>{t("inactive_status")}</Text>
@@ -152,7 +180,6 @@ export default function VerticalCard({
         )}
       </View>
 
-      {/* Content Section */}
       <View style={styles.contentContainer}>
         <View style={styles.nameContainer}>
           <Text style={styles.title}>{placeName}</Text>
@@ -160,13 +187,11 @@ export default function VerticalCard({
             <Text style={styles.isOverNight}>{t("overnight")}</Text>
           ) : null}
         </View>
+        
         <Text style={styles.priceRange}>
           {minPrice == maxPrice
             ? formatMoney(minPrice) + t("per_hour")
-            : formatMoney(minPrice) +
-            " - " +
-            formatMoney(maxPrice) +
-            t("per_hour")}
+            : formatMoney(minPrice) + " - " + formatMoney(maxPrice) + t("per_hour")}
         </Text>
 
         <View style={styles.locationContainer}>
@@ -179,6 +204,7 @@ export default function VerticalCard({
             {location}
           </Text>
         </View>
+        
         <View style={styles.distanceContainer}>
           {distance != null && (
             <Text style={styles.distanceText}>
@@ -186,6 +212,7 @@ export default function VerticalCard({
             </Text>
           )}
         </View>
+        
         <View style={styles.ratingContainer}>
           <Icon name="star" size={20} color={"#ffc907"} />
           <Text style={styles.ratingText}>
@@ -198,8 +225,11 @@ export default function VerticalCard({
 }
 
 VerticalCard.propTypes = {
-  imageUrl: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-    .isRequired,
+  imageUrl: PropTypes.oneOfType([
+    PropTypes.string, 
+    PropTypes.number, 
+    PropTypes.arrayOf(PropTypes.string)
+  ]).isRequired,
   openHour: PropTypes.string,
   closeHour: PropTypes.string,
   placeName: PropTypes.string,
@@ -218,18 +248,14 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 20,
     marginVertical: 10,
-    // shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     borderWidth: 1,
     borderColor: "rgba(51, 51, 51, 0.1)",
-    // shadowRadius: 3.84,
-    // elevation: 5,
   },
   distanceText: {
     fontSize: 14,
     color: "#666",
-    // marginTop: 4,
   },
   distanceContainer: {
     paddingHorizontal: 10,
@@ -241,18 +267,33 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 10,
     backgroundColor: "#666",
-    fontWeight: 700,
+    fontWeight: "700",
   },
   imageContainer: {
-    // position: "relative",
+    position: "relative",
     height: 200,
     borderRadius: 16,
-    // margin: 1,
   },
   image: {
     width: "100%",
     height: "100%",
     borderRadius: 16,
+  },
+  loadingContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 16,
+    zIndex: 1,
+  },
+  loadingImage: {
+    width: 50,
+    height: 50,
   },
   favouriteContainer: {
     position: "absolute",
@@ -266,7 +307,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
     elevation: 2,
-    zIndex: 1,
+    zIndex: 2,
   },
   activeStatusContainer: {
     position: "absolute",
@@ -307,12 +348,13 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 16,
     borderBottomRightRadius: 13,
   },
-  inactiveText: {
-    color: "white",
-    fontSize: 10,
-    fontWeight: "500",
-    paddingVertical: 6,
-    paddingHorizontal: 16,
+  closedStatusContainer: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#FF4B26",
+    borderTopLeftRadius: 16,
+    borderBottomRightRadius: 13,
   },
   contentContainer: {
     paddingVertical: 12,
@@ -329,7 +371,6 @@ const styles = StyleSheet.create({
     color: "#101828",
     fontSize: 16,
     fontWeight: "bold",
-    // marginBottom: 8,
   },
   priceRange: {
     fontSize: 13,
@@ -341,13 +382,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     marginBottom: 8,
-    // paddingHorizontal: 16,
   },
   locationText: {
     marginLeft: 8,
     marginRight: 20,
     fontSize: 14,
-    fontWeight: 400,
+    fontWeight: "400",
     color: "rgb(60, 60, 60)",
   },
   ratingContainer: {
@@ -360,14 +400,6 @@ const styles = StyleSheet.create({
     color: "#00000099",
   },
   hidden: {
-    display: "none",
-  },
-  closedStatusContainer: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    backgroundColor: "#FF4B26",
-    borderTopLeftRadius: 16,
-    borderBottomRightRadius: 13,
+    opacity: 0,
   },
 });

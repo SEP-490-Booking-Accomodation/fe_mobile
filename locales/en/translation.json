@@ -488,7 +488,8 @@
   "min3_max10_images_required": "3-10 images required",
   "open_hr": "Open",
   "close_hr": "Closed",
-  "search_results_for" : "Search Result For:",
-  "no_results_for" : "No results found",
-  "filter_applied" : "Filter Applied"
+  "search_results_for": "Search Result For:",
+  "no_results_for": "No results found",
+  "filter_applied": "Filter Applied",
+  "filtered_results": "Filtered results"
 }
