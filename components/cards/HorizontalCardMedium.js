@@ -1,14 +1,14 @@
 import {
   Image,
   StyleSheet,
-  Touchable,
   TouchableOpacity,
   View,
   Text,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+
 //#region How to use this components
 /**
  * @example
@@ -23,25 +23,87 @@ import { useTranslation } from "react-i18next";
             rating = {"5"}
             numOfReviews = {"12.5k"}
             distance = "22.4"
+            status = {3}
+            isOverNight = {false}
             ></HorizontalCardMedium>
- * @param {imageUrlLogo, placeName, openHour, closeHour, minPrice, maxPrice,location, rating, numOfReviews} props 
+ * @param {imageUrlLogo, placeName, openHour, closeHour, minPrice, maxPrice, location, rating, numOfReviews, distance, status, isOverNight, onPress} props 
  * @returns HorizontalCardMedium
  */
 //#endregion
+
 const HorizontalCardMedium = ({
   imageUrlLogo,
   placeName,
-  openHour,
-  closeHour,
+  openHour = "00:00",
+  closeHour = "23:59",
   minPrice,
   maxPrice,
   location,
   rating,
   numOfReviews,
   distance,
+  status = 3,
+  isOverNight = false,
   onPress,
 }) => {
   const { t } = useTranslation();
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const checkOpenStatus = () => {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+
+      const [openHourValue, openMinuteValue] = openHour.split(':').map(Number);
+      const [closeHourValue, closeMinuteValue] = closeHour.split(':').map(Number);
+
+      const currentTimeInMinutes = currentHour * 60 + currentMinute;
+      const openTimeInMinutes = openHourValue * 60 + openMinuteValue;
+      const closeTimeInMinutes = closeHourValue * 60 + closeMinuteValue;
+
+      if (closeTimeInMinutes < openTimeInMinutes) {
+        setIsOpen(
+          currentTimeInMinutes >= openTimeInMinutes ||
+          currentTimeInMinutes <= closeTimeInMinutes
+        );
+      } else {
+        setIsOpen(
+          currentTimeInMinutes >= openTimeInMinutes &&
+          currentTimeInMinutes <= closeTimeInMinutes
+        );
+      }
+    };
+
+    checkOpenStatus();
+    const intervalId = setInterval(checkOpenStatus, 60000); 
+    return () => clearInterval(intervalId);
+  }, [openHour, closeHour, isOverNight]);
+
+  const getStatusContainer = () => {
+    if (status === 2 || status === 5 || status === 1) {
+      return styles.inactiveStatusContainer;
+    } else if (status === 3) {
+      return isOpen ? styles.activeStatusContainer : styles.closedStatusContainer;
+    } else if (status === 4) {
+      return styles.pauseStatusContainer;
+    } else {
+      return styles.notStatusContainer;
+    }
+  };
+
+  const getStatusText = () => {
+    if (status === 2 || status === 5 || status === 1) {
+      return t("inactive_status");
+    } else if (status === 3) {
+      return isOpen ? t("open_hr") : t("close_hr");
+    } else if (status === 4) {
+      return t("paused_status");
+    } else {
+      return t("unknown_status");
+    }
+  };
+
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <Image
@@ -51,9 +113,9 @@ const HorizontalCardMedium = ({
       />
       <View style={styles.infoContainer}>
         <Text style={styles.title}>{placeName}</Text>
-        <View style={styles.openingHourContainer}>
+        <View style={[styles.openingHourContainer, getStatusContainer()]}>
           <Text style={styles.openHourText}>
-            {t("open_hours")} ({openHour} - {closeHour})
+            {getStatusText()} ({openHour} - {closeHour})
           </Text>
         </View>
         <Text style={styles.priceRange}>
@@ -114,12 +176,26 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   openingHourContainer: {
-    backgroundColor: "#12b347",
     borderRadius: 15,
     paddingVertical: 5,
     paddingHorizontal: 12,
     alignSelf: "flex-start",
     marginBottom: 4,
+  },
+  activeStatusContainer: {
+    backgroundColor: "#12B347", 
+  },
+  closedStatusContainer: {
+    backgroundColor: "#FF4B26", 
+  },
+  inactiveStatusContainer: {
+    backgroundColor: "rgb(209, 57, 27)",
+  },
+  pauseStatusContainer: {
+    backgroundColor: "rgb(221, 188, 0)", 
+  },
+  notStatusContainer: {
+    backgroundColor: "rgb(40, 40, 40)",
   },
   openHourText: {
     color: "white",
