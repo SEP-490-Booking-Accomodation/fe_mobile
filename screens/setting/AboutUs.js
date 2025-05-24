@@ -115,16 +115,19 @@ export default function AboutUs() {
             </Text>
             <View style={styles.teamMembers}>
               <View style={styles.memberAvatar}>
-                <Text style={styles.memberInitial}>JD</Text>
+                <Text style={styles.memberInitial}>TN</Text>
               </View>
               <View style={styles.memberAvatar}>
-                <Text style={styles.memberInitial}>AS</Text>
+                <Text style={styles.memberInitial}>TL</Text>
               </View>
               <View style={styles.memberAvatar}>
-                <Text style={styles.memberInitial}>MK</Text>
+                <Text style={styles.memberInitial}>VK</Text>
               </View>
               <View style={styles.memberAvatar}>
-                <Text style={styles.memberInitial}>+5</Text>
+                <Text style={styles.memberInitial}>TT</Text>
+              </View>
+              <View style={styles.memberAvatar}>
+                <Text style={styles.memberInitial}>HN</Text>
               </View>
             </View>
           </View>
