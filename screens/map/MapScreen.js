@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"
-import { StyleSheet, View, ScrollView, Text, ActivityIndicator, Button, Keyboard } from "react-native"
+import { StyleSheet, View, ScrollView, Text, ActivityIndicator, Button, Keyboard, TouchableOpacity } from "react-native"
 import MapView, { Marker } from "react-native-maps"
 import * as Location from "expo-location"
 import { FontAwesome5 } from "@expo/vector-icons"
@@ -24,6 +24,7 @@ const MapScreen = ({ navigation }) => {
     selectedAmenities: [],
   })
   const [isSearching, setIsSearching] = useState(false)
+  const [hasAppliedFilters, setHasAppliedFilters] = useState(false)
 
   const { data: rentalLocations, isLoading, error, refetch } = useGetAllRentalQuery()
 
@@ -121,8 +122,10 @@ const MapScreen = ({ navigation }) => {
       return [selectedLocation]
     }
 
-    return locations
-      .filter((location) => {
+    const isUsingSearchOrFilter = (searchText && searchText.length > 0 && isSearching) || hasAppliedFilters
+
+    if (isUsingSearchOrFilter) {
+      return locations.filter((location) => {
         if (searchText && searchText.length > 0 && isSearching) {
           const searchLower = searchText.toLowerCase()
           const placeNameLower = location.placeName.toLowerCase()
@@ -130,11 +133,6 @@ const MapScreen = ({ navigation }) => {
           if (!placeNameLower.includes(searchLower)) {
             return false
           }
-        }
-
-        if (userLocation && location.distance && location.distance !== "N/A") {
-          const distance = Number.parseFloat(location.distance)
-          if (distance > 5) return false
         }
 
         const min = typeof location.minPrice === 'number'
@@ -161,18 +159,32 @@ const MapScreen = ({ navigation }) => {
           const lowerBound = selectedRating - 0.9
           const upperBound = selectedRating + 0.9
 
-          console.log(`Checking rating: ${rating}, selected: ${selectedRating}, bounds: ${lowerBound}-${upperBound}`)
           isRatingMatch = rating >= lowerBound && rating <= upperBound
         }
 
         return isInPriceRange && isRatingMatch
       })
-      .sort((a, b) => {
-        if (userLocation && a.distance !== "N/A" && b.distance !== "N/A") {
-          return Number.parseFloat(a.distance) - Number.parseFloat(b.distance)
+        .sort((a, b) => {
+          if (userLocation && a.distance !== "N/A" && b.distance !== "N/A") {
+            return Number.parseFloat(a.distance) - Number.parseFloat(b.distance)
+          }
+          return 0
+        })
+    } else {
+      return locations.filter((location) => {
+        if (userLocation && location.distance && location.distance !== "N/A") {
+          const distance = Number.parseFloat(location.distance)
+          return distance <= 5
         }
-        return 0
+        return false
       })
+        .sort((a, b) => {
+          if (userLocation && a.distance !== "N/A" && b.distance !== "N/A") {
+            return Number.parseFloat(a.distance) - Number.parseFloat(b.distance)
+          }
+          return 0
+        })
+    }
   }
 
   const allLocations = getAllLocations()
@@ -208,8 +220,31 @@ const MapScreen = ({ navigation }) => {
     }
   }
 
+  const handleMyLocationPress = () => {
+    setSelectedLocation(null)
+    setSearchText("")
+    setIsSearching(false)
+    setHasAppliedFilters(false)
+    setFilters({
+      priceRange: [100000, 100000000],
+      selectedRating: null,
+      selectedAmenities: [],
+    })
+
+    if (mapRef.current && userLocation) {
+      mapRef.current.animateToRegion(
+        {
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        },
+        1000,
+      )
+    }
+  }
+
   const handleCardPress = (location) => {
-    // Navigate to the HomeStack with a flag indicating we came from Map
     navigation.navigate("Home", {
       screen: "DetailRentalLocation",
       params: {
@@ -227,6 +262,18 @@ const MapScreen = ({ navigation }) => {
   const handleSearchSubmit = () => {
     Keyboard.dismiss()
     setIsSearching(true)
+  }
+
+  const handleApplyFilters = (appliedFilters) => {
+    setFilters(appliedFilters)
+
+    const isFiltered =
+      appliedFilters.priceRange[0] !== 100000 ||
+      appliedFilters.priceRange[1] !== 100000000 ||
+      appliedFilters.selectedRating !== null ||
+      appliedFilters.selectedAmenities.length > 0
+
+    setHasAppliedFilters(isFiltered)
   }
 
   if (locationError) {
@@ -279,6 +326,14 @@ const MapScreen = ({ navigation }) => {
         style={styles.searchContainer}
         enableSearch={true}
       />
+
+      <TouchableOpacity
+        style={styles.myLocationButton}
+        onPress={handleMyLocationPress}
+        activeOpacity={0.8}
+      >
+        <FontAwesome5 name="location-arrow" size={20} color="#4E72E3" />
+      </TouchableOpacity>
 
       <MapView
         ref={mapRef}
@@ -335,14 +390,18 @@ const MapScreen = ({ navigation }) => {
         <Text style={styles.listTitle}>
           {isSearching && searchText
             ? `${t("search_results_for")} "${searchText}"`
-            : t("nearest_destinations")}
+            : hasAppliedFilters
+              ? t("filtered_results")
+              : t("nearest_destinations")}
         </Text>
         <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContentContainer}>
           {nearbyLocations.length === 0 ? (
             <Text style={styles.noResultsText}>
               {isSearching
                 ? `${t("no_results_for")} "${searchText}"`
-                : t("no_results_location")}
+                : hasAppliedFilters
+                  ? t("no_results_for")
+                  : t("no_results_location")}
             </Text>
           ) : (
             nearbyLocations.map((location) => (
@@ -369,7 +428,7 @@ const MapScreen = ({ navigation }) => {
       <Filter
         visible={filterVisible}
         onClose={() => setFilterVisible(false)}
-        onApply={(appliedFilters) => setFilters(appliedFilters)}
+        onApply={handleApplyFilters}
         rentalLocations={rentalLocations?.data || []}
       />
     </View>
@@ -417,6 +476,25 @@ const styles = StyleSheet.create({
     left: 16,
     right: 16,
     zIndex: 1,
+  },
+  myLocationButton: {
+    position: "absolute",
+    top: 110,
+    right: 16,
+    width: 48,
+    height: 48,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "rgba(78, 114, 227, 0.2)",
   },
   map: {
     flex: 0.6,
