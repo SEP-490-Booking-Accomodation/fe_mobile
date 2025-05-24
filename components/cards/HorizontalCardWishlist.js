@@ -1,84 +1,129 @@
 import {
   Image,
   StyleSheet,
-  Touchable,
   TouchableOpacity,
   View,
   Text,
+  ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-//#region How to use this components
-/**
- * @example
- * <HorizontalCardMedium
-            imageUrlLogo = {require("./assets/images/horizontalCardImage.jpeg")}
-            placeName = {"Nhà con nhộng giá rẻ Bình Tân"}
-            openHour = {"3:00"}
-            closeHour = {"23:00"}
-            minPrice = {"120.000"}
-            maxPrice = {"1.400.000"}
-            location = {"Bình Tân, HCM"}
-            rating = {"5"}
-            numOfReviews = {"12.5k"}
-            distance = "22.4"
-            ></HorizontalCardMedium>
- * @param {imageUrlLogo, placeName, openHour, closeHour, minPrice, maxPrice,location, rating, numOfReviews} props 
- * @returns HorizontalCardMedium
- */
-//#endregion
+import { useAsyncStorage } from "../../context/AsyncStorageContext"; // Update path if needed
+
+// Default placeholder image URL - use a reliable source
+const DEFAULT_PLACEHOLDER = "https://via.placeholder.com/100x100?text=No+Image";
+
 const HorizontalCardWishlist = ({
-  imageUrlLogo,
-  placeName,
-  openHour,
-  closeHour,
-  minPrice,
-  maxPrice,
-  location,
-  rating,
-  numOfReviews,
-  initFavourite,
-  onFavouritePress = () => {},
-  onCardPress = () => {},
+  item, // The entire item object
   onPress,
 }) => {
   const { t } = useTranslation();
-  const [isFavourite, setIsFavourite] = useState(initFavourite);
-  const handleFavouritePress = () => {
-    const newValue = !isFavourite;
-    setIsFavourite(newValue);
-    if (onFavouritePress) {
-      onFavouritePress(newValue);
+  const { toggleFavorite } = useAsyncStorage();
+  const [isFavouriteState, setIsFavouriteState] = useState(true); // Always true in wishlist
+  const [isLoading, setIsLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+
+  // Extract properties from item with defaults
+  const {
+    _id,
+    id,
+    imageUrl,
+    placeName,
+    openHour = "00:00",
+    closeHour = "23:59",
+    minPrice = 0,
+    maxPrice = 0,
+    location = "Unknown location",
+    rating = 0,
+    numOfReviews = 0,
+  } = item;
+
+  // Validate and prepare image URL
+  const getValidImageUrl = () => {
+    if (!imageUrl) return DEFAULT_PLACEHOLDER;
+
+    // Check if URL is valid
+    try {
+      new URL(imageUrl);
+      return imageUrl;
+    } catch (e) {
+      // If URL is invalid, try to fix common issues
+      if (imageUrl.startsWith("//")) {
+        return `https:${imageUrl}`;
+      } else if (!imageUrl.startsWith("http")) {
+        return `https://${imageUrl}`;
+      }
+      return DEFAULT_PLACEHOLDER;
+    }
+  };
+
+  const validImageUrl = getValidImageUrl();
+
+  const handleFavouritePress = async () => {
+    try {
+      // Remove from favorites
+      await toggleFavorite(item);
+      setIsFavouriteState(false);
+    } catch (error) {
+      console.error("Error removing from favorites:", error);
     }
   };
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
-      <Image
-        source={{ uri: imageUrlLogo }}
-        resizeMode="cover"
-        style={styles.image}
-      />
+      <View style={styles.imageWrapper}>
+        {isLoading && !imageError && (
+          <ActivityIndicator
+            size="small"
+            color="#4E72E3"
+            style={styles.loader}
+          />
+        )}
+        <Image
+          source={{
+            uri: imageError ? DEFAULT_PLACEHOLDER : validImageUrl,
+            headers: {
+              Accept: "image/*",
+            },
+            cache: "force-cache",
+          }}
+          resizeMode="cover"
+          style={styles.image}
+          onLoad={() => setIsLoading(false)}
+          onError={() => {
+            setIsLoading(false);
+            setImageError(true);
+            console.log(`Failed to load wishlist image: ${validImageUrl}`);
+          }}
+        />
+      </View>
+
       <View style={styles.infoContainer}>
         <Text style={styles.title}>{placeName}</Text>
         <View style={styles.openingHourContainer}>
           <Text style={styles.openHourText}>
-          {t("open_hours")} ({openHour} - {closeHour})
+            {t("open_hours")} ({openHour} - {closeHour})
           </Text>
         </View>
         <Text style={styles.priceRange}>
-          {minPrice} {t("currency")} - {maxPrice} {t("currency")}
+          {minPrice.toLocaleString("vi-VN")} {t("currency")} -{" "}
+          {maxPrice.toLocaleString("vi-VN")} {t("currency")}
         </Text>
         <View style={styles.locationContainer}>
           <Icon name="location-on" size={20} color="#4e72e3" />
-          <Text style={styles.locationText}>{location}</Text>
+          <Text
+            style={styles.locationText}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {location}
+          </Text>
         </View>
         <View style={styles.ratingContainer}>
           <Icon name="star" size={20} color="#ffc907" />
           <Text style={styles.ratingText}>
-            {rating} ({numOfReviews}  {t("reviews_count")})
+            {rating} ({numOfReviews} {t("reviews_count")})
           </Text>
         </View>
       </View>
@@ -87,11 +132,7 @@ const HorizontalCardWishlist = ({
         onPress={handleFavouritePress}
         activeOpacity={0.8}
       >
-        <Icon
-          name={isFavourite ? "favorite" : "favorite-border"}
-          size={24}
-          color={isFavourite ? "#FF4B26" : "#666666"}
-        />
+        <Icon name="favorite" size={24} color="#FF4B26" />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -113,6 +154,19 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     padding: 16,
+  },
+  imageWrapper: {
+    width: 48,
+    height: 48,
+    borderRadius: 10,
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+  loader: {
+    position: "absolute",
+    zIndex: 1,
   },
   image: {
     width: 48,
@@ -157,6 +211,7 @@ const styles = StyleSheet.create({
   locationText: {
     color: "#00000066",
     marginLeft: 8,
+    flex: 1,
   },
   ratingContainer: {
     flexDirection: "row",

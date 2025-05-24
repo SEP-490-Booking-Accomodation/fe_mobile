@@ -1,9 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Text,
+  ActivityIndicator,
+} from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import PropTypes from "prop-types";
-import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
+import { useAsyncStorage } from "../../context/AsyncStorageContext"; // Update path if needed
+
+// Default placeholder image URL - use a reliable source
+const DEFAULT_PLACEHOLDER = "https://via.placeholder.com/200x200?text=No+Image";
 
 export default function VerticalCard({
   id,
@@ -20,30 +30,49 @@ export default function VerticalCard({
   numberOfReview = 0,
   distance,
   initFavourite = false,
-  onFavouritePress = () => { },
-  // onCardPress = () => {},
+  onFavouritePress = () => {},
+  onCardPress = () => {},
 }) {
   const { t } = useTranslation();
-  const loadingGif = "https://i.gifer.com/WMDx.gif";
-  const fallbackImage =
-    "https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png";
+  const { isFavorite, toggleFavorite } = useAsyncStorage();
 
-  const [isFavourite, setIsFavourite] = useState(initFavourite);
-  const navigate = useNavigation();
-  const [isLoading, setIsLoading] = useState(true); // Trạng thái tải ảnh
-  const [currentImage, setCurrentImage] = useState(imageUrl);
+  const [isLoading, setIsLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    let timeout = setTimeout(() => {
-      if (isLoading) {
-        setCurrentImage(fallbackImage);
-        setIsLoading(false);
-      }
-    }, 5000); // 3 giây
+  // Check if this item is in favorites
+  const itemId = id;
+  const [isFavouriteState, setIsFavouriteState] = useState(
+    isFavorite ? isFavorite(itemId) : initFavourite
+  );
 
-    return () => clearTimeout(timeout);
-  }, [isLoading]);
+  // Update favorite state when component mounts or when favorites change
+  useEffect(() => {
+    if (isFavorite && itemId) {
+      setIsFavouriteState(isFavorite(itemId));
+    }
+  }, [isFavorite, itemId]);
+
+  // Validate and prepare image URL
+  const getValidImageUrl = () => {
+    if (!imageUrl) return DEFAULT_PLACEHOLDER;
+
+    // Check if URL is valid
+    try {
+      new URL(imageUrl);
+      return imageUrl;
+    } catch (e) {
+      // If URL is invalid, try to fix common issues
+      if (imageUrl.startsWith("//")) {
+        return `https:${imageUrl}`;
+      } else if (!imageUrl.startsWith("http")) {
+        return `https://${imageUrl}`;
+      }
+      return DEFAULT_PLACEHOLDER;
+    }
+  };
+
+  const validImageUrl = getValidImageUrl();
 
   useEffect(() => {
     const checkOpenStatus = () => {
@@ -51,8 +80,10 @@ export default function VerticalCard({
       const currentHour = now.getHours();
       const currentMinute = now.getMinutes();
 
-      const [openHourValue, openMinuteValue] = openHour.split(':').map(Number);
-      const [closeHourValue, closeMinuteValue] = closeHour.split(':').map(Number);
+      const [openHourValue, openMinuteValue] = openHour.split(":").map(Number);
+      const [closeHourValue, closeMinuteValue] = closeHour
+        .split(":")
+        .map(Number);
 
       const currentTimeInMinutes = currentHour * 60 + currentMinute;
       const openTimeInMinutes = openHourValue * 60 + openMinuteValue;
@@ -61,12 +92,12 @@ export default function VerticalCard({
       if (closeTimeInMinutes < openTimeInMinutes) {
         setIsOpen(
           currentTimeInMinutes >= openTimeInMinutes ||
-          currentTimeInMinutes <= closeTimeInMinutes
+            currentTimeInMinutes <= closeTimeInMinutes
         );
       } else {
         setIsOpen(
           currentTimeInMinutes >= openTimeInMinutes &&
-          currentTimeInMinutes <= closeTimeInMinutes
+            currentTimeInMinutes <= closeTimeInMinutes
         );
       }
     };
@@ -78,16 +109,55 @@ export default function VerticalCard({
     return () => clearInterval(intervalId);
   }, [openHour, closeHour, isOverNight]);
 
-  const handleFavouritePress = () => {
-    const newValue = !isFavourite;
-    setIsFavourite(newValue);
-    if (onFavouritePress) {
-      onFavouritePress(newValue);
+  const handleFavouritePress = async (e) => {
+    // Stop event propagation to prevent card press
+    e.stopPropagation();
+    e.preventDefault();
+
+    try {
+      // Create a complete item object to store in favorites
+      const item = {
+        _id: id,
+        id: id,
+        imageUrl: validImageUrl,
+        placeName,
+        openHour,
+        closeHour,
+        minPrice,
+        maxPrice,
+        location,
+        ratingPoint,
+        numberOfReview,
+        status,
+        isOverNight,
+        distance,
+      };
+
+      let newFavoriteStatus;
+
+      // Toggle favorite status
+      if (toggleFavorite) {
+        newFavoriteStatus = await toggleFavorite(item);
+      } else {
+        newFavoriteStatus = !isFavouriteState;
+      }
+
+      setIsFavouriteState(newFavoriteStatus);
+
+      // Also call the original onFavouritePress if provided
+      if (onFavouritePress) {
+        onFavouritePress(newFavoriteStatus);
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
     }
   };
 
-  const onCardPress = () => {
-    navigate.navigate("DetailRentalLocation", { rentalId: id });
+  const handleCardPress = () => {
+    console.log("Card pressed, calling onCardPress for item:", id);
+    if (onCardPress) {
+      onCardPress();
+    }
   };
 
   const formatMoney = (value) => {
@@ -97,27 +167,35 @@ export default function VerticalCard({
   return (
     <TouchableOpacity
       style={styles.card}
-      onPress={onCardPress}
+      onPress={handleCardPress}
       activeOpacity={0.97}
     >
       {/* Image Section */}
       <View style={styles.imageContainer}>
-        {isLoading &&
-          currentImage !== fallbackImage &&
-          // <Image
-          //   source={{ uri: loadingGif }}
-          //   style={styles.image}
-          //   resizeMode="center"
-          // />
-          null}
+        {isLoading && !imageError && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#4E72E3" />
+          </View>
+        )}
 
         <Image
-          source={{ uri: currentImage }}
-          style={[styles.image, isLoading ? styles.hidden : {}]}
+          source={{
+            uri: imageError ? DEFAULT_PLACEHOLDER : validImageUrl,
+            headers: {
+              Accept: "image/*",
+            },
+            cache: "force-cache",
+          }}
+          style={styles.image}
           resizeMode="cover"
           onLoad={() => setIsLoading(false)}
-          onError={() => setIsLoading(false)} // Nếu lỗi, ẩn GIF
+          onError={() => {
+            setIsLoading(false);
+            setImageError(true);
+            console.log(`Failed to load image: ${validImageUrl}`);
+          }}
         />
+
         {/* Favourite Button */}
         <TouchableOpacity
           style={styles.favouriteContainer}
@@ -125,18 +203,25 @@ export default function VerticalCard({
           activeOpacity={0.8}
         >
           <Icon
-            name={isFavourite ? "favorite" : "favorite-border"}
+            name={isFavouriteState ? "favorite" : "favorite-border"}
             size={24}
-            color={isFavourite ? "#FF4B26" : "#666666"}
+            color={isFavouriteState ? "#FF4B26" : "#666666"}
           />
         </TouchableOpacity>
+
         {/* Opening Hours */}
         {status === 2 || status === 5 || status === 1 ? (
           <View style={styles.inactiveStatusContainer}>
             <Text style={styles.openHoursText}>{t("inactive_status")}</Text>
           </View>
         ) : status === 3 ? (
-          <View style={isOpen ? styles.activeStatusContainer : styles.closedStatusContainer}>
+          <View
+            style={
+              isOpen
+                ? styles.activeStatusContainer
+                : styles.closedStatusContainer
+            }
+          >
             <Text style={styles.openHoursText}>
               {isOpen ? t("open_hr") : t("close_hr")} ({openHour} - {closeHour})
             </Text>
@@ -164,9 +249,9 @@ export default function VerticalCard({
           {minPrice == maxPrice
             ? formatMoney(minPrice) + t("per_hour")
             : formatMoney(minPrice) +
-            " - " +
-            formatMoney(maxPrice) +
-            t("per_hour")}
+              " - " +
+              formatMoney(maxPrice) +
+              t("per_hour")}
         </Text>
 
         <View style={styles.locationContainer}>
@@ -198,8 +283,8 @@ export default function VerticalCard({
 }
 
 VerticalCard.propTypes = {
-  imageUrl: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-    .isRequired,
+  id: PropTypes.string,
+  imageUrl: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   openHour: PropTypes.string,
   closeHour: PropTypes.string,
   placeName: PropTypes.string,
@@ -218,18 +303,25 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 20,
     marginVertical: 10,
-    // shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     borderWidth: 1,
     borderColor: "rgba(51, 51, 51, 0.1)",
-    // shadowRadius: 3.84,
-    // elevation: 5,
+  },
+  loadingContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+    backgroundColor: "rgba(240, 240, 240, 0.7)",
   },
   distanceText: {
     fontSize: 14,
     color: "#666",
-    // marginTop: 4,
   },
   distanceContainer: {
     paddingHorizontal: 10,
@@ -244,10 +336,10 @@ const styles = StyleSheet.create({
     fontWeight: 700,
   },
   imageContainer: {
-    // position: "relative",
     height: 200,
     borderRadius: 16,
-    // margin: 1,
+    backgroundColor: "#f0f0f0",
+    overflow: "hidden",
   },
   image: {
     width: "100%",
@@ -329,7 +421,6 @@ const styles = StyleSheet.create({
     color: "#101828",
     fontSize: 16,
     fontWeight: "bold",
-    // marginBottom: 8,
   },
   priceRange: {
     fontSize: 13,
@@ -341,7 +432,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     marginBottom: 8,
-    // paddingHorizontal: 16,
   },
   locationText: {
     marginLeft: 8,
@@ -358,9 +448,6 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 12,
     color: "#00000099",
-  },
-  hidden: {
-    display: "none",
   },
   closedStatusContainer: {
     position: "absolute",

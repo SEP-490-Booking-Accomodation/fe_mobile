@@ -14,9 +14,11 @@ import Filter from "../../components/Filter";
 import { useGetAllRentalQuery } from "../../api/rentalLocationApi";
 import * as Location from "expo-location";
 import { useTranslation } from "react-i18next";
+import { useAsyncStorage } from "../../context/AsyncStorageContext";
 
 const SearchResult = ({ route, navigation }) => {
   const { t } = useTranslation();
+  const { addSearchTerm } = useAsyncStorage();
   const query = route?.params?.query || "";
   const [userLocation, setUserLocation] = useState(null);
 
@@ -25,6 +27,13 @@ const SearchResult = ({ route, navigation }) => {
   const [selectedSortOption, setSelectedSortOption] = useState(
     t("price_low_to_high")
   );
+
+  // Save search query to history
+  useEffect(() => {
+    if (query) {
+      addSearchTerm(query);
+    }
+  }, [query, addSearchTerm]);
 
   useEffect(() => {
     (async () => {
@@ -40,7 +49,7 @@ const SearchResult = ({ route, navigation }) => {
         longitude: location.coords.longitude,
       });
     })();
-  }, []);
+  }, [t]);
 
   const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
     const toRad = (value) => (value * Math.PI) / 180;
@@ -50,9 +59,9 @@ const SearchResult = ({ route, navigation }) => {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const d = R * c;
     return d; // distance in km
@@ -79,43 +88,42 @@ const SearchResult = ({ route, navigation }) => {
     if (!rental?.data) return [];
 
     return rental.data
-    .filter((item) => item.status === 3)
-    .map((item) => {
-      console.log(item.latitude);
-      console.log(item.longitude);
+      .filter((item) => item.status === 3)
+      .map((item) => {
+        const distance =
+          userLocation && item.latitude && item.longitude
+            ? getDistanceFromLatLonInKm(
+                userLocation.latitude,
+                userLocation.longitude,
+                item.latitude,
+                item.longitude
+              )
+            : null;
 
-      const distance =
-        userLocation && item.latitude && item.longitude
-          ? getDistanceFromLatLonInKm(
-            userLocation.latitude,
-            userLocation.longitude,
-            item.latitude, // latitude
-            item.longitude // longitude
-          )
-          : null;
-
-      return {
-        id: item._id,
-        imageUrl:
-          item.image?.[0] ||
-          `https://ui-avatars.com/api/?name=${item.name}&background=random`,
-        openHour: item.openHour,
-        closeHour: item.closeHour,
-        placeName: item.name,
-        isOverNight: item.isOverNight,
-        status: item.status,
-        minPrice: item.minPrice || 0,
-        maxPrice: item.maxPrice || 0,
-        address: item.address,
-        ward: item.ward,
-        district: item.district,
-        city: item.city,
-        location: `${item.address}, ${item.ward}, ${item.district}, ${item.city}`,
-        ratingPoint: item.averageRating,
-        numberOfReview: item.totalFeedbacks,
-        distance: distance,
-      };
-    });
+        return {
+          id: item._id,
+          imageUrl:
+            item.image?.[0] ||
+            `https://ui-avatars.com/api/?name=${item.name}&background=random`,
+          openHour: item.openHour,
+          closeHour: item.closeHour,
+          placeName: item.name,
+          isOverNight: item.isOverNight,
+          status: item.status,
+          minPrice: item.minPrice || 0,
+          maxPrice: item.maxPrice || 0,
+          address: item.address,
+          ward: item.ward,
+          district: item.district,
+          city: item.city,
+          location: `${item.address}, ${item.ward}, ${item.district}, ${item.city}`,
+          ratingPoint: item.averageRating,
+          numberOfReview: item.totalFeedbacks,
+          distance: distance,
+          latitude: item.latitude,
+          longitude: item.longitude,
+        };
+      });
   }, [rental, userLocation]);
 
   const filteredAndSortedData = useMemo(() => {
@@ -129,22 +137,20 @@ const SearchResult = ({ route, navigation }) => {
       );
     }
 
-    // filteredData = filteredData.filter(
-    //   (item) =>
-    //     item.minPrice >= filterParams.priceRange[0] &&
-    //     item.minPrice <= filterParams.priceRange[1]
-    // );
-
+    // Apply filters if needed
     if (filterParams.selectedRating !== null) {
       filteredData = filteredData.filter(
         (item) => item.ratingPoint === filterParams.selectedRating
       );
     }
 
-    if (filterParams.selectedAmenities.length > 0) {
+    if (
+      filterParams.selectedAmenities &&
+      filterParams.selectedAmenities.length > 0
+    ) {
       filteredData = filteredData.filter((item) =>
-        filterParams.selectedAmenities.every((amenity) =>
-          item.amenities.includes(amenity)
+        filterParams.selectedAmenities.every(
+          (amenity) => item.amenities && item.amenities.includes(amenity)
         )
       );
     }
@@ -159,7 +165,11 @@ const SearchResult = ({ route, navigation }) => {
       }
       return 0;
     });
-  }, [query, selectedSortOption, rentalDisplay, filterParams]);
+  }, [query, selectedSortOption, rentalDisplay, filterParams, t]);
+
+  const handleCardPress = (id) => {
+    navigation.navigate("DetailRentalLocation", { rentalId: id });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -167,7 +177,6 @@ const SearchResult = ({ route, navigation }) => {
         style={styles.mh}
         placeholder={t("search_destination")}
         onPressBack={() => navigation.goBack()}
-        // onBackHome={() => navigation.}
         onPressFilterIcon={() => setIsFilterVisible(true)}
         value={query}
       />
@@ -178,7 +187,7 @@ const SearchResult = ({ route, navigation }) => {
           data={[
             t("price_low_to_high"),
             t("price_high_to_low"),
-            t("nearest_you")
+            t("nearest_you"),
           ]}
           selectedValue={selectedSortOption}
           onSelect={setSelectedSortOption}
@@ -194,28 +203,16 @@ const SearchResult = ({ route, navigation }) => {
       >
         {filteredAndSortedData.length === 0 && query ? (
           <View style={styles.noResultContainer}>
-            <Text style={styles.noResultText}>
-              {t("no_search_results")}
-            </Text>
+            <Text style={styles.noResultText}>{t("no_search_results")}</Text>
           </View>
         ) : (
-          filteredAndSortedData.map((item) => {
-            console.log(
-              "Khoảng cách đến",
-              item.placeName,
-              "là:",
-              item.distance
-            );
-            return (
-              <VerticalCard
-                key={item.id}
-                {...item}
-                initFavourite={false}
-                onFavouritePress={(isFav) => console.log(t("favorite_status"), isFav)}
-                onCardPress={() => console.log(t("card_pressed"))}
-              />
-            );
-          })
+          filteredAndSortedData.map((item) => (
+            <VerticalCard
+              key={item.id}
+              {...item}
+              onCardPress={() => handleCardPress(item.id)}
+            />
+          ))
         )}
       </ScrollView>
 
@@ -244,6 +241,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingTop: 50,
   },
   noResultText: {
     fontSize: 18,

@@ -10,20 +10,29 @@ import VerticalCard from "../../components/cards/VerticalCard";
 import ButtonGroup from "../../components/buttons/ButtonGroup";
 import * as Location from "expo-location";
 import { useTranslation } from "react-i18next";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAsyncStorage } from "../../context/AsyncStorageContext";
+import { useNavigation } from "@react-navigation/native";
+
+// Default placeholder image URL
+const DEFAULT_AVATAR_URL =
+  "https://ui-avatars.com/api/?background=random&color=fff&size=200&font-size=0.5";
 
 export default function LocationList({
   rentalData,
   onViewAllPress,
-  navigation,
+  navigation: propNavigation, // Rename to avoid conflict
 }) {
   const { t } = useTranslation();
+  const { isFavorite } = useAsyncStorage();
   const [selectedFilterIndex, setSelectedFilterIndex] = useState(0);
   const [userLocation, setUserLocation] = useState(null);
-  const [favoriteList, setFavoriteList] = useState([]);
   const [filteredRentals, setFilteredRentals] = useState([]);
 
-  // Định nghĩa filter
+  // Get navigation from hook if not provided as prop
+  const hookNavigation = useNavigation();
+  const navigation = propNavigation || hookNavigation;
+
+  // Define filters
   const filters = [
     t("all"),
     t("nearby"),
@@ -32,7 +41,7 @@ export default function LocationList({
     t("recent"),
   ];
 
-  // Lấy vị trí hiện tại của người dùng
+  // Get user's current location
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -49,23 +58,7 @@ export default function LocationList({
     })();
   }, []);
 
-  // Lấy danh sách yêu thích từ AsyncStorage
-  useEffect(() => {
-    const getFavorites = async () => {
-      try {
-        const storedFavorites = await AsyncStorage.getItem("favoriteLocations");
-        if (storedFavorites) {
-          setFavoriteList(JSON.parse(storedFavorites));
-        }
-      } catch (error) {
-        console.log("Error getting favorites:", error);
-      }
-    };
-
-    getFavorites();
-  }, []);
-
-  // Hàm tính khoảng cách từ vị trí người dùng đến địa điểm
+  // Calculate distance from user location to a place
   const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
     const toRad = (value) => (value * Math.PI) / 180;
     const R = 6371; // Radius of the earth in km
@@ -82,8 +75,10 @@ export default function LocationList({
     return d; // distance in km
   };
 
-  // Xử lý dữ liệu địa điểm
+  // Process rental data
   const processRentalData = () => {
+    if (!rentalData || !rentalData.data) return [];
+
     return rentalData.data
       .filter((item) => item.status === 3)
       .map((item) => {
@@ -100,11 +95,22 @@ export default function LocationList({
               )
             : null;
 
+        const itemId = item._id;
+
+        // Process image URL
+        let imageUrl;
+        if (item.image && item.image.length > 0 && item.image[0]) {
+          imageUrl = item.image[0];
+        } else {
+          // Create a placeholder with the name
+          imageUrl = `${DEFAULT_AVATAR_URL}&name=${encodeURIComponent(
+            item.name || "Unknown"
+          )}`;
+        }
+
         return {
-          id: item._id,
-          imageUrl:
-            item.image?.[0] ||
-            `https://ui-avatars.com/api/?name=${item.name}&background=random`,
+          id: itemId,
+          imageUrl: imageUrl,
           openHour: item.openHour,
           closeHour: item.closeHour,
           placeName: item.name,
@@ -120,13 +126,13 @@ export default function LocationList({
           ratingPoint: item.averageRating || 0,
           numberOfReview: item.totalFeedbacks || 0,
           distance: distance,
-          isFavorite: favoriteList.includes(item._id),
-          createdAt: item.createdAt || new Date().toISOString(),
+          latitude: latitude,
+          longitude: longitude,
         };
       });
   };
 
-  // Lọc theo filter được chọn
+  // Filter rentals based on selected filter
   useEffect(() => {
     const rentalList = processRentalData();
     let filtered;
@@ -141,7 +147,9 @@ export default function LocationList({
           .sort((a, b) => a.distance - b.distance);
         break;
       case 2: // Favorite
-        filtered = rentalList.filter((item) => favoriteList.includes(item.id));
+        filtered = rentalList.filter(
+          (item) => isFavorite && isFavorite(item.id)
+        );
         break;
       case 3: // Top rated
         filtered = rentalList
@@ -150,40 +158,32 @@ export default function LocationList({
         break;
       case 4: // Recent
         filtered = rentalList.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          (a, b) =>
+            new Date(b.createdAt || Date.now()) -
+            new Date(a.createdAt || Date.now())
         );
         break;
       default:
         filtered = rentalList;
     }
 
-    setFilteredRentals(filtered.slice(0, 5)); // Chỉ lấy 5 kết quả đầu tiên
-  }, [selectedFilterIndex, rentalData, userLocation, favoriteList]);
+    setFilteredRentals(filtered.slice(0, 5)); // Only take first 5 results
+  }, [selectedFilterIndex, rentalData, userLocation, isFavorite]);
 
-  // Xử lý sự kiện yêu thích
-  const handleFavoritePress = async (id, isFav) => {
-    try {
-      let updatedFavorites;
-      if (isFav) {
-        updatedFavorites = [...favoriteList, id];
-      } else {
-        updatedFavorites = favoriteList.filter((itemId) => itemId !== id);
-      }
-
-      setFavoriteList(updatedFavorites);
-      await AsyncStorage.setItem(
-        "favoriteLocations",
-        JSON.stringify(updatedFavorites)
-      );
-    } catch (error) {
-      console.log("Error updating favorites:", error);
-    }
-  };
-
-  // Xử lý khi nhấn vào card
+  // Handle card press - FIXED to work with your navigation structure
   const onLocationPress = (id) => {
-    if (navigation) {
-      navigation.navigate("LocationDetail", { id });
+    try {
+      if (navigation) {
+        // Navigate to DetailRentalLocation screen with the rental ID
+        console.log("Navigating to DetailRentalLocation with rentalId:", id);
+
+        // Based on your AppStack.js, this screen is in the HomeStack
+        navigation.navigate("DetailRentalLocation", { rentalId: id });
+      } else {
+        console.log("Navigation is not available");
+      }
+    } catch (error) {
+      console.error("Navigation error:", error);
     }
   };
 
@@ -210,24 +210,17 @@ export default function LocationList({
         inactiveTextStyle={styles.unselectedText}
       />
 
-      {/* Danh sách địa điểm */}
+      {/* Location list */}
       <ScrollView style={styles.paddingVerticalCard}>
         {filteredRentals.length > 0 ? (
           filteredRentals.map((item) => (
             <VerticalCard
               key={item.id}
               {...item}
-              onFavouritePress={(isFav) => {
-                handleFavoritePress(item.id, isFav);
-                console.log(
-                  t("favorite_log", {
-                    action: t(isFav ? "added" : "removed"),
-                    name: item.placeName,
-                  })
-                );
+              onCardPress={() => {
+                console.log("Card pressed for item:", item.id);
+                onLocationPress(item.id);
               }}
-              onCardPress={() => onLocationPress(item.id)}
-              initFavourite={item.isFavorite}
             />
           ))
         ) : (
@@ -237,7 +230,7 @@ export default function LocationList({
         )}
       </ScrollView>
 
-      {/* Nút View All ở dưới cùng */}
+      {/* View All button at the bottom */}
       <TouchableOpacity style={styles.viewAllButton} onPress={onViewAllPress}>
         <Text style={styles.viewAllButtonText}>{t("view_all")}</Text>
       </TouchableOpacity>
