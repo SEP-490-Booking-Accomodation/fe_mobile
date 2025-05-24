@@ -575,5 +575,9 @@
   "deleted": "Đã xóa",
   "loading_notifications": "Đang tải thông báo...",
   "no_notifications_subtitle": "Bạn chưa có thông báo nào",
-  "check_back_later": "Hãy quay lại sau để xem cập nhật"
+  "check_back_later": "Hãy quay lại sau để xem cập nhật",
+  "check_in_not_available": "Check-in không khả dụng",
+  "check_in_date_not_reached": "Bạn chỉ có thể check-in vào ngày {{date}} (còn {{days}} ngày)",
+  "check_in_policy_message": "Theo quy định: {{policyDescription}}\n\nBạn có thể check-in từ {{availableTime}} (còn {{remainingMinutes}} phút)",
+  "days" : "ngày"
 }

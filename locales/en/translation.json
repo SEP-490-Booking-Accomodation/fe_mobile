@@ -576,5 +576,9 @@
   "deleted": "Deleted",
   "loading_notifications": "Loading notifications...",
   "no_notifications_subtitle": "You don't have any notifications yet",
-  "check_back_later": "Check back later for updates"
+  "check_back_later": "Check back later for updates",
+  "check_in_not_available": "Check-in Not Available",
+  "check_in_date_not_reached": "You can only check-in on {{date}} ({{days}} days remaining)",
+  "check_in_policy_message": "Policy: {{policyDescription}}\n\nYou can check-in from {{availableTime}} ({{remainingMinutes}} minutes remaining)",
+  "days" : "days"
 }
