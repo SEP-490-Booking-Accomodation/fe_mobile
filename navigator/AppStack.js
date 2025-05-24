@@ -93,7 +93,8 @@ const hideTabBarScreens = [
   "TicketDetail",
   "AboutUs",
   "CustomerCare",
-  "HelpSupport"
+  "HelpSupport",
+  "NotificationScreen"
 ];
 
 // AUTH STACK

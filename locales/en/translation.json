@@ -573,5 +573,8 @@
   "category_updated": "Category Updated",
   "version": "Version",
   "is_deleted": "Is Deleted",
-  "deleted": "Deleted"
+  "deleted": "Deleted",
+  "loading_notifications": "Loading notifications...",
+  "no_notifications_subtitle": "You don't have any notifications yet",
+  "check_back_later": "Check back later for updates"
 }

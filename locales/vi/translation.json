@@ -572,5 +572,8 @@
   "category_updated": "Danh mục được cập nhật",
   "version": "Phiên bản",
   "is_deleted": "Đã xóa",
-  "deleted": "Đã xóa"
+  "deleted": "Đã xóa",
+  "loading_notifications": "Đang tải thông báo...",
+  "no_notifications_subtitle": "Bạn chưa có thông báo nào",
+  "check_back_later": "Hãy quay lại sau để xem cập nhật"
 }

@@ -161,7 +161,7 @@ const PolicyDetailScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#F9FAFB", 
   },
   loadingContainer: {
     flex: 1,
@@ -196,11 +196,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    backgroundColor: "#F9FAFB", 
   },
   headerText: {
-    fontSize: 20,
+    fontSize: 22, 
     fontWeight: "600",
     color: "#1E293B",
     marginLeft: 12,
