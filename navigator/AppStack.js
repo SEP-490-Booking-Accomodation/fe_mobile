@@ -263,6 +263,11 @@ const SettingStack = () => (
       options={{ headerShown: false }}
     />
     <Stack.Screen
+      name="PolicyDetail"
+      component={PolicyDetailScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
       name="AboutUs"
       component={AboutUs}
       options={{ headerShown: false }}
