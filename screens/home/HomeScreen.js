@@ -19,6 +19,7 @@ import { useGetAllRentalQuery } from "../../api/rentalLocationApi";
 import { ensureUserInDatabase } from "../../lib/supabase";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
 import { useTranslation } from "react-i18next";
+import { useGetNotificationsByUserQuery } from "../../api/notificationApi";
 
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -35,18 +36,28 @@ export default function HomeScreen() {
   const [displayUser, setDisplayUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const { data: notificationsResponse, refetch: refetchNotifications } = useGetNotificationsByUserQuery(
+    userId,
+    { skip: !userId }
+  );
+
+   const unreadCount = notificationsResponse?.data?.reduce((count, noti) => {
+    return !noti.isRead ? count + 1 : count;
+  }, 0) || 0;
   // Get the context at the component level (outside of any function)
   const asyncStorageContext = useAsyncStorage();
   const { removeAllIdChatPlaform, addIdChatPlatform } = useAsyncStorage();
-  const onRefresh = async () => {
+    const onRefresh = async () => {
     setRefreshing(true);
     try {
       await refetchUser();
       await refetchRental();
+      if (userId) {
+        await refetchNotifications();
+      }
     } catch (error) {
       console.error("Lỗi tải lại dữ liệu:", error);
     }
-
     setRefreshing(false);
   };
 
@@ -136,7 +147,7 @@ export default function HomeScreen() {
           location={manualCity || address || t("select_city")}
           onNotificationPress={() => navigation.navigate("NotificationScreen")}
           onAvatarPress={() => navigation.navigate("ProfileScreen")}
-          notificationCount={2}
+          notificationCount={unreadCount}
           avatarSource={
             "https://i.pinimg.com/236x/0d/85/e4/0d85e4a8cd465ac49c265e29af5e53e8.jpg"
           }
@@ -281,9 +292,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   loadingContainer: {
-  flex: 1,
-  justifyContent: "center",
-  alignItems: "center",
-  paddingVertical: 100, 
-},
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 100,
+  },
 });

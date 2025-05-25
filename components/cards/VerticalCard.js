@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import PropTypes from "prop-types";
-import { useNavigation } from "@react-navigation/native";
-import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react"
+import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native"
+import Icon from "react-native-vector-icons/MaterialIcons"
+import PropTypes from "prop-types"
+import { useNavigation } from "@react-navigation/native"
+import { useTranslation } from "react-i18next"
 
 export default function VerticalCard({
   id,
@@ -20,117 +20,131 @@ export default function VerticalCard({
   numberOfReview = 0,
   distance,
   initFavourite = false,
-  onFavouritePress = () => { },
-  // onCardPress = () => {},
+  onFavouritePress = () => {},
 }) {
-  const { t } = useTranslation();
-  const loadingGif = "https://i.gifer.com/WMDx.gif";
-  const fallbackImage =
-    "https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png";
+  const { t } = useTranslation()
+  const loadingGif = "https://i.gifer.com/WMDx.gif"
+  const fallbackImage = "https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png"
 
-  const [isFavourite, setIsFavourite] = useState(initFavourite);
-  const navigate = useNavigation();
-  const [isLoading, setIsLoading] = useState(true); // Trạng thái tải ảnh
-  const [currentImage, setCurrentImage] = useState(imageUrl);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isFavourite, setIsFavourite] = useState(initFavourite)
+  const navigate = useNavigation()
+  const [isLoading, setIsLoading] = useState(true)
+  const [currentImage, setCurrentImage] = useState("")
+  const [isOpen, setIsOpen] = useState(false)
+  const [imageError, setImageError] = useState(false)
 
   useEffect(() => {
-    let timeout = setTimeout(() => {
-      if (isLoading) {
-        setCurrentImage(fallbackImage);
-        setIsLoading(false);
-      }
-    }, 5000); // 3 giây
+    if (imageUrl) {
+      const firstImage = Array.isArray(imageUrl) ? imageUrl[0] : imageUrl
 
-    return () => clearTimeout(timeout);
-  }, [isLoading]);
+      if (firstImage && (firstImage.startsWith("http://") || firstImage.startsWith("https://"))) {
+        setCurrentImage(firstImage)
+      } else {
+        setCurrentImage(fallbackImage)
+        setImageError(true)
+      }
+    } else {
+      setCurrentImage(fallbackImage)
+      setImageError(true)
+    }
+  }, [imageUrl, fallbackImage])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (isLoading && !imageError) {
+        setCurrentImage(fallbackImage)
+        setIsLoading(false)
+        setImageError(true)
+      }
+    }, 10000)
+
+    return () => clearTimeout(timeout)
+  }, [isLoading, imageError, fallbackImage])
 
   useEffect(() => {
     const checkOpenStatus = () => {
-      const now = new Date();
-      const currentHour = now.getHours();
-      const currentMinute = now.getMinutes();
+      const now = new Date()
+      const currentHour = now.getHours()
+      const currentMinute = now.getMinutes()
 
-      const [openHourValue, openMinuteValue] = openHour.split(':').map(Number);
-      const [closeHourValue, closeMinuteValue] = closeHour.split(':').map(Number);
+      const [openHourValue, openMinuteValue] = openHour.split(":").map(Number)
+      const [closeHourValue, closeMinuteValue] = closeHour.split(":").map(Number)
 
-      const currentTimeInMinutes = currentHour * 60 + currentMinute;
-      const openTimeInMinutes = openHourValue * 60 + openMinuteValue;
-      const closeTimeInMinutes = closeHourValue * 60 + closeMinuteValue;
+      const currentTimeInMinutes = currentHour * 60 + currentMinute
+      const openTimeInMinutes = openHourValue * 60 + openMinuteValue
+      const closeTimeInMinutes = closeHourValue * 60 + closeMinuteValue
 
       if (closeTimeInMinutes < openTimeInMinutes) {
-        setIsOpen(
-          currentTimeInMinutes >= openTimeInMinutes ||
-          currentTimeInMinutes <= closeTimeInMinutes
-        );
+        setIsOpen(currentTimeInMinutes >= openTimeInMinutes || currentTimeInMinutes <= closeTimeInMinutes)
       } else {
-        setIsOpen(
-          currentTimeInMinutes >= openTimeInMinutes &&
-          currentTimeInMinutes <= closeTimeInMinutes
-        );
+        setIsOpen(currentTimeInMinutes >= openTimeInMinutes && currentTimeInMinutes <= closeTimeInMinutes)
       }
-    };
+    }
 
-    checkOpenStatus();
-
-    const intervalId = setInterval(checkOpenStatus, 60000);
-
-    return () => clearInterval(intervalId);
-  }, [openHour, closeHour, isOverNight]);
+    checkOpenStatus()
+    const intervalId = setInterval(checkOpenStatus, 60000)
+    return () => clearInterval(intervalId)
+  }, [openHour, closeHour, isOverNight])
 
   const handleFavouritePress = () => {
-    const newValue = !isFavourite;
-    setIsFavourite(newValue);
+    const newValue = !isFavourite
+    setIsFavourite(newValue)
     if (onFavouritePress) {
-      onFavouritePress(newValue);
+      onFavouritePress(newValue)
     }
-  };
+  }
 
   const onCardPress = () => {
-    navigate.navigate("DetailRentalLocation", { rentalId: id });
-  };
+    navigate.navigate("DetailRentalLocation", { rentalId: id })
+  }
 
   const formatMoney = (value) => {
-    return value.toLocaleString("vi-VN");
-  };
+    return value.toLocaleString("vi-VN")
+  }
+
+  const renderPriceRange = () => {
+    return `${formatMoney(minPrice)} - ${formatMoney(maxPrice)}${t("per_hour") || "đ/giờ"}`
+  }
+
+  const handleImageLoad = () => {
+    setIsLoading(false)
+    setImageError(false)
+  }
+
+  const handleImageError = () => {
+    if (!imageError) {
+      setCurrentImage(fallbackImage)
+      setImageError(true)
+    }
+    setIsLoading(false)
+  }
 
   return (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={onCardPress}
-      activeOpacity={0.97}
-    >
-      {/* Image Section */}
+    <TouchableOpacity style={styles.card} onPress={onCardPress} activeOpacity={0.97}>
       <View style={styles.imageContainer}>
-        {isLoading &&
-          currentImage !== fallbackImage &&
-          // <Image
-          //   source={{ uri: loadingGif }}
-          //   style={styles.image}
-          //   resizeMode="center"
-          // />
-          null}
+        {isLoading && !imageError && (
+          <View style={styles.loadingContainer}>
+            <Image source={{ uri: loadingGif }} style={styles.loadingImage} resizeMode="center" />
+          </View>
+        )}
 
         <Image
           source={{ uri: currentImage }}
-          style={[styles.image, isLoading ? styles.hidden : {}]}
+          style={[styles.image, isLoading && !imageError ? styles.hidden : {}]}
           resizeMode="cover"
-          onLoad={() => setIsLoading(false)}
-          onError={() => setIsLoading(false)} // Nếu lỗi, ẩn GIF
+          onLoad={handleImageLoad}
+          onError={handleImageError}
         />
+
         {/* Favourite Button */}
-        <TouchableOpacity
-          style={styles.favouriteContainer}
-          onPress={handleFavouritePress}
-          activeOpacity={0.8}
-        >
+        <TouchableOpacity style={styles.favouriteContainer} onPress={handleFavouritePress} activeOpacity={0.8}>
           <Icon
             name={isFavourite ? "favorite" : "favorite-border"}
             size={24}
             color={isFavourite ? "#FF4B26" : "#666666"}
           />
         </TouchableOpacity>
-        {/* Opening Hours */}
+
         {status === 2 || status === 5 || status === 1 ? (
           <View style={styles.inactiveStatusContainer}>
             <Text style={styles.openHoursText}>{t("inactive_status")}</Text>
@@ -152,40 +166,27 @@ export default function VerticalCard({
         )}
       </View>
 
-      {/* Content Section */}
       <View style={styles.contentContainer}>
         <View style={styles.nameContainer}>
           <Text style={styles.title}>{placeName}</Text>
-          {isOverNight ? (
-            <Text style={styles.isOverNight}>{t("overnight")}</Text>
-          ) : null}
+          {isOverNight ? <Text style={styles.isOverNight}>{t("overnight")}</Text> : null}
         </View>
-        <Text style={styles.priceRange}>
-          {minPrice == maxPrice
-            ? formatMoney(minPrice) + t("per_hour")
-            : formatMoney(minPrice) +
-            " - " +
-            formatMoney(maxPrice) +
-            t("per_hour")}
-        </Text>
+
+        <Text style={styles.priceRange}>{renderPriceRange()}</Text>
 
         <View style={styles.locationContainer}>
           <Icon name="location-on" size={20} color={"#4e72e3"} />
-          <Text
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            style={styles.locationText}
-          >
+          <Text numberOfLines={1} ellipsizeMode="tail" style={styles.locationText}>
             {location}
           </Text>
         </View>
+
         <View style={styles.distanceContainer}>
           {distance != null && (
-            <Text style={styles.distanceText}>
-              {t("distance_away", { distance: distance.toFixed(1) })}
-            </Text>
+            <Text style={styles.distanceText}>{t("distance_away", { distance: distance.toFixed(1) })}</Text>
           )}
         </View>
+
         <View style={styles.ratingContainer}>
           <Icon name="star" size={20} color={"#ffc907"} />
           <Text style={styles.ratingText}>
@@ -194,12 +195,11 @@ export default function VerticalCard({
         </View>
       </View>
     </TouchableOpacity>
-  );
+  )
 }
 
 VerticalCard.propTypes = {
-  imageUrl: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-    .isRequired,
+  imageUrl: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.arrayOf(PropTypes.string)]).isRequired,
   openHour: PropTypes.string,
   closeHour: PropTypes.string,
   placeName: PropTypes.string,
@@ -211,25 +211,21 @@ VerticalCard.propTypes = {
   initFavourite: PropTypes.bool,
   onFavouritePress: PropTypes.func,
   onCardPress: PropTypes.func,
-};
+}
 
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "white",
     borderRadius: 20,
     marginVertical: 10,
-    // shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     borderWidth: 1,
     borderColor: "rgba(51, 51, 51, 0.1)",
-    // shadowRadius: 3.84,
-    // elevation: 5,
   },
   distanceText: {
     fontSize: 14,
     color: "#666",
-    // marginTop: 4,
   },
   distanceContainer: {
     paddingHorizontal: 10,
@@ -241,18 +237,33 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 10,
     backgroundColor: "#666",
-    fontWeight: 700,
+    fontWeight: "700",
   },
   imageContainer: {
-    // position: "relative",
+    position: "relative",
     height: 200,
     borderRadius: 16,
-    // margin: 1,
   },
   image: {
     width: "100%",
     height: "100%",
     borderRadius: 16,
+  },
+  loadingContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 16,
+    zIndex: 1,
+  },
+  loadingImage: {
+    width: 50,
+    height: 50,
   },
   favouriteContainer: {
     position: "absolute",
@@ -266,7 +277,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
     elevation: 2,
-    zIndex: 1,
+    zIndex: 2,
   },
   activeStatusContainer: {
     position: "absolute",
@@ -307,12 +318,13 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 16,
     borderBottomRightRadius: 13,
   },
-  inactiveText: {
-    color: "white",
-    fontSize: 10,
-    fontWeight: "500",
-    paddingVertical: 6,
-    paddingHorizontal: 16,
+  closedStatusContainer: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#FF4B26",
+    borderTopLeftRadius: 16,
+    borderBottomRightRadius: 13,
   },
   contentContainer: {
     paddingVertical: 12,
@@ -329,7 +341,6 @@ const styles = StyleSheet.create({
     color: "#101828",
     fontSize: 16,
     fontWeight: "bold",
-    // marginBottom: 8,
   },
   priceRange: {
     fontSize: 13,
@@ -341,13 +352,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     marginBottom: 8,
-    // paddingHorizontal: 16,
   },
   locationText: {
     marginLeft: 8,
     marginRight: 20,
     fontSize: 14,
-    fontWeight: 400,
+    fontWeight: "400",
     color: "rgb(60, 60, 60)",
   },
   ratingContainer: {
@@ -360,14 +370,6 @@ const styles = StyleSheet.create({
     color: "#00000099",
   },
   hidden: {
-    display: "none",
+    opacity: 0,
   },
-  closedStatusContainer: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    backgroundColor: "#FF4B26",
-    borderTopLeftRadius: 16,
-    borderBottomRightRadius: 13,
-  },
-});
+})

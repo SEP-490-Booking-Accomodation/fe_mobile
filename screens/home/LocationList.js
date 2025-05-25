@@ -82,6 +82,23 @@ export default function LocationList({
     return d; // distance in km
   };
 
+  const processImageUrl = (imageData, placeName) => {
+    if (Array.isArray(imageData) && imageData.length > 0) {
+      const firstImage = imageData[0];
+      if (typeof firstImage === 'string' && 
+          (firstImage.startsWith('http://') || firstImage.startsWith('https://'))) {
+        return firstImage;
+      }
+    }
+    
+    if (typeof imageData === 'string' && 
+        (imageData.startsWith('http://') || imageData.startsWith('https://'))) {
+      return imageData;
+    }
+    
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(placeName)}&background=random&color=fff&size=400`;
+  };
+
   // Xử lý dữ liệu địa điểm
   const processRentalData = () => {
     return rentalData.data
@@ -102,9 +119,7 @@ export default function LocationList({
 
         return {
           id: item._id,
-          imageUrl:
-            item.image?.[0] ||
-            `https://ui-avatars.com/api/?name=${item.name}&background=random`,
+          imageUrl: processImageUrl(item.image, item.name),
           openHour: item.openHour,
           closeHour: item.closeHour,
           placeName: item.name,
@@ -157,10 +172,9 @@ export default function LocationList({
         filtered = rentalList;
     }
 
-    setFilteredRentals(filtered.slice(0, 5)); // Chỉ lấy 5 kết quả đầu tiên
+    setFilteredRentals(filtered.slice(0, 5)); 
   }, [selectedFilterIndex, rentalData, userLocation, favoriteList]);
 
-  // Xử lý sự kiện yêu thích
   const handleFavoritePress = async (id, isFav) => {
     try {
       let updatedFavorites;
@@ -180,7 +194,6 @@ export default function LocationList({
     }
   };
 
-  // Xử lý khi nhấn vào card
   const onLocationPress = (id) => {
     if (navigation) {
       navigation.navigate("LocationDetail", { id });
@@ -196,7 +209,6 @@ export default function LocationList({
         </TouchableOpacity>
       </View>
 
-      {/* Filter ButtonGroup */}
       <ButtonGroup
         items={filters}
         selectedIndex={selectedFilterIndex}
@@ -210,7 +222,6 @@ export default function LocationList({
         inactiveTextStyle={styles.unselectedText}
       />
 
-      {/* Danh sách địa điểm */}
       <ScrollView style={styles.paddingVerticalCard}>
         {filteredRentals.length > 0 ? (
           filteredRentals.map((item) => (
@@ -237,7 +248,6 @@ export default function LocationList({
         )}
       </ScrollView>
 
-      {/* Nút View All ở dưới cùng */}
       <TouchableOpacity style={styles.viewAllButton} onPress={onViewAllPress}>
         <Text style={styles.viewAllButtonText}>{t("view_all")}</Text>
       </TouchableOpacity>
@@ -311,7 +321,7 @@ const styles = StyleSheet.create({
   viewAllButton: {
     backgroundColor: "#4E72E3",
     padding: 16,
-    borderRadius: 8,
+    borderRadius: 100,
     alignItems: "center",
     justifyContent: "center",
     marginHorizontal: 20,

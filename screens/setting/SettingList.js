@@ -46,6 +46,18 @@ export default function SettingList() {
   const handlePolicyPress = () => {
     navigation.navigate("Policies");
   };
+  const handleHelpSupportPress = () => {
+    navigation.navigate("HelpSupport");
+  };
+
+  const handleAboutUsPress = () => {
+    navigation.navigate("AboutUs");
+  };
+
+  const handleCustomerCarePress = () => {
+    navigation.navigate("CustomerCare");
+  };
+
 
   const handleLanguageChange = async (langCode) => {
     setSelectedLanguage(langCode);
@@ -99,10 +111,10 @@ export default function SettingList() {
           {renderItem("earth-outline", t("change_language"), () =>
             setIsLangModalVisible(true)
           )}
-          {renderItem("help-outline", t("help_support"))}
-          {renderItem("information-circle-outline", t("about_us"))}
+          {renderItem("help-outline", t("help_support"), handleHelpSupportPress)}
+          {renderItem("information-circle-outline", t("about_us"), handleAboutUsPress)}
           {renderItem("lock-closed-outline", t("privacy_policy"), handlePolicyPress)}
-          {renderItem("headset-outline", t("customer_care"))}
+          {renderItem("headset-outline", t("customer_care"), handleCustomerCarePress)}
         </View>
 
         <Modal

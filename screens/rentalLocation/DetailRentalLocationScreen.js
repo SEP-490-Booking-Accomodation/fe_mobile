@@ -19,7 +19,7 @@ import MultiSelectButtonGroup from "../../components/buttons/MultiSelectButtonGr
 import Tag from "../../components/Tag";
 import SimpleVerticalCard from "../../components/cards/SimpleVerticalCard";
 import { Button } from "react-native-elements";
-import { MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { newChat } from "../../lib/supabase";
 import { useGetAllFeedbackByRentalIdQuery } from "../../api/feedbackApi";
 import { useGetAverageFeedbackByRentalIdQuery } from "../../api/feedbackApi";
@@ -452,7 +452,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
       <View style={styles.mainContainer}>
         <View style={styles.fixedHeaderActions}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="arrow-back" size={24} color="#333" />
+            <AntDesign name="left" size={24} color="#4E72E3" />
           </TouchableOpacity>
           <View style={styles.actionIcons}>
             <TouchableOpacity onPress={toggleFavorite}>
@@ -463,10 +463,10 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               />
             </TouchableOpacity>
             <TouchableOpacity onPress={handleChatPress}>
-              <MaterialIcons name="chat" size={24} color="#333" />
+              <MaterialIcons name="chat" size={24} color="#4E72E3" />
             </TouchableOpacity>
             <TouchableOpacity onPress={handleMoreOptions}>
-              <Icon name="more-vert" size={24} color="#333" />
+              <Icon name="more-vert" size={24} color="#4E72E3" />
             </TouchableOpacity>
           </View>
         </View>
