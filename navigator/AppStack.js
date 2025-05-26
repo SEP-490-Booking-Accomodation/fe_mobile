@@ -47,6 +47,9 @@ import WalletScreen from "../screens/profile/childPage/WalletScreen";
 import PaymentMethod from "../screens/payment/PaymentMethod";
 import NotificationScreen from "../screens/notification/Notification";
 import SettingList from "../screens/setting/SettingList";
+import AboutUs from "../screens/setting/AboutUs";
+import CustomerCare from "../screens/setting/CustomerCare";
+import HelpSupport from "../screens/setting/HelpSupport";
 import ProfileScreen from "../screens/profile/ProfileScreen";
 import EditInfo from "../screens/profile/childPage/EditInfo";
 import ChangePassword from "../screens/profile/childPage/ChangePassword";
@@ -88,6 +91,10 @@ const hideTabBarScreens = [
   "ProfileScreen",
   "EditInfo",
   "TicketDetail",
+  "AboutUs",
+  "CustomerCare",
+  "HelpSupport",
+  "NotificationScreen"
 ];
 
 // AUTH STACK
@@ -261,6 +268,22 @@ const SettingStack = () => (
       component={PolicyDetailScreen}
       options={{ headerShown: false }}
     />
+    <Stack.Screen
+      name="AboutUs"
+      component={AboutUs}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="CustomerCare"
+      component={CustomerCare}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="HelpSupport"
+      component={HelpSupport}
+      options={{ headerShown: false }}
+    />
+
   </Stack.Navigator>
 );
 

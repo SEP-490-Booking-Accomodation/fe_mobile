@@ -1,4 +1,3 @@
-// HomeScreen.js
 import React from "react";
 import {
   View,
@@ -17,23 +16,51 @@ import { useTranslation } from "react-i18next";
 const NotificationList = () => {
   const { t } = useTranslation();
   const userId = useSelector((state) => state.auth?.userId);
-  const {
-    data: notifications,
-    isLoading,
-    error,
-  } = useGetNotificationsByUserQuery(userId);
+  const { data, isLoading, error, refetch } = useGetNotificationsByUserQuery(userId, { skip: !userId });
 
   if (isLoading) {
-    return <ActivityIndicator size="large" style={styles.loading} />;
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#4E72E3" />
+        <Text style={styles.loadingText}>{t('loading_notifications')}</Text>
+      </View>
+    );
   }
 
   if (error) {
-    return <Text style={styles.error}>{t('error_loading_notifications')}</Text>;
+    if (error.status === 404) {
+      return (
+        <View style={styles.emptyContainer}>
+          <Icon name="notifications-off-outline" size={64} color="#CBD5E1" />
+          <Text style={styles.emptyTitle}>{t('no_notifications')}</Text>
+          <Text style={styles.emptySubtitle}>{t('no_notifications_subtitle')}</Text>
+        </View>
+      );
+    }
+    return (
+      <View style={styles.errorContainer}>
+        <Icon name="alert-circle-outline" size={48} color="#EF4444" />
+        <Text style={styles.errorTitle}>{t('error_loading_notifications')}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+          <Text style={styles.retryText}>{t('retry')}</Text>
+        </TouchableOpacity>
+      </View>
+    );
   }
 
-  const transformedData = notifications?.data?.map((notification) => ({
+  if (!data?.data || data.data.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Icon name="notifications-off-outline" size={64} color="#CBD5E1" />
+        <Text style={styles.emptyTitle}>{t('no_notifications')}</Text>
+        <Text style={styles.emptySubtitle}>{t('check_back_later')}</Text>
+      </View>
+    );
+  }
+
+  const transformedData = data.data.map((notification) => ({
     id: notification._id,
-    icon: getNotificationIcon(notification.type),
+    iconName: "notifications", 
     title: notification.title,
     time: notification.createdAt,
     message: notification.content,
@@ -44,53 +71,85 @@ const NotificationList = () => {
     <FlatList
       data={transformedData}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => (
-        <NotificationItem
-          id={item.id}
-          iconName={item.icon}
-          title={item.title}
-          time={item.time}
-          message={item.message}
-          status={item.status}
-        />
-      )}
+      renderItem={({ item }) => <NotificationItem {...item} />}
       contentContainerStyle={styles.listContainer}
-      ListEmptyComponent={<Text style={styles.empty}>{t('no_notifications')}</Text>}
+      showsVerticalScrollIndicator={false}
+      ItemSeparatorComponent={() => <View style={styles.separator} />}
     />
   );
 };
 
-const getNotificationIcon = (type) => {
-  switch (type) {
-    case 1:
-      return "checkmark-circle-outline";
-    case 2:
-      return "close-circle-outline";
-    case 3:
-      return "wallet-outline";
-    default:
-      return "notifications-outline";
-  }
-};
-
 const styles = StyleSheet.create({
   listContainer: {
-    paddingBottom: 16,
-    marginHorizontal: 5,
-    marginVertical: 5,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 24,
   },
-  loading: {
-    marginTop: 20,
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
   },
-  error: {
-    textAlign: "center",
-    marginTop: 20,
-    color: "red",
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#64748B',
+    fontWeight: '500',
   },
-  empty: {
-    textAlign: "center",
-    marginTop: 20,
-    color: "#666",
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingVertical: 60,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1E293B',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingVertical: 40,
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#EF4444',
+    marginTop: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#4E72E3',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    elevation: 2,
+    shadowColor: '#4E72E3',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  retryText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  separator: {
+    height: 8,
   },
 });
 

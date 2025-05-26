@@ -6,7 +6,7 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import HorizontalCardWishlist from "../../../components/cards/HorizontalCardWishlist";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
@@ -25,7 +25,7 @@ export default function FavouriteList({ route, navigation }) {
         style={styles.arrowBack}
         onPress={() => navigation.goBack()}
       >
-        <MaterialIcons name="arrow-back" size={24} color="#4E72E3" />
+        <AntDesign name="left" size={24} color="#4E72E3" />
       </TouchableOpacity>
       <Text style={styles.textHeader}>{t("favorites_list")}</Text>
     </View>
