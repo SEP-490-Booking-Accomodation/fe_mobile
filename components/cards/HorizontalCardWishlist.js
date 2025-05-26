@@ -1,56 +1,125 @@
 import {
   Image,
   StyleSheet,
-  Touchable,
   TouchableOpacity,
   View,
   Text,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import React from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+
 //#region How to use this components
 /**
  * @example
- * <HorizontalCardMedium
+ * <HorizontalCardWishlist
             imageUrlLogo = {require("./assets/images/horizontalCardImage.jpeg")}
             placeName = {"Nhà con nhộng giá rẻ Bình Tân"}
             openHour = {"3:00"}
             closeHour = {"23:00"}
-            minPrice = {"120.000"}
-            maxPrice = {"1.400.000"}
+            minPrice = {120000}
+            maxPrice = {1400000}
             location = {"Bình Tân, HCM"}
             rating = {"5"}
             numOfReviews = {"12.5k"}
-            distance = "22.4"
-            ></HorizontalCardMedium>
- * @param {imageUrlLogo, placeName, openHour, closeHour, minPrice, maxPrice,location, rating, numOfReviews} props 
- * @returns HorizontalCardMedium
+            status = {3}
+            isOverNight = {false}
+            initFavourite = {false}
+            ></HorizontalCardWishlist>
+ * @param {imageUrlLogo, placeName, openHour, closeHour, minPrice, maxPrice, location, rating, numOfReviews, status, isOverNight, initFavourite, onFavouritePress, onCardPress, onPress} props 
+ * @returns HorizontalCardWishlist
  */
 //#endregion
+
 const HorizontalCardWishlist = ({
   imageUrlLogo,
   placeName,
-  openHour,
-  closeHour,
-  minPrice,
-  maxPrice,
+  openHour = "00:00",
+  closeHour = "23:59",
+  minPrice = 0,
+  maxPrice = 0,
   location,
   rating,
   numOfReviews,
-  initFavourite,
+  status = 3,
+  isOverNight = false,
+  initFavourite = false,
   onFavouritePress = () => {},
   onCardPress = () => {},
   onPress,
 }) => {
   const { t } = useTranslation();
   const [isFavourite, setIsFavourite] = useState(initFavourite);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const checkOpenStatus = () => {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+
+      const [openHourValue, openMinuteValue] = openHour.split(':').map(Number);
+      const [closeHourValue, closeMinuteValue] = closeHour.split(':').map(Number);
+
+      const currentTimeInMinutes = currentHour * 60 + currentMinute;
+      const openTimeInMinutes = openHourValue * 60 + openMinuteValue;
+      const closeTimeInMinutes = closeHourValue * 60 + closeMinuteValue;
+
+      if (closeTimeInMinutes < openTimeInMinutes) {
+        setIsOpen(
+          currentTimeInMinutes >= openTimeInMinutes ||
+          currentTimeInMinutes <= closeTimeInMinutes
+        );
+      } else {
+        setIsOpen(
+          currentTimeInMinutes >= openTimeInMinutes &&
+          currentTimeInMinutes <= closeTimeInMinutes
+        );
+      }
+    };
+
+    checkOpenStatus();
+    const intervalId = setInterval(checkOpenStatus, 60000); 
+    return () => clearInterval(intervalId);
+  }, [openHour, closeHour, isOverNight]);
+
   const handleFavouritePress = () => {
     const newValue = !isFavourite;
     setIsFavourite(newValue);
     if (onFavouritePress) {
       onFavouritePress(newValue);
+    }
+  };
+
+  const formatMoney = (value) => {
+    return value.toLocaleString("vi-VN");
+  };
+
+  const renderPriceRange = () => {
+    return `${formatMoney(minPrice)} - ${formatMoney(maxPrice)}${t("per_hour") || "đ/giờ"}`;
+  };
+
+  const getStatusContainer = () => {
+    if (status === 2 || status === 5 || status === 1) {
+      return styles.inactiveStatusContainer;
+    } else if (status === 3) {
+      return isOpen ? styles.activeStatusContainer : styles.closedStatusContainer;
+    } else if (status === 4) {
+      return styles.pauseStatusContainer;
+    } else {
+      return styles.notStatusContainer;
+    }
+  };
+
+  const getStatusText = () => {
+    if (status === 2 || status === 5 || status === 1) {
+      return t("inactive_status");
+    } else if (status === 3) {
+      return isOpen ? t("open_hr") : t("close_hr");
+    } else if (status === 4) {
+      return t("paused_status");
+    } else {
+      return t("unknown_status");
     }
   };
 
@@ -63,13 +132,13 @@ const HorizontalCardWishlist = ({
       />
       <View style={styles.infoContainer}>
         <Text style={styles.title}>{placeName}</Text>
-        <View style={styles.openingHourContainer}>
+        <View style={[styles.openingHourContainer, getStatusContainer()]}>
           <Text style={styles.openHourText}>
-          {t("open_hours")} ({openHour} - {closeHour})
+            {getStatusText()} ({openHour} - {closeHour})
           </Text>
         </View>
         <Text style={styles.priceRange}>
-          {minPrice} {t("currency")} - {maxPrice} {t("currency")}
+          {renderPriceRange()}
         </Text>
         <View style={styles.locationContainer}>
           <Icon name="location-on" size={20} color="#4e72e3" />
@@ -78,7 +147,7 @@ const HorizontalCardWishlist = ({
         <View style={styles.ratingContainer}>
           <Icon name="star" size={20} color="#ffc907" />
           <Text style={styles.ratingText}>
-            {rating} ({numOfReviews}  {t("reviews_count")})
+            {rating} ({numOfReviews} {t("reviews_count")})
           </Text>
         </View>
       </View>
@@ -131,12 +200,26 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   openingHourContainer: {
-    backgroundColor: "#12b347",
     borderRadius: 15,
     paddingVertical: 5,
     paddingHorizontal: 12,
     alignSelf: "flex-start",
     marginBottom: 4,
+  },
+  activeStatusContainer: {
+    backgroundColor: "#12B347", 
+  },
+  closedStatusContainer: {
+    backgroundColor: "#FF4B26", 
+  },
+  inactiveStatusContainer: {
+    backgroundColor: "rgb(209, 57, 27)",
+  },
+  pauseStatusContainer: {
+    backgroundColor: "rgb(221, 188, 0)", 
+  },
+  notStatusContainer: {
+    backgroundColor: "rgb(40, 40, 40)",
   },
   openHourText: {
     color: "white",

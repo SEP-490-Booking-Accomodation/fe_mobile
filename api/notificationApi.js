@@ -5,7 +5,13 @@ export const notificationApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
       getNotificationsByUser: builder.query({
         query: (userId) => `/notification/user/${userId}`,
-        providesTags: ["Notification"],
+        providesTags: (result, error, userId) => [
+          { type: 'Notification', id: 'LIST' },
+          ...(result?.data || []).map((notification) => ({ 
+            type: 'Notification', 
+            id: notification._id 
+          })),
+        ],
       }),
       markNotificationAsRead: builder.mutation({
         query: (notificationId) => ({
@@ -13,10 +19,36 @@ export const notificationApi = baseApi.injectEndpoints({
           method: "PUT",
           body: { isRead: true },
         }),
-        invalidatesTags: ["Notification"], 
+        invalidatesTags: (result, error, notificationId) => [
+          { type: 'Notification', id: notificationId },
+          { type: 'Notification', id: 'LIST' },
+        ],
+        async onQueryStarted(notificationId, { dispatch, queryFulfilled, getState }) {
+          const state = getState();
+          const userId = state.auth?.userId;
+          
+          if (userId) {
+            const patchResult = dispatch(
+              notificationApi.util.updateQueryData('getNotificationsByUser', userId, (draft) => {
+                if (draft?.data) {
+                  const notification = draft.data.find(n => n._id === notificationId);
+                  if (notification) {
+                    notification.isRead = true;
+                  }
+                }
+              })
+            );
+            
+            try {
+              await queryFulfilled;
+            } catch {
+              patchResult.undo();
+            }
+          }
+        },
       }),
     }),
-  });
+});
   
 export const {
     useGetNotificationsByUserQuery,

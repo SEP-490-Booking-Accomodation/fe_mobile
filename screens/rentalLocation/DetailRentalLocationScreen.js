@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import {
   ScrollView,
@@ -21,7 +19,7 @@ import MultiSelectButtonGroup from "../../components/buttons/MultiSelectButtonGr
 import Tag from "../../components/Tag";
 import SimpleVerticalCard from "../../components/cards/SimpleVerticalCard";
 import { Button } from "react-native-elements";
-import { MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { newChat } from "../../lib/supabase";
 import { useGetAllFeedbackByRentalIdQuery } from "../../api/feedbackApi";
 import { useGetAverageFeedbackByRentalIdQuery } from "../../api/feedbackApi";
@@ -32,7 +30,6 @@ import { useTranslation } from "react-i18next";
 
 // Import only the MoreOptionsModal component
 import MoreOptionsModal from "../booking/modals/MoreOptionModal";
-// Removed ReportModal import
 
 const DetailRentalLocationScreen = ({ route, navigation }) => {
   const { t } = useTranslation();
@@ -45,10 +42,10 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const [selectedServices, setSelectedServices] = useState([]);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [allServices, setAllServices] = useState([]);
+  const [isOpen, setIsOpen] = useState(false); // Add state for open/close status
 
   // Modal visibility states
   const [moreOptionsModalVisible, setMoreOptionsModalVisible] = useState(false);
-  // Removed reportModalVisible state
 
   // State for the review image modal
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
@@ -118,6 +115,42 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   };
 
   useEffect(() => {
+    const checkOpenStatus = () => {
+      if (!rentalData?.data?.openHour || !rentalData?.data?.closeHour) {
+        return;
+      }
+
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+
+      const [openHourValue, openMinuteValue] = rentalData.data.openHour.split(':').map(Number);
+      const [closeHourValue, closeMinuteValue] = rentalData.data.closeHour.split(':').map(Number);
+
+      const currentTimeInMinutes = currentHour * 60 + currentMinute;
+      const openTimeInMinutes = openHourValue * 60 + openMinuteValue;
+      const closeTimeInMinutes = closeHourValue * 60 + closeMinuteValue;
+
+      if (closeTimeInMinutes < openTimeInMinutes) {
+        setIsOpen(
+          currentTimeInMinutes >= openTimeInMinutes ||
+          currentTimeInMinutes <= closeTimeInMinutes
+        );
+      } else {
+        setIsOpen(
+          currentTimeInMinutes >= openTimeInMinutes &&
+          currentTimeInMinutes <= closeTimeInMinutes
+        );
+      }
+    };
+
+    checkOpenStatus();
+
+    const intervalId = setInterval(checkOpenStatus, 60000);
+    return () => clearInterval(intervalId);
+  }, [rentalData]);
+
+  useEffect(() => {
     fetchUser();
     loadFavoriteStatus();
     updateServices();
@@ -172,9 +205,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     console.log("Share pressed");
     // Implement your share functionality here
   };
-
-  // Removed handleReport function
-  // Removed handleReportSubmit function
 
   const ratingCounts = (feedbackDataList || []).reduce((acc, review) => {
     const rating = review.rating;
@@ -388,12 +418,42 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const rental = rentalData.data;
   const accommodationTypes = rental.accommodationTypeIds.data || [];
 
+  const renderStatusIndicator = () => {
+    if (rental.status === 2 || rental.status === 5 || rental.status === 1) {
+      return (
+        <View style={styles.inactiveStatusContainer}>
+          <Text style={styles.statusText}>{t("inactive_status")}</Text>
+        </View>
+      );
+    } else if (rental.status === 3) {
+      return (
+        <View style={isOpen ? styles.openStatusContainer : styles.closedStatusContainer}>
+          <Text style={styles.statusText}>
+            {isOpen ? t("open_hr") : t("close_hr")} ({rental.openHour} - {rental.closeHour})
+          </Text>
+        </View>
+      );
+    } else if (rental.status === 4) {
+      return (
+        <View style={styles.pauseStatusContainer}>
+          <Text style={styles.statusText}>{t("paused_status")}</Text>
+        </View>
+      );
+    } else {
+      return (
+        <View style={styles.unknownStatusContainer}>
+          <Text style={styles.statusText}>{t("unknown_status")}</Text>
+        </View>
+      );
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.mainContainer}>
         <View style={styles.fixedHeaderActions}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="arrow-back" size={24} color="#333" />
+            <AntDesign name="left" size={24} color="#4E72E3" />
           </TouchableOpacity>
           <View style={styles.actionIcons}>
             <TouchableOpacity onPress={toggleFavorite}>
@@ -404,10 +464,10 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               />
             </TouchableOpacity>
             <TouchableOpacity onPress={handleChatPress}>
-              <MaterialIcons name="chat" size={24} color="#333" />
+              <MaterialIcons name="chat" size={24} color="#4E72E3" />
             </TouchableOpacity>
             <TouchableOpacity onPress={handleMoreOptions}>
-              <Icon name="more-vert" size={24} color="#333" />
+              <Icon name="more-vert" size={24} color="#4E72E3" />
             </TouchableOpacity>
           </View>
         </View>
@@ -426,18 +486,21 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 
         <ScrollView style={styles.container}>
           <View style={styles.headerContainer}>
-            <Image
-              source={{
-                uri: rental.image?.[0] || "https://via.placeholder.com/300",
-              }}
-              style={styles.headerImage}
-            />
+            <View style={styles.imageContainer}>
+              <Image
+                source={{
+                  uri: rental.image?.[0] || "https://via.placeholder.com/300",
+                }}
+                style={styles.headerImage}
+              />
+              {renderStatusIndicator()}
+            </View>
             <View style={styles.headerDetails}>
               <View style={styles.destinationHeader}>
                 <Text style={styles.destinationName}>{rental.name}</Text>
                 <Tag
                   text={`${rental.openHour} - ${rental.closeHour}`}
-                  backgroundColor="#4CAF50"
+                  backgroundColor={isOpen ? "#12B347" : "#FF4B26"}
                   textColor="#fff"
                 />
               </View>
@@ -550,7 +613,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   );
 };
 
-// Styles remain the same
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -709,9 +771,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 16,
   },
-  headerImage: {
+  imageContainer: {
+    position: "relative",
     width: "100%",
     height: 200,
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  headerImage: {
+    width: "100%",
+    height: "100%",
     borderRadius: 20,
   },
   headerDetails: {
