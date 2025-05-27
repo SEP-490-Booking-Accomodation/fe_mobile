@@ -1,71 +1,26 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+
 const AsyncStorageContext = createContext();
+
 export const useAsyncStorage = () => {
   return useContext(AsyncStorageContext);
 };
+
 export const AsyncStorageProvider = ({ children }) => {
   const navigation = useNavigation();
-  // const [data, setData] = useState(null);
   const [searchHistory, setSearchHistory] = useState([]);
   const [favorites, setFavorites] = useState([]);
-  // This is missing:
   const [idChatPlatform, setIdChatPlatform] = useState([]);
 
-
   useEffect(() => {
-    // loadData();
     loadFavorites();
     loadSearchHistory();
-    loadIdChatPlatform(); 
+    loadIdChatPlatform();
   }, []);
-  // const loadData = async () => {
-  //   try {
-  //     const storedData = await AsyncStorage.getItem("your_key");
-  //     if (storedData) {
-  //       setData(JSON.parse(storedData));
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to load data from AsyncStorage:", error);
-  //   }
-  // };
 
-  // const saveData = async (value) => {
-  //   try {
-  //     await AsyncStorage.setItem("your_key", JSON.stringify(value));
-  //     setData(value);
-  //   } catch (error) {
-  //     console.error("Failed to save data to AsyncStorage:", error);
-  //   }
-  // };
-
-  // const removeItems = async (itemIds) => {
-  //   try {
-  //     const currentData = await AsyncStorage.getItem("your_key");
-  //     if (currentData) {
-  //       const parsedData = JSON.parse(currentData);
-  //       const updatedData = parsedData.filter(
-  //         (item) => !itemIds.includes(item._id)
-  //       );
-  //       await AsyncStorage.setItem("your_key", JSON.stringify(updatedData));
-  //       setData(updatedData);
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to remove items from AsyncStorage:", error);
-  //   }
-  // };
-
-  // const logout = async () => {
-  //   try {
-  //     await AsyncStorage.removeItem("token");
-  //     await AsyncStorage.removeItem("expToken");
-  //     navigation.navigate("Login");
-  //   } catch (error) {
-  //     console.error("Logout failed:", error);
-  //   }
-  // };
-  //====================================================================
+  //========================================================================
   //Search History
   const loadSearchHistory = async () => {
     try {
@@ -77,11 +32,12 @@ export const AsyncStorageProvider = ({ children }) => {
       console.error("Failed to load search history:", error);
     }
   };
+
   const addSearchTerm = async (term) => {
     try {
       const updatedHistory = [term, ...searchHistory.filter((t) => t !== term)];
       if (updatedHistory.length > 6) {
-        updatedHistory.pop(); // Giới hạn 6 mục
+        updatedHistory.pop();
       }
       setSearchHistory(updatedHistory);
       await AsyncStorage.setItem(
@@ -101,6 +57,7 @@ export const AsyncStorageProvider = ({ children }) => {
       console.error("Failed to clear search history:", error);
     }
   };
+
   const removeSearchTerm = async (term) => {
     try {
       const updatedHistory = searchHistory.filter((t) => t !== term);
@@ -113,8 +70,9 @@ export const AsyncStorageProvider = ({ children }) => {
       console.error("Failed to remove search term:", error);
     }
   };
+
   //========================================================================
-  //Favorite
+  //Favorite Locations
   const loadFavorites = async () => {
     try {
       const storedFavorites = await AsyncStorage.getItem("favorites");
@@ -130,7 +88,7 @@ export const AsyncStorageProvider = ({ children }) => {
     try {
       const updatedFavorites = [...favorites];
       const existingIndex = updatedFavorites.findIndex(
-        (fav) => fav._id === item._id
+        (fav) => fav.id === item.id
       );
 
       if (existingIndex === -1) {
@@ -140,28 +98,64 @@ export const AsyncStorageProvider = ({ children }) => {
           "favorites",
           JSON.stringify(updatedFavorites)
         );
+        return true;
       }
+      return false;
     } catch (error) {
       console.error("Failed to add favorite:", error);
+      return false;
     }
   };
+
+  const removeFavorite = async (itemId) => {
+    try {
+      const updatedFavorites = favorites.filter((fav) => fav.id !== itemId);
+      setFavorites(updatedFavorites);
+      await AsyncStorage.setItem("favorites", JSON.stringify(updatedFavorites));
+      return true;
+    } catch (error) {
+      console.error("Failed to remove favorite:", error);
+      return false;
+    }
+  };
+
+  const isFavorite = (itemId) => {
+    return favorites.some((fav) => fav.id === itemId);
+  };
+
+  const toggleFavorite = async (item) => {
+    try {
+      const isCurrentlyFavorite = isFavorite(item.id);
+
+      if (isCurrentlyFavorite) {
+        await removeFavorite(item.id);
+        return false;
+      } else {
+        await addFavorite(item);
+        return true;
+      }
+    } catch (error) {
+      console.error("Failed to toggle favorite:", error);
+      return false;
+    }
+  };
+
   //========================================================================
   // idChatPlatform
-
   const loadIdChatPlatform = async () => {
     try {
       const storedIdChatPlatform = await AsyncStorage.getItem("idChatPlatform");
       if (storedIdChatPlatform) {
         const parsedData = JSON.parse(storedIdChatPlatform);
         setIdChatPlatform(parsedData);
-        return parsedData; // Return the loaded data
+        return parsedData;
       }
-      return []; // Return empty array if no data
-    } catch(error) {
+      return [];
+    } catch (error) {
       console.error("Failed to load idChatPlatform:", error);
-      return []; // Return empty array on error
+      return [];
     }
-  }
+  };
 
   const addIdChatPlatform = async (item) => {
     try {
@@ -178,35 +172,22 @@ export const AsyncStorageProvider = ({ children }) => {
         );
       }
     } catch (error) {
-      useEffect(() => {
-        console.log("idChatPlatform updated:", idChatPlatform);
-      }, [idChatPlatform]);
-      
-      
+      console.error("Failed to add idChatPlatform:", error);
     }
-  }
+  };
 
   const removeAllIdChatPlaform = async () => {
     try {
-      await AsyncStorage.removeItem("idChatPlatform");  
+      await AsyncStorage.removeItem("idChatPlatform");
       setIdChatPlatform([]);
     } catch (error) {
       console.log("Failed to remove idChatPlatform:", error);
-    } 
+    }
   };
-  
-
-
 
   return (
     <AsyncStorageContext.Provider
       value={{
-        //GIữ lại xem thử nếu bị ảnh hưởng mở ra
-        // data,
-        // saveData,
-        // removeItems,
-        // logout,
-
         //Search Provider
         searchHistory,
         addSearchTerm,
@@ -216,13 +197,15 @@ export const AsyncStorageProvider = ({ children }) => {
         //Favorite Provider
         favorites,
         addFavorite,
+        removeFavorite,
+        isFavorite,
+        toggleFavorite,
 
         //IdChatPlatform
         idChatPlatform,
         addIdChatPlatform,
         loadIdChatPlatform,
         removeAllIdChatPlaform,
-
       }}
     >
       {children}
