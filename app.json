@@ -2,6 +2,7 @@
   "expo": {
     "name": "mean",
     "scheme": "mean",
+    "privacy": "public",
     "slug": "mean",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,7 +10,6 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "platforms": ["ios", "android"],
-
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -29,6 +29,18 @@
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0813d6d0-1178-4d01-a58a-fdb174338850"
+      }
+    },
+    "owner": "yukinoame",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/0813d6d0-1178-4d01-a58a-fdb174338850"
     }
   }
 }

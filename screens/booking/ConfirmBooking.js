@@ -45,9 +45,20 @@ export default function ConfirmBooking() {
   let refundMinutes = values[0]?.val || 20; // mặc định nếu không có
   const bookingTime = dayjs(); // thời điểm tạo booking
   const refundDeadline = bookingTime.add(refundMinutes, "minute");
-  const refundDeadlineISO = refundDeadline.toISOString();
+  // const refundDeadlineISO = refundDeadline.toISOString();
+  const date = new Date(refundDeadline);
 
-  // console.log(refundDeadline);
+  // Hàm định dạng số thành 2 chữ số
+  const pad = (n) => n.toString().padStart(2, "0");
+
+  // Tạo chuỗi định dạng dd-MM-yyyy HH:mm:ss
+  const deadlineFormatted = `${pad(date.getDate())}-${pad(
+    date.getMonth() + 1
+  )}-${date.getFullYear()} ${pad(date.getHours())}:${pad(
+    date.getMinutes()
+  )}:${pad(date.getSeconds())}`;
+
+  console.log("refund" + deadlineFormatted);
   // console.log(bookingTime);
 
   useEffect(() => {
@@ -166,7 +177,7 @@ export default function ConfirmBooking() {
       note: bookingData.note || "",
       status: 8,
       // timeExpireRefund: refundDeadline,
-      timeExpireRefund: refundDeadlineISO,
+      timeExpireRefund: deadlineFormatted,
       // discountAmount: discountAmount, // Add discount amount to the booking data
       totalPrice: finalTotal, // Add final total after discount
     };
