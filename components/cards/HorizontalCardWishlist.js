@@ -1,37 +1,11 @@
-import {
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  Text,
-} from "react-native";
+import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-
-//#region How to use this components
-/**
- * @example
- * <HorizontalCardWishlist
-            imageUrlLogo = {require("./assets/images/horizontalCardImage.jpeg")}
-            placeName = {"Nhà con nhộng giá rẻ Bình Tân"}
-            openHour = {"3:00"}
-            closeHour = {"23:00"}
-            minPrice = {120000}
-            maxPrice = {1400000}
-            location = {"Bình Tân, HCM"}
-            rating = {"5"}
-            numOfReviews = {"12.5k"}
-            status = {3}
-            isOverNight = {false}
-            initFavourite = {false}
-            ></HorizontalCardWishlist>
- * @param {imageUrlLogo, placeName, openHour, closeHour, minPrice, maxPrice, location, rating, numOfReviews, status, isOverNight, initFavourite, onFavouritePress, onCardPress, onPress} props 
- * @returns HorizontalCardWishlist
- */
-//#endregion
+import { useAsyncStorage } from "../../context/AsyncStorageContext"; // Adjust path as needed
 
 const HorizontalCardWishlist = ({
+  id, // Add id prop
   imageUrlLogo,
   placeName,
   openHour = "00:00",
@@ -49,8 +23,16 @@ const HorizontalCardWishlist = ({
   onPress,
 }) => {
   const { t } = useTranslation();
-  const [isFavourite, setIsFavourite] = useState(initFavourite);
+  const { isFavorite, toggleFavorite } = useAsyncStorage();
+  const [isFavourite, setIsFavourite] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
+  // Check if item is favorite on mount and when favorites change
+  useEffect(() => {
+    if (id) {
+      setIsFavourite(isFavorite(id));
+    }
+  }, [id, isFavorite]);
 
   useEffect(() => {
     const checkOpenStatus = () => {
@@ -58,8 +40,10 @@ const HorizontalCardWishlist = ({
       const currentHour = now.getHours();
       const currentMinute = now.getMinutes();
 
-      const [openHourValue, openMinuteValue] = openHour.split(':').map(Number);
-      const [closeHourValue, closeMinuteValue] = closeHour.split(':').map(Number);
+      const [openHourValue, openMinuteValue] = openHour.split(":").map(Number);
+      const [closeHourValue, closeMinuteValue] = closeHour
+        .split(":")
+        .map(Number);
 
       const currentTimeInMinutes = currentHour * 60 + currentMinute;
       const openTimeInMinutes = openHourValue * 60 + openMinuteValue;
@@ -68,26 +52,48 @@ const HorizontalCardWishlist = ({
       if (closeTimeInMinutes < openTimeInMinutes) {
         setIsOpen(
           currentTimeInMinutes >= openTimeInMinutes ||
-          currentTimeInMinutes <= closeTimeInMinutes
+            currentTimeInMinutes <= closeTimeInMinutes
         );
       } else {
         setIsOpen(
           currentTimeInMinutes >= openTimeInMinutes &&
-          currentTimeInMinutes <= closeTimeInMinutes
+            currentTimeInMinutes <= closeTimeInMinutes
         );
       }
     };
 
     checkOpenStatus();
-    const intervalId = setInterval(checkOpenStatus, 60000); 
+    const intervalId = setInterval(checkOpenStatus, 60000);
     return () => clearInterval(intervalId);
   }, [openHour, closeHour, isOverNight]);
 
-  const handleFavouritePress = () => {
-    const newValue = !isFavourite;
-    setIsFavourite(newValue);
+  const handleFavouritePress = async () => {
+    if (!id) {
+      console.warn("Cannot toggle favorite: missing id");
+      return;
+    }
+
+    const locationData = {
+      id,
+      imageUrl: imageUrlLogo,
+      placeName,
+      openHour,
+      closeHour,
+      minPrice,
+      maxPrice,
+      location,
+      rating,
+      numOfReviews,
+      status,
+      isOverNight,
+    };
+
+    const newFavoriteStatus = await toggleFavorite(locationData);
+    setIsFavourite(newFavoriteStatus);
+
+    // Call the original callback if provided
     if (onFavouritePress) {
-      onFavouritePress(newValue);
+      onFavouritePress(newFavoriteStatus);
     }
   };
 
@@ -96,14 +102,18 @@ const HorizontalCardWishlist = ({
   };
 
   const renderPriceRange = () => {
-    return `${formatMoney(minPrice)} - ${formatMoney(maxPrice)}${t("per_hour") || "đ/giờ"}`;
+    return `${formatMoney(minPrice)} - ${formatMoney(maxPrice)}${
+      t("per_hour") || "đ/giờ"
+    }`;
   };
 
   const getStatusContainer = () => {
     if (status === 2 || status === 5 || status === 1) {
       return styles.inactiveStatusContainer;
     } else if (status === 3) {
-      return isOpen ? styles.activeStatusContainer : styles.closedStatusContainer;
+      return isOpen
+        ? styles.activeStatusContainer
+        : styles.closedStatusContainer;
     } else if (status === 4) {
       return styles.pauseStatusContainer;
     } else {
@@ -124,7 +134,7 @@ const HorizontalCardWishlist = ({
   };
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
+    <TouchableOpacity style={styles.card} onPress={onPress || onCardPress}>
       <Image
         source={{ uri: imageUrlLogo }}
         resizeMode="cover"
@@ -137,9 +147,7 @@ const HorizontalCardWishlist = ({
             {getStatusText()} ({openHour} - {closeHour})
           </Text>
         </View>
-        <Text style={styles.priceRange}>
-          {renderPriceRange()}
-        </Text>
+        <Text style={styles.priceRange}>{renderPriceRange()}</Text>
         <View style={styles.locationContainer}>
           <Icon name="location-on" size={20} color="#4e72e3" />
           <Text style={styles.locationText}>{location}</Text>
@@ -166,6 +174,7 @@ const HorizontalCardWishlist = ({
   );
 };
 
+// Styles remain the same
 const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
@@ -207,16 +216,16 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   activeStatusContainer: {
-    backgroundColor: "#12B347", 
+    backgroundColor: "#12B347",
   },
   closedStatusContainer: {
-    backgroundColor: "#FF4B26", 
+    backgroundColor: "#FF4B26",
   },
   inactiveStatusContainer: {
     backgroundColor: "rgb(209, 57, 27)",
   },
   pauseStatusContainer: {
-    backgroundColor: "rgb(221, 188, 0)", 
+    backgroundColor: "rgb(221, 188, 0)",
   },
   notStatusContainer: {
     backgroundColor: "rgb(40, 40, 40)",

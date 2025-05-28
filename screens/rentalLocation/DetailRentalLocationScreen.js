@@ -25,6 +25,7 @@ import { useGetAllFeedbackByRentalIdQuery } from "../../api/feedbackApi";
 import { useGetAverageFeedbackByRentalIdQuery } from "../../api/feedbackApi";
 import { useGetRentalLocationByIdQuery } from "../../api/rentalLocationApi";
 import { useGetAllAccommodationTypesQuery } from "../../api/accommodationTypeApi";
+import { useGetUserIdByOwnerIdQuery } from "../../api/ownerApi";
 import { useTranslation } from "react-i18next";
 
 // Import only the MoreOptionsModal component
@@ -69,8 +70,8 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     isError: isRentalError,
   } = useGetRentalLocationByIdQuery(locationId);
 
-  const ownerId = rentalData?.data?.ownerId?._id;
-
+  const ownerId = rentalData?.data?.ownerId.id;
+  const { data: userOwnerId } = useGetUserIdByOwnerIdQuery(ownerId);
   const {
     data: accommodationTypesData,
     isLoading: isAccommodationLoading,
@@ -177,7 +178,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     try {
       const currentUser = user;
       console.log("Current User:", currentUser);
-      const ownerPlatformId = rentalData.data?.ownerId?.userId?._id;
+      const ownerPlatformId = userOwnerId?.userId;
       const locationId = rentalData.data?._id;
 
       const result = await newChat({

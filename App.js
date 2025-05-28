@@ -17,6 +17,7 @@ import { useSocket } from './hooks/useSocket';
 import Toast from 'react-native-toast-message';
 import SocketService from './services/socketService';
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function App() {
   const navigationRef = useRef();

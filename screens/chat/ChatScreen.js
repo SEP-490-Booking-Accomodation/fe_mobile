@@ -18,10 +18,10 @@ import { Ionicons } from "@expo/vector-icons";
 import OnlineStatus from "../../components/chat/OnlineStatus";
 import MessageStatus from "../../components/chat/MessageStatus";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
-import { useTranslation } from "react-i18next"; 
+import { useTranslation } from "react-i18next";
 
 export default function ChatScreen({ route, navigation }) {
-  const { t } = useTranslation(); 
+  const { t } = useTranslation();
   const { chatId, chatName } = route.params;
   // State management
   const [messages, setMessages] = useState([]);
@@ -33,12 +33,12 @@ export default function ChatScreen({ route, navigation }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [userId, setUserId] = useState(null);
   const [userName, setUserName] = useState(null);
-  
+
   // Refs
   const flatListRef = useRef(null);
   const appState = useRef(AppState.currentState);
   const realtimeSubscription = useRef(null);
-  
+
   // Hooks
   const { loadIdChatPlatform } = useAsyncStorage();
 
@@ -369,10 +369,7 @@ export default function ChatScreen({ route, navigation }) {
       // Order: sent < delivered < read
       const statusOrder = { sent: 1, delivered: 2, read: 3 };
       if (statusOrder[status] > statusOrder[message.status]) {
-        await supabase
-          .from("messages")
-          .update(updateData)
-          .eq("id", messageId);
+        await supabase.from("messages").update(updateData).eq("id", messageId);
       }
     } catch (e) {
       console.error("Exception updating message status:", e.message);
@@ -475,43 +472,41 @@ export default function ChatScreen({ route, navigation }) {
     const isCurrentUser = item.user_id === userId;
     const profile = userProfiles[item.user_id];
     const username = profile ? profile.username : t("unknown_user");
-    
+
     return (
       <View
         style={[
           styles.messageContainer,
-          isCurrentUser ? styles.currentUserMessage : styles.otherUserMessage
+          isCurrentUser ? styles.currentUserMessage : styles.otherUserMessage,
         ]}
       >
-        {!isCurrentUser && (
-          <Text style={styles.messageSender}>{username}</Text>
-        )}
+        {!isCurrentUser && <Text style={styles.messageSender}>{username}</Text>}
         <View style={styles.messageContentRow}>
           <View
             style={[
               styles.messageBubble,
               isCurrentUser ? styles.currentUserBubble : styles.otherUserBubble,
-              item.isTemp && styles.tempMessageBubble
+              item.isTemp && styles.tempMessageBubble,
             ]}
           >
-            <Text style={[
-              styles.messageText,
-              isCurrentUser ? styles.currentUserText : styles.otherUserText
-            ]}>
+            <Text
+              style={[
+                styles.messageText,
+                isCurrentUser ? styles.currentUserText : styles.otherUserText,
+              ]}
+            >
               {item.content}
             </Text>
           </View>
         </View>
         <View style={styles.messageFooter}>
           <Text style={styles.messageTime}>
-            {new Date(item.created_at).toLocaleTimeString([], { 
-              hour: '2-digit', 
-              minute: '2-digit' 
+            {new Date(item.created_at).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
             })}
           </Text>
-          {isCurrentUser && (
-            <MessageStatus status={item.status} />
-          )}
+          {isCurrentUser && <MessageStatus status={item.status} />}
         </View>
       </View>
     );
@@ -532,9 +527,9 @@ export default function ChatScreen({ route, navigation }) {
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.backButton}
-            onPress={() => navigation.goBack()}
+            onPress={() => navigation.navigate("MessagesScreen")}
           >
             <Ionicons name="arrow-back" size={24} color="#000000" />
           </TouchableOpacity>
@@ -582,7 +577,7 @@ export default function ChatScreen({ route, navigation }) {
             contentContainerStyle={styles.chatList}
             onRefresh={fetchMessages}
             refreshing={isRefreshing}
-            onContentSizeChange={() => 
+            onContentSizeChange={() =>
               flatListRef.current?.scrollToEnd({ animated: false })
             }
           />
@@ -602,7 +597,7 @@ export default function ChatScreen({ route, navigation }) {
           <TouchableOpacity
             style={[
               styles.sendButton,
-              !newMessage.trim() || sending ? styles.sendButtonDisabled : null
+              !newMessage.trim() || sending ? styles.sendButtonDisabled : null,
             ]}
             onPress={sendMessage}
             disabled={!newMessage.trim() || sending}
