@@ -285,12 +285,11 @@ export default function BookingInformation({ route, navigation }) {
     console.log(checkInDateTime);
     console.log(checkOutDateTime);
     const formCheckAvailable = {
-      rentalLocationId: rentalData?.id,
+      rentalLocationId: rentalData?.data?.id,
       accommodationTypeId: accommodationTypeData?.data?.id,
       checkIn: checkInDateTime,
       checkOut: checkOutDateTime,
     };
-
     try {
       const response = await checkAvailable({
         data: formCheckAvailable,
