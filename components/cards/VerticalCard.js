@@ -26,8 +26,8 @@ export default function VerticalCard({
   const { t } = useTranslation();
   const { isFavorite, toggleFavorite } = useAsyncStorage();
   const loadingGif = "https://i.gifer.com/WMDx.gif";
-  const fallbackImage =
-    "https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png";
+  // const fallbackImage =
+  //   "https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png";
 
   const [isFavourite, setIsFavourite] = useState(false);
   const navigate = useNavigation();
@@ -41,36 +41,36 @@ export default function VerticalCard({
     setIsFavourite(isFavorite(id));
   }, [id, isFavorite]);
 
-  useEffect(() => {
-    if (imageUrl) {
-      const firstImage = Array.isArray(imageUrl) ? imageUrl[0] : imageUrl;
+  // useEffect(() => {
+  //   if (imageUrl) {
+  //     const firstImage = Array.isArray(imageUrl) ? imageUrl[0] : imageUrl;
 
-      if (
-        firstImage &&
-        (firstImage.startsWith("http://") || firstImage.startsWith("https://"))
-      ) {
-        setCurrentImage(firstImage);
-      } else {
-        setCurrentImage(fallbackImage);
-        setImageError(true);
-      }
-    } else {
-      setCurrentImage(fallbackImage);
-      setImageError(true);
-    }
-  }, [imageUrl, fallbackImage]);
+  //     if (
+  //       firstImage &&
+  //       (firstImage.startsWith("http://") || firstImage.startsWith("https://"))
+  //     ) {
+  //       setCurrentImage(firstImage);
+  //     } else {
+  //       setCurrentImage(fallbackImage);
+  //       setImageError(true);
+  //     }
+  //   } else {
+  //     setCurrentImage(fallbackImage);
+  //     setImageError(true);
+  //   }
+  // }, [imageUrl, fallbackImage]);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (isLoading && !imageError) {
-        setCurrentImage(fallbackImage);
-        setIsLoading(false);
-        setImageError(true);
-      }
-    }, 10000);
+  // useEffect(() => {
+  //   const timeout = setTimeout(() => {
+  //     if (isLoading && !imageError) {
+  //       setCurrentImage(fallbackImage);
+  //       setIsLoading(false);
+  //       setImageError(true);
+  //     }
+  //   }, 10000);
 
-    return () => clearTimeout(timeout);
-  }, [isLoading, imageError, fallbackImage]);
+  //   return () => clearTimeout(timeout);
+  // }, [isLoading, imageError, fallbackImage]);
 
   useEffect(() => {
     const checkOpenStatus = () => {
@@ -108,7 +108,7 @@ export default function VerticalCard({
   const handleFavouritePress = async () => {
     const locationData = {
       id,
-      imageUrl: currentImage,
+      imageUrl,
       placeName,
       openHour,
       closeHour,
@@ -152,7 +152,7 @@ export default function VerticalCard({
 
   const handleImageError = () => {
     if (!imageError) {
-      setCurrentImage(fallbackImage);
+      // setCurrentImage(fallbackImage);
       setImageError(true);
     }
     setIsLoading(false);
@@ -165,7 +165,7 @@ export default function VerticalCard({
       activeOpacity={0.97}
     >
       <View style={styles.imageContainer}>
-        {isLoading && !imageError && (
+        {/* {isLoading && !imageError && (
           <View style={styles.loadingContainer}>
             <Image
               source={{ uri: loadingGif }}
@@ -173,10 +173,10 @@ export default function VerticalCard({
               resizeMode="center"
             />
           </View>
-        )}
+        )} */}
 
         <Image
-          source={{ uri: currentImage }}
+          source={{ uri: imageUrl }}
           style={[styles.image, isLoading && !imageError ? styles.hidden : {}]}
           resizeMode="cover"
           onLoad={handleImageLoad}
