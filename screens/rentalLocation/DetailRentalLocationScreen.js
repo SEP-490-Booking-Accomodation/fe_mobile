@@ -12,9 +12,7 @@ import {
   Modal,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import AsyncStorage, {
-  useAsyncStorage,
-} from "../../context/AsyncStorageContext";
+import { useAsyncStorage } from "../../context/AsyncStorageContext";
 import MultiSelectButtonGroup from "../../components/buttons/MultiSelectButtonGroup";
 import Tag from "../../components/Tag";
 import SimpleVerticalCard from "../../components/cards/SimpleVerticalCard";
@@ -34,11 +32,11 @@ import MoreOptionsModal from "../booking/modals/MoreOptionModal";
 const DetailRentalLocationScreen = ({ route, navigation }) => {
   const { t } = useTranslation();
   const [user, setUser] = useState({});
-  const { loadIdChatPlatform } = useAsyncStorage();
+  const { loadIdChatPlatform, isFavorite, toggleFavorite } = useAsyncStorage();
   const { rentalId: locationId } = route.params;
   const [activeTab, setActiveTab] = useState("accommodation_types");
   const [isServicesExpanded, setIsServicesExpanded] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavoriteState, setIsFavoriteState] = useState(false);
   const [selectedServices, setSelectedServices] = useState([]);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [allServices, setAllServices] = useState([]);
@@ -91,13 +89,35 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     }
   };
 
-  const loadFavoriteStatus = async () => {
-    const favoriteStatus = await AsyncStorage.getItem(
-      `favoriteStatus_${locationId}`
-    );
-    if (favoriteStatus !== null) {
-      setIsFavorite(JSON.parse(favoriteStatus));
-    }
+  const checkFavoriteStatus = () => {
+    const favoriteStatus = isFavorite(locationId);
+    setIsFavoriteState(favoriteStatus);
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!rentalData?.data) return;
+
+    const rentalItem = {
+      id: locationId,
+      imageUrl: rentalData.data.image?.[0] || `https://ui-avatars.com/api/?name=${rentalData.data.name}&background=random`,
+      openHour: rentalData.data.openHour,
+      closeHour: rentalData.data.closeHour,
+      placeName: rentalData.data.name,
+      isOverNight: rentalData.data.isOverNight,
+      status: rentalData.data.status,
+      minPrice: rentalData.data.minPrice || 0,
+      maxPrice: rentalData.data.maxPrice || 0,
+      address: rentalData.data.address,
+      ward: rentalData.data.ward,
+      district: rentalData.data.district,
+      city: rentalData.data.city,
+      location: `${rentalData.data.address}, ${rentalData.data.ward}, ${rentalData.data.district}, ${rentalData.data.city}`,
+      ratingPoint: rentalData.data.averageRating || 0,
+      numberOfReview: rentalData.data.totalFeedbacks || 0,
+    };
+
+    const newStatus = await toggleFavorite(rentalItem);
+    setIsFavoriteState(newStatus);
   };
 
   const updateServices = () => {
@@ -152,7 +172,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     fetchUser();
-    loadFavoriteStatus();
+    checkFavoriteStatus();
     updateServices();
   }, [locationId]);
 
@@ -164,15 +184,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
       </View>
     );
   }
-
-  const toggleFavorite = async () => {
-    const newStatus = !isFavorite;
-    setIsFavorite(newStatus);
-    await AsyncStorage.setItem(
-      `favoriteStatus_${locationId}`,
-      JSON.stringify(newStatus)
-    );
-  };
 
   const handleChatPress = async () => {
     try {
@@ -456,9 +467,9 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
             <AntDesign name="left" size={24} color="#4E72E3" />
           </TouchableOpacity>
           <View style={styles.actionIcons}>
-            <TouchableOpacity onPress={toggleFavorite}>
+            <TouchableOpacity onPress={handleToggleFavorite}>
               <Icon
-                name={isFavorite ? "favorite" : "favorite-border"}
+                name={isFavoriteState ? "favorite" : "favorite-border"}
                 size={24}
                 color="red"
               />

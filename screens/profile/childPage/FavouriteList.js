@@ -21,13 +21,13 @@ export default function FavouriteList({ route, navigation }) {
 
   // Update local state when favorites change
   useEffect(() => {
-    setDataFavourite(favorites);
+    setDataFavourite(favorites.slice());
   }, [favorites]);
 
   // Refresh favorites when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
-      setDataFavourite(favorites);
+      setDataFavourite(favorites.slice());
     }, [favorites])
   );
 
