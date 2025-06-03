@@ -15,7 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function LocationList({
   rentalData,
   onViewAllPress,
-  navigation,
+  onLocationPress,
 }) {
   const { t } = useTranslation();
   const [selectedFilterIndex, setSelectedFilterIndex] = useState(0);
@@ -29,7 +29,6 @@ export default function LocationList({
     t("nearby"),
     t("favorite"),
     t("top_rated"),
-    t("recent"),
   ];
 
   // Lấy vị trí hiện tại của người dùng
@@ -74,9 +73,9 @@ export default function LocationList({
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const d = R * c;
     return d; // distance in km
@@ -85,24 +84,35 @@ export default function LocationList({
   const processImageUrl = (imageData, placeName) => {
     if (Array.isArray(imageData) && imageData.length > 0) {
       const firstImage = imageData[0];
-      if (typeof firstImage === 'string' && 
-          (firstImage.startsWith('http://') || firstImage.startsWith('https://'))) {
+      if (typeof firstImage === 'string' &&
+        (firstImage.startsWith('http://') || firstImage.startsWith('https://'))) {
         return firstImage;
       }
     }
-    
-    if (typeof imageData === 'string' && 
-        (imageData.startsWith('http://') || imageData.startsWith('https://'))) {
+
+    if (typeof imageData === 'string' &&
+      (imageData.startsWith('http://') || imageData.startsWith('https://'))) {
       return imageData;
     }
-    
+
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(placeName)}&background=random&color=fff&size=400`;
   };
 
   // Xử lý dữ liệu địa điểm
   const processRentalData = () => {
-    return rentalData.data
-      .filter((item) => item.status === 3)
+    const filteredRentals = rentalData.data
+      .filter((item) => item.status === 3 && item.accommodationTypeIds && item.accommodationTypeIds.length > 0);
+    
+    console.log("Filtered Rentals (status=3 & has accommodationTypes):", 
+      filteredRentals.map(item => ({
+        id: item._id,
+        name: item.name,
+        status: item.status,
+        accommodationTypeIds: item.accommodationTypeIds
+      }))
+    );
+    
+    return filteredRentals
       .map((item) => {
         const latitude = item.latitude;
         const longitude = item.longitude;
@@ -110,12 +120,32 @@ export default function LocationList({
         const distance =
           userLocation && latitude && longitude
             ? getDistanceFromLatLonInKm(
-                userLocation.latitude,
-                userLocation.longitude,
-                latitude,
-                longitude
-              )
+              userLocation.latitude,
+              userLocation.longitude,
+              latitude,
+              longitude
+            )
             : null;
+
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+
+        const [openHourValue, openMinuteValue] = item.openHour.split(":").map(Number);
+        const [closeHourValue, closeMinuteValue] = item.closeHour.split(":").map(Number);
+
+        const currentTimeInMinutes = currentHour * 60 + currentMinute;
+        const openTimeInMinutes = openHourValue * 60 + openMinuteValue;
+        const closeTimeInMinutes = closeHourValue * 60 + closeMinuteValue;
+
+        let isOpen = item.isOverNight ? true : false;
+        if (!item.isOverNight) {
+          if (closeTimeInMinutes < openTimeInMinutes) {
+            isOpen = currentTimeInMinutes >= openTimeInMinutes || currentTimeInMinutes <= closeTimeInMinutes;
+          } else {
+            isOpen = currentTimeInMinutes >= openTimeInMinutes && currentTimeInMinutes <= closeTimeInMinutes;
+          }
+        }
 
         return {
           id: item._id,
@@ -137,7 +167,13 @@ export default function LocationList({
           distance: distance,
           isFavorite: favoriteList.includes(item._id),
           createdAt: item.createdAt || new Date().toISOString(),
+          isOpen: isOpen, 
         };
+      })
+      .sort((a, b) => {
+        if (a.isOpen && !b.isOpen) return -1;
+        if (!a.isOpen && b.isOpen) return 1;
+        return 0;
       });
   };
 
@@ -163,16 +199,11 @@ export default function LocationList({
           .filter((item) => item.ratingPoint > 0)
           .sort((a, b) => b.ratingPoint - a.ratingPoint);
         break;
-      case 4: // Recent
-        filtered = rentalList.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        );
-        break;
       default:
         filtered = rentalList;
     }
 
-    setFilteredRentals(filtered.slice(0, 5)); 
+    setFilteredRentals(filtered.slice(0, 5));
   }, [selectedFilterIndex, rentalData, userLocation, favoriteList]);
 
   const handleFavoritePress = async (id, isFav) => {
@@ -191,12 +222,6 @@ export default function LocationList({
       );
     } catch (error) {
       console.log("Error updating favorites:", error);
-    }
-  };
-
-  const onLocationPress = (id) => {
-    if (navigation) {
-      navigation.navigate("LocationDetail", { id });
     }
   };
 
@@ -239,6 +264,7 @@ export default function LocationList({
               }}
               onCardPress={() => onLocationPress(item.id)}
               initFavourite={item.isFavorite}
+              disabled={!item.isOpen} 
             />
           ))
         ) : (

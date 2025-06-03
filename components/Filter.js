@@ -1,16 +1,18 @@
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import { View, Text, StyleSheet, Modal, TouchableOpacity, PanResponder, Animated, Dimensions } from "react-native"
 import MultiSlider from "@ptomasroos/react-native-multi-slider"
 import ButtonGroup from "../components/buttons/ButtonGroup"
-import MultiSelectButtonGroup from "../components/buttons/MultiSelectButtonGroup"
 import CustomButton from "../components/buttons/Button"
 import { useTranslation } from "react-i18next"
+import { FontAwesome5 } from "@expo/vector-icons"
+import AmenitiesModal from "./modals/AmenitiesModal"
 
 const Filter = ({ visible, onClose, onApply, rentalLocations = [] }) => {
   const { t } = useTranslation()
   const [priceRange, setPriceRange] = useState([100000, 100000000])
   const [selectedRating, setSelectedRating] = useState(null)
   const [selectedAmenities, setSelectedAmenities] = useState([])
+  const [isAmenitiesModalVisible, setIsAmenitiesModalVisible] = useState(false)
   const screenWidth = Dimensions.get("window").width
   const sliderWidth = screenWidth - 40
 
@@ -18,6 +20,35 @@ const Filter = ({ visible, onClose, onApply, rentalLocations = [] }) => {
     min: 0,
     max: 10000,
   })
+
+  const ratingRanges = [
+    { min: 0, max: 1, label: "0-1" },
+    { min: 1, max: 2, label: "1-2" },
+    { min: 2, max: 3, label: "2-3" },
+    { min: 3, max: 4, label: "3-4" },
+    { min: 4, max: 5, label: "4-5" }
+  ]
+
+  const uniqueServiceNames = useMemo(() => {
+    const allServices = rentalLocations
+      .filter(rental => rental.status === 3) 
+      .reduce((services, rental) => {
+        if (rental.accommodationTypeIds && Array.isArray(rental.accommodationTypeIds)) {
+          rental.accommodationTypeIds.forEach(type => {
+            if (type.serviceIds && Array.isArray(type.serviceIds)) {
+              type.serviceIds.forEach(service => {
+                if (service.name) {
+                  services.add(service.name);
+                }
+              });
+            }
+          });
+        }
+        return services;
+      }, new Set());
+    
+    return Array.from(allServices);
+  }, [rentalLocations]);
 
   useEffect(() => {
     if (rentalLocations?.length > 0) {
@@ -164,7 +195,7 @@ const Filter = ({ visible, onClose, onApply, rentalLocations = [] }) => {
             <Text style={styles.sectionTitle}>{t("rating")}</Text>
             <View style={styles.line} />
             <ButtonGroup
-              items={[`1 ${t("star")}`, `2 ${t("star")}`, `3 ${t("star")}`, `4 ${t("star")}`, `5 ${t("star")}`]}
+              items={ratingRanges.map(range => `${range.label} ${t("star")}`)}
               selectedIndex={selectedRating}
               onChange={setSelectedRating}
               containerStyle={styles.buttonGroupContainer}
@@ -182,27 +213,17 @@ const Filter = ({ visible, onClose, onApply, rentalLocations = [] }) => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t("amenities")}</Text>
             <View style={styles.line} />
-            <MultiSelectButtonGroup
-              items={[
-                t("air_conditioner"),
-                t("refrigerator"),
-                t("wifi"),
-                t("tv"),
-                t("other_amenities"),
-                t("pet_allowed"),
-              ]}
-              selectedIndexes={selectedAmenities}
-              onChange={setSelectedAmenities}
-              containerStyle={styles.multiSelectContainer}
-              buttonStyle={styles.multiSelectButton}
-              activeButtonStyle={styles.activeMultiSelectButton}
-              inactiveButtonStyle={styles.inactiveMultiSelectButton}
-              textStyle={styles.multiSelectText}
-              activeTextStyle={styles.activeMultiSelectText}
-              inactiveTextStyle={styles.inactiveMultiSelectText}
-              spacing={10}
-              borderRadius={25}
-            />
+            <TouchableOpacity 
+              style={styles.amenitiesButton}
+              onPress={() => setIsAmenitiesModalVisible(true)}
+            >
+              <Text style={styles.amenitiesButtonText}>
+                {selectedAmenities.length > 0 
+                  ? `${selectedAmenities.length} ${t("amenities_selected")}`
+                  : t("select_amenities")}
+              </Text>
+              <FontAwesome5 name="chevron-right" size={16} color="#98A0B4" />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.buttonContainer}>
@@ -223,6 +244,14 @@ const Filter = ({ visible, onClose, onApply, rentalLocations = [] }) => {
           </View>
         </Animated.View>
       </View>
+
+      <AmenitiesModal
+        visible={isAmenitiesModalVisible}
+        onClose={() => setIsAmenitiesModalVisible(false)}
+        amenities={uniqueServiceNames}
+        selectedAmenities={selectedAmenities}
+        onSelectAmenity={setSelectedAmenities}
+      />
     </Modal>
   )
 }
@@ -338,32 +367,6 @@ const styles = StyleSheet.create({
   inactiveText: {
     color: "#4E72E3",
   },
-  multiSelectContainer: {
-    marginBottom: 20,
-  },
-  multiSelectButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderWidth: 1,
-  },
-  activeMultiSelectButton: {
-    backgroundColor: "rgba(78, 114, 227, 0.33)",
-    borderColor: "transparent",
-  },
-  inactiveMultiSelectButton: {
-    backgroundColor: "#F2F4F7",
-    borderColor: "#F2F4F7",
-  },
-  multiSelectText: {
-    fontSize: 15,
-    fontWeight: "500",
-  },
-  activeMultiSelectText: {
-    color: "#4B4B4B",
-  },
-  inactiveMultiSelectText: {
-    color: "#4B4B4B",
-  },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -380,6 +383,21 @@ const styles = StyleSheet.create({
     width: Dimensions.get("window").width - 40,
     backgroundColor: "#F3F3F3",
     marginVertical: 10,
+  },
+  amenitiesButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  amenitiesButtonText: {
+    fontSize: 14,
+    color: '#111827',
+    fontWeight: '500',
   },
 })
 

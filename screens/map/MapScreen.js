@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from "react"
-import { StyleSheet, View, ScrollView, Text, ActivityIndicator, Button, Keyboard, TouchableOpacity } from "react-native"
+import React, { useState, useEffect, useRef } from "react"
+import { StyleSheet, View, ScrollView, Text, ActivityIndicator, Button, Keyboard, TouchableOpacity, Modal } from "react-native"
 import MapView, { Marker } from "react-native-maps"
 import * as Location from "expo-location"
 import { FontAwesome5 } from "@expo/vector-icons"
+import { useFocusEffect } from '@react-navigation/native'
 import HorizontalCardMedium from "../../components/cards/HorizontalCardMedium"
 import SearchField from "../../components/SearchField"
 import Filter from "../../components/Filter"
@@ -25,8 +26,24 @@ const MapScreen = ({ navigation }) => {
   })
   const [isSearching, setIsSearching] = useState(false)
   const [hasAppliedFilters, setHasAppliedFilters] = useState(false)
+  
+  const [selectedRadius, setSelectedRadius] = useState(5)
+  const [radiusModalVisible, setRadiusModalVisible] = useState(false)
+  const [hasSelectedCustomRadius, setHasSelectedCustomRadius] = useState(false)
 
   const { data: rentalLocations, isLoading, error, refetch } = useGetAllRentalQuery()
+
+  // Radius options
+  const radiusOptions = [
+    { value: 1, label: "1 km" },
+    { value: 2, label: "2 km" },
+    { value: 5, label: "5 km" },
+    { value: 10, label: "10 km" },
+    { value: 15, label: "15 km" },
+    { value: 20, label: "20 km" },
+    { value: 50, label: "50 km" },
+    { value: 100, label: "100 km" },
+  ]
 
   useEffect(() => {
     const checkLocationPermission = async () => {
@@ -58,6 +75,32 @@ const MapScreen = ({ navigation }) => {
     checkLocationPermission()
   }, [])
 
+  useFocusEffect(
+    React.useCallback(() => {
+      // Reset states when screen is focused
+      setSelectedLocation(null)
+      setSearchText("")
+      setIsSearching(false)
+      setFilters({
+        priceRange: [100000, 100000000],
+        selectedRating: null,
+        selectedAmenities: [],
+      })
+      setHasAppliedFilters(false)
+      setFilterVisible(false)
+      
+      // Reset map to user location if available
+      if (mapRef.current && userLocation) {
+        mapRef.current.animateToRegion({
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }, 1000)
+      }
+    }, [userLocation])
+  )
+
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const deg2rad = (deg) => deg * (Math.PI / 180)
     const R = 6371
@@ -76,18 +119,47 @@ const MapScreen = ({ navigation }) => {
   const transformLocations = () => {
     if (!rentalLocations?.data) return []
 
-    return rentalLocations.data
+    console.log("Total locations before filtering:", rentalLocations.data.length)
+    
+    const filteredLocations = rentalLocations.data
       .filter((location) => {
-        return (
-          location.latitude &&
-          location.longitude &&
-          !isNaN(Number.parseFloat(location.latitude)) &&
-          !isNaN(Number.parseFloat(location.longitude))
-        )
+        // Only show rentals with status 3 and has accommodationTypeIds
+        if (location.status !== 3) {
+          console.log(`Location ${location._id} filtered out: status = ${location.status}`)
+          return false
+        }
+        if (!location.accommodationTypeIds?.length) {
+          console.log(`Location ${location._id} filtered out: empty accommodationTypeIds`)
+          return false
+        }
+        
+        if (!location.latitude || !location.longitude || 
+            isNaN(Number.parseFloat(location.latitude)) || 
+            isNaN(Number.parseFloat(location.longitude))) {
+          console.log(`Location ${location._id} filtered out: invalid coordinates`)
+          return false
+        }
+
+        return true
       })
       .map((location) => {
         const lat = Number.parseFloat(location.latitude)
         const lng = Number.parseFloat(location.longitude)
+
+        const services = location.accommodationTypeIds?.reduce((acc, type) => {
+          console.log('Processing accommodationType:', type);
+          if (type.serviceIds && Array.isArray(type.serviceIds)) {
+            type.serviceIds.forEach(service => {
+              console.log('Service found:', service);
+              if (service.name) {
+                acc.add(service.name)
+              }
+            })
+          }
+          return acc
+        }, new Set())
+
+        console.log('Extracted services for location', location._id, ':', Array.from(services));
 
         return {
           id: location._id,
@@ -97,23 +169,43 @@ const MapScreen = ({ navigation }) => {
           placeName: location.name,
           openHour: location.openHour || "08:00",
           closeHour: location.closeHour || "22:00",
-          minPrice: location?.minPrice ?? 100000,
-          maxPrice: location?.maxPrice ?? 500000,
-          location: `${location.address || ""}, ${location.ward || ""}, ${location.district || ""
-            }, ${location.city || ""}`,
-          rating: location.rating || "4.5",
-          numOfReviews: location.numOfReviews || "10",
+          minPrice: location?.minPrice ?? 0,
+          maxPrice: location?.maxPrice ?? 0,
+          location: `${location.address || ""}, ${location.ward || ""}, ${location.district || ""}, ${location.city || ""}`,
+          rating: location.averageRating || "0",
+          numOfReviews: location.totalFeedbacks || "0",
           distance: userLocation
             ? calculateDistance(userLocation.latitude, userLocation.longitude, lat, lng).toFixed(1)
             : "N/A",
-          destination: location,
+          destination: {
+            ...location,
+            services: Array.from(services)
+          }
         }
       })
+
+    console.log("Locations after filtering:", filteredLocations.length)
+    return filteredLocations
   }
 
   const getAllLocations = () => {
     return transformLocations()
   }
+
+  const isLocationOpen = (location) => {
+    if (location.destination.isOverNight) return true;
+
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes(); // Convert to minutes
+
+    const [openHour, openMinute] = (location.openHour || "08:00").split(":").map(Number);
+    const [closeHour, closeMinute] = (location.closeHour || "22:00").split(":").map(Number);
+    
+    const openTime = openHour * 60 + openMinute;
+    const closeTime = closeHour * 60 + closeMinute;
+    
+    return currentTime >= openTime && currentTime <= closeTime;
+  };
 
   const getNearbyLocations = () => {
     const locations = transformLocations()
@@ -125,14 +217,16 @@ const MapScreen = ({ navigation }) => {
     const isUsingSearchOrFilter = (searchText && searchText.length > 0 && isSearching) || hasAppliedFilters
 
     if (isUsingSearchOrFilter) {
-      return locations.filter((location) => {
+      const filtered = locations.filter((location) => {
         if (searchText && searchText.length > 0 && isSearching) {
-          const searchLower = searchText.toLowerCase()
-          const placeNameLower = location.placeName.toLowerCase()
-
-          if (!placeNameLower.includes(searchLower)) {
-            return false
-          }
+          const searchLower = searchText.toLowerCase().trim()
+          return (
+            location.destination.name?.toLowerCase().includes(searchLower) ||
+            location.destination.address?.toLowerCase().includes(searchLower) ||
+            location.destination.ward?.toLowerCase().includes(searchLower) ||
+            location.destination.district?.toLowerCase().includes(searchLower) ||
+            location.destination.city?.toLowerCase().includes(searchLower)
+          )
         }
 
         const min = typeof location.minPrice === 'number'
@@ -150,35 +244,62 @@ const MapScreen = ({ navigation }) => {
 
         let isRatingMatch = true
         if (filters.selectedRating !== null) {
-          const rating =
-            typeof location.rating === "number"
-              ? location.rating
-              : Number.parseFloat(location.rating || location.averageRating || "0")
+          const rating = location.destination.averageRating || 0;
 
-          const selectedRating = filters.selectedRating + 1
-          const lowerBound = selectedRating - 0.9
-          const upperBound = selectedRating + 0.9
-
-          isRatingMatch = rating >= lowerBound && rating <= upperBound
+          const ratingRanges = [
+            { min: 0, max: 1 },
+            { min: 1, max: 2 },
+            { min: 2, max: 3 },
+            { min: 3, max: 4 },
+            { min: 4, max: 5 }
+          ]
+          
+          const selectedRange = ratingRanges[filters.selectedRating]
+          isRatingMatch = rating >= selectedRange.min && rating <= selectedRange.max
         }
 
-        return isInPriceRange && isRatingMatch
+        let hasSelectedServices = true
+        if (filters.selectedAmenities && filters.selectedAmenities.length > 0) {
+          console.log('Selected amenities:', filters.selectedAmenities);
+          console.log('Location services:', location.destination.services);
+          hasSelectedServices = filters.selectedAmenities.every(amenity => {
+            const hasService = location.destination.services.includes(amenity);
+            console.log(`Checking amenity ${amenity}: ${hasService}`);
+            return hasService;
+          })
+        }
+
+        return isInPriceRange && isRatingMatch && hasSelectedServices
       })
-        .sort((a, b) => {
-          if (userLocation && a.distance !== "N/A" && b.distance !== "N/A") {
-            return Number.parseFloat(a.distance) - Number.parseFloat(b.distance)
-          }
-          return 0
-        })
+
+      console.log('Filtered locations count:', filtered.length);
+      return filtered.sort((a, b) => {
+        // Sort by open/closed status first
+        const aIsOpen = isLocationOpen(a);
+        const bIsOpen = isLocationOpen(b);
+        if (aIsOpen !== bIsOpen) return bIsOpen ? 1 : -1;
+
+        // If both have same open status, sort by distance
+        if (userLocation && a.distance !== "N/A" && b.distance !== "N/A") {
+          return Number.parseFloat(a.distance) - Number.parseFloat(b.distance)
+        }
+        return 0
+      })
     } else {
       return locations.filter((location) => {
         if (userLocation && location.distance && location.distance !== "N/A") {
           const distance = Number.parseFloat(location.distance)
-          return distance <= 5
+          return distance <= selectedRadius 
         }
         return false
       })
         .sort((a, b) => {
+          // Sort by open/closed status first
+          const aIsOpen = isLocationOpen(a);
+          const bIsOpen = isLocationOpen(b);
+          if (aIsOpen !== bIsOpen) return bIsOpen ? 1 : -1;
+
+          // If both have same open status, sort by distance
           if (userLocation && a.distance !== "N/A" && b.distance !== "N/A") {
             return Number.parseFloat(a.distance) - Number.parseFloat(b.distance)
           }
@@ -245,7 +366,7 @@ const MapScreen = ({ navigation }) => {
   }
 
   const handleCardPress = (location) => {
-    navigation.navigate("Home", {
+    navigation.navigate("Map", {
       screen: "DetailRentalLocation",
       params: {
         rentalId: location.id,
@@ -274,6 +395,17 @@ const MapScreen = ({ navigation }) => {
       appliedFilters.selectedAmenities.length > 0
 
     setHasAppliedFilters(isFiltered)
+  }
+
+  const handleRadiusSelect = (radius) => {
+    setSelectedRadius(radius)
+    setHasSelectedCustomRadius(true)
+    setRadiusModalVisible(false)
+  }
+
+  const handleRadiusReset = () => {
+    setSelectedRadius(5)
+    setHasSelectedCustomRadius(false)
   }
 
   if (locationError) {
@@ -321,7 +453,17 @@ const MapScreen = ({ navigation }) => {
         value={searchText}
         backIcon={true}
         filterIcon={true}
-        onPressBackIcon={() => navigation.goBack()}
+        onPressBackIcon={() => {
+          setSearchText("")
+          setIsSearching(false)
+          setFilters({
+            priceRange: [100000, 100000000],
+            selectedRating: null,
+            selectedAmenities: [],
+          })
+          setHasAppliedFilters(false)
+          navigation.goBack()
+        }}
         onPressFilterIcon={() => setFilterVisible(true)}
         style={styles.searchContainer}
         enableSearch={true}
@@ -387,13 +529,34 @@ const MapScreen = ({ navigation }) => {
       </MapView>
 
       <View style={styles.listContainer}>
-        <Text style={styles.listTitle}>
-          {isSearching && searchText
-            ? `${t("search_results_for")} "${searchText}"`
-            : hasAppliedFilters
-              ? t("filtered_results")
-              : t("nearest_destinations")}
-        </Text>
+        <View style={styles.listHeader}>
+          <Text style={styles.listTitle}>
+            {isSearching && searchText
+              ? `${t("search_results_for")} "${searchText}"`
+              : hasAppliedFilters
+                ? t("filtered_results")
+                : hasSelectedCustomRadius
+                  ? `Trong bán kính ${selectedRadius}km`
+                  : t("nearest_destinations")}
+          </Text>
+          <View style={styles.headerActions}>
+            {!isSearching && !hasAppliedFilters && (
+              <TouchableOpacity
+                style={styles.radiusButton}
+                onPress={() => setRadiusModalVisible(true)}
+                activeOpacity={0.8}
+              >
+                <FontAwesome5 name="circle" size={14} color="#4E72E3" />
+                <Text style={styles.radiusButtonText}>{selectedRadius}km</Text>
+              </TouchableOpacity>
+            )}
+            {hasSelectedCustomRadius && !isSearching && !hasAppliedFilters && (
+              <TouchableOpacity onPress={handleRadiusReset} style={styles.resetButton}>
+                <Text style={styles.resetButtonText}>Đặt lại</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
         <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContentContainer}>
           {nearbyLocations.length === 0 ? (
             <Text style={styles.noResultsText}>
@@ -401,7 +564,9 @@ const MapScreen = ({ navigation }) => {
                 ? `${t("no_results_for")} "${searchText}"`
                 : hasAppliedFilters
                   ? t("no_results_for")
-                  : t("no_results_location")}
+                  : hasSelectedCustomRadius
+                    ? `Không có địa điểm nào trong bán kính ${selectedRadius}km`
+                    : t("no_results_location")}
             </Text>
           ) : (
             nearbyLocations.map((location) => (
@@ -419,11 +584,59 @@ const MapScreen = ({ navigation }) => {
                 distance={location.distance}
                 style={styles.card}
                 onPress={() => handleCardPress(location)}
+                disabled={!isLocationOpen(location)}
+                isOverNight={location.destination.isOverNight}
               />
             ))
           )}
         </ScrollView>
       </View>
+
+      {/* Radius Selection Modal */}
+      <Modal
+        visible={radiusModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setRadiusModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Chọn bán kính tìm kiếm</Text>
+              <TouchableOpacity
+                onPress={() => setRadiusModalVisible(false)}
+                style={styles.modalCloseButton}
+              >
+                <FontAwesome5 name="times" size={18} color="#666" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.radiusOptionsContainer}>
+              {radiusOptions.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.radiusOption,
+                    selectedRadius === option.value && styles.selectedRadiusOption,
+                  ]}
+                  onPress={() => handleRadiusSelect(option.value)}
+                >
+                  <Text
+                    style={[
+                      styles.radiusOptionText,
+                      selectedRadius === option.value && styles.selectedRadiusOptionText,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                  {selectedRadius === option.value && (
+                    <FontAwesome5 name="check" size={16} color="#4E72E3" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
 
       <Filter
         visible={filterVisible}
@@ -515,11 +728,54 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
+  listHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
   listTitle: {
     fontSize: 16,
     fontWeight: "600",
     color: "#333333",
-    marginBottom: 8,
+    flex: 1,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  radiusButton: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    flexDirection: "row",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "rgba(78, 114, 227, 0.2)",
+  },
+  radiusButtonText: {
+    marginLeft: 4,
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#4E72E3",
+  },
+  resetButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 12,
+  },
+  resetButtonText: {
+    fontSize: 12,
+    color: "#666",
+    fontWeight: "500",
   },
   scrollContainer: {
     flex: 1,
@@ -529,6 +785,61 @@ const styles = StyleSheet.create({
   },
   card: {
     marginBottom: 12,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContainer: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: "70%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333333",
+  },
+  modalCloseButton: {
+    padding: 4,
+  },
+  radiusOptionsContainer: {
+    paddingHorizontal: 20,
+  },
+  radiusOption: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    marginVertical: 4,
+    borderRadius: 12,
+    backgroundColor: "#f9f9f9",
+  },
+  selectedRadiusOption: {
+    backgroundColor: "rgba(78, 114, 227, 0.1)",
+    borderWidth: 1,
+    borderColor: "#4E72E3",
+  },
+  radiusOptionText: {
+    fontSize: 16,
+    color: "#333333",
+  },
+  selectedRadiusOptionText: {
+    color: "#4E72E3",
+    fontWeight: "600",
   },
 
   userMarkerContainer: {

@@ -4,7 +4,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import PropTypes from "prop-types";
 import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
-import { useAsyncStorage } from "../../context/AsyncStorageContext"; // Adjust path as needed
+import { useAsyncStorage } from "../../context/AsyncStorageContext";
 
 export default function VerticalCard({
   id,
@@ -21,7 +21,9 @@ export default function VerticalCard({
   numberOfReview = 0,
   distance,
   initFavourite = false,
-  onFavouritePress = () => {},
+  onFavouritePress = () => { },
+  onCardPress = () => { },
+  disabled = false,
 }) {
   const { t } = useTranslation();
   const { isFavorite, toggleFavorite } = useAsyncStorage();
@@ -71,7 +73,7 @@ export default function VerticalCard({
 
     return () => clearTimeout(timeout);
   }, [isLoading, imageError, fallbackImage]);
-
+  
   useEffect(() => {
     const checkOpenStatus = () => {
       const now = new Date();
@@ -79,9 +81,7 @@ export default function VerticalCard({
       const currentMinute = now.getMinutes();
 
       const [openHourValue, openMinuteValue] = openHour.split(":").map(Number);
-      const [closeHourValue, closeMinuteValue] = closeHour
-        .split(":")
-        .map(Number);
+      const [closeHourValue, closeMinuteValue] = closeHour.split(":").map(Number);
 
       const currentTimeInMinutes = currentHour * 60 + currentMinute;
       const openTimeInMinutes = openHourValue * 60 + openMinuteValue;
@@ -90,12 +90,12 @@ export default function VerticalCard({
       if (closeTimeInMinutes < openTimeInMinutes) {
         setIsOpen(
           currentTimeInMinutes >= openTimeInMinutes ||
-            currentTimeInMinutes <= closeTimeInMinutes
+          currentTimeInMinutes <= closeTimeInMinutes
         );
       } else {
         setIsOpen(
           currentTimeInMinutes >= openTimeInMinutes &&
-            currentTimeInMinutes <= closeTimeInMinutes
+          currentTimeInMinutes <= closeTimeInMinutes
         );
       }
     };
@@ -131,8 +131,8 @@ export default function VerticalCard({
     }
   };
 
-  const onCardPress = () => {
-    navigate.navigate("DetailRentalLocation", { rentalId: id });
+  const handleCardPress = () => {
+    onCardPress(); 
   };
 
   const formatMoney = (value) => {
@@ -140,9 +140,8 @@ export default function VerticalCard({
   };
 
   const renderPriceRange = () => {
-    return `${formatMoney(minPrice)} - ${formatMoney(maxPrice)}${
-      t("per_hour") || "đ/giờ"
-    }`;
+    return `${formatMoney(minPrice)} - ${formatMoney(maxPrice)}${t("per_hour") || "đ/giờ"
+      }`;
   };
 
   const handleImageLoad = () => {
@@ -160,9 +159,9 @@ export default function VerticalCard({
 
   return (
     <TouchableOpacity
-      style={styles.card}
-      onPress={onCardPress}
-      activeOpacity={0.97}
+      style={[styles.card, disabled && styles.disabledCard]}
+      onPress={disabled ? null : handleCardPress}
+      activeOpacity={disabled ? 1 : 0.97}
     >
       <View style={styles.imageContainer}>
         {isLoading && !imageError && (
@@ -203,13 +202,11 @@ export default function VerticalCard({
         ) : status === 3 ? (
           <View
             style={
-              isOpen
-                ? styles.activeStatusContainer
-                : styles.closedStatusContainer
+              disabled ? styles.closedStatusContainer : styles.activeStatusContainer
             }
           >
             <Text style={styles.openHoursText}>
-              {isOpen ? t("open_hr") : t("close_hr")} ({openHour} - {closeHour})
+              {disabled ? t("close_hr") : t("open_hr")} ({openHour} - {closeHour})
             </Text>
           </View>
         ) : status === 4 ? (
@@ -263,7 +260,6 @@ export default function VerticalCard({
   );
 }
 
-// PropTypes remain the same
 VerticalCard.propTypes = {
   imageUrl: PropTypes.oneOfType([
     PropTypes.string,
@@ -281,9 +277,9 @@ VerticalCard.propTypes = {
   initFavourite: PropTypes.bool,
   onFavouritePress: PropTypes.func,
   onCardPress: PropTypes.func,
+  disabled: PropTypes.bool,
 };
 
-// Styles remain the same
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "white",
@@ -293,6 +289,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     borderWidth: 1,
     borderColor: "rgba(51, 51, 51, 0.1)",
+  },
+  disabledCard: {
+    opacity: 0.6,
   },
   distanceText: {
     fontSize: 14,

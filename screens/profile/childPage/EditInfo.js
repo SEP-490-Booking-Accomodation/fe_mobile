@@ -125,7 +125,7 @@ export default function EditInfo() {
 
       console.log(t("update_success"));
       setIsButtonSaveActive(false);
-      navigation.navigate("ProfileScreen");
+      navigation.goBack(); // Quay lại trang trước đó
     } catch (error) {
       console.error("Update error:", error);
       alert(t("general_error"));
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   spacing: {
     padding: 4,
   },
-   footer: {
+  footer: {
     position: "absolute",
     bottom: 20,
     left: 0,
