@@ -12,9 +12,7 @@ import {
   Modal,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import AsyncStorage, {
-  useAsyncStorage,
-} from "../../context/AsyncStorageContext";
+import { useAsyncStorage } from "../../context/AsyncStorageContext";
 import MultiSelectButtonGroup from "../../components/buttons/MultiSelectButtonGroup";
 import Tag from "../../components/Tag";
 import SimpleVerticalCard from "../../components/cards/SimpleVerticalCard";
@@ -34,15 +32,15 @@ import MoreOptionsModal from "../booking/modals/MoreOptionModal";
 const DetailRentalLocationScreen = ({ route, navigation }) => {
   const { t } = useTranslation();
   const [user, setUser] = useState({});
-  const { loadIdChatPlatform } = useAsyncStorage();
+  const { loadIdChatPlatform, isFavorite, toggleFavorite } = useAsyncStorage();
   const { rentalId: locationId } = route.params;
   const [activeTab, setActiveTab] = useState("accommodation_types");
   const [isServicesExpanded, setIsServicesExpanded] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavoriteState, setIsFavoriteState] = useState(false);
   const [selectedServices, setSelectedServices] = useState([]);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [allServices, setAllServices] = useState([]);
-  const [isOpen, setIsOpen] = useState(false); // Add state for open/close status
+  const [isOpen, setIsOpen] = useState(false);
 
   // Modal visibility states
   const [moreOptionsModalVisible, setMoreOptionsModalVisible] = useState(false);
@@ -80,6 +78,19 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const isLoading = isRentalLoading || isAccommodationLoading;
   const isError = isRentalError || isAccommodationError;
 
+  // Debug: Log route params on mount
+  useEffect(() => {
+   
+  }, [route.params]);
+
+  // Debug: Log rentalData and feedbackAverage when they change
+  useEffect(() => {
+
+  }, [rentalData]);
+  useEffect(() => {
+
+  }, [feedbackAverage]);
+
   const fetchUser = async () => {
     try {
       const userData = await loadIdChatPlatform();
@@ -88,15 +99,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
-    }
-  };
-
-  const loadFavoriteStatus = async () => {
-    const favoriteStatus = await AsyncStorage.getItem(
-      `favoriteStatus_${locationId}`
-    );
-    if (favoriteStatus !== null) {
-      setIsFavorite(JSON.parse(favoriteStatus));
     }
   };
 
@@ -152,9 +154,10 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     fetchUser();
-    loadFavoriteStatus();
+    // Check if the location is in favorites
+    setIsFavoriteState(isFavorite(locationId));
     updateServices();
-  }, [locationId]);
+  }, [locationId, isFavorite]);
 
   if (!locationId) {
     return (
@@ -165,19 +168,62 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     );
   }
 
-  const toggleFavorite = async () => {
-    const newStatus = !isFavorite;
-    setIsFavorite(newStatus);
-    await AsyncStorage.setItem(
-      `favoriteStatus_${locationId}`,
-      JSON.stringify(newStatus)
+  // Add this guard clause before using rentalData.data or feedbackAverage
+  if (!rentalData || !rentalData.data || !feedbackAverage) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4E72E3" />
+        </View>
+      </SafeAreaView>
     );
+  }
+
+  const handleFavoritePress = async () => {
+    try {
+      // Check if rentalData is loaded
+      if (!rentalData?.data) {
+        console.warn('[DEBUG] rentalData is not loaded yet!');
+        Alert.alert(
+          t("error"),
+          t("please_wait_loading"),
+          [{ text: t("ok"), style: "default" }]
+        );
+        return;
+      }
+
+      const locationData = {
+        id: locationId,
+        imageUrl: rentalData.data.image?.[0] || "https://ui-avatars.com/api/?name=Place&background=random&color=fff&size=400",
+        placeName: rentalData.data.name || t("unknown_place"),
+        openHour: rentalData.data.openHour || "00:00",
+        closeHour: rentalData.data.closeHour || "23:59",
+        minPrice: rentalData.data.minPrice || 0,
+        maxPrice: rentalData.data.maxPrice || 0,
+        location: rentalData.data.address 
+          ? `${rentalData.data.address}, ${rentalData.data.ward || ""}, ${rentalData.data.district || ""}, ${rentalData.data.city || ""}`
+          : t("location_not_available"),
+        ratingPoint: feedbackAverage?.averageRating || 0,
+        numberOfReview: feedbackAverage?.totalFeedbacks || 0,
+        status: rentalData.data.status || 3,
+        isOverNight: rentalData.data.isOverNight || false,
+      };
+
+     
+      const newFavoriteStatus = await toggleFavorite(locationData);
+      setIsFavoriteState(newFavoriteStatus);
+    } catch (error) {
+      Alert.alert(
+        t("error"),
+        t("failed_to_update_favorite"),
+        [{ text: t("ok"), style: "default" }]
+      );
+    }
   };
 
   const handleChatPress = async () => {
     try {
       const currentUser = user;
-      console.log("Current User:", currentUser);
       const ownerPlatformId = userOwnerId?.userId;
       const locationId = rentalData.data?._id;
 
@@ -189,7 +235,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
         navigation,
       });
 
-      console.log(result);
+      
     } catch (error) {
       console.error("Chat start error:", error);
     }
@@ -202,13 +248,11 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 
   // Add these handler functions for the modal actions
   const handleShare = () => {
-    console.log("Share pressed");
     // Implement your share functionality here
   };
 
   const ratingCounts = (feedbackDataList || []).reduce((acc, review) => {
     const rating = review.rating;
-    console.log(acc);
     if (rating >= 1 && rating <= 5) {
       acc[rating] = (acc[rating] || 0) + 1;
     }
@@ -378,7 +422,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               imageUrl={accommodationType.image?.[0]}
               placeName={accommodationType.name}
               price={`${accommodationType.basePrice}${t("per_hour")}`}
-              location={`${rental.address}, ${rental.ward} , ${rental.district}, ${rental.city}`}
+              location={`${rentalData.data.address}, ${rentalData.data.ward} , ${rentalData.data.district}, ${rentalData.data.city}`}
               onCardPress={() => handleCardPress(accommodationType)}
             />
           ))}
@@ -448,6 +492,27 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     }
   };
 
+  // Update the favorite button in the render section
+  const renderFavoriteButton = () => {
+    if (isLoading) {
+      return (
+        <TouchableOpacity disabled>
+          <ActivityIndicator size="small" color="#666666" />
+        </TouchableOpacity>
+      );
+    }
+
+    return (
+      <TouchableOpacity onPress={handleFavoritePress}>
+        <Icon
+          name={isFavoriteState ? "favorite" : "favorite-border"}
+          size={24}
+          color={isFavoriteState ? "#FF4B26" : "#666666"}
+        />
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.mainContainer}>
@@ -456,13 +521,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
             <AntDesign name="left" size={24} color="#4E72E3" />
           </TouchableOpacity>
           <View style={styles.actionIcons}>
-            <TouchableOpacity onPress={toggleFavorite}>
-              <Icon
-                name={isFavorite ? "favorite" : "favorite-border"}
-                size={24}
-                color="red"
-              />
-            </TouchableOpacity>
+            {renderFavoriteButton()}
             <TouchableOpacity onPress={handleChatPress}>
               <MaterialIcons name="chat" size={24} color="#4E72E3" />
             </TouchableOpacity>
@@ -616,6 +675,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    paddingTop: 20,
     backgroundColor: "#f8f9fa",
   },
   ratingCount: {

@@ -86,21 +86,13 @@ export const AsyncStorageProvider = ({ children }) => {
 
   const addFavorite = async (item) => {
     try {
-      const updatedFavorites = [...favorites];
-      const existingIndex = updatedFavorites.findIndex(
-        (fav) => fav.id === item.id
+      const updatedFavorites = [item, ...favorites.filter(fav => fav.id !== item.id)];
+      setFavorites(updatedFavorites);
+      await AsyncStorage.setItem(
+        "favorites",
+        JSON.stringify(updatedFavorites)
       );
-
-      if (existingIndex === -1) {
-        updatedFavorites.push(item);
-        setFavorites(updatedFavorites);
-        await AsyncStorage.setItem(
-          "favorites",
-          JSON.stringify(updatedFavorites)
-        );
-        return true;
-      }
-      return false;
+      return true;
     } catch (error) {
       console.error("Failed to add favorite:", error);
       return false;
@@ -181,7 +173,6 @@ export const AsyncStorageProvider = ({ children }) => {
       await AsyncStorage.removeItem("idChatPlatform");
       setIdChatPlatform([]);
     } catch (error) {
-      console.log("Failed to remove idChatPlatform:", error);
     }
   };
 
