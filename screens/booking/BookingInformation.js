@@ -124,10 +124,7 @@ export default function BookingInformation({ route, navigation }) {
     selectedDay.setHours(0, 0, 0, 0);
 
     if (selectedDay < today || selectedDay > tomorrow) {
-      Alert.alert(
-        t("error"),
-        t("date_selection_error")
-      );
+      Alert.alert(t("error"), t("date_selection_error"));
       closeDatePicker();
       return;
     }
@@ -247,7 +244,6 @@ export default function BookingInformation({ route, navigation }) {
     return parts.join(", ");
   };
 
-
   const formatMoney = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -286,11 +282,11 @@ export default function BookingInformation({ route, navigation }) {
     console.log(checkInDateTime);
     console.log(checkOutDateTime);
     const formCheckAvailable = {
-      accommodationTypeId: accommodationTypeData?.data.id,
+      rentalLocationId: rentalData?.data?.id,
+      accommodationTypeId: accommodationTypeData?.data?.id,
       checkIn: checkInDateTime,
       checkOut: checkOutDateTime,
     };
-
     try {
       const response = await checkAvailable({
         data: formCheckAvailable,
@@ -313,10 +309,7 @@ export default function BookingInformation({ route, navigation }) {
         Alert.alert(t("sorry"), t("no_available_rooms"));
       }
     } catch (error) {
-      Alert.alert(
-        t("failed"),
-        error.data?.message || t("booking_failed")
-      );
+      Alert.alert(t("failed"), error.data?.message || t("booking_failed"));
     }
   };
 
@@ -388,7 +381,6 @@ export default function BookingInformation({ route, navigation }) {
     </SafeAreaView>
   );
 }
-
 
 const styles = StyleSheet.create({
   safeArea: {

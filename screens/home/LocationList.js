@@ -36,7 +36,6 @@ export default function LocationList({
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        console.log("Permission to access location was denied");
         return;
       }
 
@@ -57,7 +56,6 @@ export default function LocationList({
           setFavoriteList(JSON.parse(storedFavorites));
         }
       } catch (error) {
-        console.log("Error getting favorites:", error);
       }
     };
 
@@ -193,6 +191,8 @@ export default function LocationList({
         break;
       case 2: // Favorite
         filtered = rentalList.filter((item) => favoriteList.includes(item.id));
+        // Show newest favorite first
+        filtered = filtered.reverse();
         break;
       case 3: // Top rated
         filtered = rentalList
@@ -221,7 +221,7 @@ export default function LocationList({
         JSON.stringify(updatedFavorites)
       );
     } catch (error) {
-      console.log("Error updating favorites:", error);
+     
     }
   };
 
@@ -255,12 +255,6 @@ export default function LocationList({
               {...item}
               onFavouritePress={(isFav) => {
                 handleFavoritePress(item.id, isFav);
-                console.log(
-                  t("favorite_log", {
-                    action: t(isFav ? "added" : "removed"),
-                    name: item.placeName,
-                  })
-                );
               }}
               onCardPress={() => onLocationPress(item.id)}
               initFavourite={item.isFavorite}
