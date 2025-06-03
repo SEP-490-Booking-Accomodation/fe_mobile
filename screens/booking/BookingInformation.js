@@ -167,25 +167,29 @@ export default function BookingInformation({ route, navigation }) {
       return;
     }
 
-    if (
-      selectedHour > CLOSING_HOUR ||
-      (selectedHour === CLOSING_HOUR && selectedMinute < CLOSING_MINUTE)
-    ) {
-      Alert.alert(
-        "Lỗi",
-        `Thời gian nhận phòng chỉ từ ${OPENING_HOUR}:${String(
-          OPENING_MINUTE
-        ).padStart(2, "0")} đến ${CLOSING_HOUR}:${String(
-          CLOSING_MINUTE
-        ).padStart(2, "0")}.`
-      );
-      closeTimePicker();
-      return;
+    // Nếu là phòng qua đêm thì cho phép chọn đến 23:59
+    if (!isOverNight) {
+      if (
+        selectedHour > CLOSING_HOUR ||
+        (selectedHour === CLOSING_HOUR && selectedMinute < CLOSING_MINUTE)
+      ) {
+        Alert.alert(
+          "Lỗi",
+          `Thời gian nhận phòng chỉ từ ${OPENING_HOUR}:${String(
+            OPENING_MINUTE
+          ).padStart(2, "0")} đến ${CLOSING_HOUR}:${String(
+            CLOSING_MINUTE
+          ).padStart(2, "0")}.`
+        );
+        closeTimePicker();
+        return;
+      }
     }
 
     const endDateTime = new Date(selectedDateTime);
     endDateTime.setHours(endDateTime.getHours() + selectedDuration);
 
+    // Nếu không phải qua đêm thì mới kiểm tra endDateTime vượt quá closing
     if (
       !isOverNight &&
       (endDateTime.getHours() > CLOSING_HOUR ||

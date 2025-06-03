@@ -45,7 +45,7 @@ export default function CouponSelector({
     const currentDate = new Date();
     const processed = [];
 
-    couponData.forEach((coupon) => {
+    couponData?.coupons.forEach((coupon) => {
       if (coupon.isDelete || !coupon.isActive) return;
 
       const startDate = new Date(convertVNDateToISO(coupon.startDate));
@@ -171,7 +171,7 @@ export default function CouponSelector({
                         disabled={!item.isSelectable}
                       >
                         <View style={styles.voucherHeader}>
-                          <Text style={styles.voucherCode}>{item.code}</Text>
+                          <Text style={styles.voucherCode}>{item.couponCode}</Text>
                           <Text style={styles.voucherDiscount}>
                             {item.discount}
                           </Text>

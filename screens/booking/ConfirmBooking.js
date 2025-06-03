@@ -155,8 +155,13 @@ export default function ConfirmBooking() {
   const handleConfirm = async () => {
     setIsLoading(true);
 
+    // Policy Checkout 
+    // Policy Checkin
+    // Policy Refund time
+    // Policy Cancel
+
     const formBooking = {
-      // policySystemIds: policyId || ["67ebf15d828b69a4d279d960"],
+      policySystemIds: policyId || ["67ebf15d828b69a4d279d960"],
       customerId: customerData.id,
       accommodationTypeId: typeRoom.id,
       couponId: selectedVoucher?.id || null,
