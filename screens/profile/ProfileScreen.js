@@ -71,7 +71,10 @@ export default function ProfileScreen() {
     <View style={styles.header}>
       <TouchableOpacity
         style={styles.arrowBack}
-        onPress={() => navigation.goBack()}
+        onPress={() => navigation.reset({
+          index: 0,
+          routes: [{ name: "HomeScreen" }],
+        })}
       >
         <AntDesign name="left" size={24} color="#4E72E3" />
       </TouchableOpacity>

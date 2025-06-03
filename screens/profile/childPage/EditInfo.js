@@ -8,6 +8,7 @@ import {
   Image,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -21,9 +22,11 @@ import { uploadAvatar } from "../../../lib/supabase";
 
 const AvatarUpload = ({ currentImage, onImageChange }) => {
   const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
 
   const pickImage = async () => {
     try {
+      setIsLoading(true);
       if (Platform.OS !== "web") {
         const { status } =
           await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -42,6 +45,14 @@ const AvatarUpload = ({ currentImage, onImageChange }) => {
 
       if (!result.canceled && result.assets.length > 0) {
         const imageUri = result.assets[0].uri;
+        const fileInfo = await getFileInfo(imageUri);
+        
+        // Check file size (5MB limit)
+        if (fileInfo.size > 5 * 1024 * 1024) {
+          alert(t("image_size_error") || "Image size should be less than 5MB");
+          return;
+        }
+
         console.log("Selected image URI:", imageUri);
         if (!uploadAvatar) {
           throw new Error("uploadAvatar function is not defined");
@@ -61,14 +72,26 @@ const AvatarUpload = ({ currentImage, onImageChange }) => {
         errorMessage = t("network_error") || "Network error, please try again";
       }
       alert(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const getFileInfo = async (uri) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    return { size: blob.size };
   };
 
   return (
     <View style={styles.avatarContainer}>
-      <TouchableOpacity onPress={pickImage}>
+      <TouchableOpacity onPress={pickImage} disabled={isLoading}>
         <View style={styles.avatarWrapper}>
-          {currentImage ? (
+          {isLoading ? (
+            <View style={[styles.avatar, styles.loadingContainer]}>
+              <ActivityIndicator size="large" color="#4E72E3" />
+            </View>
+          ) : currentImage ? (
             <Image source={{ uri: currentImage }} style={styles.avatar} />
           ) : (
             <View style={[styles.avatar, styles.placeholder]} />
@@ -125,7 +148,10 @@ export default function EditInfo() {
 
       console.log(t("update_success"));
       setIsButtonSaveActive(false);
-      navigation.navigate("ProfileScreen");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "ProfileScreen" }],
+      });
     } catch (error) {
       console.error("Update error:", error);
       alert(t("general_error"));
@@ -250,5 +276,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     // padding: 16,
+  },
+  loadingContainer: {
+    backgroundColor: 'rgba(225, 225, 225, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
