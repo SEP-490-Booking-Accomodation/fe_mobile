@@ -16,7 +16,7 @@ export default function CouponSelector({
   selectedVoucher,
   setSelectedVoucher,
 }) {
-  const { t } = useTranslation(); 
+  const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
   const [processedCoupons, setProcessedCoupons] = useState([]);
   const { data: couponData, refetch } = useGetAllCouponQuery();
@@ -45,7 +45,7 @@ export default function CouponSelector({
     const currentDate = new Date();
     const processed = [];
 
-    couponData.forEach((coupon) => {
+    couponData?.coupons.forEach((coupon) => {
       if (coupon.isDelete || !coupon.isActive) return;
 
       const startDate = new Date(convertVNDateToISO(coupon.startDate));
@@ -69,8 +69,8 @@ export default function CouponSelector({
           });
         }
       } else {
-        description = t("discount_fixed", { 
-          amount: formatCurrency(coupon.amount) 
+        description = t("discount_fixed", {
+          amount: formatCurrency(coupon.amount),
         });
       }
 
@@ -114,7 +114,7 @@ export default function CouponSelector({
   };
 
   const handleSelectVoucher = (voucher) => {
-    if (!voucher.isSelectable) return; 
+    if (!voucher.isSelectable) return;
     setSelectedVoucher(voucher);
     setModalVisible(false);
   };
@@ -141,10 +141,7 @@ export default function CouponSelector({
         />
       </TouchableOpacity>
 
-      <ReactNativeModal
-        isVisible={modalVisible}
-        style={styles.modalWrapper}
-      >
+      <ReactNativeModal isVisible={modalVisible} style={styles.modalWrapper}>
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback>
