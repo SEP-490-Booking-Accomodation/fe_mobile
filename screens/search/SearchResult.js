@@ -4,7 +4,7 @@ import SearchField from "../search/SearchField";
 import Dropdown from "../../components/DropDown";
 import VerticalCard from "../../components/cards/VerticalCard";
 import Filter from "../../components/Filter";
-import { useGetAllRentalQuery } from "../../api/rentalLocationApi";
+import { useGetAllRentalQuery, useGetRentalLocationByIdQuery } from "../../api/rentalLocationApi";
 import * as Location from "expo-location";
 import { useTranslation } from "react-i18next";
 
@@ -79,8 +79,10 @@ const SearchResult = ({ route, navigation }) => {
   const rentalDisplay = useMemo(() => {
     if (!rental?.data) return [];
 
+    console.log('Total rentals from API:', rental.data.length);
+
     return rental.data
-      .filter((item) => item.status === 3)
+      .filter((item) => item.status === 3 && item.accommodationTypeIds && item.accommodationTypeIds.length > 0)
       .map((item) => {
         const distance =
           userLocation && item.latitude && item.longitude
@@ -91,6 +93,43 @@ const SearchResult = ({ route, navigation }) => {
               item.longitude
             )
             : null;
+
+        // Extract all services from accommodationTypeIds
+        const services = item.accommodationTypeIds?.reduce((acc, type) => {
+          console.log('Processing accommodationType in Search:', type);
+          if (type.serviceIds && Array.isArray(type.serviceIds)) {
+            type.serviceIds.forEach(service => {
+              console.log('Service found in Search:', service);
+              if (service.name) {
+                acc.add(service.name);
+              }
+            });
+          }
+          return acc;
+        }, new Set());
+
+        console.log('Extracted services for rental', item._id, ':', Array.from(services));
+
+        // Calculate if the location is open
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+
+        const [openHourValue, openMinuteValue] = (item.openHour || "08:00").split(":").map(Number);
+        const [closeHourValue, closeMinuteValue] = (item.closeHour || "22:00").split(":").map(Number);
+
+        const currentTimeInMinutes = currentHour * 60 + currentMinute;
+        const openTimeInMinutes = openHourValue * 60 + openMinuteValue;
+        const closeTimeInMinutes = closeHourValue * 60 + closeMinuteValue;
+
+        let isOpen = item.isOverNight ? true : false;
+        if (!item.isOverNight) {
+          if (closeTimeInMinutes < openTimeInMinutes) {
+            isOpen = currentTimeInMinutes >= openTimeInMinutes || currentTimeInMinutes <= closeTimeInMinutes;
+          } else {
+            isOpen = currentTimeInMinutes >= openTimeInMinutes && currentTimeInMinutes <= closeTimeInMinutes;
+          }
+        }
 
         return {
           id: item._id,
@@ -110,13 +149,17 @@ const SearchResult = ({ route, navigation }) => {
           ratingPoint: item.averageRating || 0,
           numberOfReview: item.totalFeedbacks,
           distance: distance,
-          amenities: item.amenities || [],
+          isOpen: isOpen,
+          services: Array.from(services),
+          accommodationTypeIds: item.accommodationTypeIds
         };
       });
   }, [rental, userLocation]);
 
   const filteredAndSortedData = useMemo(() => {
     let filteredData = rentalDisplay;
+
+    console.log('Initial data count:', filteredData.length);
 
     filteredData = filteredData.filter((item) => {
       const searchMatch = !isSearching ||
@@ -133,23 +176,47 @@ const SearchResult = ({ route, navigation }) => {
               item.maxPrice >= appliedFilterParams.priceRange[1]);
 
           const ratingMatch = appliedFilterParams.selectedRating !== null
-            ? (item.ratingPoint || 0) >= (appliedFilterParams.selectedRating + 0.1)
+            ? (() => {
+                const rating = parseFloat(item.ratingPoint || '0');
+                const ratingRanges = [
+                  { min: 0, max: 1 },
+                  { min: 1, max: 2 },
+                  { min: 2, max: 3 },
+                  { min: 3, max: 4 },
+                  { min: 4, max: 5 }
+                ];
+                const selectedRange = ratingRanges[appliedFilterParams.selectedRating];
+                return rating >= selectedRange.min && rating <= selectedRange.max;
+              })()
             : true;
 
-          const amenitiesMatch = appliedFilterParams.selectedAmenities.length > 0
-            ? appliedFilterParams.selectedAmenities.every((amenity) =>
-              item.amenities.includes(amenity)
-            )
-            : true;
+          let hasSelectedServices = true;
+          if (appliedFilterParams.selectedAmenities && appliedFilterParams.selectedAmenities.length > 0) {
+            console.log('Selected amenities in Search:', appliedFilterParams.selectedAmenities);
+            console.log('Item services:', item.services);
+            hasSelectedServices = appliedFilterParams.selectedAmenities.every(amenity => {
+              const hasService = item.services.includes(amenity);
+              console.log(`Checking amenity ${amenity} in Search: ${hasService}`);
+              return hasService;
+            });
+          }
 
-          return priceInRange && ratingMatch && amenitiesMatch;
+          return priceInRange && ratingMatch && hasSelectedServices;
         })()
         : true;
 
       return searchMatch && filterMatch;
     });
 
+    console.log('Filtered data count:', filteredData.length);
+
+    // Sort by open/closed status first, then by the selected sort option
     return filteredData.sort((a, b) => {
+      // First sort by open/closed status
+      if (a.isOpen && !b.isOpen) return -1;
+      if (!a.isOpen && b.isOpen) return 1;
+
+      // Then apply the selected sort option
       if (selectedSortOption === t("price_low_to_high")) {
         return a.minPrice - b.minPrice;
       } else if (selectedSortOption === t("price_high_to_low")) {
@@ -207,7 +274,12 @@ const SearchResult = ({ route, navigation }) => {
                 {...item}
                 initFavourite={false}
                 onFavouritePress={(isFav) => console.log(t("favorite_status"), isFav)}
-                onCardPress={() => navigation.navigate("RentalDetail", { id: item.id })}
+                onCardPress={() => {
+                  navigation.navigate("DetailRentalLocation", { 
+                    rentalId: item.id
+                  });
+                }}
+                disabled={!item.isOpen}
               />
             ))}
           </>

@@ -9,8 +9,6 @@ export default function SimpleVerticalCard(props) {
     placeName,
     price,
     location,
-    ratingPoint,
-    numberOfReview,
     onCardPress,
   } = props;
 
@@ -68,13 +66,6 @@ export default function SimpleVerticalCard(props) {
           <Icon name="location-on" size={16} color={"#4e72e3"} />
           <Text style={styles.locationText}>{location}</Text>
         </View>
-
-        <View style={styles.ratingContainer}>
-          <Icon name="star" size={16} color={"#ffc907"} />
-          <Text style={styles.ratingText}>
-            {ratingPoint} ({numberOfReview} {t("reviews_count")})
-          </Text>
-        </View>
       </View>
     </TouchableOpacity>
   );
@@ -131,15 +122,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   locationText: {
-    fontSize: 12,
-    color: "#6b7280",
-    marginLeft: 4,
-  },
-  ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  ratingText: {
     fontSize: 12,
     color: "#6b7280",
     marginLeft: 4,

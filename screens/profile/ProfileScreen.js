@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -20,16 +20,24 @@ import { useDispatch } from "react-redux";
 import { logout } from "../../redux/authSlice";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
 import { useTranslation } from "react-i18next";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const userId = useSelector((state) => state.auth?.userId);
-  const { data, isLoading, error } = useGetCustomerDetailByIdQuery(userId);
+  const { data, isLoading, error, refetch } = useGetCustomerDetailByIdQuery(userId);
   const defaultAvatar = require("../../assets/images/man.jpg");
   const dispatch = useDispatch();
   const { removeAllIdChatPlaform } = useAsyncStorage();
   const navigation = useNavigation();
+
+  // Refetch data khi màn hình được focus
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   const logoutModalRender = () => (
     <Modal
@@ -106,7 +114,7 @@ export default function ProfileScreen() {
   );
 
   const handleNavigateEditInfo = () => {
-    navigation.navigate("EditInfo", { data });
+    navigation.navigate("EditInfo", { data, refetchProfile: refetch });
   };
 
   const handleNavigateChangePassword = () => {
@@ -137,7 +145,7 @@ export default function ProfileScreen() {
     setShowLogoutModal(false);
     dispatch(logout());
     await removeAllIdChatPlaform();
-    navigation.reset({//xóa các stack trước đó 
+    navigation.reset({
       index: 0,
       routes: [{ name: "MainTabs" }],
     });
@@ -155,8 +163,8 @@ export default function ProfileScreen() {
             <Image
               source={
                 data?.userId?.avatarUrl
-                  ? { uri: data?.userId?.avatarUrl[0] } // Remote URL
-                  : defaultAvatar // Local image (require statement)
+                  ? { uri: data?.userId?.avatarUrl[0] } 
+                  : defaultAvatar
               }
               style={styles.avatar}
             />
@@ -188,18 +196,6 @@ export default function ProfileScreen() {
               false,
               handleNavigateFavouriteList
             )}
-            {/*{renderItem(*/}
-            {/*  "wallet-outline",*/}
-            {/*  "Ví của tôi",*/}
-            {/*  false,*/}
-            {/*  handleNavigateWalletScreen*/}
-            {/*)}*/}
-            {/*{renderItem(*/}
-            {/*  "newspaper-outline",*/}
-            {/*  "Lịch sử",*/}
-            {/*  false,*/}
-            {/*  handleNavigateHistory*/}
-            {/*)}*/}
             {renderItem(
               "star-outline",
               t('my_ratings'),
@@ -302,7 +298,6 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "bold",
   },
-  // Modal styles
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",

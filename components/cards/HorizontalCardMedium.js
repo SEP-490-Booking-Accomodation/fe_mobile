@@ -45,12 +45,18 @@ const HorizontalCardMedium = ({
   status = 3,
   isOverNight = false,
   onPress,
+  disabled = false,
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const checkOpenStatus = () => {
+      if (isOverNight) {
+        setIsOpen(true);
+        return;
+      }
+
       const now = new Date();
       const currentHour = now.getHours();
       const currentMinute = now.getMinutes();
@@ -113,13 +119,26 @@ const HorizontalCardMedium = ({
   };
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
+    <TouchableOpacity 
+      style={[
+        styles.card,
+        disabled && styles.disabledCard
+      ]} 
+      onPress={disabled ? null : onPress}
+      activeOpacity={disabled ? 1 : 0.2}
+    >
       <Image
         source={{ uri: imageUrlLogo }}
         resizeMode="cover"
-        style={styles.image}
+        style={[
+          styles.image,
+          disabled && styles.disabledImage
+        ]}
       />
-      <View style={styles.infoContainer}>
+      <View style={[
+        styles.infoContainer,
+        disabled && styles.disabledContent
+      ]}>
         <Text style={styles.title}>{placeName}</Text>
         <View style={[styles.openingHourContainer, getStatusContainer()]}>
           <Text style={styles.openHourText}>
@@ -241,6 +260,16 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 12,
     color: "#979797",
+  },
+  disabledCard: {
+    opacity: 0.6,
+    backgroundColor: "#f5f5f5",
+  },
+  disabledImage: {
+    opacity: 0.5,
+  },
+  disabledContent: {
+    opacity: 0.7,
   },
 });
 
