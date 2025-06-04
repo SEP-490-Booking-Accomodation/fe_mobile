@@ -23,7 +23,6 @@ export default function BookingInformation({ route, navigation }) {
   const { t } = useTranslation();
   const { accommodationTypeData, rentalData } = route.params || {};
 
-  // Set isOverNight property from accommodationTypeData
   const parseTime = (timeStr) => {
     if (!timeStr) return { hour: 0, minute: 0 };
     const [hour, minute] = timeStr.split(":").map(Number);
@@ -42,12 +41,10 @@ export default function BookingInformation({ route, navigation }) {
   const MAX_PEOPLE = accommodationTypeData?.data?.maxPeopleNumber || 3;
   const isOverNight = rentalData?.data?.isOverNight;
 
-  // State for pickers and modals
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
   const [isTimePickerVisible, setTimePickerVisible] = useState(false);
   const [isGuestModalVisible, setGuestModalVisible] = useState(false);
 
-  // Initialize with current date and time
   const now = new Date();
   const [selectedDate, setSelectedDate] = useState(now);
   const [selectedTime, setSelectedTime] = useState();
@@ -58,7 +55,6 @@ export default function BookingInformation({ route, navigation }) {
   });
   const [endTime, setEndTime] = useState(null);
 
-  // Form validation
   const [isFormValid, setIsFormValid] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -137,19 +133,20 @@ export default function BookingInformation({ route, navigation }) {
   };
 
   const handleTimeSelect = (time) => {
-    const now = new Date();
-    const selectedDateTime = new Date(selectedDate);
-    selectedDateTime.setHours(time.getHours(), time.getMinutes(), 0);
+  const now = new Date();
+  const selectedDateTime = new Date(selectedDate);
+  selectedDateTime.setHours(time.getHours(), time.getMinutes(), 0);
 
-    if (selectedDateTime < now) {
-      Alert.alert(t("error"), t("future_time_error"));
-      closeTimePicker();
-      return;
-    }
+  if (selectedDateTime < now) {
+    Alert.alert(t("error"), t("future_time_error"));
+    closeTimePicker();
+    return;
+  }
 
-    const selectedHour = time.getHours();
-    const selectedMinute = time.getMinutes();
+  const selectedHour = time.getHours();
+  const selectedMinute = time.getMinutes();
 
+  if (!isOverNight) {
     if (
       selectedHour < OPENING_HOUR ||
       (selectedHour === OPENING_HOUR && selectedMinute < OPENING_MINUTE)
@@ -167,48 +164,48 @@ export default function BookingInformation({ route, navigation }) {
       return;
     }
 
-    // Nếu là phòng qua đêm thì cho phép chọn đến 23:59
-    if (!isOverNight) {
-      if (
-        selectedHour > CLOSING_HOUR ||
-        (selectedHour === CLOSING_HOUR && selectedMinute < CLOSING_MINUTE)
-      ) {
-        Alert.alert(
-          "Lỗi",
-          `Thời gian nhận phòng chỉ từ ${OPENING_HOUR}:${String(
-            OPENING_MINUTE
-          ).padStart(2, "0")} đến ${CLOSING_HOUR}:${String(
-            CLOSING_MINUTE
-          ).padStart(2, "0")}.`
-        );
-        closeTimePicker();
-        return;
-      }
-    }
-
-    const endDateTime = new Date(selectedDateTime);
-    endDateTime.setHours(endDateTime.getHours() + selectedDuration);
-
-    // Nếu không phải qua đêm thì mới kiểm tra endDateTime vượt quá closing
     if (
-      !isOverNight &&
-      (endDateTime.getHours() > CLOSING_HOUR ||
-        (endDateTime.getHours() === CLOSING_HOUR &&
-          endDateTime.getMinutes() > CLOSING_MINUTE))
+      selectedHour > CLOSING_HOUR ||
+      (selectedHour === CLOSING_HOUR && selectedMinute < CLOSING_MINUTE)
     ) {
       Alert.alert(
-        "Lỗi",
-        `Thời gian nhận phòng không được chọn sau ${CLOSING_HOUR}:${String(
-          CLOSING_MINUTE
-        ).padStart(2, "0")}.`
+        t("error"),
+        t("opening_hours_error", {
+          openHour: OPENING_HOUR,
+          openMinute: String(OPENING_MINUTE).padStart(2, "0"),
+          closeHour: CLOSING_HOUR,
+          closeMinute: String(CLOSING_MINUTE).padStart(2, "0"),
+        })
       );
       closeTimePicker();
       return;
     }
-    closeTimePicker();
+  }
 
-    setSelectedTime(time);
-  };
+  const endDateTime = new Date(selectedDateTime);
+  endDateTime.setHours(endDateTime.getHours() + selectedDuration);
+
+  if (
+    !isOverNight &&
+    (endDateTime.getHours() > CLOSING_HOUR ||
+      (endDateTime.getHours() === CLOSING_HOUR &&
+        endDateTime.getMinutes() > CLOSING_MINUTE))
+  ) {
+    Alert.alert(
+      t("error"),
+      t("check_out_exceed_error", {
+        closeHour: CLOSING_HOUR,
+        closeMinute: String(CLOSING_MINUTE).padStart(2, "0"),
+      })
+    );
+    closeTimePicker();
+    return;
+  }
+
+  closeTimePicker();
+  setSelectedTime(time);
+};
+
 
   const closeDatePicker = useCallback(() => {
     setDatePickerVisible(false);

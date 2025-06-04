@@ -581,5 +581,6 @@
   "check_in_policy_message": "Theo quy định: {{policyDescription}}\n\nBạn có thể check-in từ {{availableTime}} (còn {{remainingMinutes}} phút)",
   "days": "ngày",
   "discount_fixed": "Giảm {{amount}}đồng",
-  "search_coupon_code": "Tìm kiếm mã giảm giá"
+  "search_coupon_code": "Tìm kiếm mã giảm giá",
+  "Duration": "Thời lượng"
 }

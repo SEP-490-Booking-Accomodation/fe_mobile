@@ -251,7 +251,7 @@ export default function ConfirmBooking() {
   };
   // const handleConfirm1 = async () => {
   //   console.log("Confirm");
-  // };
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -296,14 +296,17 @@ export default function ConfirmBooking() {
             <View style={styles.jusBetween}>
               <Text style={styles.value}>{t("date")}: </Text>
               <Text>{bookingData?.date}</Text>
+
             </View>
             <View style={styles.jusBetween}>
               <Text style={styles.value}>{t("time")}:</Text>
               <Text>
-                {bookingData?.time} - {bookingData?.endTime}
+                {bookingData?.time} - {bookingData?.endTime} {bookingData?.endTime < bookingData?.time ? `(${bookingData?.endDate})` : ""}
               </Text>
             </View>
+           
           </View>
+          
 
           <View style={styles.card}>
             <Text style={styles.label}>{t("guests")}:</Text>
