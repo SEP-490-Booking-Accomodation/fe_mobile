@@ -34,43 +34,156 @@ const RegisterScreen = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [register] = useRegisterMutation();
 
+  // Error states
+  const [fullNameError, setFullNameError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [dobError, setDobError] = useState("");
+
+  // Validation functions (same as web)
+  const validateEmail = (email) =>
+    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+  
+  const validatePhone = (phone) => /^\d{10}$/.test(phone);
+  
+  const validateDateOfBirth = (dob) => {
+    if (!dob) return false;
+    
+    const birthDate = new Date(dob);
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const birthYear = birthDate.getFullYear();
+    
+    if (birthDate > today) return false;
+    
+    if (currentYear - birthYear > 100) return false;
+    
+    const age = currentYear - birthYear;
+    const hasHadBirthdayThisYear = today >= new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
+    
+    return age > 18 || (age === 18 && hasHadBirthdayThisYear);
+  };
+  
+  const validatePassword = (password) => {
+    if (password.length < 8) return false;
+    
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    
+    return hasUppercase && hasLowercase && hasNumber && hasSpecial;
+  };
+
+  const isFormValid = () => {
+    const isEmailValid = validateEmail(email);
+    const isPhoneValid = validatePhone(phone);
+    const isDoBValid = validateDateOfBirth(dob);
+    const isPasswordValid = validatePassword(password);
+    const isPasswordMatch = password === confirmPassword && confirmPassword !== "";
+    const isFullNameValid = fullName.trim() !== "";
+    
+    return isEmailValid && isPhoneValid && isDoBValid && isPasswordValid && 
+           isPasswordMatch && isFullNameValid && acceptTerms;
+  };
+
+  // Real-time validation handlers
+  const handleFullNameChange = (text) => {
+    setFullName(text);
+    if (text && text.trim() === "") {
+      setFullNameError(t("full_name_required"));
+    } else {
+      setFullNameError("");
+    }
+  };
+
+  const handlePhoneChange = (text) => {
+    setPhone(text);
+    if (text && !validatePhone(text)) {
+      setPhoneError(t("phone_must_be_10_digits"));
+    } else {
+      setPhoneError("");
+    }
+  };
+
+  const handleEmailChange = (text) => {
+    setEmail(text);
+    if (text && !validateEmail(text)) {
+      setEmailError(t("invalid_email"));
+    } else {
+      setEmailError("");
+    }
+  };
+
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    if (text && !validatePassword(text)) {
+      setPasswordError(t("password_requirements"));
+    } else {
+      setPasswordError("");
+    }
+    
+    // Also check confirm password if it's filled
+    if (confirmPassword && text !== confirmPassword) {
+      setConfirmPasswordError(t("password_mismatch"));
+    } else if (confirmPassword) {
+      setConfirmPasswordError("");
+    }
+  };
+
+  const handleConfirmPasswordChange = (text) => {
+    setConfirmPassword(text);
+    if (text && password !== text) {
+      setConfirmPasswordError(t("password_mismatch"));
+    } else {
+      setConfirmPasswordError("");
+    }
+  };
+
+  const handleDateChange = (selectedDate) => {
+    if (selectedDate) {
+      setDob(selectedDate);
+      if (!validateDateOfBirth(selectedDate)) {
+        setDobError(t("age_requirement_18_100"));
+      } else {
+        setDobError("");
+      }
+    }
+  };
+
   const handleRegister = async () => {
-    if (!fullName || !phone || !email || !password || !confirmPassword) {
-      alert(t("fill_all_fields"));
+    // Final validation before submission
+    if (!fullName.trim()) {
+      Alert.alert(t("validation_error"), t("full_name_required"));
       return;
     }
-    if (!/^\d{10}$/.test(phone)) {
-      alert(t("invalid_phone"));
+    if (!validatePhone(phone)) {
+      Alert.alert(t("validation_error"), t("phone_must_be_10_digits"));
       return;
     }
-    if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
-      alert(t("invalid_email"));
+    if (!validateEmail(email)) {
+      Alert.alert(t("validation_error"), t("invalid_email"));
       return;
     }
-    if (password.length < 8) {
-      alert(t("password_length"));
+    if (!validateDateOfBirth(dob)) {
+      Alert.alert(t("validation_error"), t("age_requirement_18_100"));
       return;
     }
-
-    const ageDiff = new Date().getFullYear() - dob.getFullYear();
-    if (
-      ageDiff < 16 ||
-      (ageDiff === 16 &&
-        new Date() < new Date(dob.setFullYear(dob.getFullYear() + 16)))
-    ) {
-      alert(t("age_requirement"));
+    if (!validatePassword(password)) {
+      Alert.alert(t("validation_error"), t("password_requirements"));
       return;
     }
-
-    if (dob > new Date()) {
-      alert(t("invalid_dob"));
-      return;
-    }
-
     if (password !== confirmPassword) {
-      alert(t("password_mismatch"));
+      Alert.alert(t("validation_error"), t("password_mismatch"));
+      return;
+    }
+    if (!acceptTerms) {
+      Alert.alert(t("validation_error"), t("accept_terms_required"));
       return;
     }
 
@@ -80,19 +193,18 @@ const RegisterScreen = () => {
       const data = {
         fullName,
         phone,
-        email,
+        email: email.toLowerCase().trim(),
         password,
         doB: dob,
-        avatarUrl: null,
+        avatarUrl: [],
         roleID: "67f87ca8c19b91da666bbdc9",
       };
       const response = await register({ data: data }).unwrap();
       console.log("Register response:", response);
-      alert("Đăng ký thành công!");
+      Alert.alert(t("success"), t("register_success"));
       navigation.goBack();
-      // navigation.navigate("Login");
     } catch (error) {
-      alert(t("register_failed"));
+      Alert.alert(t("error"), error?.data?.message || t("register_failed"));
     } finally {
       setLoading(false);
     }
@@ -114,18 +226,16 @@ const RegisterScreen = () => {
   };
 
   const onDateChange = (event, selectedDate) => {
-    // For Android, hiding is automatic after selection
     if (Platform.OS === "android") {
       setShowDatePicker(false);
     }
 
     if (selectedDate) {
-      setDob(selectedDate);
+      handleDateChange(selectedDate);
     }
   };
 
   const confirmDate = () => {
-    console.log("confirm");
     setIsModalVisible(false);
   };
 
@@ -150,38 +260,66 @@ const RegisterScreen = () => {
             </View>
             <View style={styles.card}>
               <View style={styles.formContainer}>
-                <CustomInput
-                  label={t("full_name")}
-                  placeholder={t("enter_full_name")}
-                  value={fullName}
-                  onChangeText={setFullName}
-                  autoCapitalize="words"
-                  containerStyle={styles.inputContainer}
-                  inputContainerStyle={styles.input}
-                />
-                <CustomInput
-                  label={t("phone")}
-                  placeholder={t("enter_phone")}
-                  value={phone}
-                  onChangeText={setPhone}
-                  keyboardType="phone-pad"
-                  containerStyle={styles.inputContainer}
-                  inputContainerStyle={styles.input}
-                />
-                <CustomInput
-                  label={t("email")}
-                  placeholder={t("enter_email")}
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  containerStyle={styles.inputContainer}
-                  inputContainerStyle={styles.input}
-                />
+                <View style={styles.inputContainer}>
+                  <CustomInput
+                    label={t("full_name")}
+                    placeholder={t("enter_full_name")}
+                    value={fullName}
+                    onChangeText={handleFullNameChange}
+                    autoCapitalize="words"
+                    inputContainerStyle={[
+                      styles.input,
+                      fullNameError ? styles.inputError : null
+                    ]}
+                  />
+                  {fullNameError ? (
+                    <Text style={styles.errorText}>{fullNameError}</Text>
+                  ) : null}
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <CustomInput
+                    label={t("phone")}
+                    placeholder={t("enter_phone")}
+                    value={phone}
+                    onChangeText={handlePhoneChange}
+                    keyboardType="phone-pad"
+                    inputContainerStyle={[
+                      styles.input,
+                      phoneError ? styles.inputError : null
+                    ]}
+                  />
+                  {phoneError ? (
+                    <Text style={styles.errorText}>{phoneError}</Text>
+                  ) : null}
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <CustomInput
+                    label={t("email")}
+                    placeholder={t("enter_email")}
+                    value={email}
+                    onChangeText={handleEmailChange}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    inputContainerStyle={[
+                      styles.input,
+                      emailError ? styles.inputError : null
+                    ]}
+                  />
+                  {emailError ? (
+                    <Text style={styles.errorText}>{emailError}</Text>
+                  ) : null}
+                </View>
+
                 <View style={styles.inputContainer}>
                   <Text style={styles.inputLabel}>{t("dob")}</Text>
                   <TouchableOpacity
-                    style={[styles.input, styles.dateInput]}
+                    style={[
+                      styles.input, 
+                      styles.dateInput,
+                      dobError ? styles.inputError : null
+                    ]}
                     onPress={showDatepicker}
                   >
                     <Text
@@ -190,27 +328,64 @@ const RegisterScreen = () => {
                       {dob ? formatDate(dob) : t("select_dob")}
                     </Text>
                   </TouchableOpacity>
+                  {dobError ? (
+                    <Text style={styles.errorText}>{dobError}</Text>
+                  ) : null}
                 </View>
-                <CustomInput
-                  label={t("password")}
-                  placeholder={t("enter_password")}
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  containerStyle={styles.inputContainer}
-                  inputContainerStyle={styles.input}
-                  passwordIconColor="#6B7280"
-                />
-                <CustomInput
-                  label={t("confirm_password")}
-                  placeholder={t("re_enter_password")}
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  secureTextEntry
-                  containerStyle={styles.inputContainer}
-                  inputContainerStyle={styles.input}
-                  passwordIconColor="#6B7280"
-                />
+
+                <View style={styles.inputContainer}>
+                  <CustomInput
+                    label={t("password")}
+                    placeholder={t("enter_password")}
+                    value={password}
+                    onChangeText={handlePasswordChange}
+                    secureTextEntry
+                    inputContainerStyle={[
+                      styles.input,
+                      passwordError ? styles.inputError : null
+                    ]}
+                    passwordIconColor="#6B7280"
+                  />
+                  {passwordError ? (
+                    <Text style={styles.errorText}>{passwordError}</Text>
+                  ) : null}
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <CustomInput
+                    label={t("confirm_password")}
+                    placeholder={t("re_enter_password")}
+                    value={confirmPassword}
+                    onChangeText={handleConfirmPasswordChange}
+                    secureTextEntry
+                    inputContainerStyle={[
+                      styles.input,
+                      confirmPasswordError ? styles.inputError : null
+                    ]}
+                    passwordIconColor="#6B7280"
+                  />
+                  {confirmPasswordError ? (
+                    <Text style={styles.errorText}>{confirmPasswordError}</Text>
+                  ) : null}
+                </View>
+
+                <View style={styles.checkboxContainer}>
+                  <TouchableOpacity
+                    style={styles.checkbox}
+                    onPress={() => setAcceptTerms(!acceptTerms)}
+                  >
+                    <View style={[
+                      styles.checkboxBox,
+                      acceptTerms ? styles.checkboxChecked : null
+                    ]}>
+                      {acceptTerms && <Text style={styles.checkmark}>✓</Text>}
+                    </View>
+                    <Text style={styles.checkboxText}>
+                      {t("accept_terms_and_privacy")}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
                 <CustomButton
                   title={t("register_button")}
                   backgroundColor="#1A2741"
@@ -218,16 +393,14 @@ const RegisterScreen = () => {
                   titleColor="#FFFFFF"
                   disabledTitleColor="#FFFFFF"
                   loading={loading}
-                  disabled={
-                    !fullName ||
-                    !phone ||
-                    !email ||
-                    !password ||
-                    !confirmPassword
-                  }
-                  style={styles.loginButton}
+                  disabled={!isFormValid()}
+                  style={[
+                    styles.loginButton,
+                    !isFormValid() ? styles.disabledButton : null
+                  ]}
                   onPress={handleRegister}
                 />
+
                 <View style={styles.signupContainer}>
                   <Text style={styles.signupText}>{t("have_account")} </Text>
                   <TouchableOpacity
@@ -280,9 +453,6 @@ const RegisterScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    // flex: 1,
-  },
   backgroundImage: {
     flex: 1,
     resizeMode: "cover",
@@ -296,8 +466,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-
-    // justifyContent: "space-between",
   },
   header: {
     paddingHorizontal: 24,
@@ -324,40 +492,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: Platform.OS === "ios" ? 50 : 24,
   },
-  dot: {
-    width: 48,
-    height: 6,
-    borderRadius: 4,
-    backgroundColor: "#EBEBEB",
-    alignSelf: "center",
-    marginBottom: 24,
-  },
   inputContainer: {
-    marginBottom: 24,
+    marginBottom: 16,
   },
   input: {
     backgroundColor: "#F8FAFC",
     borderWidth: 1,
     borderColor: "#E2E8F0",
   },
-  loginButton: {
-    marginBottom: 24,
+  inputError: {
+    borderColor: "#EF4444",
+    borderWidth: 1,
   },
-  signupContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+  errorText: {
+    color: "#EF4444",
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
   },
-  signupText: {
-    color: "#94A3B8",
-    fontSize: 14,
-  },
-  signupButtonText: {
-    color: "#4E72E3",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-
   dateInput: {
     justifyContent: "center",
     paddingVertical: 16,
@@ -377,6 +529,57 @@ const styles = StyleSheet.create({
   placeholderText: {
     fontSize: 16,
     color: "#9CA3AF",
+  },
+  checkboxContainer: {
+    marginBottom: 24,
+  },
+  checkbox: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  checkboxBox: {
+    width: 20,
+    height: 20,
+    borderWidth: 2,
+    borderColor: "#E2E8F0",
+    borderRadius: 4,
+    marginRight: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxChecked: {
+    backgroundColor: "#4E72E3",
+    borderColor: "#4E72E3",
+  },
+  checkboxText: {
+    fontSize: 14,
+    color: "#1F2937",
+    flex: 1,
+  },
+  checkmark: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  loginButton: {
+    marginBottom: 24,
+  },
+  disabledButton: {
+    opacity: 0.6,
+  },
+  signupContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  signupText: {
+    color: "#94A3B8",
+    fontSize: 14,
+  },
+  signupButtonText: {
+    color: "#4E72E3",
+    fontSize: 14,
+    fontWeight: "500",
   },
   modalContainer: {
     flex: 1,

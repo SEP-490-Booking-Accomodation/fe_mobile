@@ -270,7 +270,7 @@
   "no_location_data": "位置データがありません",
   "search_destination": "目的地を検索",
   "your_location": "現在地",
-  "nearest_destinations": "最寄りの目的地（5km圏内）",
+  "nearest_destinations": "最寄りの目的地",
   "no_results_location": "該当する場所が見つかりません",
   "notifications": "通知",
   "confirm_payment": "支払い確認",

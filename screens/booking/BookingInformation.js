@@ -143,69 +143,65 @@ export default function BookingInformation({ route, navigation }) {
     return;
   }
 
-  const selectedHour = time.getHours();
-  const selectedMinute = time.getMinutes();
+    if (!isOverNight) {
+      const selectedHour = time.getHours();
+      const selectedMinute = time.getMinutes();
 
-  if (!isOverNight) {
-    if (
-      selectedHour < OPENING_HOUR ||
-      (selectedHour === OPENING_HOUR && selectedMinute < OPENING_MINUTE)
-    ) {
-      Alert.alert(
-        t("error"),
-        t("opening_hours_error", {
-          openHour: OPENING_HOUR,
-          openMinute: String(OPENING_MINUTE).padStart(2, "0"),
-          closeHour: CLOSING_HOUR,
-          closeMinute: String(CLOSING_MINUTE).padStart(2, "0"),
-        })
-      );
-      closeTimePicker();
-      return;
+      if (
+        selectedHour < OPENING_HOUR ||
+        (selectedHour === OPENING_HOUR && selectedMinute < OPENING_MINUTE)
+      ) {
+        Alert.alert(
+          t("error"),
+          t("opening_hours_error", {
+            openHour: OPENING_HOUR,
+            openMinute: String(OPENING_MINUTE).padStart(2, "0"),
+            closeHour: CLOSING_HOUR,
+            closeMinute: String(CLOSING_MINUTE).padStart(2, "0")
+          })
+        );
+        closeTimePicker();
+        return;
+      }
+
+      if (
+        selectedHour > CLOSING_HOUR ||
+        (selectedHour === CLOSING_HOUR && selectedMinute < CLOSING_MINUTE)
+      ) {
+        Alert.alert(
+          "Lỗi",
+          `Thời gian nhận phòng chỉ từ ${OPENING_HOUR}:${String(
+            OPENING_MINUTE
+          ).padStart(2, "0")} đến ${CLOSING_HOUR}:${String(
+            CLOSING_MINUTE
+          ).padStart(2, "0")}.`
+        );
+        closeTimePicker();
+        return;
+      }
+
+      const endDateTime = new Date(selectedDateTime);
+      endDateTime.setHours(endDateTime.getHours() + selectedDuration);
+
+      if (
+        endDateTime.getHours() > CLOSING_HOUR ||
+        (endDateTime.getHours() === CLOSING_HOUR &&
+          endDateTime.getMinutes() > CLOSING_MINUTE)
+      ) {
+        Alert.alert(
+          "Lỗi",
+          `Thời gian nhận phòng không được chọn sau ${CLOSING_HOUR}:${String(
+            CLOSING_MINUTE
+          ).padStart(2, "0")}.`
+        );
+        closeTimePicker();
+        return;
+      }
     }
-
-    if (
-      selectedHour > CLOSING_HOUR ||
-      (selectedHour === CLOSING_HOUR && selectedMinute < CLOSING_MINUTE)
-    ) {
-      Alert.alert(
-        t("error"),
-        t("opening_hours_error", {
-          openHour: OPENING_HOUR,
-          openMinute: String(OPENING_MINUTE).padStart(2, "0"),
-          closeHour: CLOSING_HOUR,
-          closeMinute: String(CLOSING_MINUTE).padStart(2, "0"),
-        })
-      );
-      closeTimePicker();
-      return;
-    }
-  }
-
-  const endDateTime = new Date(selectedDateTime);
-  endDateTime.setHours(endDateTime.getHours() + selectedDuration);
-
-  if (
-    !isOverNight &&
-    (endDateTime.getHours() > CLOSING_HOUR ||
-      (endDateTime.getHours() === CLOSING_HOUR &&
-        endDateTime.getMinutes() > CLOSING_MINUTE))
-  ) {
-    Alert.alert(
-      t("error"),
-      t("check_out_exceed_error", {
-        closeHour: CLOSING_HOUR,
-        closeMinute: String(CLOSING_MINUTE).padStart(2, "0"),
-      })
-    );
+    
     closeTimePicker();
-    return;
-  }
-
-  closeTimePicker();
-  setSelectedTime(time);
-};
-
+    setSelectedTime(time);
+  };
 
   const closeDatePicker = useCallback(() => {
     setDatePickerVisible(false);

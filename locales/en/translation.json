@@ -271,7 +271,7 @@
   "no_location_data": "No location data available",
   "search_destination": "Search your destination",
   "your_location": "Your location",
-  "nearest_destinations": "Nearest destinations (5km radius)",
+  "nearest_destinations": "Nearest destinations",
   "no_results_location": "No matching locations found",
   "notifications": "Notification",
   "confirm_payment": "Payment Confirmation",
