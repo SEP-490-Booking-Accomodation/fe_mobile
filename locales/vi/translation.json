@@ -122,9 +122,9 @@
   "payment_with_momo": "Thanh toán bằng Momo của bạn",
   "payment_guarantee": "Cam kết thanh toán",
   "payment_guarantee_description": "Mean đảm bảo số tiền bạn thanh toán cho mỗi giao dịch",
-  "promo_voucher": "Voucher khuyến mãi",
-  "select_voucher": "Chọn voucher",
-  "choose_voucher": "Chọn Voucher",
+  "promo_voucher": "Mã khuyến mãi",
+  "select_voucher": "Chọn mã khuyến mãi",
+  "choose_voucher": "Chọn mã khuyến mãi",
   "discount_percentage_with_max": "Giảm {{amount}}% cho đơn hàng (tối đa {{max}})",
   "discount_percentage_no_max": "Giảm {{amount}}% cho đơn hàng",
   "coming_soon": "Sắp có hiệu lực",
@@ -579,5 +579,8 @@
   "check_in_not_available": "Check-in không khả dụng",
   "check_in_date_not_reached": "Bạn chỉ có thể check-in vào ngày {{date}} (còn {{days}} ngày)",
   "check_in_policy_message": "Theo quy định: {{policyDescription}}\n\nBạn có thể check-in từ {{availableTime}} (còn {{remainingMinutes}} phút)",
-  "days" : "ngày"
+  "days": "ngày",
+  "discount_fixed": "Giảm {{amount}}đồng",
+  "search_coupon_code": "Tìm kiếm mã giảm giá",
+  "Duration": "Thời lượng"
 }
