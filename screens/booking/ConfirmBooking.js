@@ -150,6 +150,11 @@ export default function ConfirmBooking() {
   const handleConfirm = async () => {
     setIsLoading(true);
 
+    // Policy Checkout 
+    // Policy Checkin
+    // Policy Refund time
+    // Policy Cancel
+
     const formBooking = {
       // policySystemIds: policyId || ["67ebf15d828b69a4d279d960"],
       customerId: customerData.id,
@@ -283,14 +288,17 @@ export default function ConfirmBooking() {
             <View style={styles.jusBetween}>
               <Text style={styles.value}>{t("date")}: </Text>
               <Text>{bookingData?.date}</Text>
+
             </View>
             <View style={styles.jusBetween}>
               <Text style={styles.value}>{t("time")}:</Text>
               <Text>
-                {bookingData?.time} - {bookingData?.endTime}
+                {bookingData?.time} - {bookingData?.endTime} {bookingData?.endTime < bookingData?.time ? `(${bookingData?.endDate})` : ""}
               </Text>
             </View>
+           
           </View>
+          
 
           <View style={styles.card}>
             <Text style={styles.label}>{t("guests")}:</Text>
