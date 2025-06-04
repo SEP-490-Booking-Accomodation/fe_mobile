@@ -3,9 +3,30 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useMarkNotificationAsReadMutation } from "../../api/notificationApi";
 import { useTranslation } from "react-i18next"; 
+import { useNavigation } from "@react-navigation/native";
 
-const NotificationItem = ({ id, iconName, title, time, message, status }) => {
+const NOTIFICATION_TYPES = {
+  BOOKING: 1,
+  FEEDBACK: 2,
+  PAYMENT: 3,
+};
+
+const getNotificationIcon = (type) => {
+  switch (type) {
+    case NOTIFICATION_TYPES.BOOKING:
+      return "calendar";
+    case NOTIFICATION_TYPES.FEEDBACK:
+      return "chatbox";
+    case NOTIFICATION_TYPES.PAYMENT:
+      return "wallet";
+    default:
+      return "notifications";
+  }
+};
+
+const NotificationItem = ({ id, type, title, time, message, status, bookingId }) => {
   const { t } = useTranslation();
+  const navigation = useNavigation();
   const [markAsRead] = useMarkNotificationAsReadMutation();
   const [isLoading, setIsLoading] = useState(false);
   
@@ -15,16 +36,28 @@ const NotificationItem = ({ id, iconName, title, time, message, status }) => {
       try {
         await markAsRead(id).unwrap();
       } catch (error) {
-        console.error('Error marking notification as read:', error);
       } finally {
         setIsLoading(false);
       }
     }
+
+    navigation.navigate('NotificationDetail', {
+      notification: {
+        _id: id,
+        type,
+        title,
+        content: message,
+        createdAt: time,
+        bookingId,
+      }
+    });
   };
 
   const formatTime = (timeString) => {
     return timeString;
   };
+
+  const iconName = getNotificationIcon(type);
 
   return (
     <TouchableOpacity

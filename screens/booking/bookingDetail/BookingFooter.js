@@ -44,13 +44,11 @@ export default function BookingFooter({
       const now = dayjs()
 
       if (!deadline.isValid()) {
-        console.log("Invalid refund deadline format:", refundDeadline)
         return false
       }
 
       return now.isBefore(deadline)
     } catch (error) {
-      console.log("Error parsing refund deadline:", error)
       return false
     }
   }
@@ -64,16 +62,13 @@ export default function BookingFooter({
     
     try {
       const parsed = dayjs(dateTimeString, "DD/MM/YYYY HH:mm:ss")
-      console.log(`Parsing ${dateTimeString}:`, parsed.format(), parsed.isValid())
       
       if (parsed.isValid()) {
         return parsed
       }
       
-      console.log("Could not parse date:", dateTimeString)
       return null
     } catch (error) {
-      console.log("Error parsing date:", dateTimeString, error)
       return null
     }
   }
@@ -82,23 +77,14 @@ export default function BookingFooter({
     const checkInTime = parseDateTime(bookingData?.checkInHour)
     const checkOutTime = parseDateTime(bookingData?.checkOutHour)
     
-    console.log("=== CHECK-IN BUTTON ENABLED CHECK ===")
-    console.log("Check-in time:", checkInTime ? checkInTime.format() : "NULL")
-    console.log("Check-out time:", checkOutTime ? checkOutTime.format() : "NULL")
-    
     if (!checkInTime) {
-      console.log("No valid check-in time")
       return false
     }
     
     const currentDate = dayjs().format("YYYY-MM-DD")
     const checkInDate = checkInTime.format("YYYY-MM-DD")
     
-    console.log("Current date:", currentDate)
-    console.log("Check-in date:", checkInDate)
-    
     if (currentDate !== checkInDate) {
-      console.log("Not check-in date")
       return false
     }
 
@@ -106,13 +92,8 @@ export default function BookingFooter({
     const policyValues = checkInPolicyData?.data?.[0]?.values || []
     const checkInMinutes = policyValues.length > 0 ? parseInt(policyValues[0].val) : 20 
 
-    console.log("Policy minutes:", checkInMinutes)
     
     const checkInAvailableTime = checkInTime.subtract(checkInMinutes, 'minute')
-
-    console.log("Current time:", currentTime.format())
-    console.log("Check-in time:", checkInTime.format())
-    console.log("Available time:", checkInAvailableTime.format())
     
     const isEnabled = (
       currentTime.isAfter(checkInAvailableTime) ||
@@ -120,7 +101,6 @@ export default function BookingFooter({
       (checkOutTime && currentTime.isAfter(checkInTime) && currentTime.isBefore(checkOutTime))
     )
     
-    console.log("Button enabled:", isEnabled)
     return isEnabled
   }
 

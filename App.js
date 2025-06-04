@@ -99,7 +99,6 @@ const GlobalSocketHandler = ({ navigationRef }) => {
   const isAuth = useSelector((state) => state.auth?.isAuth);
 
   useEffect(() => {
-    console.log('Socket connection status:', isConnected);
     SocketService.setNavigationRef(navigationRef);
 
     // Kết nối socket khi có userId và đã xác thực
@@ -220,7 +219,6 @@ const AuthLoader = () => {
       const isAuth = parsedAuthData?.isAuth || false;
       if (isAuth === false) {
         dispatch(logout());
-        console.log("Đã đăng xuất");
       } else if (authData) {
         const { userId, token, isAuth, userData, refreshToken, customerId } =
           JSON.parse(authData);
@@ -243,14 +241,12 @@ const AuthLoader = () => {
         const decodedToken = jwtDecode(token);
         const currentUnixTime = dayjs().unix();
         if (decodedToken.exp < currentUnixTime) {
-          console.log("Token đã hết hạn, tiến hành refresh Token...");
           const refreshData = { refreshToken: parsedAuthData.refreshToken };
           const response = await useRefreshToken({
             data: refreshData,
           }).unwrap();
           dispatch(refreshToken(response.accessToken));
         } else {
-          console.log("Token còn hạn sử dụng.");
         }
       } catch (error) {
         Alert.alert("Phiên đăng nhập hết hạn");
@@ -261,7 +257,6 @@ const AuthLoader = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    console.log('Auth status changed:', { userId, isAuth });
   }, [userId, isAuth]);
 
   return null;

@@ -99,14 +99,12 @@ const ReportModal = ({
         ? translated
         : fallbackTranslations[key] || key;
     } catch (e) {
-      console.log("Translation error:", e);
       return fallbackTranslations[key] || key;
     }
   };
 
   // Enhanced showAlert function with fallbacks and direct Alert usage
   const showAlert = (title, message, buttons = [], icon = "") => {
-    console.log("Showing alert:", title, message);
 
     // Set the state for the custom AlertModal
     setAlertTitle(safeT(title));
@@ -250,7 +248,6 @@ const ReportModal = ({
         }
       }
     } catch (error) {
-      console.error("Error picking image:", error);
       showAlert(
         "error",
         "image_pick_error",
@@ -358,7 +355,6 @@ const ReportModal = ({
         }
       }
     } catch (error) {
-      console.error("Error taking photo:", error);
       showAlert(
         "error",
         "camera_error",
@@ -406,7 +402,6 @@ const ReportModal = ({
         });
 
       if (error) {
-        console.error("Supabase upload error:", error);
         throw error;
       }
 
@@ -417,7 +412,6 @@ const ReportModal = ({
 
       return publicUrlData.publicUrl;
     } catch (error) {
-      console.error("Upload error:", error);
       throw error;
     }
   };
@@ -443,14 +437,9 @@ const ReportModal = ({
 
   // This function validates the form and shows the confirmation modal
   const handleSubmitButtonPress = () => {
-    console.log("Submit button pressed");
-    console.log("Selected reason index:", selectedReasonIndex);
-    console.log("Description length:", description.trim().length);
-    console.log("Images count:", images.length);
 
     // Validate inputs
     if (selectedReasonIndex === null) {
-      console.log("Validation failed: No reason selected");
 
       // Use native Alert as a direct fallback
       Alert.alert(
@@ -476,7 +465,6 @@ const ReportModal = ({
     }
 
     if (description.trim().length < 10) {
-      console.log("Validation failed: Description too short");
 
       // Use native Alert as a direct fallback
       Alert.alert(
@@ -503,7 +491,6 @@ const ReportModal = ({
 
     // Check if there are at least MIN_IMAGES
     if (images.length < MIN_IMAGES) {
-      console.log("Validation failed: Not enough images");
 
       // Use native Alert as a direct fallback
       Alert.alert(
@@ -545,7 +532,6 @@ const ReportModal = ({
 
     // Check if there are too many images
     if (images.length > MAX_IMAGES) {
-      console.log("Validation failed: Too many images");
 
       // Use native Alert as a direct fallback
       Alert.alert(
@@ -570,7 +556,6 @@ const ReportModal = ({
       return;
     }
 
-    console.log("Validation passed, showing confirmation modal");
     setError("");
     // Show confirmation modal
     setSubmitConfirmModalVisible(true);
@@ -578,7 +563,6 @@ const ReportModal = ({
 
   // This function actually submits the report after confirmation
   const handleSubmit = async () => {
-    console.log("Report submission confirmed");
     setSubmitConfirmModalVisible(false);
     setIsSubmitting(true);
     setUploadProgress(0);
@@ -595,7 +579,6 @@ const ReportModal = ({
       try {
         uploadedImageUrls = await uploadImagesToSupabase(imageUris);
       } catch (uploadError) {
-        console.error("Error uploading images:", uploadError);
 
         // If upload fails, show error and return
         showAlert(
@@ -630,11 +613,9 @@ const ReportModal = ({
         contentReply: "",
       };
 
-      console.log("Report data prepared:", reportData);
 
       // Call the API to create the report
       const response = await createReport(reportData).unwrap();
-      console.log("API response:", response);
 
       // Show success message
       showAlert(
@@ -662,7 +643,6 @@ const ReportModal = ({
         });
       }
     } catch (error) {
-      console.error("Report submission error:", error);
 
       // Use native Alert as a direct fallback
       Alert.alert("Error", "Failed to submit report. Please try again.", [
@@ -717,13 +697,11 @@ const ReportModal = ({
 
     const imagesNeeded = MAX_IMAGES - images.length;
     setImagePickerModalVisible(true);
-    console.log(`${imagesNeeded} more images can be added`);
   };
 
   // Effect to handle API errors
   useEffect(() => {
     if (apiError) {
-      console.error("API Error:", apiError);
       showAlert(
         "error",
         safeT("report_submission_failed"),
@@ -741,7 +719,6 @@ const ReportModal = ({
 
   // Debug effect to log when alert modal should be visible
   useEffect(() => {
-    console.log("Alert modal visible state changed:", alertModalVisible);
   }, [alertModalVisible]);
 
   return (

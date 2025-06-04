@@ -56,13 +56,11 @@ export default function HomeScreen() {
         await refetchNotifications();
       }
     } catch (error) {
-      console.error("Lỗi tải lại dữ liệu:", error);
     }
     setRefreshing(false);
   };
 
   const handleLocationPress = (locationId) => {
-    console.log("Navigating with locationId:", locationId);
     navigation.navigate("DetailRentalLocation", {
       rentalId: locationId,
       previousScreen: "Home",

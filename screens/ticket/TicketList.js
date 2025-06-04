@@ -131,13 +131,11 @@ export default function TicketList() {
     try {
       await refetch();
     } catch (error) {
-      console.error(t("data_refresh_error"), error);
     }
     setRefreshing(false);
   };
 
   const handleSubmitReview = async (reviewData) => {
-    console.log("Submit review", reviewData);
     const requestData = {
       bookingId: reviewData.bookingId,
       content: reviewData.content,
@@ -154,7 +152,6 @@ export default function TicketList() {
         ...bookingData,
         status: BOOKING_STATUS.COMPLETED,
       };
-      console.log("Updated booking data", updatedBookingData);
 
       await updateBooking({
         id: reviewData.bookingId,
@@ -172,7 +169,6 @@ export default function TicketList() {
       alert(t("review_submitted"));
       refetch();
     } catch (error) {
-      console.error(error);
       alert(error.message);
     }
   };
@@ -199,25 +195,21 @@ export default function TicketList() {
   );
 
   const handleViewDetail = (id) => {
-    console.log("View detail", id);
     //Navigate to details page
     navigation.navigate("BookingDetail", { bookingId: id });
     //navigation.navigate("TicketDetail", { bookingId: id });
   };
 
   const handleCancel = (id) => {
-    console.log("Cancel booking", id);
     // Implement cancel logic
   };
 
   const handleReview = (id) => {
-    console.log("Review booking", id);
     setSelectedBookingId(id);
     setReviewModalVisible(true);
   };
 
   const handleRebooking = (id) => {
-    console.log("Rebooking", id);
     // Navigate to rebooking page
     // navigation.navigate("RebookingPage", { bookingId: id });
   };

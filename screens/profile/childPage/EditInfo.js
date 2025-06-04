@@ -42,16 +42,13 @@ const AvatarUpload = ({ currentImage, onImageChange }) => {
 
       if (!result.canceled && result.assets.length > 0) {
         const imageUri = result.assets[0].uri;
-        console.log("Selected image URI:", imageUri);
         if (!uploadAvatar) {
           throw new Error("uploadAvatar function is not defined");
         }
         const newImageUrl = await uploadAvatar(imageUri, currentImage);
-        console.log("New image URL:", newImageUrl);
         onImageChange(newImageUrl);
       }
     } catch (error) {
-      console.error("Image upload error:", error.message);
       let errorMessage = t("general_error");
       if (error.message.includes("empty")) {
         errorMessage = t("image_empty_error") || "Selected image is empty";
@@ -113,7 +110,6 @@ export default function EditInfo() {
 
   const handleUpdateInfo = async () => {
     if (!userId) {
-      console.error("User ID is missing!");
       return;
     }
 
@@ -123,11 +119,9 @@ export default function EditInfo() {
         updatedUser: { fullName, email, phone, avatarUrl: image },
       }).unwrap();
 
-      console.log(t("update_success"));
       setIsButtonSaveActive(false);
       navigation.goBack(); // Quay lại trang trước đó
     } catch (error) {
-      console.error("Update error:", error);
       alert(t("general_error"));
     }
   };

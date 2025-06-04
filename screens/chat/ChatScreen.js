@@ -14,7 +14,7 @@ import {
   SafeAreaView,
 } from "react-native";
 import { supabase } from "../../lib/supabase";
-import { Ionicons } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import OnlineStatus from "../../components/chat/OnlineStatus";
 import MessageStatus from "../../components/chat/MessageStatus";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
@@ -107,7 +107,6 @@ export default function ChatScreen({ route, navigation }) {
           setLoading(false);
         })
         .catch((error) => {
-          console.error("Error initializing chat:", error);
           setLoading(false);
           Alert.alert(t("error"), t("failed_to_load_chat"));
         });
@@ -202,7 +201,6 @@ export default function ChatScreen({ route, navigation }) {
         )
         .subscribe();
     } catch (error) {
-      console.error("Error setting up realtime subscription:", error);
     }
   }
 
@@ -249,7 +247,6 @@ export default function ChatScreen({ route, navigation }) {
         return [];
       }
     } catch (e) {
-      console.error("Exception fetching participants:", e.message);
       setParticipants([]);
       return [];
     }
@@ -277,7 +274,6 @@ export default function ChatScreen({ route, navigation }) {
         }));
       }
     } catch (e) {
-      console.error("Exception fetching profile:", e.message);
     }
   }
 
@@ -323,7 +319,6 @@ export default function ChatScreen({ route, navigation }) {
 
       return true;
     } catch (error) {
-      console.error("Exception fetching messages:", error.message);
       Alert.alert(t("error"), t("failed_to_load_messages"));
       setMessages([]);
       return false;
@@ -372,7 +367,6 @@ export default function ChatScreen({ route, navigation }) {
         await supabase.from("messages").update(updateData).eq("id", messageId);
       }
     } catch (e) {
-      console.error("Exception updating message status:", e.message);
     }
   }
 
@@ -396,7 +390,6 @@ export default function ChatScreen({ route, navigation }) {
         await updateMessageStatus(message.id, "read", userId);
       }
     } catch (e) {
-      console.error("Exception marking chat messages as read:", e.message);
     }
   }
 
@@ -460,7 +453,6 @@ export default function ChatScreen({ route, navigation }) {
         );
       }
     } catch (error) {
-      console.error("Exception sending message:", error.message);
       Alert.alert(t("error"), t("failed_to_send_message") + error.message);
     } finally {
       setSending(false);
@@ -531,7 +523,11 @@ export default function ChatScreen({ route, navigation }) {
             style={styles.backButton}
             onPress={() => navigation.navigate("MessagesScreen")}
           >
-            <Ionicons name="arrow-back" size={24} color="#000000" />
+            <AntDesign 
+            name="left" 
+            size={24} 
+            color="#4E72E3" 
+          />
           </TouchableOpacity>
 
           <View style={styles.headerProfile}>
@@ -559,7 +555,7 @@ export default function ChatScreen({ route, navigation }) {
           </View>
 
           <TouchableOpacity style={styles.headerButton}>
-            <Ionicons name="ellipsis-vertical" size={24} color="#4A90E2" />
+            <Ionicons name="ellipsis-vertical" size={24} color="#4E72E3" />
           </TouchableOpacity>
         </View>
 

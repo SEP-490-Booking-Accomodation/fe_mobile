@@ -200,7 +200,6 @@ const RegisterScreen = () => {
         roleID: "67f87ca8c19b91da666bbdc9",
       };
       const response = await register({ data: data }).unwrap();
-      console.log("Register response:", response);
       Alert.alert(t("success"), t("register_success"));
       navigation.goBack();
     } catch (error) {

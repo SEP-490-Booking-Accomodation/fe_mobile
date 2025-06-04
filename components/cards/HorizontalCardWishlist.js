@@ -69,7 +69,6 @@ const HorizontalCardWishlist = ({
 
   const handleFavouritePress = async () => {
     if (!id) {
-      console.warn("Cannot toggle favorite: missing id");
       return;
     }
 

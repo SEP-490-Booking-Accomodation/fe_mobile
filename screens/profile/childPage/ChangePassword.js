@@ -34,7 +34,6 @@ export default function ChangePassword({ route }) {
   const handlePasswordChange = async () => {
     try {
      const response = await updatePasswordApi({updatedPassword: {currentPassword, newPassword}});
-     console.log("Change password response:", response);
      if (response.data) {
       Alert.alert(t('success'), t('password_change_success'));
        navigation.goBack();
@@ -43,7 +42,6 @@ export default function ChangePassword({ route }) {
       Alert.alert(t('failure'), response.error?.data?.message);
      }
     } catch (error) {
-      console.error("Error changing password:", error); 
       alert(t('unexpected_error'));
     }
   };

@@ -21,7 +21,6 @@ class SocketService {
 
     connect(userId) {
         if (this.socket && this.isConnected) {
-            console.log('Socket already connected');
             return this.socket;
         }
 
@@ -34,29 +33,24 @@ class SocketService {
         });
 
         this.socket.on('connect', () => {
-            console.log('Socket connected:', this.socket.id);
             this.isConnected = true;
             this.reconnectAttempts = 0; // Reset reconnect attempts
 
             if (userId) {
                 this.socket.emit('join', userId.toString());
-                console.log(`Joined room for user: ${userId}`);
             }
         });
 
         this.socket.on('disconnect', () => {
-            console.log('Socket disconnected');
             this.isConnected = false;
         });
 
         this.socket.on('connect_error', (error) => {
-            console.error('Socket connection error:', error);
             this.isConnected = false;
         });
 
         // Xử lý notification - Đây là phần quan trọng nhất
         this.socket.on('notification', (notification) => {
-            console.log('New notification received:', notification);
             
             // Hiển thị Toast ngay lập tức trên bất kỳ màn hình nào
             this.showGlobalNotification(notification);
@@ -71,14 +65,12 @@ class SocketService {
 
         this.socket.on('reconnect_attempt', () => {
             this.reconnectAttempts++;
-            console.log(`Reconnect attempt: ${this.reconnectAttempts}`);
             if (this.reconnectAttempts <= 3 && userId) {
                 this.socket.emit('join', userId.toString());
             }
         });
 
         this.socket.on('reconnect', () => {
-            console.log('Socket reconnected');
             this.isConnected = true;
             if (userId) {
                 this.socket.emit('join', userId.toString());
@@ -94,21 +86,18 @@ class SocketService {
             this.socket = null;
             this.isConnected = false;
             this.reconnectAttempts = 0;
-            console.log('Socket manually disconnected');
         }
     }
 
     joinRoom(userId) {
         if (this.socket && this.isConnected && userId) {
             this.socket.emit('join', userId.toString());
-            console.log(`Joined room for user: ${userId}`);
         }
     }
 
     leaveRoom(userId) {
         if (this.socket && this.isConnected && userId) {
             this.socket.emit('leave', userId.toString());
-            console.log(`Left room for user: ${userId}`);
         }
     }
 
@@ -135,11 +124,6 @@ class SocketService {
             }
         });
 
-        // Log để debug
-        console.log('Global notification displayed:', {
-            title: notification.title,
-            content: notification.content || notification.body
-        });
     }
 
     // Điều hướng đến màn hình notification
@@ -153,19 +137,15 @@ class SocketService {
                     this.navigationRef.current.navigate('Home', {
                         screen: 'NotificationScreen'
                     });
-                    console.log('Navigated to NotificationScreen');
                 }
             } catch (error) {
-                console.error('Error navigating to notification screen:', error);
                 // Fallback: thử navigate trực tiếp
                 try {
                     this.navigationRef.current.navigate('NotificationScreen');
                 } catch (fallbackError) {
-                    console.error('Fallback navigation also failed:', fallbackError);
                 }
             }
         } else {
-            console.warn('Navigation ref not available');
         }
     }
 

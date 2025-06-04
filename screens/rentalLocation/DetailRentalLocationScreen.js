@@ -82,7 +82,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
         setUser(userData[0]);
       }
     } catch (error) {
-      console.error("Error fetching user data:", error);
     }
   };
 
@@ -192,7 +191,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const handleChatPress = async () => {
     try {
       const currentUser = user;
-      console.log("Current User:", currentUser);
       const ownerPlatformId = userOwnerId?.userId;
       const locationId = rentalData.data?._id;
 
@@ -204,9 +202,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
         navigation,
       });
 
-      console.log(result);
     } catch (error) {
-      console.error("Chat start error:", error);
     }
   };
 
@@ -217,13 +213,11 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 
   // Add these handler functions for the modal actions
   const handleShare = () => {
-    console.log("Share pressed");
     // Implement your share functionality here
   };
 
   const ratingCounts = (feedbackDataList || []).reduce((acc, review) => {
     const rating = review.rating;
-    console.log(acc);
     if (rating >= 1 && rating <= 5) {
       acc[rating] = (acc[rating] || 0) + 1;
     }

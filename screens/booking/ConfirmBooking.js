@@ -58,8 +58,6 @@ export default function ConfirmBooking() {
     date.getMinutes()
   )}:${pad(date.getSeconds())}`;
 
-  console.log("refund" + deadlineFormatted);
-  // console.log(bookingTime);
 
   useEffect(() => {
     if (bookingData) {
@@ -148,9 +146,6 @@ export default function ConfirmBooking() {
 
   const checkInDateTime = `${bookingData.date} ${bookingData.time}:00`;
   const checkOutDateTime = `${bookingData.date} ${bookingData.endTime}:00`;
-  // console.log(checkInDateTime);
-  // console.log(checkOutDateTime);
-  // console.log(finalTotal);
 
   const handleConfirm = async () => {
     setIsLoading(true);
@@ -186,7 +181,6 @@ export default function ConfirmBooking() {
       // discountAmount: discountAmount, // Add discount amount to the booking data
       totalPrice: finalTotal, // Add final total after discount
     };
-    // console.log(formBooking);
 
     try {
       const response = await createBooking({
@@ -242,7 +236,6 @@ export default function ConfirmBooking() {
         })
       );
     } catch (error) {
-      console.log(error);
 
       Alert.alert(t("failed"), error.data?.message || t("booking_failed"));
     } finally {
@@ -250,8 +243,7 @@ export default function ConfirmBooking() {
     }
   };
   // const handleConfirm1 = async () => {
-  //   console.log("Confirm");
-
+  // };
 
   return (
     <SafeAreaView style={styles.container}>

@@ -133,11 +133,9 @@ export default function HistoryScreen() {
     </View>
   );
   const handleViewDetail = (id) => {
-    console.log("View detail", id);
   };
 
   const handleCancel = (id) => {
-    console.log("Cancel booking", id);
   };
 
   const filteredBookings = mockData.filter(booking => booking.bookingStatus === activeTab);

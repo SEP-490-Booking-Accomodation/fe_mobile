@@ -150,7 +150,6 @@ export default function MessagesScreen({ navigation }) {
         })
         .eq("iduserplatform", userIdPlatform.iduserplatform);
     } catch (e) {
-      console.error("Exception updating online status:", e.message);
     }
   }
 
@@ -232,7 +231,6 @@ export default function MessagesScreen({ navigation }) {
       fetchLastMessages(chatIds);
       fetchUnreadCounts(chatIds);
     } catch (error) {
-      console.error("Exception fetching chats:", error.message);
       Alert.alert(t('error'), t('load_chats_error'));
     } finally {
       setLoading(false);
@@ -277,7 +275,6 @@ export default function MessagesScreen({ navigation }) {
 
       setLastMessages(messagesMap);
     } catch (e) {
-      console.error("Exception fetching last messages:", e.message);
     }
   }
 
@@ -316,7 +313,6 @@ export default function MessagesScreen({ navigation }) {
 
       setUnreadCounts(countsMap);
     } catch (e) {
-      console.error("Exception fetching unread counts:", e.message);
     }
   }
 

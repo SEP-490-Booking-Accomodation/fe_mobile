@@ -27,7 +27,6 @@ export default function CouponSelector({ selectedVoucher, setSelectedVoucher }) 
       setRefreshing(true);
       await refetch();
     } catch (error) {
-      console.error("Lỗi khi làm mới voucher:", error);
     } finally {
       setRefreshing(false);
     }

@@ -46,7 +46,6 @@ const ImprovedDateTimePicker = ({
     return maxDate;
   };
 
-  console.log(isOverNight);
   // This effect updates available durations based on selected time and closing hour
   useEffect(() => {
     if (!selectedTime) {

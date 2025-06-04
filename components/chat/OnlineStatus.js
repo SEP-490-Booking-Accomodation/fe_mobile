@@ -19,7 +19,6 @@ export default function OnlineStatus({ isOnline, lastSeen, showText = false, siz
             if (diffDays === 1) return "Yesterday"
             return `${diffDays}d ago`
         } catch (e) {
-            console.error("Error formatting last seen:", e)
             return "Offline"
         }
     }
