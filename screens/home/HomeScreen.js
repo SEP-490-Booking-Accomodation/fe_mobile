@@ -63,20 +63,10 @@ export default function HomeScreen() {
 
   const handleLocationPress = (locationId) => {
     console.log("Navigating with locationId:", locationId);
-
-    // Find the rental data by locationId
-    const selectedRental = rental?.data?.find(
-      (item) => item._id === locationId
-    );
-
-    if (selectedRental) {
-      navigation.navigate("DetailRentalLocation", {
-        rentalData: selectedRental,
-        previousScreen: "Home",
-      });
-    } else {
-      console.error("Không tìm thấy dữ liệu cho locationId:", locationId);
-    }
+    navigation.navigate("DetailRentalLocation", {
+      rentalId: locationId,
+      previousScreen: "Home",
+    });
   };
 
   useEffect(() => {
@@ -190,36 +180,6 @@ export default function HomeScreen() {
           )}
         </ScrollView>
       </>
-      {/* <Modal transparent={true} visible={modalVisible} animationType="slide">
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Chọn thành phố</Text>
-
-            <ScrollView style={styles.cityListContainer}>
-              {cities.map((city, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.cityOption,
-                    { borderBottomWidth: index === cities.length - 1 ? 0 : 1 },
-                  ]}
-                  activeOpacity={0.6}
-                  onPress={() => handleSelectCity(city)}
-                >
-                  <Text style={styles.cityText}>{city}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.cancelText}>Hủy</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal> */}
     </SafeAreaView>
   );
 }

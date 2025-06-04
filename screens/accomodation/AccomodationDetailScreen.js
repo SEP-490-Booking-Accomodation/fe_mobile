@@ -28,6 +28,10 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
   const authData = useSelector((state) => state.auth);
   const userId = authData.userId;
 
+  const formatPrice = (value) => {
+    return value.toLocaleString("vi-VN");
+  };
+
   const { data, isLoading, isError } =
     useGetAccommodationTypeByIdQuery(accommodationTypeId);
 
@@ -74,8 +78,6 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
     price: accommodationType.basePrice,
     overtimePrice: accommodationType.overtimeHourlyPrice,
     priceUnit: "h",
-    rating: "4.5",
-    reviewCount: "12",
     images:
       accommodationType.image?.length > 0
         ? accommodationType.image.map((img, index) => ({
@@ -91,15 +93,6 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
     amenities: allServices || [],
     description: accommodationType.description || t("no_description"),
     maxPeople: accommodationType.maxPeopleNumber,
-    reviews: [
-      {
-        userName: "John Doe",
-        rating: 5,
-        comment: "Great place to stay!",
-        date: "2023-05-15",
-        images: [],
-      },
-    ],
   };
 
   const handleBookNow = (accommodationType) => {
@@ -127,17 +120,6 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
     const imageSet = accommodationTypeData.images
       .map((img) => ({
         uri: img?.source?.uri || img.source,
-      }))
-      .filter((img) => img.uri);
-    setCurrentImageSet(imageSet);
-    setSelectedImageIndex(index);
-    setImageModalVisible(true);
-  };
-
-  const openReviewModal = (index) => {
-    const imageSet = accommodationTypeData.reviews[0]?.images
-      .map((img) => ({
-        uri: img?.source ? img.source.uri : "",
       }))
       .filter((img) => img.uri);
     setCurrentImageSet(imageSet);
@@ -201,24 +183,18 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
         <View style={styles.priceContainer}>
           <Text
             style={styles.priceText}
-          >{`${accommodationTypeData.price}đ/${accommodationTypeData.priceUnit}`}</Text>
+          >{`${formatPrice(accommodationTypeData.price)}đ/${accommodationTypeData.priceUnit}`}</Text>
         </View>
         <View style={styles.detailRow}>
           <MaterialIcons name="access-time" size={20} color="#4e72e3" />
           <Text style={styles.detailText}>
-            {t("overtime_price")}: {accommodationTypeData.overtimePrice} {t("per_hour")}
+            {t("overtime_price")}: {formatPrice(accommodationTypeData.overtimePrice)} {t("per_hour")}
           </Text>
         </View>
         <View style={styles.detailRow}>
           <MaterialIcons name="people" size={20} color="#4e72e3" />
           <Text style={styles.detailText}>
             {t("max_people")}: {accommodationTypeData.maxPeople}
-          </Text>
-        </View>
-        <View style={styles.reviewContainer}>
-          <MaterialIcons name="star" size={20} color="#ffc907" />
-          <Text style={styles.ratingText}>
-            {`${accommodationTypeData.rating} (${accommodationTypeData.reviewCount} ${t('reviews')})`}
           </Text>
         </View>
       </View>
@@ -267,8 +243,6 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
     );
   };
 
-
-
   const renderPhotos = () => {
     if (accommodationTypeData.images.length === 0) {
       return (
@@ -286,57 +260,60 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
     const totalPadding = contentPadding * 2;
     const imageWidth = (screenWidth - totalSpacing - totalPadding) / numColumns;
 
-    return (
-      <FlatList
-        data={accommodationTypeData.images}
-        numColumns={numColumns}
-        contentContainerStyle={styles.photosContainer}
-        renderItem={({ item, index }) => (
-          <TouchableOpacity
-            onPress={() => openGalleryModal(index)}
-            style={[
-              styles.imageWrapper,
-              {
-                marginRight: (index + 1) % numColumns === 0 ? 0 : spacing,
-                marginBottom: spacing,
-              },
-            ]}
-          >
-            <Image
-              source={
-                typeof item.source === "string"
-                  ? { uri: item.source }
-                  : item.source
-              }
+    const rows = [];
+    for (let i = 0; i < accommodationTypeData.images.length; i += numColumns) {
+      const rowItems = accommodationTypeData.images.slice(i, i + numColumns);
+      rows.push(
+        <View key={`row-${i}`} style={styles.photoRow}>
+          {rowItems.map((item, index) => (
+            <TouchableOpacity
+              key={item.id}
+              onPress={() => openGalleryModal(i + index)}
               style={[
-                styles.gridImage,
-                { width: imageWidth, height: imageWidth },
+                styles.imageWrapper,
+                {
+                  marginRight: index === rowItems.length - 1 ? 0 : spacing,
+                },
               ]}
-              resizeMode="cover"
-            />
-          </TouchableOpacity>
-        )}
-        keyExtractor={(item) => item.id}
-      />
+            >
+              <Image
+                source={
+                  typeof item.source === "string"
+                    ? { uri: item.source }
+                    : item.source
+                }
+                style={[
+                  styles.gridImage,
+                  { width: imageWidth, height: imageWidth },
+                ]}
+                resizeMode="cover"
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.photosContainer}>
+        {rows}
+      </View>
     );
   };
-
 
   const renderContent = () => {
     switch (activeTab) {
       case 0:
         return (
-          <ScrollView>
+          <View>
             <Text style={styles.descriptionText}>
               {accommodationTypeData.description}
             </Text>
             {renderAmenities()}
-          </ScrollView>
+          </View>
         );
       case 1:
         return renderPhotos();
-      case 2:
-        return <ScrollView>{renderReviews()}</ScrollView>;
       default:
         return null;
     }
@@ -345,11 +322,11 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       {renderHeader()}
-      <View style={styles.content}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {renderMainInfo()}
         {renderTabs()}
         {renderContent()}
-      </View>
+      </ScrollView>
       <View style={styles.footer}>
         <CustomButton
           onPress={() => handleBookNow(accommodationTypeData)}
@@ -357,7 +334,6 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
           style={styles.bookButton}
           backgroundColor="#101828"
           disabled={rentalData.data?.status === 4 || rentalData.data?.status === 5}
-
         />
       </View>
       <ImageViewing
@@ -436,12 +412,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#4e72e3",
   },
-  reviewContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 8,
-  },
-
   amenitiesContainer: {
     paddingHorizontal: 16,
     marginTop: 16,
@@ -486,6 +456,10 @@ const styles = StyleSheet.create({
   },
   photosContainer: {
     padding: 16,
+  },
+  photoRow: {
+    flexDirection: "row",
+    marginBottom: 8,
   },
   noPhotosContainer: {
     flex: 1,

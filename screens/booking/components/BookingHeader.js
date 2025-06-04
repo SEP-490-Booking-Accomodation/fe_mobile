@@ -3,48 +3,22 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
-import ReportModal from "../modals/ReportModal"; // Adjust the import path as necessary
 
 export default function BookingHeader({ rentalName = "" }) {
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const [reportModalVisible, setReportModalVisible] = useState(false);
-
-  const handleReportPress = () => {
-    setReportModalVisible(true);
-  };
-
-  const handleReportSubmit = (reportData) => {
-    console.log("Report submitted:", reportData);
-    // Here you would typically send the report to your backend
-  };
 
   return (
     <>
       <View style={styles.headerContainer}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.navigate("TicketList")}
+          onPress={() => navigation.goBack()}
         >
-          <AntDesign name="left" size={24} color="#000" />
+          <AntDesign name="left" size={24} color="#4E72E3" />
         </TouchableOpacity>
         <Text style={styles.header}>{t("booking_details")}</Text>
-        <TouchableOpacity
-          style={styles.reportButton}
-          onPress={handleReportPress}
-        >
-          <MaterialIcons name="report-problem" size={24} color="#4e72e3" />
-        </TouchableOpacity>
       </View>
-
-      {/* Report Modal */}
-      <ReportModal
-        visible={reportModalVisible}
-        onClose={() => setReportModalVisible(false)}
-        onSubmit={handleReportSubmit}
-        t={t}
-        rentalName={rentalName}
-      />
     </>
   );
 }

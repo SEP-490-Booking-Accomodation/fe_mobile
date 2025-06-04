@@ -247,6 +247,41 @@ const MapStack = () => (
       component={MapScreen}
       options={{ headerShown: false }}
     />
+    <Stack.Screen
+      name="DetailRentalLocation"
+      component={DetailRentalLocationScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="DetailAccomodation"
+      component={AccomodationDetailScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="BookingInformation"
+      component={BookingInformation}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="ConfirmBooking"
+      component={ConfirmBooking}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="PaymentConfirm"
+      component={PaymentConfirm}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="PaymentSuccess"
+      component={PaymentSuccess}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="BookingDetail"
+      component={BookingDetail}
+      options={{ headerShown: false }}
+    />
   </Stack.Navigator>
 );
 //Setting Stack
@@ -399,7 +434,7 @@ const MainTabNavigator = () => {
                   <Ionicons name="map" size={24} color={color} />
                 ),
               }}
-              // onPress={() => navigation.navigate("Map")}
+            // onPress={() => navigation.navigate("Map")}
             />
           ),
         }}

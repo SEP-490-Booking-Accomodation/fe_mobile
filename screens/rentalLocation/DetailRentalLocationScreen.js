@@ -31,6 +31,7 @@ import MoreOptionsModal from "../booking/modals/MoreOptionModal";
 
 const DetailRentalLocationScreen = ({ route, navigation }) => {
   const { t } = useTranslation();
+  const { rentalId } = route.params;
   const [user, setUser] = useState({});
   const { loadIdChatPlatform, isFavorite, toggleFavorite } = useAsyncStorage();
   const { rentalId: locationId } = route.params;
@@ -40,7 +41,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const [selectedServices, setSelectedServices] = useState([]);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [allServices, setAllServices] = useState([]);
-  const [isOpen, setIsOpen] = useState(false); // Add state for open/close status
+  const [isOpen, setIsOpen] = useState(false);
 
   // Modal visibility states
   const [moreOptionsModalVisible, setMoreOptionsModalVisible] = useState(false);
@@ -49,34 +50,30 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [selectedReviewImage, setSelectedReviewImage] = useState(null);
 
-  // Function to open the review image modal
-  const openReviewModal = (imageIndex, reviewImages) => {
-    if (reviewImages && reviewImages[imageIndex]) {
-      setSelectedReviewImage(reviewImages[imageIndex].source);
-      setReviewModalVisible(true);
-    }
-  };
-
-  const { data: feedbackDataList } =
-    useGetAllFeedbackByRentalIdQuery(locationId);
-  const { data: feedbackAverage } =
-    useGetAverageFeedbackByRentalIdQuery(locationId);
-
   const {
     data: rentalData,
     isLoading: isRentalLoading,
     isError: isRentalError,
-  } = useGetRentalLocationByIdQuery(locationId);
+  } = useGetRentalLocationByIdQuery(rentalId);
 
-  const ownerId = rentalData?.data?.ownerId.id;
+  const ownerId = rentalData?.data?.ownerId?.id;
   const { data: userOwnerId } = useGetUserIdByOwnerIdQuery(ownerId);
   const {
     data: accommodationTypesData,
     isLoading: isAccommodationLoading,
     isError: isAccommodationError,
-  } = useGetAllAccommodationTypesQuery(locationId || "");
+  } = useGetAllAccommodationTypesQuery(rentalId || "");
   const isLoading = isRentalLoading || isAccommodationLoading;
   const isError = isRentalError || isAccommodationError;
+
+  const { data: feedbackDataList } =
+    useGetAllFeedbackByRentalIdQuery(rentalId);
+  const { data: feedbackAverage } =
+    useGetAverageFeedbackByRentalIdQuery(rentalId);
+
+  const formatPrice = (value) => {
+    return value.toLocaleString("vi-VN");
+  };
 
   const fetchUser = async () => {
     try {
@@ -136,6 +133,12 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     const checkOpenStatus = () => {
+      // If rental is overnight, always set to open
+      if (rentalData?.data?.isOverNight) {
+        setIsOpen(true);
+        return;
+      }
+
       if (!rentalData?.data?.openHour || !rentalData?.data?.closeHour) {
         return;
       }
@@ -164,19 +167,20 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
       }
     };
 
-    checkOpenStatus();
-
-    const intervalId = setInterval(checkOpenStatus, 60000);
-    return () => clearInterval(intervalId);
+    if (rentalData?.data) {
+      checkOpenStatus();
+      const intervalId = setInterval(checkOpenStatus, 60000);
+      return () => clearInterval(intervalId);
+    }
   }, [rentalData]);
 
   useEffect(() => {
     fetchUser();
     checkFavoriteStatus();
     updateServices();
-  }, [locationId]);
+  }, [rentalId]);
 
-  if (!locationId) {
+  if (!rentalId) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text>{t("location_not_found")}</Text>
@@ -271,20 +275,20 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
                 <View style={styles.reviewerDetails}>
                   <Text style={styles.reviewerName}>
                     {review.bookingId?.customerId?.userId?.fullName &&
-                    review.bookingId?.customerId?.userId?.fullName.length <= 1
+                      review.bookingId?.customerId?.userId?.fullName.length <= 1
                       ? "*"
                       : `${review.bookingId?.customerId?.userId?.fullName
-                          .slice(
-                            0,
-                            Math.floor(
-                              review.bookingId?.customerId?.userId?.fullName
-                                ?.length / 2
-                            )
+                        .slice(
+                          0,
+                          Math.floor(
+                            review.bookingId?.customerId?.userId?.fullName
+                              ?.length / 2
                           )
-                          .replace(
-                            /./g,
-                            "*"
-                          )}${review.bookingId?.customerId?.userId?.fullName?.slice(
+                        )
+                        .replace(
+                          /./g,
+                          "*"
+                        )}${review.bookingId?.customerId?.userId?.fullName?.slice(
                           Math.floor(
                             review.bookingId?.customerId?.userId?.fullName
                               ?.length / 2
@@ -331,10 +335,10 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     const filteredAccommodationTypes =
       selectedServices.length > 0
         ? (accommodationTypesData?.data || []).filter((accommodation) =>
-            accommodation.serviceIds?.some((service) =>
-              selectedServices.includes(service.name)
-            )
+          accommodation.serviceIds?.some((service) =>
+            selectedServices.includes(service.name)
           )
+        )
         : accommodationTypesData?.data || [];
 
     return (
@@ -388,7 +392,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               key={accommodationType._id}
               imageUrl={accommodationType.image?.[0]}
               placeName={accommodationType.name}
-              price={`${accommodationType.basePrice}${t("per_hour")}`}
+              price={`${formatPrice(accommodationType.basePrice)}${t("per_hour")}`}
               location={`${rental.address}, ${rental.ward} , ${rental.district}, ${rental.city}`}
               onCardPress={() => handleCardPress(accommodationType)}
             />
@@ -534,16 +538,14 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
                 {isDescriptionExpanded
                   ? rental.description
                   : `${rental.description.slice(0, 90)}...`}
-                <TouchableOpacity
-                  onPress={() =>
-                    setIsDescriptionExpanded(!isDescriptionExpanded)
-                  }
-                  style={styles.readMoreContainer}
-                >
-                  <Text style={styles.readMoreText}>
-                    {isDescriptionExpanded ? t("collapse") : t("read_more")}
+                {rental.description.length > 90 && (
+                  <Text
+                    onPress={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                    style={styles.readMoreText}
+                  >
+                    {" "}{isDescriptionExpanded ? t("collapse") : t("read_more")}
                   </Text>
-                </TouchableOpacity>
+                )}
               </Text>
             </View>
           </View>
@@ -819,10 +821,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     color: "#555",
   },
-  readMoreText: {
-    color: "#4E72E3",
-    fontWeight: "bold",
-  },
   readMoreContainer: {
     marginLeft: 4,
     marginTop: 25,
@@ -846,6 +844,12 @@ const styles = StyleSheet.create({
     borderColor: "rgba(0, 0, 0, 0.1)",
     paddingTop: 12,
     paddingBottom: 12,
+  },
+
+  readMoreText: {
+    color: "#4E72E3",
+    fontWeight: "600",
+    fontSize: 14,
   },
   activeButton: {
     backgroundColor: "rgba(78, 114, 227, 0.33)",
