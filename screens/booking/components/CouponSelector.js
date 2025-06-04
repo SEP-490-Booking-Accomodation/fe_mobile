@@ -6,19 +6,19 @@ import {
   StyleSheet,
   FlatList,
   TouchableWithoutFeedback,
+  TextInput,
 } from "react-native";
 import { Entypo, Feather } from "@expo/vector-icons";
 import { ReactNativeModal } from "react-native-modal";
 import { useGetAllCouponQuery } from "../../../api/couponApi";
 import { useTranslation } from "react-i18next";
 
-export default function CouponSelector({
-  selectedVoucher,
-  setSelectedVoucher,
-}) {
-  const { t } = useTranslation(); 
+export default function CouponSelector({ selectedVoucher, setSelectedVoucher }) {
+  const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
   const [processedCoupons, setProcessedCoupons] = useState([]);
+  const [filteredCoupons, setFilteredCoupons] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: couponData, refetch } = useGetAllCouponQuery();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -69,8 +69,8 @@ export default function CouponSelector({
           });
         }
       } else {
-        description = t("discount_fixed", { 
-          amount: formatCurrency(coupon.amount) 
+        description = t("discount_fixed", {
+          amount: formatCurrency(coupon.amount),
         });
       }
 
@@ -91,10 +91,23 @@ export default function CouponSelector({
     processed.sort((a, b) => {
       if (a.isSelectable && !b.isSelectable) return -1;
       if (!a.isSelectable && b.isSelectable) return 1;
-      return 0;
+
+      const aIsPercentage = a.discountBasedOn.toLowerCase() === "percentage";
+      const bIsPercentage = b.discountBasedOn.toLowerCase() === "percentage";
+
+      if (aIsPercentage && bIsPercentage) {
+        return b.amount - a.amount;
+      } else if (aIsPercentage && !bIsPercentage) {
+        return -1;
+      } else if (!aIsPercentage && bIsPercentage) {
+        return 1;
+      } else {
+        return b.amount - a.amount;
+      }
     });
 
     setProcessedCoupons(processed);
+    setFilteredCoupons(processed);
   };
 
   const convertVNDateToISO = (vnDate) => {
@@ -110,13 +123,29 @@ export default function CouponSelector({
       minimumFractionDigits: 0,
     })
       .format(amount)
-      .replace("₫", "đ");
+      .replace("₫", "");
   };
 
   const handleSelectVoucher = (voucher) => {
-    if (!voucher.isSelectable) return; 
-    setSelectedVoucher(voucher);
+    if (!voucher.isSelectable) return;
+    if (selectedVoucher && selectedVoucher.couponCode === voucher.couponCode) {
+      setSelectedVoucher(null);
+    } else {
+      setSelectedVoucher(voucher);
+    }
     setModalVisible(false);
+  };
+
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    if (text.trim() === "") {
+      setFilteredCoupons(processedCoupons);
+    } else {
+      const filtered = processedCoupons.filter((coupon) =>
+        coupon.couponCode.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredCoupons(filtered);
+    }
   };
 
   return (
@@ -125,7 +154,10 @@ export default function CouponSelector({
         <Text style={styles.label}>{t("promo_voucher")}</Text>
         {selectedVoucher ? (
           <View style={styles.selectedInfo}>
-            <Text style={styles.voucherCode}>{selectedVoucher.code}</Text>
+            <Text style={styles.voucherCode}>{selectedVoucher.couponCode}</Text>
+            <Text style={styles.voucherDesc}>
+              {selectedVoucher.name}
+            </Text>
             <Text style={styles.voucherDesc}>
               {selectedVoucher.description}
             </Text>
@@ -141,10 +173,7 @@ export default function CouponSelector({
         />
       </TouchableOpacity>
 
-      <ReactNativeModal
-        isVisible={modalVisible}
-        style={styles.modalWrapper}
-      >
+      <ReactNativeModal isVisible={modalVisible} style={styles.modalWrapper}>
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback>
@@ -156,43 +185,56 @@ export default function CouponSelector({
                   <Text style={styles.modalTitle}>{t("choose_voucher")}</Text>
                 </View>
 
-                {processedCoupons.length > 0 ? (
+                <TextInput
+                  style={styles.searchBar}
+                  placeholder={t("search_coupon_code")}
+                  value={searchQuery}
+                  onChangeText={handleSearch}
+                />
+
+                {filteredCoupons.length > 0 ? (
                   <FlatList
                     refreshing={refreshing}
                     onRefresh={handleRefresh}
-                    data={processedCoupons}
+                    data={filteredCoupons}
                     renderItem={({ item }) => (
                       <TouchableOpacity
                         style={[
                           styles.voucherItem,
                           !item.isSelectable && styles.futureVoucher,
+                          selectedVoucher?.couponCode === item.couponCode &&
+                            styles.selectedVoucher,
                         ]}
                         onPress={() => handleSelectVoucher(item)}
                         disabled={!item.isSelectable}
                       >
-                        <View style={styles.voucherHeader}>
-                          <Text style={styles.voucherCode}>{item.couponCode}</Text>
+                        <View style={styles.voucherLeft}>
+                          <Text style={styles.discountLabel}>Sale</Text>
                           <Text style={styles.voucherDiscount}>
                             {item.discount}
                           </Text>
                         </View>
-                        <Text style={styles.voucherName}>{item.name}</Text>
-                        <Text style={styles.voucherDesc}>
-                          {item.description}
-                        </Text>
-
-                        {!item.isSelectable && (
-                          <Text style={styles.comingSoonTag}>
-                            {t("coming_soon")}
+                        <View style={styles.voucherRight}>
+                          <View style={styles.voucherHeader}>
+                            <Text style={styles.voucherCode}>
+                              {item.couponCode}
+                            </Text>
+                          </View>
+                          <Text style={styles.validityPeriod}>
+                            {t("validity_period", {
+                              start: item.startDate.split(" ")[0],
+                              end: item.endDate.split(" ")[0],
+                            })}
                           </Text>
-                        )}
-
-                        <Text style={styles.validityPeriod}>
-                          {t("validity_period", {
-                            start: item.startDate.split(" ")[0],
-                            end: item.endDate.split(" ")[0],
-                          })}
-                        </Text>
+                          <Text style={styles.validityPeriod}>
+                            {item.name}
+                          </Text>
+                          {!item.isSelectable && (
+                            <Text style={styles.comingSoonTag}>
+                              {t("coming_soon")}
+                            </Text>
+                          )}
+                        </View>
                       </TouchableOpacity>
                     )}
                   />
@@ -241,9 +283,14 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   voucherDiscount: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: "bold",
-    color: "#e63946",
+    color: "white",
+  },
+  discountLabel: {
+    fontSize: 14,
+    color: "white",
+    marginBottom: 2,
   },
   voucherName: {
     fontSize: 14,
@@ -279,19 +326,46 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
+  searchBar: {
+    height: 40,
+    borderColor: "#ddd",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 15,
+  },
   voucherItem: {
-    paddingVertical: 15,
-    paddingHorizontal: 12,
+    flexDirection: "row",
     borderBottomWidth: 1,
     borderColor: "#eee",
     backgroundColor: "#f9f9f9",
     marginBottom: 10,
     borderRadius: 8,
   },
+  voucherLeft: {
+    backgroundColor: "#4E72E3",
+    justifyContent: "center",
+    alignItems: "center",
+    width: 100,
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
+    paddingVertical: 10,
+  },
+  voucherRight: {
+    flex: 1,
+    paddingLeft: 15,
+    paddingVertical: 10,
+
+  },
   voucherHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  selectedVoucher: {
+    borderWidth: 2,
+    borderColor: "#4E72E3",
+    backgroundColor: "#e6f0fa",
   },
   futureVoucher: {
     opacity: 0.6,

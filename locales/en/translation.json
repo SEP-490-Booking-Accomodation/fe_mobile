@@ -580,5 +580,7 @@
   "check_in_not_available": "Check-in Not Available",
   "check_in_date_not_reached": "You can only check-in on {{date}} ({{days}} days remaining)",
   "check_in_policy_message": "Policy: {{policyDescription}}\n\nYou can check-in from {{availableTime}} ({{remainingMinutes}} minutes remaining)",
-  "days" : "days"
+  "days": "days",
+  "discount_fixed": "Discount {{amount}}",
+  "search_coupon_code": "Search coupon code"
 }
