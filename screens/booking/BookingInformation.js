@@ -153,7 +153,7 @@ export default function BookingInformation({ route, navigation }) {
       ) {
         Alert.alert(
           t("error"),
-          t("opening_hours_error", {
+          t("check_in_time_error", {
             openHour: OPENING_HOUR,
             openMinute: String(OPENING_MINUTE).padStart(2, "0"),
             closeHour: CLOSING_HOUR,
@@ -169,12 +169,13 @@ export default function BookingInformation({ route, navigation }) {
         (selectedHour === CLOSING_HOUR && selectedMinute < CLOSING_MINUTE)
       ) {
         Alert.alert(
-          "Lỗi",
-          `Thời gian nhận phòng chỉ từ ${OPENING_HOUR}:${String(
-            OPENING_MINUTE
-          ).padStart(2, "0")} đến ${CLOSING_HOUR}:${String(
-            CLOSING_MINUTE
-          ).padStart(2, "0")}.`
+          t("error"),
+          t("check_in_time_error", {
+            openHour: OPENING_HOUR,
+            openMinute: String(OPENING_MINUTE).padStart(2, "0"),
+            closeHour: CLOSING_HOUR,
+            closeMinute: String(CLOSING_MINUTE).padStart(2, "0")
+          })
         );
         closeTimePicker();
         return;
@@ -189,10 +190,11 @@ export default function BookingInformation({ route, navigation }) {
           endDateTime.getMinutes() > CLOSING_MINUTE)
       ) {
         Alert.alert(
-          "Lỗi",
-          `Thời gian nhận phòng không được chọn sau ${CLOSING_HOUR}:${String(
-            CLOSING_MINUTE
-          ).padStart(2, "0")}.`
+          t("error"),
+          t("check_in_end_time_error", {
+            closeHour: CLOSING_HOUR,
+            closeMinute: String(CLOSING_MINUTE).padStart(2, "0")
+          })
         );
         closeTimePicker();
         return;
@@ -279,8 +281,6 @@ export default function BookingInformation({ route, navigation }) {
       selectedTime
     )}:00`;
     const checkOutDateTime = `${formatDate(endTime)} ${formatTime(endTime)}:00`;
-    console.log(checkInDateTime);
-    console.log(checkOutDateTime);
     const formCheckAvailable = {
       rentalLocationId: rentalData?.data?.id,
       accommodationTypeId: accommodationTypeData?.data?.id,

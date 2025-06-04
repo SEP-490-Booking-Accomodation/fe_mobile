@@ -102,10 +102,12 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
         t("not_logged_in_message"),
         [
           {
+            text: t("later"),
+          },
+          {
             text: t("login"),
             onPress: () => navigation.navigate("Auth"),
           },
-          { text: t("later") },
         ]
       );
       return;

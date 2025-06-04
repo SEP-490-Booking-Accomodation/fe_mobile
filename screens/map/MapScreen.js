@@ -67,7 +67,6 @@ const MapScreen = ({ navigation }) => {
           longitudeDelta: 0.05,
         })
       } catch (error) {
-        console.error("Location error:", error)
         setLocationError(t("location_current_error"))
       }
     }
@@ -119,24 +118,20 @@ const MapScreen = ({ navigation }) => {
   const transformLocations = () => {
     if (!rentalLocations?.data) return []
 
-    console.log("Total locations before filtering:", rentalLocations.data.length)
     
     const filteredLocations = rentalLocations.data
       .filter((location) => {
         // Only show rentals with status 3 and has accommodationTypeIds
         if (location.status !== 3) {
-          console.log(`Location ${location._id} filtered out: status = ${location.status}`)
           return false
         }
         if (!location.accommodationTypeIds?.length) {
-          console.log(`Location ${location._id} filtered out: empty accommodationTypeIds`)
           return false
         }
         
         if (!location.latitude || !location.longitude || 
             isNaN(Number.parseFloat(location.latitude)) || 
             isNaN(Number.parseFloat(location.longitude))) {
-          console.log(`Location ${location._id} filtered out: invalid coordinates`)
           return false
         }
 
@@ -147,10 +142,8 @@ const MapScreen = ({ navigation }) => {
         const lng = Number.parseFloat(location.longitude)
 
         const services = location.accommodationTypeIds?.reduce((acc, type) => {
-          console.log('Processing accommodationType:', type);
           if (type.serviceIds && Array.isArray(type.serviceIds)) {
             type.serviceIds.forEach(service => {
-              console.log('Service found:', service);
               if (service.name) {
                 acc.add(service.name)
               }
@@ -159,7 +152,6 @@ const MapScreen = ({ navigation }) => {
           return acc
         }, new Set())
 
-        console.log('Extracted services for location', location._id, ':', Array.from(services));
 
         return {
           id: location._id,
@@ -184,7 +176,6 @@ const MapScreen = ({ navigation }) => {
         }
       })
 
-    console.log("Locations after filtering:", filteredLocations.length)
     return filteredLocations
   }
 
@@ -260,11 +251,8 @@ const MapScreen = ({ navigation }) => {
 
         let hasSelectedServices = true
         if (filters.selectedAmenities && filters.selectedAmenities.length > 0) {
-          console.log('Selected amenities:', filters.selectedAmenities);
-          console.log('Location services:', location.destination.services);
           hasSelectedServices = filters.selectedAmenities.every(amenity => {
             const hasService = location.destination.services.includes(amenity);
-            console.log(`Checking amenity ${amenity}: ${hasService}`);
             return hasService;
           })
         }
@@ -272,7 +260,6 @@ const MapScreen = ({ navigation }) => {
         return isInPriceRange && isRatingMatch && hasSelectedServices
       })
 
-      console.log('Filtered locations count:', filtered.length);
       return filtered.sort((a, b) => {
         // Sort by open/closed status first
         const aIsOpen = isLocationOpen(a);

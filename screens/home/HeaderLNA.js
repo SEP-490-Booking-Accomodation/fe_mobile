@@ -84,10 +84,12 @@ const UserNotLoggedIn = ({ onLoginPress }) => {
       t('login_required'),
       [
         {
+          text: t('later'),
+        },
+        {
           text: t('login'),
           onPress: () => onLoginPress(),
         },
-        { text: t('later') },
       ]
     );
   };

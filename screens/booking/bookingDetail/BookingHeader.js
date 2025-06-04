@@ -22,7 +22,6 @@ export default function BookingHeader({
   };
 
   const handleReportSubmit = (reportData) => {
-    console.log("Report submitted:", reportData);
     // Here you would typically send the report to your backend
   };
 

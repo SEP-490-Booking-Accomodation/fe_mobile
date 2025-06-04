@@ -91,9 +91,7 @@ export default function BookingDetail() {
           Alert.alert(t("error"), t("payment_create_failed"))
           setIsLoadingBtn(false)
         }
-        // console.log(response);
       } catch (error) {
-        console.error("Thanh toán thất bại:", error)
         Alert.alert(t("error"), t("payment_failed"))
         // setIsLoadingBtn(false);
       } finally {
@@ -130,7 +128,6 @@ export default function BookingDetail() {
               { text: "OK", onPress: () => refetch() },
             ])
           } catch (error) {
-            console.error("Error cancelling booking:", error)
             Alert.alert(t("error"), error.data?.message || t("cancel_failed"))
           }
         },
@@ -158,7 +155,6 @@ export default function BookingDetail() {
       }).unwrap()
       Alert.alert(t("success"), t("check_in_success"), [{ text: "OK", onPress: () => refetch() }])
     } catch (error) {
-      console.error("Error checking in:", error)
       Alert.alert(t("error"), error.data?.message || t("check_in_failed"))
     } finally {
       setIsCheckingIn(false)
@@ -227,7 +223,6 @@ export default function BookingDetail() {
       }).unwrap()
       Alert.alert(t("success"), t("check_out_success"), [{ text: "OK", onPress: () => refetch() }])
     } catch (error) {
-      console.error("Error checking out:", error)
       Alert.alert(t("error"), error.data?.message || t("check_out_failed"))
     } finally {
       setIsCheckingOut(false)
@@ -250,7 +245,6 @@ export default function BookingDetail() {
   const accommodationType =
     bookingData?.accommodationId?.accommodationTypeId?.name || "";
   const roomNo = bookingData?.accommodationId?.roomNo || "";
-  console.log("room", roomNo);
   return (
     <SafeAreaView style={styles.container}>
       <BookingHeader

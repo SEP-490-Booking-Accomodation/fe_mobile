@@ -7,8 +7,10 @@ import {
 } from "react-native";
 import TicketScreen from "../../components/TicketComponents/TicketScreen";
 import { useGetBookingByIdQuery } from "../../api/bookingApi";
+import { useTranslation } from "react-i18next";
 
 const TicketDetail = ({ route, navigation }) => {
+  const { t } = useTranslation();
   const { bookingId } = route.params || {};
   const {
     data: bookingData,
@@ -29,7 +31,7 @@ const TicketDetail = ({ route, navigation }) => {
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
           <ActivityIndicator size="large" color="#FFFFFF" />
-          <Text style={{ color: "#FFFFFF", marginTop: 10 }}>Loading...</Text>
+          <Text style={{ color: "#FFFFFF", marginTop: 10 }}>{t('loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -49,8 +51,7 @@ const TicketDetail = ({ route, navigation }) => {
           }}
         >
           <Text style={{ color: "#FFFFFF", fontSize: 18, textAlign: "center" }}>
-            There was an error loading the booking information. Please try
-            again.
+            {t('booking_load_error')}
           </Text>
         </View>
       </SafeAreaView>

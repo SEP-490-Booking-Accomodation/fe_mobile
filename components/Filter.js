@@ -220,7 +220,7 @@ const Filter = ({ visible, onClose, onApply, rentalLocations = [] }) => {
               <Text style={styles.amenitiesButtonText}>
                 {selectedAmenities.length > 0 
                   ? `${selectedAmenities.length} ${t("amenities_selected")}`
-                  : t("select_amenities")}
+                  : t("amenities_modal_label")}
               </Text>
               <FontAwesome5 name="chevron-right" size={16} color="#98A0B4" />
             </TouchableOpacity>

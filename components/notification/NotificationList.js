@@ -60,11 +60,12 @@ const NotificationList = () => {
 
   const transformedData = data.data.map((notification) => ({
     id: notification._id,
-    iconName: "notifications", 
+    type: notification.type,
     title: notification.title,
     time: notification.createdAt,
     message: notification.content,
     status: notification.isRead ? "read" : "unread",
+    bookingId: notification.bookingId,
   }));
 
   return (

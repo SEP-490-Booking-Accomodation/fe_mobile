@@ -24,7 +24,6 @@ const SearchResult = ({ route, navigation }) => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        console.log(t("location_permission_denied"));
         return;
       }
 
@@ -55,7 +54,6 @@ const SearchResult = ({ route, navigation }) => {
     try {
       await refetchRental();
     } catch (error) {
-      console.error(t("data_refresh_error"), error);
     }
     setRefreshing(false);
   };
@@ -79,7 +77,6 @@ const SearchResult = ({ route, navigation }) => {
   const rentalDisplay = useMemo(() => {
     if (!rental?.data) return [];
 
-    console.log('Total rentals from API:', rental.data.length);
 
     return rental.data
       .filter((item) => item.status === 3 && item.accommodationTypeIds && item.accommodationTypeIds.length > 0)
@@ -96,10 +93,8 @@ const SearchResult = ({ route, navigation }) => {
 
         // Extract all services from accommodationTypeIds
         const services = item.accommodationTypeIds?.reduce((acc, type) => {
-          console.log('Processing accommodationType in Search:', type);
           if (type.serviceIds && Array.isArray(type.serviceIds)) {
             type.serviceIds.forEach(service => {
-              console.log('Service found in Search:', service);
               if (service.name) {
                 acc.add(service.name);
               }
@@ -108,7 +103,6 @@ const SearchResult = ({ route, navigation }) => {
           return acc;
         }, new Set());
 
-        console.log('Extracted services for rental', item._id, ':', Array.from(services));
 
         // Calculate if the location is open
         const now = new Date();
@@ -159,7 +153,6 @@ const SearchResult = ({ route, navigation }) => {
   const filteredAndSortedData = useMemo(() => {
     let filteredData = rentalDisplay;
 
-    console.log('Initial data count:', filteredData.length);
 
     filteredData = filteredData.filter((item) => {
       const searchMatch = !isSearching ||
@@ -192,11 +185,8 @@ const SearchResult = ({ route, navigation }) => {
 
           let hasSelectedServices = true;
           if (appliedFilterParams.selectedAmenities && appliedFilterParams.selectedAmenities.length > 0) {
-            console.log('Selected amenities in Search:', appliedFilterParams.selectedAmenities);
-            console.log('Item services:', item.services);
             hasSelectedServices = appliedFilterParams.selectedAmenities.every(amenity => {
               const hasService = item.services.includes(amenity);
-              console.log(`Checking amenity ${amenity} in Search: ${hasService}`);
               return hasService;
             });
           }
@@ -208,7 +198,6 @@ const SearchResult = ({ route, navigation }) => {
       return searchMatch && filterMatch;
     });
 
-    console.log('Filtered data count:', filteredData.length);
 
     // Sort by open/closed status first, then by the selected sort option
     return filteredData.sort((a, b) => {

@@ -46,6 +46,7 @@ import PaymentSuccess from "../screens/payment/PaymentSuccess";
 import WalletScreen from "../screens/profile/childPage/WalletScreen";
 import PaymentMethod from "../screens/payment/PaymentMethod";
 import NotificationScreen from "../screens/notification/Notification";
+import NotificationDetail from "../screens/notification/NotificationDetail";
 import SettingList from "../screens/setting/SettingList";
 import AboutUs from "../screens/setting/AboutUs";
 import CustomerCare from "../screens/setting/CustomerCare";
@@ -94,7 +95,8 @@ const hideTabBarScreens = [
   "AboutUs",
   "CustomerCare",
   "HelpSupport",
-  "NotificationScreen"
+  "NotificationScreen",
+  "NotificationDetail"
 ];
 
 // AUTH STACK
@@ -182,6 +184,11 @@ const HomeStack = () => (
     <Stack.Screen
       name="NotificationScreen"
       component={NotificationScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="NotificationDetail"
+      component={NotificationDetail}
       options={{ headerShown: false }}
     />
     <Stack.Screen
@@ -475,7 +482,6 @@ const AppStack = () => {
       try {
         setInitialRoute("MainTabs");
       } catch (e) {
-        console.error("Failed to load app state", e);
         setInitialRoute("Splash");
       }
     };
