@@ -5,6 +5,7 @@ import CustomButton from "../../../components/buttons/Button"
 import { useTranslation } from "react-i18next"
 import customParseFormat from "dayjs/plugin/customParseFormat"
 import { useGetPolicyHashTagQuery } from "../../../api/policySystemApi"
+import { useCreateNotificationMutation } from "../../../api/notificationApi"
 
 dayjs.extend(customParseFormat)
 import { useRoute } from "@react-navigation/native"
@@ -20,6 +21,7 @@ export default function BookingFooter({
   isUpdating,
 }) {
   const { t } = useTranslation()
+  const [createNotification] = useCreateNotificationMutation()
   const status = Number(bookingData?.status)
   const paymentStatus = Number(bookingData?.paymentStatus)
   const refundDeadline = bookingData?.timeExpireRefund
@@ -206,7 +208,24 @@ export default function BookingFooter({
           t("refund_cancel_message", { time: formattedTime }),
           [
             { text: t("no"), style: "cancel" },
-            { text: t("yes"), onPress: onCancel },
+            { 
+              text: t("yes"), 
+              onPress: async () => {
+                try {
+                  await onCancel();
+                  await createNotification({
+                    userId: bookingData.rentalLocation.ownerId,
+                    bookingId: bookingId,
+                    title: t("booking_refunded"),
+                    content: `${t("booking_refunded_for")} ${bookingData.rentalLocation.name} ${t("on")} ${dayjs(bookingData.checkInHour).format("DD/MM/YYYY")} ${t("at")} ${dayjs(bookingData.checkInHour).format("HH:mm")}. ${t("refund_amount")}: ${bookingData.totalPrice}`,
+                    isRead: false,
+                    type: 1
+                  }).unwrap();
+                } catch (error) {
+                  console.log('Failed to create refund notification:', error);
+                }
+              }
+            },
           ],
         )
       } else {
@@ -215,12 +234,85 @@ export default function BookingFooter({
           t("refund_overdue_message", { time: formattedTime }),
           [
             { text: t("no"), style: "cancel" },
-            { text: t("cancel_anyway"), onPress: onCancel },
+            { 
+              text: t("cancel_anyway"), 
+              onPress: async () => {
+                try {
+                  await onCancel();
+                  await createNotification({
+                    userId: bookingData.rentalLocation.ownerId,
+                    bookingId: bookingId,
+                    title: t("booking_cancelled_late"),
+                    content: `${t("booking_cancelled_late_for")} ${bookingData.rentalLocation.name} ${t("on")} ${dayjs(bookingData.checkInHour).format("DD/MM/YYYY")} ${t("at")} ${dayjs(bookingData.checkInHour).format("HH:mm")}. ${t("no_refund_message")}`,
+                    isRead: false,
+                    type: 1
+                  }).unwrap();
+                } catch (error) {
+                  console.log('Failed to create late cancellation notification:', error);
+                }
+              }
+            },
           ],
         )
       }
     } else {
-      onCancel()
+      Alert.alert(
+        t("cancel_booking_title"),
+        t("cancel_booking_message"),
+        [
+          { text: t("no"), style: "cancel" },
+          { 
+            text: t("yes"), 
+            onPress: async () => {
+              try {
+                await onCancel();
+                await createNotification({
+                  userId: bookingData.rentalLocation.ownerId,
+                  bookingId: bookingId,
+                  title: t("booking_cancelled"),
+                  content: `${t("booking_cancelled_for")} ${bookingData.rentalLocation.name} ${t("on")} ${dayjs(bookingData.checkInHour).format("DD/MM/YYYY")} ${t("at")} ${dayjs(bookingData.checkInHour).format("HH:mm")}`,
+                  isRead: false,
+                  type: 1
+                }).unwrap();
+              } catch (error) {
+                console.log('Failed to create cancellation notification:', error);
+              }
+            }
+          },
+        ]
+      );
+    }
+  }
+
+  const handleCheckIn = async () => {
+    try {
+      await onCheckIn();
+      await createNotification({
+        userId: bookingData.rentalLocation.ownerId,
+        bookingId: bookingId,
+        title: t("customer_checked_in"),
+        content: `${t("customer_checked_in_for")} ${bookingData.rentalLocation.name} ${t("on")} ${dayjs(bookingData.checkInHour).format("DD/MM/YYYY")} ${t("at")} ${dayjs(bookingData.checkInHour).format("HH:mm")}`,
+        isRead: false,
+        type: 1
+      }).unwrap();
+    } catch (error) {
+      console.log('Failed to create check-in notification:', error);
+    }
+  }
+
+  const handleCheckOut = async () => {
+    try {
+      await onCheckOut();
+      await createNotification({
+        userId: bookingData.rentalLocation.ownerId,
+        bookingId: bookingId,
+        title: t("customer_checked_out"),
+        content: `${t("customer_checked_out_for")} ${bookingData.rentalLocation.name} ${t("on")} ${dayjs(bookingData.checkOutHour).format("DD/MM/YYYY")} ${t("at")} ${dayjs(bookingData.checkOutHour).format("HH:mm")}`,
+        isRead: false,
+        type: 1
+      }).unwrap();
+    } catch (error) {
+      console.log('Failed to create check-out notification:', error);
     }
   }
 
@@ -258,7 +350,7 @@ export default function BookingFooter({
           {shouldShowCheckIn() && (
             <CustomButton
               title={getCheckInButtonText()}
-              onPress={isCheckInButtonEnabled() ? onCheckIn : handleDisabledCheckInPress}
+              onPress={isCheckInButtonEnabled() ? handleCheckIn : handleDisabledCheckInPress}
               style={[styles.checkInButton, !isCheckInButtonEnabled() && styles.disabledCheckInButton]}
               textStyle={[styles.checkInButtonText, !isCheckInButtonEnabled() && styles.disabledCheckInButtonText]}
               disabled={false}
@@ -304,7 +396,7 @@ export default function BookingFooter({
             <View style={styles.buttonRow}>
               <CustomButton
                 title={t("check_out")}
-                onPress={onCheckOut}
+                onPress={handleCheckOut}
                 style={styles.checkOutButton}
                 textStyle={styles.checkInButtonText}
                 loading={isUpdating}

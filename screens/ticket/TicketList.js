@@ -31,6 +31,7 @@ const BOOKING_STATUS = Object.freeze({
 });
 import { useCreateFeedbackMutation } from "../../api/feedbackApi";
 import NotAuth from "../auth/NotAuth";
+import { useCreateNotificationMutation } from "../../api/notificationApi";
 
 export default function TicketList() {
   const { t } = useTranslation();
@@ -58,6 +59,7 @@ export default function TicketList() {
     isLoading,
     refetch,
   } = useGetAllBookingByCustomerIdQuery(customerData?.id);
+  const [createNotification] = useCreateNotificationMutation();
   const mapStatusToFilterCategory = (status) => {
     switch (status) {
       case BOOKING_STATUS.CONFIRMED:
@@ -157,6 +159,23 @@ export default function TicketList() {
         id: reviewData.bookingId,
         data: updatedBookingData,
       }).unwrap();
+
+      const booking = bookingData.bookings.find(b => b.id === reviewData.bookingId);
+      if (booking) {
+        try {
+          await createNotification({
+            userId: booking.accommodationId.rentalLocationId.ownerId,
+            bookingId: reviewData.bookingId,
+            title: t("new_feedback_received"),
+            content: `${t("customer_left_feedback")} ${booking.accommodationId.rentalLocationId.name}. ${t("rating")}: ${reviewData.rating}/5`,
+            isRead: false,
+            type: 1
+          }).unwrap();
+        } catch (notificationError) {
+          console.log('Failed to create feedback notification:', notificationError);
+        }
+      }
+
       setLocalBookings((prevBookings) =>
         prevBookings.map((booking) =>
           booking.id === reviewData.bookingId
