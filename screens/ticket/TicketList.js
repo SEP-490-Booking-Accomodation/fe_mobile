@@ -103,7 +103,6 @@ export default function TicketList() {
 
   // Function to convert booking data - defined BEFORE it's used
   const convertBookingsData = (bookings) => {
-    console.log("Original booking data:", bookings[0]); // Log the first booking to see structure
     return bookings.map((booking) => ({
       id: booking.id,
       imageUrl: booking.accommodationId.image[0] || imageTest,
@@ -131,7 +130,6 @@ export default function TicketList() {
     }
   }, [bookingData]);
 
-  console.log("accomodationType", bookingData?.bookings[0]?.accommodationId?.accommodationTypeId);
 
 
   const [refreshing, setRefreshing] = useState(false);
@@ -171,7 +169,7 @@ export default function TicketList() {
       if (booking) {
         try {
           await createNotification({
-            userId: booking.accommodationId.rentalLocationId.ownerId,
+            userId: bookingData?.accommodationId?.rentalLocationId?.ownerId?.userId?._id,
             bookingId: reviewData.bookingId,
             title: t("new_feedback_received"),
             content: `${t("customer_left_feedback")} ${booking.accommodationId.rentalLocationId.name}. ${t("rating")}: ${reviewData.rating}/5`,
@@ -179,7 +177,6 @@ export default function TicketList() {
             type: 1
           }).unwrap();
         } catch (notificationError) {
-          console.log('Failed to create feedback notification:', notificationError);
         }
       }
 

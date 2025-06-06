@@ -32,7 +32,7 @@ export default function BookingHeader({
           style={styles.backButton}
           onPress={() => navigation.navigate("TicketList")}
         >
-          <AntDesign name="left" size={24} color="#000" />
+          <AntDesign name="left" size={24} color="#4e72e3" />
         </TouchableOpacity>
         <Text style={styles.header}>{t("booking_details")}</Text>
         <TouchableOpacity

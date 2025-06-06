@@ -435,7 +435,7 @@
   "refund_overdue_message": "Bạn đã quá hạn hoàn tiền (sau {{time}}). Bạn vẫn muốn hủy?",
   "refund_cancel_button": "Hoàn và Hủy đặt phòng",
   "cancel_button": "Hủy",
-  "cancel_anyway": "Hủy vẫn tiếp tục",
+  "cancel_anyway": "Hủy",
   "pay_now_button": "Thanh toán ngay",
   "view_ticket_button": "Xem vé",
   "refund_note_available": "* Hủy trước {{time}} sẽ được hoàn tiền.",
@@ -444,7 +444,7 @@
   "payment_label": "Thanh toán:",
   "payment_pending": "Chờ thanh toán",
   "payment_paid": "Đã thanh toán",
-  "payment_refunded": "Đã hoàn tiền",
+  "payment_refunded": "Yêu cầu hoàn tiền",
   "note": "Ghi chú",
   "payment_info_title": "Thông tin thanh toán",
   "refund_available": "Hoàn tiền khả dụng",
@@ -666,5 +666,12 @@
   "customer_left_feedback": "Khách đã đánh giá cho",
   "refund_amount": "Số tiền hoàn lại",
   "no_refund_message": "Sẽ không được hoàn tiền",
-  "new_message": "Tin nhắn mới"
+  "new_message": "Tin nhắn mới",
+  "checked_in_at": "đã check-in lúc",
+  "for_date": "cho ngày",
+  "checked_out_at": "đã check-out lúc",
+  "cancelled_at": "đã hủy lúc",
+  "customer_cancelled_with_refund_request": "Khách đã hủy và yêu cầu hoàn tiền",
+  "booking_cancelled_with_refund_request_for": "Đặt phòng tại",
+  "requested_refund_amount": "Số tiền yêu cầu hoàn"
 }
