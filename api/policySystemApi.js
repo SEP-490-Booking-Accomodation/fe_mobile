@@ -19,6 +19,11 @@ export const policySystemApi = baseApi.injectEndpoints({
       transformResponse: (response) => response.data, 
       providesTags: ["PolicySystem"],
     }),
+    getAllPolicySystemsByCategory: builder.query({
+      query: (category) =>
+        `/policy-system/category-name/${category}`,
+      transformResponse: (response) => response.data, 
+    }),
   }),
 });
 
@@ -26,4 +31,5 @@ export const {
   useGetPolicyHashTagQuery,
   useLazyGetAllPoliciesQuery,
   useGetPolicyByIdQuery,
+  useGetAllPolicySystemsByCategoryQuery,
 } = policySystemApi;

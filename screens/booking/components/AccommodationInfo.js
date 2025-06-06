@@ -1,22 +1,24 @@
 import React, { useState } from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
-
+import {useGetAccommodationTypeByIdQuery} from "../../../api/accommodationTypeApi"
 const AccommodationInfo = ({
   accommodationTypeData,
   formatMoney,
   rentalData,
   isOverNight,
 }) => {
+
+  const {data: accommodationTypeDataApi} = useGetAccommodationTypeByIdQuery(accommodationTypeData?.data?.id);
   const { t } = useTranslation();
   if (!accommodationTypeData?.data) return null;
   const loadingGif = "https://i.gifer.com/WMDx.gif";
   const [isLoading, setIsLoading] = useState(true); // Trạng thái tải ảnh
-
+  const imageReplace = accommodationTypeDataApi?.data?.image?.[0] || accommodationTypeData?.data?.image?.[0];
   return (
     <View style={styles.typeInfoContainer}>
       <Image
-        source={{ uri: accommodationTypeData?.data?.image?.[0] }}
+        source={{ uri: accommodationTypeData?.data?.image?.[0] || imageReplace}}
         style={styles.mainImage}
         resizeMode="contain"
         onLoad={() => setIsLoading(false)}
