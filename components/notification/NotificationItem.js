@@ -9,6 +9,9 @@ const NOTIFICATION_TYPES = {
   BOOKING: 1,
   FEEDBACK: 2,
   PAYMENT: 3,
+  USER: 4,
+  RENTAL: 5,
+  MESSAGE: 6,
 };
 
 const getNotificationIcon = (type) => {
@@ -19,6 +22,12 @@ const getNotificationIcon = (type) => {
       return "chatbox";
     case NOTIFICATION_TYPES.PAYMENT:
       return "wallet";
+    case NOTIFICATION_TYPES.USER:
+      return "person";
+    case NOTIFICATION_TYPES.RENTAL:
+      return "home";
+    case NOTIFICATION_TYPES.MESSAGE:
+      return "mail";
     default:
       return "notifications";
   }

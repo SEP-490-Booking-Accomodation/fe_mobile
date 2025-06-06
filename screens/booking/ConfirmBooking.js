@@ -25,7 +25,10 @@ import { useGetCustomerByUserIdQuery } from "../../api/authApi";
 import CouponSelector from "./components/CouponSelector";
 import { useGetPolicyHashTagQuery } from "../../api/policySystemApi";
 import { useTranslation } from "react-i18next";
+
 import {useGetAllPolicySystemsByCategoryQuery} from "../../api/policySystemApi"
+import { useCreateNotificationMutation } from "../../api/notificationApi";
+
 
 export default function ConfirmBooking() {
   const { t } = useTranslation();
@@ -37,6 +40,7 @@ export default function ConfirmBooking() {
   const [discountAmount, setDiscountAmount] = useState(0);
   const [finalTotal, setFinalTotal] = useState(0);
   const [createBooking] = useCreateBookingMutation();
+  const [createNotification] = useCreateNotificationMutation();
   const navigation = useNavigation();
   const route = useRoute();
   const { bookingData } = route.params || {};
@@ -175,10 +179,8 @@ export default function ConfirmBooking() {
       passwordRoom: "",
       note: bookingData.note || "",
       status: 8,
-      // timeExpireRefund: refundDeadline,
       timeExpireRefund: deadlineFormatted,
-      // discountAmount: discountAmount, // Add discount amount to the booking data
-      totalPrice: finalTotal, // Add final total after discount
+      totalPrice: finalTotal,
     };
 
     try {
@@ -186,25 +188,19 @@ export default function ConfirmBooking() {
         data: formBooking,
       }).unwrap();
 
-      // navigation.navigate("BookingDetail", {
-      //   bookingId: response.booking.id,
-      // });
+      try {
+        await createNotification({
+          userId: customerData.id,
+          bookingId: response.booking.id,
+          title: t("booking_success"),
+          content: `${t("booking_confirmed_for")} ${rentalData.name} ${t("on")} ${bookingData.date} ${t("at")} ${bookingData.time}`,
+          isRead: false,
+          type: 1
+        }).unwrap();
+      } catch (notificationError) {
+        console.log('Failed to create notification:', notificationError);
+      }
 
-      // navigation.reset({
-      //   index: 1,
-      //   routes: [
-      //     {
-      //       name: "MainTabs",
-      //       params: {
-      //         screen: "Ticket",
-      //         params: {
-      //           screen: "BookingDetail",
-      //           params: { bookingId: response.booking.id },
-      //         },
-      //       },
-      //     },
-      //   ],
-      // });
       navigation.dispatch(
         CommonActions.reset({
           index: 1,
@@ -235,7 +231,6 @@ export default function ConfirmBooking() {
         })
       );
     } catch (error) {
-
       Alert.alert(t("failed"), error.data?.message || t("booking_failed"));
     } finally {
       setIsLoading(false);
@@ -354,7 +349,7 @@ export default function ConfirmBooking() {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <AntDesign name="left" size={24} color="#000" />
+          <AntDesign name="left" size={24} color="#4E72E3" />
         </TouchableOpacity>
         <View>
           <Text>{t("total")}</Text>
