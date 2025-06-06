@@ -335,6 +335,7 @@ const TicketStack = () => (
     <Stack.Screen name="TicketList" component={TicketList} />
     <Stack.Screen name="BookingDetail" component={BookingDetail} />
     <Stack.Screen name="TicketDetail" component={TicketDetail} />
+    <Stack.Screen name="BookingInformation" component={BookingInformation} />
   </Stack.Navigator>
 );
 // Custom Middle Button Component

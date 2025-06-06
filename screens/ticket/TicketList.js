@@ -103,6 +103,7 @@ export default function TicketList() {
 
   // Function to convert booking data - defined BEFORE it's used
   const convertBookingsData = (bookings) => {
+    console.log("Original booking data:", bookings[0]); // Log the first booking to see structure
     return bookings.map((booking) => ({
       id: booking.id,
       imageUrl: booking.accommodationId.image[0] || imageTest,
@@ -117,6 +118,9 @@ export default function TicketList() {
       bookingStatus: mapStatusToFilterCategory(booking.status),
       paymentStatus: booking.paymentStatus,
       feedbackId: booking.feedbackId,
+      accommodationId: booking.accommodationId,
+      accommodationTypeId: booking.accommodationId?.accommodationTypeId,
+      rentalLocationId: booking.accommodationId?.rentalLocationId,
     }));
   };
 
@@ -126,6 +130,9 @@ export default function TicketList() {
       setLocalBookings(convertBookingsData(bookingData.bookings));
     }
   }, [bookingData]);
+
+  console.log("accomodationType", bookingData?.bookings[0]?.accommodationId?.accommodationTypeId);
+
 
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = async () => {
@@ -228,9 +235,15 @@ export default function TicketList() {
     setReviewModalVisible(true);
   };
 
-  const handleRebooking = (id) => {
-    // Navigate to rebooking page
-    // navigation.navigate("RebookingPage", { bookingId: id });
+  const handleRebooking = ({accommodationType, rentalLocation}) => {
+     navigation.navigate("Home", {
+      
+      screen: "BookingInformation",
+      params: {
+        accommodationTypeData: { data: accommodationType },
+        rentalData: { data: rentalLocation },
+      }
+    });
   };
 
   // Filter bookings based on active tab
@@ -240,6 +253,8 @@ export default function TicketList() {
       : convertedBookings.filter(
         (booking) => booking.bookingStatus === activeTab.key
       );
+
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -345,7 +360,16 @@ export default function TicketList() {
                     onViewDetail={() => handleViewDetail(booking.id)}
                     onCancelAction={() => handleCancel(booking.id)}
                     onReviewAction={() => handleReview(booking.id)}
-                    onRebookingAction={() => handleRebooking(booking.id)}
+                    onRebookingAction={() => {
+                      console.log("Booking data in CardInMyTicket:", {
+                        accommodationType: booking.accommodationTypeId,
+                        rentalLocation: booking.rentalLocationId
+                      });
+                      handleRebooking({
+                        accommodationType: booking.accommodationTypeId,
+                        rentalLocation: booking.rentalLocationId
+                      });
+                    }}
                   />
                 </View>
               ))
