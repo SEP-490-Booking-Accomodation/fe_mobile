@@ -7,6 +7,9 @@ const NOTIFICATION_TYPES = {
   BOOKING: 1,
   FEEDBACK: 2,
   PAYMENT: 3,
+  USER: 4,
+  RENTAL: 5,
+  MESSAGE: 6,
 };
 
 const getNotificationIcon = (type) => {
@@ -20,6 +23,15 @@ const getNotificationIcon = (type) => {
       break;
     case NOTIFICATION_TYPES.PAYMENT:
       iconName = "wallet";
+      break;
+    case NOTIFICATION_TYPES.USER:
+      iconName = "person";
+      break;
+    case NOTIFICATION_TYPES.RENTAL:
+      iconName = "home";
+      break;
+    case NOTIFICATION_TYPES.MESSAGE:
+      iconName = "mail";
       break;
   }
   return iconName;
@@ -36,6 +48,15 @@ const getNotificationTypeText = (type) => {
       break;
     case NOTIFICATION_TYPES.PAYMENT:
       text = "notification_type_payment";
+      break;
+    case NOTIFICATION_TYPES.USER:
+      text = "notification_type_user";
+      break;
+    case NOTIFICATION_TYPES.RENTAL:
+      text = "notification_type_rental";
+      break;
+    case NOTIFICATION_TYPES.MESSAGE:
+      text = "notification_type_message";
       break;
     default:
       text = "notification_type_default";
