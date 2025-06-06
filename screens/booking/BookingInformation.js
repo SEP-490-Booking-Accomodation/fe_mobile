@@ -22,7 +22,8 @@ import { useTranslation } from "react-i18next";
 export default function BookingInformation({ route, navigation }) {
   const { t } = useTranslation();
   const { accommodationTypeData, rentalData } = route.params || {};
-
+  console.log("accommodationTypeData", accommodationTypeData);
+  console.log("rentalData", rentalData);
   const parseTime = (timeStr) => {
     if (!timeStr) return { hour: 0, minute: 0 };
     const [hour, minute] = timeStr.split(":").map(Number);

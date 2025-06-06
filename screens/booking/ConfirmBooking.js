@@ -25,6 +25,7 @@ import { useGetCustomerByUserIdQuery } from "../../api/authApi";
 import CouponSelector from "./components/CouponSelector";
 import { useGetPolicyHashTagQuery } from "../../api/policySystemApi";
 import { useTranslation } from "react-i18next";
+import {useGetAllPolicySystemsByCategoryQuery} from "../../api/policySystemApi"
 
 export default function ConfirmBooking() {
   const { t } = useTranslation();
@@ -47,7 +48,10 @@ export default function ConfirmBooking() {
   const refundDeadline = bookingTime.add(refundMinutes, "minute");
   // const refundDeadlineISO = refundDeadline.toISOString();
   const date = new Date(refundDeadline);
+  const { data: policyData } = useGetAllPolicySystemsByCategoryQuery("System");
 
+  const policySystemIds = policyData?.map((item) => item.id);
+  
   // Hàm định dạng số thành 2 chữ số
   const pad = (n) => n.toString().padStart(2, "0");
 
@@ -150,13 +154,8 @@ export default function ConfirmBooking() {
   const handleConfirm = async () => {
     setIsLoading(true);
 
-    // Policy Checkout 
-    // Policy Checkin
-    // Policy Refund time
-    // Policy Cancel
-
     const formBooking = {
-      // policySystemIds: policyId || ["67ebf15d828b69a4d279d960"],
+      policySystemIds: policySystemIds,
       customerId: customerData.id,
       accommodationTypeId: typeRoom.id,
       couponId: selectedVoucher?.id || null,
