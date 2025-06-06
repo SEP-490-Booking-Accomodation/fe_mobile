@@ -17,11 +17,13 @@ import GuestSelector from "./components/GuestSelector";
 import BookingFooter from "./components/BookingFooter";
 import GuestSelectionModal from "./modals/GuestSelectionModal";
 import { useCheckAvailableRoomMutation } from "../../api/bookingApi";
+import { useGetPolicyHashTagQuery } from "../../api/policySystemApi";
 import { useTranslation } from "react-i18next";
 
 export default function BookingInformation({ route, navigation }) {
   const { t } = useTranslation();
   const { accommodationTypeData, rentalData } = route.params || {};
+  const { data: checkInPolicyData } = useGetPolicyHashTagQuery("thoigiancheckin");
 
   const parseTime = (timeStr) => {
     if (!timeStr) return { hour: 0, minute: 0 };
@@ -133,15 +135,25 @@ export default function BookingInformation({ route, navigation }) {
   };
 
   const handleTimeSelect = (time) => {
-  const now = new Date();
-  const selectedDateTime = new Date(selectedDate);
-  selectedDateTime.setHours(time.getHours(), time.getMinutes(), 0);
+    const now = new Date();
+    const selectedDateTime = new Date(selectedDate);
+    selectedDateTime.setHours(time.getHours(), time.getMinutes(), 0);
 
-  if (selectedDateTime < now) {
-    Alert.alert(t("error"), t("future_time_error"));
-    closeTimePicker();
-    return;
-  }
+    const policyValues = checkInPolicyData?.data?.[0]?.values || [];
+    const checkInMinutes = policyValues.length > 0 ? parseInt(policyValues[0].val) : 20;
+    const policyDescription = policyValues.length > 0 ? policyValues[0].description : "Được checkin sớm trước 20 phút trở đi";
+
+    const earliestCheckInTime = new Date(now.getTime() + checkInMinutes * 60000);
+
+    if (selectedDateTime < earliestCheckInTime) {
+      const formattedEarliestTime = `${String(earliestCheckInTime.getHours()).padStart(2, "0")}:${String(earliestCheckInTime.getMinutes()).padStart(2, "0")}`;
+      Alert.alert(
+        t("error"),
+        `${policyDescription}. Vui lòng chọn thời gian sau ${formattedEarliestTime}`
+      );
+      closeTimePicker();
+      return;
+    }
 
     if (!isOverNight) {
       const selectedHour = time.getHours();

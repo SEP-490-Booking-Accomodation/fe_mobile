@@ -665,5 +665,12 @@
   "customer_left_feedback": "お客様からのフィードバック：",
   "refund_amount": "返金額",
   "no_refund_message": "返金は行われません",
-  "new_message": "新しいメッセージ"
+  "new_message": "新しいメッセージ",
+  "for_date": "日付",
+  "checked_out_at": "チェックアウト時刻",
+  "cancelled_at": "キャンセル時刻",
+  "checked_in_at": "チェックイン時刻",
+  "customer_cancelled_with_refund_request": "お客様がキャンセルし、返金を要求しました",
+  "booking_cancelled_with_refund_request_for": "予約場所",
+  "requested_refund_amount": "返金額"
 }

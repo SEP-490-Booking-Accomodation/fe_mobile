@@ -659,5 +659,12 @@
   "customer_left_feedback": "Customer left feedback for",
   "refund_amount": "Refund amount",
   "no_refund_message": "No refund will be issued",
-  "new_message": "New Message"
+  "new_message": "New Message",
+  "checked_in_at": "checked in at",
+  "for_date": "for date",
+  "checked_out_at": "checked out at",
+  "cancelled_at": "cancelled at",
+  "customer_cancelled_with_refund_request": "Customer cancelled and requested refund",
+  "booking_cancelled_with_refund_request_for": "Booking at",
+  "requested_refund_amount": "Requested refund amount"
 }

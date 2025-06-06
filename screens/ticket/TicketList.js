@@ -164,7 +164,7 @@ export default function TicketList() {
       if (booking) {
         try {
           await createNotification({
-            userId: booking.accommodationId.rentalLocationId.ownerId,
+            userId: bookingData?.accommodationId?.rentalLocationId?.ownerId?.userId?._id,
             bookingId: reviewData.bookingId,
             title: t("new_feedback_received"),
             content: `${t("customer_left_feedback")} ${booking.accommodationId.rentalLocationId.name}. ${t("rating")}: ${reviewData.rating}/5`,

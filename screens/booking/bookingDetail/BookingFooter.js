@@ -135,7 +135,7 @@ export default function BookingFooter({
     const remainingMinutes = checkInAvailableTime.diff(currentTime, 'minute')
     
     if (remainingMinutes > 0) {
-      return `${t('check_in')} (${remainingMinutes}${t('min')})`
+      return `${t('check_in')}`
     }
     
     return t('check_in')
@@ -192,103 +192,14 @@ export default function BookingFooter({
   }
 
   const handleCancelPress = () => {
-    if (paymentStatus === PAYMENT_STATUS.PAID && refundDeadline) {
-      const formattedTime = (() => {
-        try {
-          const deadline = dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss")
-          return deadline.isValid() ? deadline.format("HH:mm DD/MM/YYYY") : refundDeadline
-        } catch {
-          return refundDeadline
-        }
-      })()
-
-      if (isRefundAvailable()) {
-        Alert.alert(
-          t("refund_cancel_title"),
-          t("refund_cancel_message", { time: formattedTime }),
-          [
-            { text: t("no"), style: "cancel" },
-            { 
-              text: t("yes"), 
-              onPress: async () => {
-                try {
-                  await onCancel();
-                  await createNotification({
-                    userId: bookingData.rentalLocation.ownerId,
-                    bookingId: bookingId,
-                    title: t("booking_refunded"),
-                    content: `${t("booking_refunded_for")} ${bookingData.rentalLocation.name} ${t("on")} ${dayjs(bookingData.checkInHour).format("DD/MM/YYYY")} ${t("at")} ${dayjs(bookingData.checkInHour).format("HH:mm")}. ${t("refund_amount")}: ${bookingData.totalPrice}`,
-                    isRead: false,
-                    type: 1
-                  }).unwrap();
-                } catch (error) {
-                  console.log('Failed to create refund notification:', error);
-                }
-              }
-            },
-          ],
-        )
-      } else {
-        Alert.alert(
-          t("refund_overdue_title"),
-          t("refund_overdue_message", { time: formattedTime }),
-          [
-            { text: t("no"), style: "cancel" },
-            { 
-              text: t("cancel_anyway"), 
-              onPress: async () => {
-                try {
-                  await onCancel();
-                  await createNotification({
-                    userId: bookingData.rentalLocation.ownerId,
-                    bookingId: bookingId,
-                    title: t("booking_cancelled_late"),
-                    content: `${t("booking_cancelled_late_for")} ${bookingData.rentalLocation.name} ${t("on")} ${dayjs(bookingData.checkInHour).format("DD/MM/YYYY")} ${t("at")} ${dayjs(bookingData.checkInHour).format("HH:mm")}. ${t("no_refund_message")}`,
-                    isRead: false,
-                    type: 1
-                  }).unwrap();
-                } catch (error) {
-                  console.log('Failed to create late cancellation notification:', error);
-                }
-              }
-            },
-          ],
-        )
-      }
-    } else {
-      Alert.alert(
-        t("cancel_booking_title"),
-        t("cancel_booking_message"),
-        [
-          { text: t("no"), style: "cancel" },
-          { 
-            text: t("yes"), 
-            onPress: async () => {
-              try {
-                await onCancel();
-                await createNotification({
-                  userId: bookingData.rentalLocation.ownerId,
-                  bookingId: bookingId,
-                  title: t("booking_cancelled"),
-                  content: `${t("booking_cancelled_for")} ${bookingData.rentalLocation.name} ${t("on")} ${dayjs(bookingData.checkInHour).format("DD/MM/YYYY")} ${t("at")} ${dayjs(bookingData.checkInHour).format("HH:mm")}`,
-                  isRead: false,
-                  type: 1
-                }).unwrap();
-              } catch (error) {
-                console.log('Failed to create cancellation notification:', error);
-              }
-            }
-          },
-        ]
-      );
-    }
+    onCancel();
   }
 
   const handleCheckIn = async () => {
     try {
       await onCheckIn();
       await createNotification({
-        userId: bookingData.rentalLocation.ownerId,
+        userId: bookingData.accommodationId.rentalLocationId.ownerId.userId._id,
         bookingId: bookingId,
         title: t("customer_checked_in"),
         content: `${t("customer_checked_in_for")} ${bookingData.rentalLocation.name} ${t("on")} ${dayjs(bookingData.checkInHour).format("DD/MM/YYYY")} ${t("at")} ${dayjs(bookingData.checkInHour).format("HH:mm")}`,
@@ -304,7 +215,7 @@ export default function BookingFooter({
     try {
       await onCheckOut();
       await createNotification({
-        userId: bookingData.rentalLocation.ownerId,
+        userId: bookingData.accommodationId.rentalLocationId.ownerId.userId._id,
         bookingId: bookingId,
         title: t("customer_checked_out"),
         content: `${t("customer_checked_out_for")} ${bookingData.rentalLocation.name} ${t("on")} ${dayjs(bookingData.checkOutHour).format("DD/MM/YYYY")} ${t("at")} ${dayjs(bookingData.checkOutHour).format("HH:mm")}`,
@@ -439,21 +350,24 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     backgroundColor: "transparent",
-    height: 50,
+    height: 'auto',
+    minHeight: 50,
+    paddingVertical: 8,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "#4E72E3",
     flex: 1,
   },
   cancelButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
     color: "#4E72E3",
+    textAlign: 'center',
   },
   multilineButtonText: {
     textAlign: "center",
     flexWrap: "wrap",
-    lineHeight: 20,
+    lineHeight: 18,
   },
   homeButton: {
     backgroundColor: "#4E72E3",
