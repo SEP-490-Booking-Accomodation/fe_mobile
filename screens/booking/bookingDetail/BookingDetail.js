@@ -113,7 +113,6 @@ export default function BookingDetail() {
   };
 
   const handleCancel = () => {
-    console.log('Cancel - BookingData:', JSON.stringify(bookingData, null, 2));
     // Check if refund is available
     const isPaid = bookingData?.paymentStatus === PAYMENT_STATUS.PAID
     const refundDeadline = bookingData?.timeExpireRefund
@@ -187,7 +186,6 @@ export default function BookingDetail() {
 
               await createNotification(notificationData).unwrap()
             } catch (error) {
-              console.log('Failed to create cancellation notification:', error)
             }
 
             Alert.alert(t("success"), isRefundAvailable ? t("cancel_refund_success") : t("cancel_success"), [
@@ -208,7 +206,6 @@ export default function BookingDetail() {
   }
 
   const handleCheckIn = async () => {
-    console.log('CheckIn - BookingData:', JSON.stringify(bookingData, null, 2));
     setIsCheckingIn(true)
     try {
       const updatedBookingData = {
@@ -233,7 +230,6 @@ export default function BookingDetail() {
           type: 1
         }).unwrap()
       } catch (error) {
-        console.log('Failed to create check-in notification:', error)
       }
 
       Alert.alert(t("success"), t("check_in_success"), [{ text: "OK", onPress: () => refetch() }])
@@ -293,7 +289,6 @@ export default function BookingDetail() {
 
   // Extracted the actual checkout logic to a separate function
   const performCheckout = async () => {
-    console.log('CheckOut - BookingData:', JSON.stringify(bookingData, null, 2));
     setIsCheckingOut(true)
     try {
       const updatedBookingData = {
@@ -318,7 +313,6 @@ export default function BookingDetail() {
           type: 1
         }).unwrap()
       } catch (error) {
-        console.log('Failed to create check-out notification:', error)
       }
 
       Alert.alert(t("success"), t("check_out_success"), [{ text: "OK", onPress: () => refetch() }])

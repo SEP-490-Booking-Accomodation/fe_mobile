@@ -198,7 +198,6 @@ export default function ConfirmBooking() {
           type: 1
         }).unwrap();
       } catch (notificationError) {
-        console.log('Failed to create notification:', notificationError);
       }
 
       navigation.dispatch(

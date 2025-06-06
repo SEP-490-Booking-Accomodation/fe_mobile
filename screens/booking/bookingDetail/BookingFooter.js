@@ -207,7 +207,6 @@ export default function BookingFooter({
         type: 1
       }).unwrap();
     } catch (error) {
-      console.log('Failed to create check-in notification:', error);
     }
   }
 
@@ -223,7 +222,6 @@ export default function BookingFooter({
         type: 1
       }).unwrap();
     } catch (error) {
-      console.log('Failed to create check-out notification:', error);
     }
   }
 
