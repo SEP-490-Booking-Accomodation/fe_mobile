@@ -79,6 +79,9 @@ const NotificationDetail = ({ route, navigation }) => {
           navigation.navigate('BookingDetail', { bookingId: notification.bookingId });
         }
         break;
+      case NOTIFICATION_TYPES.MESSAGE:
+        navigation.navigate('Messages');
+        break;
       case NOTIFICATION_TYPES.FEEDBACK:
         // Navigate to feedback screen if needed
         break;

@@ -50,6 +50,11 @@ const NotificationItem = ({ id, type, title, time, message, status, bookingId })
       }
     }
 
+    if (type === NOTIFICATION_TYPES.MESSAGE) {
+      navigation.navigate('Messages');
+      return;
+    }
+
     navigation.navigate('NotificationDetail', {
       notification: {
         _id: id,
