@@ -83,7 +83,10 @@ const NotificationDetail = ({ route, navigation }) => {
     switch (notification.type) {
       case NOTIFICATION_TYPES.BOOKING:
         if (notification.bookingId) {
-          navigation.navigate('BookingDetail', { bookingId: notification.bookingId });
+          navigation.navigate('BookingDetail', { 
+            bookingId: notification.bookingId,
+            fromNotification: true 
+          });
         }
         break;
       case NOTIFICATION_TYPES.MESSAGE:
