@@ -26,9 +26,8 @@ import CouponSelector from "./components/CouponSelector";
 import { useGetPolicyHashTagQuery } from "../../api/policySystemApi";
 import { useTranslation } from "react-i18next";
 
-import {useGetAllPolicySystemsByCategoryQuery} from "../../api/policySystemApi"
+import { useGetAllPolicySystemsByCategoryQuery } from "../../api/policySystemApi";
 import { useCreateNotificationMutation } from "../../api/notificationApi";
-
 
 export default function ConfirmBooking() {
   const { t } = useTranslation();
@@ -45,6 +44,7 @@ export default function ConfirmBooking() {
   const route = useRoute();
   const { bookingData } = route.params || {};
   const [isLoading, setIsLoading] = useState(false);
+  console.log("bookingData", bookingData);
 
   const values = getTimeRefundData?.data?.[0]?.values || [];
   let refundMinutes = values[0]?.val || 20; // mặc định nếu không có
@@ -55,7 +55,7 @@ export default function ConfirmBooking() {
   const { data: policyData } = useGetAllPolicySystemsByCategoryQuery("System");
 
   const policySystemIds = policyData?.map((item) => item.id);
-  
+
   // Hàm định dạng số thành 2 chữ số
   const pad = (n) => n.toString().padStart(2, "0");
 
@@ -65,7 +65,6 @@ export default function ConfirmBooking() {
   )}-${date.getFullYear()} ${pad(date.getHours())}:${pad(
     date.getMinutes()
   )}:${pad(date.getSeconds())}`;
-
 
   useEffect(() => {
     if (bookingData) {
@@ -151,9 +150,10 @@ export default function ConfirmBooking() {
     hoursEnd,
     minutesEnd
   ).toISOString();
+  console.log("Booking DATA", bookingData.date);
 
   const checkInDateTime = `${bookingData.date} ${bookingData.time}:00`;
-  const checkOutDateTime = `${bookingData.date} ${bookingData.endTime}:00`;
+  const checkOutDateTime = `${bookingData.endDate} ${bookingData.endTime}:00`;
 
   const handleConfirm = async () => {
     setIsLoading(true);
@@ -193,12 +193,13 @@ export default function ConfirmBooking() {
           userId: customerData.id,
           bookingId: response.booking.id,
           title: t("booking_success"),
-          content: `${t("booking_confirmed_for")} ${rentalData.name} ${t("on")} ${bookingData.date} ${t("at")} ${bookingData.time}`,
+          content: `${t("booking_confirmed_for")} ${rentalData.name} ${t(
+            "on"
+          )} ${bookingData.date} ${t("at")} ${bookingData.time}`,
           isRead: false,
-          type: 1
+          type: 1,
         }).unwrap();
-      } catch (notificationError) {
-      }
+      } catch (notificationError) {}
 
       navigation.dispatch(
         CommonActions.reset({
@@ -281,17 +282,17 @@ export default function ConfirmBooking() {
             <View style={styles.jusBetween}>
               <Text style={styles.value}>{t("date")}: </Text>
               <Text>{bookingData?.date}</Text>
-
             </View>
             <View style={styles.jusBetween}>
               <Text style={styles.value}>{t("time")}:</Text>
               <Text>
-                {bookingData?.time} - {bookingData?.endTime} {bookingData?.endTime < bookingData?.time ? `(${bookingData?.endDate})` : ""}
+                {bookingData?.time} - {bookingData?.endTime}{" "}
+                {bookingData?.endTime < bookingData?.time
+                  ? `(${bookingData?.endDate})`
+                  : ""}
               </Text>
             </View>
-           
           </View>
-          
 
           <View style={styles.card}>
             <Text style={styles.label}>{t("guests")}:</Text>
