@@ -47,6 +47,7 @@ export default function BookingInformation({ route, navigation }) {
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
   const [isTimePickerVisible, setTimePickerVisible] = useState(false);
   const [isGuestModalVisible, setGuestModalVisible] = useState(false);
+  const [dateError, setDateError] = useState("");
 
   const now = new Date();
   const [selectedDate, setSelectedDate] = useState(now);
@@ -72,6 +73,26 @@ export default function BookingInformation({ route, navigation }) {
   useEffect(() => {
     validateForm();
   }, [selectedDate, selectedTime, selectedDuration, guestCount, formData]);
+
+  useEffect(() => {
+    // Check if rental is closed and not overnight on component mount
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const [closeHourValue, closeMinuteValue] = rentalData?.data?.closeHour.split(":").map(Number);
+    const isClosed = currentHour > closeHourValue || (currentHour === closeHourValue && currentMinute >= closeMinuteValue);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selectedDay = new Date(selectedDate);
+    selectedDay.setHours(0, 0, 0, 0);
+
+    if (!isOverNight && isClosed && selectedDay.getTime() === today.getTime()) {
+      setDateError(t("rental_closed_today"));
+    } else {
+      setDateError("");
+    }
+  }, [isOverNight, rentalData?.data?.closeHour, selectedDate]);
 
   const validateForm = () => {
     const isDateTimeValid = selectedDate && selectedTime && isValidDateTime();
@@ -125,6 +146,24 @@ export default function BookingInformation({ route, navigation }) {
 
     const selectedDay = new Date(date);
     selectedDay.setHours(0, 0, 0, 0);
+
+    // Check if rental is closed and not overnight
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const [closeHourValue, closeMinuteValue] = rentalData?.data?.closeHour.split(":").map(Number);
+    const isClosed = currentHour > closeHourValue || (currentHour === closeHourValue && currentMinute >= closeMinuteValue);
+
+    // Clear error if tomorrow is selected
+    if (selectedDay.getTime() === tomorrow.getTime()) {
+      setDateError("");
+    }
+    // Show error if today is selected and rental is closed
+    else if (!isOverNight && isClosed && selectedDay.getTime() === today.getTime()) {
+      setDateError(t("rental_closed_today"));
+      closeDatePicker();
+      return;
+    }
 
     if (selectedDay < today || selectedDay > tomorrow) {
       Alert.alert(t("error"), t("date_selection_error"));
@@ -370,6 +409,7 @@ export default function BookingInformation({ route, navigation }) {
               handleTimeSelect={handleTimeSelect}
               closeDatePicker={closeDatePicker}
               closeTimePicker={closeTimePicker}
+              dateError={dateError}
             />
 
             <DurationSelector

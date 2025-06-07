@@ -248,6 +248,7 @@
   "not_logged_in": "Bạn chưa đăng nhập",
   "login_required": "Vui lòng đăng nhập để sử dụng tính năng này",
   "welcome_message": "Chúc bạn có một chuyến đi vui vẻ trong kỳ nghỉ tuyệt vời!",
+  "back_to_home": "Trở về trang chủ",
   "search_placeholder": "Tìm kiếm điểm đến của bạn",
   "location_info_error": "Không thể lấy thông tin địa điểm",
   "select_city_title": "Chọn thành phố",
@@ -676,5 +677,6 @@
   "requested_refund_amount": "Số tiền yêu cầu hoàn",
   "view_policies": "Xem chính sách",
   "owner_policies": "Chính sách của chủ nhà",
-  "minimum_payment_warning": "Thanh toán phải lớn hơn 10,000đ"
+  "minimum_payment_warning": "Thanh toán phải lớn hơn 10,000đ",
+  "rental_closed_today": "Địa điểm đã đóng cửa hôm nay. Vui lòng chọn ngày mai."
 }

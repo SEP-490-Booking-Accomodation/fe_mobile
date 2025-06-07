@@ -136,7 +136,7 @@
   "overnight": "オーバーナイト",
   "error_booking_window": "48時間以内（今日または明日）の予約のみ可能です。",
   "error_past_time": "未来の時間を選択してください。",
-  "error_opening_hours": "営業時間は{{opening}}から{{closing}}までです。",
+  "error_opening_hours": "チェックイン時間は{{openHour}}:{{openMinute}}から{{closeHour}}:{{closeMinute}}までです。",
   "guest_selection_title": "宿泊人数",
   "maximum_people": "最大{{maxPeople}}人",
   "adults": "大人",
@@ -676,5 +676,7 @@
   "requested_refund_amount": "返金額",
   "view_policies": "ポリシーを表示",
   "owner_policies": "オーナーポリシー",
-  "minimum_payment_warning": "支払いは10,000d以上である必要があります"
+  "minimum_payment_warning": "支払いは10,000d以上である必要があります",
+  "rental_closed_today": "本日は閉店しています。明日を選択してください。",
+  "back_to_home": "ホームに戻る"
 }

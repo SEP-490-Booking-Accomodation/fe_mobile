@@ -137,7 +137,7 @@
   "usage_duration_overnight": "Usage Duration (including overnight)",
   "error_booking_window": "Bookings can only be made within 48 hours (today or tomorrow).",
   "error_past_time": "Please select a future time.",
-  "error_opening_hours": "Operating hours are from {{opening}} to {{closing}}.",
+  "error_opening_hours": "Check-in time is only from {{openHour}}:{{openMinute}} to {{closeHour}}:{{closeMinute}}.",
   "guest_selection_title": "Number of Guests",
   "maximum_people": "Maximum {{maxPeople}} people",
   "adults": "Adults",
@@ -199,7 +199,7 @@
   "go_home": "Go to Home",
   "date_selection_error": "Please select today or tomorrow only.",
   "future_time_error": "Please select a time in the future.",
-  "opening_hours_error": "Check-in time is from {{openHour}}:{{openMinute}} to {{closeHour}}:{{closeMinute}}.",
+  "opening_hours_error": "Check-in time is only from {{openHour}}:{{openMinute}} to {{closeHour}}:{{closeMinute}}.",
   "select_guest_count": "Select number of guests",
   "adults_count": "{{count}} adults",
   "children_count": "{{count}} children",
@@ -248,7 +248,7 @@
   "go_to_policies": "Go to Policies",
   "select_city": "Select city",
   "not_logged_in": "Not logged in",
-  "login_required": "Please login to use this feature",
+  "login_required": "Please log in to use this feature",
   "welcome_message": "Wish you a happy trip on your wonderful vacation!",
   "search_placeholder": "Search your destination",
   "location_info_error": "Could not fetch location information",
@@ -670,5 +670,7 @@
   "requested_refund_amount": "Requested refund amount",
   "view_policies": "View Policies",
   "owner_policies": "Owner Policies",
-  "minimum_payment_warning": "Your payment must be larger than 10,000đ"
+  "minimum_payment_warning": "Your payment must be larger than 10,000đ",
+  "rental_closed_today": "The rental is closed today. Please select tomorrow.",
+  "back_to_home": "Back to Home"
 }
