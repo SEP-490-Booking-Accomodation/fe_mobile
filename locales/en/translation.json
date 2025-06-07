@@ -667,5 +667,8 @@
   "cancelled_at": "cancelled at",
   "customer_cancelled_with_refund_request": "Customer cancelled and requested refund",
   "booking_cancelled_with_refund_request_for": "Booking at",
-  "requested_refund_amount": "Requested refund amount"
+  "requested_refund_amount": "Requested refund amount",
+  "view_policies": "View Policies",
+  "owner_policies": "Owner Policies",
+  "minimum_payment_warning": "Your payment must be larger than 10,000đ"
 }

@@ -43,36 +43,6 @@ export default function VerticalCard({
     setIsFavourite(isFavorite(id));
   }, [id, isFavorite]);
 
-  // useEffect(() => {
-  //   if (imageUrl) {
-  //     const firstImage = Array.isArray(imageUrl) ? imageUrl[0] : imageUrl;
-
-  //     if (
-  //       firstImage &&
-  //       (firstImage.startsWith("http://") || firstImage.startsWith("https://"))
-  //     ) {
-  //       setCurrentImage(firstImage);
-  //     } else {
-  //       setCurrentImage(fallbackImage);
-  //       setImageError(true);
-  //     }
-  //   } else {
-  //     setCurrentImage(fallbackImage);
-  //     setImageError(true);
-  //   }
-  // }, [imageUrl, fallbackImage]);
-
-  // useEffect(() => {
-  //   const timeout = setTimeout(() => {
-  //     if (isLoading && !imageError) {
-  //       setCurrentImage(fallbackImage);
-  //       setIsLoading(false);
-  //       setImageError(true);
-  //     }
-  //   }, 10000);
-
-  //   return () => clearTimeout(timeout);
-  // }, [isLoading, imageError, fallbackImage]);
   
   useEffect(() => {
     const checkOpenStatus = () => {
@@ -159,9 +129,9 @@ export default function VerticalCard({
 
   return (
     <TouchableOpacity
-      style={[styles.card, disabled && styles.disabledCard]}
-      onPress={disabled ? null : handleCardPress}
-      activeOpacity={disabled ? 1 : 0.97}
+      style={[styles.card]}
+      onPress={handleCardPress}
+      activeOpacity={0.97}
     >
       <View style={styles.imageContainer}>
         {/* {isLoading && !imageError && (

@@ -673,5 +673,8 @@
   "cancelled_at": "đã hủy lúc",
   "customer_cancelled_with_refund_request": "Khách đã hủy và yêu cầu hoàn tiền",
   "booking_cancelled_with_refund_request_for": "Đặt phòng tại",
-  "requested_refund_amount": "Số tiền yêu cầu hoàn"
+  "requested_refund_amount": "Số tiền yêu cầu hoàn",
+  "view_policies": "Xem chính sách",
+  "owner_policies": "Chính sách của chủ nhà",
+  "minimum_payment_warning": "Thanh toán phải lớn hơn 10,000đ"
 }
