@@ -336,15 +336,23 @@ export default function ConfirmBooking() {
               </View>
             )}
 
-            <View style={[styles.jusBetween, styles.totalRow]}>
-              <Text style={styles.totalText}>{t("total_amount")}:</Text>
-              <Text style={styles.totalAmount}>{formatMoney(finalTotal)}</Text>
-            </View>
+                      <View style={[styles.jusBetween, styles.totalRow]}>
+            <Text style={styles.totalText}>{t("total_amount")}:</Text>
+            <Text style={styles.totalAmount}>{formatMoney(finalTotal)}</Text>
           </View>
-        </KeyboardAvoidingView>
-      </ScrollView>
+          
+          {finalTotal <= 10000 && (
+            <View style={styles.warningContainer}>
+              <Text style={styles.warningText}>
+                {t("minimum_payment_warning")}
+              </Text>
+            </View>
+          )}
+        </View>
+      </KeyboardAvoidingView>
+    </ScrollView>
 
-      <View style={styles.footer}>
+    <View style={styles.footer}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
@@ -359,7 +367,7 @@ export default function ConfirmBooking() {
           onPress={handleConfirm}
           style={{ width: "40%" }}
           title={t("book_now")}
-          disabled={isLoading}
+          disabled={isLoading || finalTotal <= 10000}
         />
       </View>
     </SafeAreaView>
@@ -451,5 +459,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-start",
     paddingLeft: 15,
+  },
+  warningContainer: {
+    backgroundColor: "#fff3cd",
+    borderColor: "#ffeaa7",
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 10,
+  },
+  warningText: {
+    color: "#856404",
+    fontSize: 14,
+    fontWeight: "500",
+    textAlign: "center",
   },
 });

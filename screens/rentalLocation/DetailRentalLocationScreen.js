@@ -25,7 +25,9 @@ import { useGetAverageFeedbackByRentalIdQuery } from "../../api/feedbackApi";
 import { useGetRentalLocationByIdQuery } from "../../api/rentalLocationApi";
 import { useGetAllAccommodationTypesQuery } from "../../api/accommodationTypeApi";
 import { useGetUserIdByOwnerIdQuery } from "../../api/ownerApi";
+import { useGetPolicyOwerQuery } from "../../api/policyOwerApi";
 import { useTranslation } from "react-i18next";
+import PolicyModal from "../../components/modals/PolicyModal";
 
 // Import only the MoreOptionsModal component
 import MoreOptionsModal from "../booking/modals/MoreOptionModal";
@@ -52,6 +54,8 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [selectedReviewImage, setSelectedReviewImage] = useState(null);
 
+  const [isPolicyModalVisible, setIsPolicyModalVisible] = useState(false);
+
   const {
     data: rentalData,
     isLoading: isRentalLoading,
@@ -72,6 +76,10 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const { data: feedbackDataList } = useGetAllFeedbackByRentalIdQuery(rentalId);
   const { data: feedbackAverage } =
     useGetAverageFeedbackByRentalIdQuery(rentalId);
+
+  const { data: policyData, isLoading: isPolicyLoading, error: policyError } = useGetPolicyOwerQuery(
+    rentalData?.data?.ownerId?.id
+  );
 
   const formatPrice = (value) => {
     return value.toLocaleString("vi-VN");
@@ -417,6 +425,10 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     });
   };
 
+  const handleShowPolicies = () => {
+    setIsPolicyModalVisible(true);
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -556,8 +568,15 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
                   {feedbackAverage?.averageRating?.toFixed(1) || "0.0"} (
                   {feedbackAverage?.totalFeedbacks || 0} {t("reviews_count")}
                   {")"}
-                </Text>
+                </Text> 
               </View>
+              <TouchableOpacity
+                style={styles.policyButton}
+                onPress={handleShowPolicies}
+              >
+                <Icon name="policy" size={20} color="#4e72e3" />
+                <Text style={styles.policyButtonText}>{t("owner_policies")}</Text>
+              </TouchableOpacity>
               <Text style={styles.description}>
                 {isDescriptionExpanded
                   ? rental.description
@@ -574,6 +593,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
                   </Text>
                 )}
               </Text>
+              
             </View>
           </View>
 
@@ -648,6 +668,13 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
             />
           </View>
         </Modal>
+        <PolicyModal
+          visible={isPolicyModalVisible}
+          onClose={() => setIsPolicyModalVisible(false)}
+          policies={policyData?.owners || []}
+          isLoading={isPolicyLoading}
+          error={policyError}
+        />
       </View>
     </SafeAreaView>
   );
@@ -966,6 +993,19 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     borderRadius: 20,
+  },
+  policyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f2ff',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+  },
+  policyButtonText: {
+    marginLeft: 8,
+    color: '#4e72e3',
+    fontWeight: '600',
   },
 });
 
