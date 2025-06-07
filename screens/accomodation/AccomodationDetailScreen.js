@@ -21,18 +21,20 @@ import MultipleButtonNoSelect from "../../components/buttons/MultipleButtonNoSel
 import { useGetAccommodationTypeByIdQuery } from "../../api/accommodationTypeApi";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
+import { RefreshControl } from "react-native";
 
 const AccomodationDetailScreen = ({ route, navigation }) => {
   const { t } = useTranslation();
   const { accommodationTypeId, rentalData, rentalName } = route.params;
   const authData = useSelector((state) => state.auth);
   const userId = authData.userId;
+  const [refreshing, setRefreshing] = useState(false);
 
   const formatPrice = (value) => {
     return value.toLocaleString("vi-VN");
   };
 
-  const { data, isLoading, isError } =
+  const { data, isLoading, isError, refetch } =
     useGetAccommodationTypeByIdQuery(accommodationTypeId);
 
   const [activeTab, setActiveTab] = useState(0);
@@ -81,15 +83,15 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
     images:
       accommodationType.image?.length > 0
         ? accommodationType.image.map((img, index) => ({
-          id: `img-${index}`,
-          source: { uri: img },
-        }))
+            id: `img-${index}`,
+            source: { uri: img },
+          }))
         : [
-          {
-            id: "default-img",
-            source: require("../../assets/images/banner.png"),
-          },
-        ],
+            {
+              id: "default-img",
+              source: require("../../assets/images/banner.png"),
+            },
+          ],
     amenities: allServices || [],
     description: accommodationType.description || t("no_description"),
     maxPeople: accommodationType.maxPeopleNumber,
@@ -97,19 +99,15 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
 
   const handleBookNow = (accommodationType) => {
     if (!userId) {
-      Alert.alert(
-        t("not_logged_in_title"),
-        t("not_logged_in_message"),
-        [
-          {
-            text: t("later"),
-          },
-          {
-            text: t("login"),
-            onPress: () => navigation.navigate("Auth"),
-          },
-        ]
-      );
+      Alert.alert(t("not_logged_in_title"), t("not_logged_in_message"), [
+        {
+          text: t("later"),
+        },
+        {
+          text: t("login"),
+          onPress: () => navigation.navigate("Auth"),
+        },
+      ]);
       return;
     }
     navigation.navigate("BookingInformation", {
@@ -183,14 +181,15 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
           />
         </View>
         <View style={styles.priceContainer}>
-          <Text
-            style={styles.priceText}
-          >{`${formatPrice(accommodationTypeData.price)}đ/${accommodationTypeData.priceUnit}`}</Text>
+          <Text style={styles.priceText}>{`${formatPrice(
+            accommodationTypeData.price
+          )}đ/${accommodationTypeData.priceUnit}`}</Text>
         </View>
         <View style={styles.detailRow}>
           <MaterialIcons name="access-time" size={20} color="#4e72e3" />
           <Text style={styles.detailText}>
-            {t("overtime_price")}: {formatPrice(accommodationTypeData.overtimePrice)} {t("per_hour")}
+            {t("overtime_price")}:{" "}
+            {formatPrice(accommodationTypeData.overtimePrice)} {t("per_hour")}
           </Text>
         </View>
         <View style={styles.detailRow}>
@@ -296,11 +295,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
       );
     }
 
-    return (
-      <View style={styles.photosContainer}>
-        {rows}
-      </View>
-    );
+    return <View style={styles.photosContainer}>{rows}</View>;
   };
 
   const renderContent = () => {
@@ -335,7 +330,9 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
           title={t("book_now")}
           style={styles.bookButton}
           backgroundColor="#101828"
-          disabled={rentalData.data?.status === 4 || rentalData.data?.status === 5}
+          disabled={
+            rentalData.data?.status === 4 || rentalData.data?.status === 5
+          }
         />
       </View>
       <ImageViewing
