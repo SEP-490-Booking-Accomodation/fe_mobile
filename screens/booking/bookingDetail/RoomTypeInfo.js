@@ -13,7 +13,6 @@ export default function RoomTypeInfo({ typeRoom, password }) {
     >
       <InfoText>{typeRoom?.name ?? t("no_info")}</InfoText>
       <InfoSecondaryText>{typeRoom?.description ?? ""}</InfoSecondaryText>
-      <InfoSecondaryText>Password: {password ?? ""}</InfoSecondaryText>
     </InfoCard>
   );
 }
