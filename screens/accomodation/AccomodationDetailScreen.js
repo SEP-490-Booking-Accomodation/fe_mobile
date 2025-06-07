@@ -37,6 +37,13 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
   const { data, isLoading, isError, refetch } =
     useGetAccommodationTypeByIdQuery(accommodationTypeId);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refetch();
+    } catch (error) {}
+    setRefreshing(false);
+  };
   const [activeTab, setActiveTab] = useState(0);
   const [isImageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -319,7 +326,20 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       {renderHeader()}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            colors={["#FF5733", "#33FF57", "#3357FF"]}
+            tintColor="#3357FF"
+            title="Loading..."
+            titleColor="#3357FF"
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         {renderMainInfo()}
         {renderTabs()}
         {renderContent()}
