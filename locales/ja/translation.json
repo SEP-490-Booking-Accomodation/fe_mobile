@@ -165,9 +165,9 @@
   "payment_status_refund": "返金済み",
   "payment_status_failed": "失敗",
   "payment_status_unknown": "不明",
-  "payment_description": "予約{{id}}のMomo支払い {{price}}",
-  "payment_create_failed": "Momo支払いを作成できませんでした",
-  "payment_failed": "Momo支払いが失敗しました",
+  "payment_description": "予約{{id}}の支払い {{price}}",
+  "payment_create_failed": "支払いを作成できませんでした",
+  "payment_failed": "失敗した",
   "cancel_confirmation_title": "キャンセルの確認",
   "cancel_confirmation_message": "この予約をキャンセルしますか？",
   "no": "いいえ",
@@ -580,7 +580,7 @@
   "check_in_not_available": "チェックインできません",
   "check_in_date_not_reached": "{{date}}にチェックインできます（あと{{days}}日）",
   "check_in_policy_message": "ポリシー：{{policyDescription}}\n\n{{availableTime}}からチェックインできます（あと{{remainingMinutes}}分）",
-  "days" : "日",
+  "days": "日",
   "discount_fixed": "割引{{amount}}",
   "search_coupon_code": "クーポンコードを検索",
   "notification_detail": "通知の詳細",
@@ -672,5 +672,7 @@
   "checked_in_at": "チェックイン時刻",
   "customer_cancelled_with_refund_request": "お客様がキャンセルし、返金を要求しました",
   "booking_cancelled_with_refund_request_for": "予約場所",
-  "requested_refund_amount": "返金額"
+  "requested_refund_amount": "返金額",
+  "payment_method_payos": "PayOSを使用して支払う",
+  "payment_with_payos": "PayOSでお支払い"
 }
