@@ -48,35 +48,36 @@ const RegisterScreen = () => {
   // Validation functions (same as web)
   const validateEmail = (email) =>
     /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
-  
+
   const validatePhone = (phone) => /^\d{10}$/.test(phone);
-  
+
   const validateDateOfBirth = (dob) => {
     if (!dob) return false;
-    
+
     const birthDate = new Date(dob);
     const today = new Date();
     const currentYear = today.getFullYear();
     const birthYear = birthDate.getFullYear();
-    
+
     if (birthDate > today) return false;
-    
+
     if (currentYear - birthYear > 100) return false;
-    
+
     const age = currentYear - birthYear;
-    const hasHadBirthdayThisYear = today >= new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
-    
+    const hasHadBirthdayThisYear =
+      today >= new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
+
     return age > 18 || (age === 18 && hasHadBirthdayThisYear);
   };
-  
+
   const validatePassword = (password) => {
     if (password.length < 8) return false;
-    
+
     const hasUppercase = /[A-Z]/.test(password);
     const hasLowercase = /[a-z]/.test(password);
     const hasNumber = /\d/.test(password);
     const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-    
+
     return hasUppercase && hasLowercase && hasNumber && hasSpecial;
   };
 
@@ -85,11 +86,19 @@ const RegisterScreen = () => {
     const isPhoneValid = validatePhone(phone);
     const isDoBValid = validateDateOfBirth(dob);
     const isPasswordValid = validatePassword(password);
-    const isPasswordMatch = password === confirmPassword && confirmPassword !== "";
+    const isPasswordMatch =
+      password === confirmPassword && confirmPassword !== "";
     const isFullNameValid = fullName.trim() !== "";
-    
-    return isEmailValid && isPhoneValid && isDoBValid && isPasswordValid && 
-           isPasswordMatch && isFullNameValid && acceptTerms;
+
+    return (
+      isEmailValid &&
+      isPhoneValid &&
+      isDoBValid &&
+      isPasswordValid &&
+      isPasswordMatch &&
+      isFullNameValid &&
+      acceptTerms
+    );
   };
 
   // Real-time validation handlers
@@ -127,7 +136,7 @@ const RegisterScreen = () => {
     } else {
       setPasswordError("");
     }
-    
+
     // Also check confirm password if it's filled
     if (confirmPassword && text !== confirmPassword) {
       setConfirmPasswordError(t("password_mismatch"));
@@ -268,7 +277,7 @@ const RegisterScreen = () => {
                     autoCapitalize="words"
                     inputContainerStyle={[
                       styles.input,
-                      fullNameError ? styles.inputError : null
+                      fullNameError ? styles.inputError : null,
                     ]}
                   />
                   {fullNameError ? (
@@ -285,7 +294,7 @@ const RegisterScreen = () => {
                     keyboardType="phone-pad"
                     inputContainerStyle={[
                       styles.input,
-                      phoneError ? styles.inputError : null
+                      phoneError ? styles.inputError : null,
                     ]}
                   />
                   {phoneError ? (
@@ -303,7 +312,7 @@ const RegisterScreen = () => {
                     autoCapitalize="none"
                     inputContainerStyle={[
                       styles.input,
-                      emailError ? styles.inputError : null
+                      emailError ? styles.inputError : null,
                     ]}
                   />
                   {emailError ? (
@@ -315,9 +324,9 @@ const RegisterScreen = () => {
                   <Text style={styles.inputLabel}>{t("dob")}</Text>
                   <TouchableOpacity
                     style={[
-                      styles.input, 
+                      styles.input,
                       styles.dateInput,
-                      dobError ? styles.inputError : null
+                      dobError ? styles.inputError : null,
                     ]}
                     onPress={showDatepicker}
                   >
@@ -341,7 +350,7 @@ const RegisterScreen = () => {
                     secureTextEntry
                     inputContainerStyle={[
                       styles.input,
-                      passwordError ? styles.inputError : null
+                      passwordError ? styles.inputError : null,
                     ]}
                     passwordIconColor="#6B7280"
                   />
@@ -359,7 +368,7 @@ const RegisterScreen = () => {
                     secureTextEntry
                     inputContainerStyle={[
                       styles.input,
-                      confirmPasswordError ? styles.inputError : null
+                      confirmPasswordError ? styles.inputError : null,
                     ]}
                     passwordIconColor="#6B7280"
                   />
@@ -373,10 +382,12 @@ const RegisterScreen = () => {
                     style={styles.checkbox}
                     onPress={() => setAcceptTerms(!acceptTerms)}
                   >
-                    <View style={[
-                      styles.checkboxBox,
-                      acceptTerms ? styles.checkboxChecked : null
-                    ]}>
+                    <View
+                      style={[
+                        styles.checkboxBox,
+                        acceptTerms ? styles.checkboxChecked : null,
+                      ]}
+                    >
                       {acceptTerms && <Text style={styles.checkmark}>✓</Text>}
                     </View>
                     <Text style={styles.checkboxText}>
@@ -395,16 +406,14 @@ const RegisterScreen = () => {
                   disabled={!isFormValid()}
                   style={[
                     styles.loginButton,
-                    !isFormValid() ? styles.disabledButton : null
+                    !isFormValid() ? styles.disabledButton : null,
                   ]}
                   onPress={handleRegister}
                 />
 
                 <View style={styles.signupContainer}>
                   <Text style={styles.signupText}>{t("have_account")} </Text>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate("Login")}
-                  >
+                  <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Text style={styles.signupButtonText}>{t("login")}</Text>
                   </TouchableOpacity>
                 </View>
