@@ -699,8 +699,7 @@
   "submit": "送信",
   "photo_permission_message": "画像を選択するために写真ライブラリへのアクセスを許可してください。",
   "unsupported_format": "サポートされていない画像形式",
-  "only_jpg_png_supported": "一部の画像がスキップされました。JPGとPNGのみがサポートされています。"
-  "requested_refund_amount": "返金額",
+  "only_jpg_png_supported": "一部の画像がスキップされました。JPGとPNGのみがサポートされています。",
   "payment_method_payos": "PayOSを使用して支払う",
   "payment_with_payos": "PayOSでお支払い"
 }
