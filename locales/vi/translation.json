@@ -677,8 +677,7 @@
   "booking_cancelled_with_refund_request_for": "Đặt phòng tại",
   "requested_refund_amount": "Số tiền yêu cầu hoàn",
   "payment_method_payos": "PayOS",
-  "payment_with_payos": "Thanh toán bằng PayOS"
-  "requested_refund_amount": "Số tiền yêu cầu hoàn",
+  "payment_with_payos": "Thanh toán bằng PayOS",
   "view_policies": "Xem chính sách",
   "owner_policies": "Chính sách của chủ nhà",
   "minimum_payment_warning": "Thanh toán phải lớn hơn 10,000đ",
