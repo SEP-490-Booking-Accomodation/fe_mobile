@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   Modal,
+  RefreshControl,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
@@ -45,6 +46,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 
   // Modal visibility states
   const [moreOptionsModalVisible, setMoreOptionsModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   // State for the review image modal
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
@@ -54,6 +56,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     data: rentalData,
     isLoading: isRentalLoading,
     isError: isRentalError,
+    refetch: refetchRentalData,
   } = useGetRentalLocationByIdQuery(rentalId);
 
   const ownerId = rentalData?.data?.ownerId?.id;
@@ -66,8 +69,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const isLoading = isRentalLoading || isAccommodationLoading;
   const isError = isRentalError || isAccommodationError;
 
-  const { data: feedbackDataList } =
-    useGetAllFeedbackByRentalIdQuery(rentalId);
+  const { data: feedbackDataList } = useGetAllFeedbackByRentalIdQuery(rentalId);
   const { data: feedbackAverage } =
     useGetAverageFeedbackByRentalIdQuery(rentalId);
 
@@ -81,22 +83,28 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
       if (userData) {
         setUser(userData[0]);
       }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    }
+    } catch (error) {}
   };
 
   const checkFavoriteStatus = () => {
     const favoriteStatus = isFavorite(locationId);
     setIsFavoriteState(favoriteStatus);
   };
-
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refetchRentalData();
+    } catch (error) {}
+    setRefreshing(false);
+  };
   const handleToggleFavorite = async () => {
     if (!rentalData?.data) return;
 
     const rentalItem = {
       id: locationId,
-      imageUrl: rentalData.data.image?.[0] || `https://ui-avatars.com/api/?name=${rentalData.data.name}&background=random`,
+      imageUrl:
+        rentalData.data.image?.[0] ||
+        `https://ui-avatars.com/api/?name=${rentalData.data.name}&background=random`,
       openHour: rentalData.data.openHour,
       closeHour: rentalData.data.closeHour,
       placeName: rentalData.data.name,
@@ -147,8 +155,12 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
       const currentHour = now.getHours();
       const currentMinute = now.getMinutes();
 
-      const [openHourValue, openMinuteValue] = rentalData.data.openHour.split(':').map(Number);
-      const [closeHourValue, closeMinuteValue] = rentalData.data.closeHour.split(':').map(Number);
+      const [openHourValue, openMinuteValue] = rentalData.data.openHour
+        .split(":")
+        .map(Number);
+      const [closeHourValue, closeMinuteValue] = rentalData.data.closeHour
+        .split(":")
+        .map(Number);
 
       const currentTimeInMinutes = currentHour * 60 + currentMinute;
       const openTimeInMinutes = openHourValue * 60 + openMinuteValue;
@@ -157,12 +169,12 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
       if (closeTimeInMinutes < openTimeInMinutes) {
         setIsOpen(
           currentTimeInMinutes >= openTimeInMinutes ||
-          currentTimeInMinutes <= closeTimeInMinutes
+            currentTimeInMinutes <= closeTimeInMinutes
         );
       } else {
         setIsOpen(
           currentTimeInMinutes >= openTimeInMinutes &&
-          currentTimeInMinutes <= closeTimeInMinutes
+            currentTimeInMinutes <= closeTimeInMinutes
         );
       }
     };
@@ -192,7 +204,6 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const handleChatPress = async () => {
     try {
       const currentUser = user;
-      console.log("Current User:", currentUser);
       const ownerPlatformId = userOwnerId?.userId;
       const locationId = rentalData.data?._id;
 
@@ -203,11 +214,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
         rental: rentalData.data,
         navigation,
       });
-
-      console.log(result);
-    } catch (error) {
-      console.error("Chat start error:", error);
-    }
+    } catch (error) {}
   };
 
   // Update the handleMoreOptions function to show the modal
@@ -217,13 +224,11 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
 
   // Add these handler functions for the modal actions
   const handleShare = () => {
-    console.log("Share pressed");
     // Implement your share functionality here
   };
 
   const ratingCounts = (feedbackDataList || []).reduce((acc, review) => {
     const rating = review.rating;
-    console.log(acc);
     if (rating >= 1 && rating <= 5) {
       acc[rating] = (acc[rating] || 0) + 1;
     }
@@ -275,20 +280,20 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
                 <View style={styles.reviewerDetails}>
                   <Text style={styles.reviewerName}>
                     {review.bookingId?.customerId?.userId?.fullName &&
-                      review.bookingId?.customerId?.userId?.fullName.length <= 1
+                    review.bookingId?.customerId?.userId?.fullName.length <= 1
                       ? "*"
                       : `${review.bookingId?.customerId?.userId?.fullName
-                        .slice(
-                          0,
-                          Math.floor(
-                            review.bookingId?.customerId?.userId?.fullName
-                              ?.length / 2
+                          .slice(
+                            0,
+                            Math.floor(
+                              review.bookingId?.customerId?.userId?.fullName
+                                ?.length / 2
+                            )
                           )
-                        )
-                        .replace(
-                          /./g,
-                          "*"
-                        )}${review.bookingId?.customerId?.userId?.fullName?.slice(
+                          .replace(
+                            /./g,
+                            "*"
+                          )}${review.bookingId?.customerId?.userId?.fullName?.slice(
                           Math.floor(
                             review.bookingId?.customerId?.userId?.fullName
                               ?.length / 2
@@ -335,10 +340,10 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     const filteredAccommodationTypes =
       selectedServices.length > 0
         ? (accommodationTypesData?.data || []).filter((accommodation) =>
-          accommodation.serviceIds?.some((service) =>
-            selectedServices.includes(service.name)
+            accommodation.serviceIds?.some((service) =>
+              selectedServices.includes(service.name)
+            )
           )
-        )
         : accommodationTypesData?.data || [];
 
     return (
@@ -392,7 +397,9 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               key={accommodationType._id}
               imageUrl={accommodationType.image?.[0]}
               placeName={accommodationType.name}
-              price={`${formatPrice(accommodationType.basePrice)}${t("per_hour")}`}
+              price={`${formatPrice(accommodationType.basePrice)}${t(
+                "per_hour"
+              )}`}
               location={`${rental.address}, ${rental.ward} , ${rental.district}, ${rental.city}`}
               onCardPress={() => handleCardPress(accommodationType)}
             />
@@ -442,9 +449,14 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
       );
     } else if (rental.status === 3) {
       return (
-        <View style={isOpen ? styles.openStatusContainer : styles.closedStatusContainer}>
+        <View
+          style={
+            isOpen ? styles.openStatusContainer : styles.closedStatusContainer
+          }
+        >
           <Text style={styles.statusText}>
-            {isOpen ? t("open_hr") : t("close_hr")} ({rental.openHour} - {rental.closeHour})
+            {isOpen ? t("open_hr") : t("close_hr")} ({rental.openHour} -{" "}
+            {rental.closeHour})
           </Text>
         </View>
       );
@@ -499,7 +511,19 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
           )}
         </View>
 
-        <ScrollView style={styles.container}>
+        <ScrollView
+          style={styles.container}
+          refreshControl={
+            <RefreshControl
+              colors={["#FF5733", "#33FF57", "#3357FF"]}
+              tintColor="#3357FF"
+              title="Loading..."
+              titleColor="#3357FF"
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+            />
+          }
+        >
           <View style={styles.headerContainer}>
             <View style={styles.imageContainer}>
               <Image
@@ -540,10 +564,13 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
                   : `${rental.description.slice(0, 90)}...`}
                 {rental.description.length > 90 && (
                   <Text
-                    onPress={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                    onPress={() =>
+                      setIsDescriptionExpanded(!isDescriptionExpanded)
+                    }
                     style={styles.readMoreText}
                   >
-                    {" "}{isDescriptionExpanded ? t("collapse") : t("read_more")}
+                    {" "}
+                    {isDescriptionExpanded ? t("collapse") : t("read_more")}
                   </Text>
                 )}
               </Text>

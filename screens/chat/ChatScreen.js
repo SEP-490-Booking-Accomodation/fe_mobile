@@ -14,11 +14,12 @@ import {
   SafeAreaView,
 } from "react-native";
 import { supabase } from "../../lib/supabase";
-import { Ionicons } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import OnlineStatus from "../../components/chat/OnlineStatus";
 import MessageStatus from "../../components/chat/MessageStatus";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
 import { useTranslation } from "react-i18next";
+import { useCreateNotificationMutation } from "../../api/notificationApi";
 
 export default function ChatScreen({ route, navigation }) {
   const { t } = useTranslation();
@@ -33,6 +34,7 @@ export default function ChatScreen({ route, navigation }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [userId, setUserId] = useState(null);
   const [userName, setUserName] = useState(null);
+  const [userPlatformId, setUserPlatformId] = useState(null);
 
   // Refs
   const flatListRef = useRef(null);
@@ -41,6 +43,7 @@ export default function ChatScreen({ route, navigation }) {
 
   // Hooks
   const { loadIdChatPlatform } = useAsyncStorage();
+  const [createNotification] = useCreateNotificationMutation();
 
   // Load user data on mount
   useEffect(() => {
@@ -49,8 +52,13 @@ export default function ChatScreen({ route, navigation }) {
 
       if (user !== null && user.length > 0) {
         const storedUser = user[0];
-        if (storedUser._id) setUserId(storedUser._id);
+        if (storedUser._id) {
+          setUserId(storedUser._id);
+        }
         if (storedUser.username) setUserName(storedUser.username);
+        if (storedUser.idUserPlatform) {
+          setUserPlatformId(storedUser.idUserPlatform);
+        }
       }
     };
 
@@ -106,10 +114,8 @@ export default function ChatScreen({ route, navigation }) {
           setupRealtimeSubscription();
           setLoading(false);
         })
-        .catch((error) => {
-          console.error("Error initializing chat:", error);
+        .catch(() => {
           setLoading(false);
-          Alert.alert(t("error"), t("failed_to_load_chat"));
         });
     }
 
@@ -202,7 +208,6 @@ export default function ChatScreen({ route, navigation }) {
         )
         .subscribe();
     } catch (error) {
-      console.error("Error setting up realtime subscription:", error);
     }
   }
 
@@ -214,20 +219,32 @@ export default function ChatScreen({ route, navigation }) {
         .select(
           `
           user_id,
-          profiles:user_id(id, username, is_online, last_seen)
+          profiles:user_id(
+            id, 
+            username, 
+            is_online, 
+            last_seen,
+            iduserplatform
+          )
         `
         )
         .eq("chat_id", chatId);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       if (Array.isArray(data)) {
-        const participantList = data.map((p) => ({
-          id: p.user_id,
-          username: p.profiles?.username || t("unknown_user"),
-          isOnline: p.profiles?.is_online || false,
-          lastSeen: p.profiles?.last_seen || null,
-        }));
+        const participantList = data.map((p) => {
+          const participant = {
+            id: p.user_id,
+            username: p.profiles?.username || t("unknown_user"),
+            isOnline: p.profiles?.is_online || false,
+            lastSeen: p.profiles?.last_seen || null,
+            platformUserId: p.profiles?.iduserplatform || null
+          };
+          return participant;
+        });
 
         setParticipants(participantList);
 
@@ -239,6 +256,7 @@ export default function ChatScreen({ route, navigation }) {
             username: p.username,
             isOnline: p.isOnline,
             lastSeen: p.lastSeen,
+            platformUserId: p.platformUserId
           };
         });
 
@@ -249,7 +267,6 @@ export default function ChatScreen({ route, navigation }) {
         return [];
       }
     } catch (e) {
-      console.error("Exception fetching participants:", e.message);
       setParticipants([]);
       return [];
     }
@@ -277,7 +294,6 @@ export default function ChatScreen({ route, navigation }) {
         }));
       }
     } catch (e) {
-      console.error("Exception fetching profile:", e.message);
     }
   }
 
@@ -316,14 +332,13 @@ export default function ChatScreen({ route, navigation }) {
 
       // Mark messages as read separate from the main loading flow
       if (userId) {
-        markChatMessagesAsRead(chatId, userId).catch((err) =>
-          console.error("Error marking messages as read:", err)
+        markChatMessagesAsRead(chatId, userId).catch(() =>
+          null
         );
       }
 
       return true;
     } catch (error) {
-      console.error("Exception fetching messages:", error.message);
       Alert.alert(t("error"), t("failed_to_load_messages"));
       setMessages([]);
       return false;
@@ -372,7 +387,6 @@ export default function ChatScreen({ route, navigation }) {
         await supabase.from("messages").update(updateData).eq("id", messageId);
       }
     } catch (e) {
-      console.error("Exception updating message status:", e.message);
     }
   }
 
@@ -396,7 +410,6 @@ export default function ChatScreen({ route, navigation }) {
         await updateMessageStatus(message.id, "read", userId);
       }
     } catch (e) {
-      console.error("Exception marking chat messages as read:", e.message);
     }
   }
 
@@ -458,9 +471,29 @@ export default function ChatScreen({ route, navigation }) {
         setMessages((prevMessages) =>
           prevMessages.map((msg) => (msg.id === tempMessage.id ? data[0] : msg))
         );
+
+        // Create notifications for all other participants
+        const otherParticipants = participants.filter(p => p.id !== userId);
+        
+        for (const participant of otherParticipants) {
+          try {
+            if (!participant.platformUserId) {
+              continue;
+            }
+            
+            await createNotification({
+              userId: participant.platformUserId,
+              title: t("new_message"),
+              content: `${userName}: ${messageToSend}`,
+              isRead: false,
+              type: 6
+            }).unwrap();
+            
+          } catch (notificationError) {
+          }
+        }
       }
     } catch (error) {
-      console.error("Exception sending message:", error.message);
       Alert.alert(t("error"), t("failed_to_send_message") + error.message);
     } finally {
       setSending(false);
@@ -531,7 +564,11 @@ export default function ChatScreen({ route, navigation }) {
             style={styles.backButton}
             onPress={() => navigation.navigate("MessagesScreen")}
           >
-            <Ionicons name="arrow-back" size={24} color="#000000" />
+            <AntDesign 
+            name="left" 
+            size={24} 
+            color="#4E72E3" 
+          />
           </TouchableOpacity>
 
           <View style={styles.headerProfile}>
@@ -559,7 +596,7 @@ export default function ChatScreen({ route, navigation }) {
           </View>
 
           <TouchableOpacity style={styles.headerButton}>
-            <Ionicons name="ellipsis-vertical" size={24} color="#4A90E2" />
+            <Ionicons name="ellipsis-vertical" size={24} color="#4E72E3" />
           </TouchableOpacity>
         </View>
 
@@ -572,7 +609,7 @@ export default function ChatScreen({ route, navigation }) {
           <FlatList
             ref={flatListRef}
             data={messages}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => `message-${item.id}`}
             renderItem={renderMessage}
             contentContainerStyle={styles.chatList}
             onRefresh={fetchMessages}

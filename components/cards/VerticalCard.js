@@ -71,9 +71,9 @@ export default function VerticalCard({
   //     }
   //   }, 10000);
 
-  // return () => clearTimeout(timeout);
+  //   return () => clearTimeout(timeout);
   // }, [isLoading, imageError, fallbackImage]);
-
+  
   useEffect(() => {
     const checkOpenStatus = () => {
       const now = new Date();

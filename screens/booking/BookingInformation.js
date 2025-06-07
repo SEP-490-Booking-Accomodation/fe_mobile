@@ -17,11 +17,14 @@ import GuestSelector from "./components/GuestSelector";
 import BookingFooter from "./components/BookingFooter";
 import GuestSelectionModal from "./modals/GuestSelectionModal";
 import { useCheckAvailableRoomMutation } from "../../api/bookingApi";
+import { useGetPolicyHashTagQuery } from "../../api/policySystemApi";
 import { useTranslation } from "react-i18next";
 
 export default function BookingInformation({ route, navigation }) {
   const { t } = useTranslation();
   const { accommodationTypeData, rentalData } = route.params || {};
+  const { data: checkInPolicyData } =
+    useGetPolicyHashTagQuery("thoigiancheckin");
 
   const parseTime = (timeStr) => {
     if (!timeStr) return { hour: 0, minute: 0 };
@@ -137,8 +140,30 @@ export default function BookingInformation({ route, navigation }) {
     const selectedDateTime = new Date(selectedDate);
     selectedDateTime.setHours(time.getHours(), time.getMinutes(), 0);
 
-    if (selectedDateTime < now) {
-      Alert.alert(t("error"), t("future_time_error"));
+    const policyValues = checkInPolicyData?.[0]?.values || [];
+
+    const checkInMinutes =
+      policyValues.length > 0 ? parseInt(policyValues[0].val) : 20;
+    const policyDescription =
+      policyValues.length > 0
+        ? policyValues[0].description
+        : "Được checkin sớm trước 20 phút trở đi";
+
+    const earliestCheckInTime = new Date(
+      now.getTime() + checkInMinutes * 60000
+    );
+
+    if (selectedDateTime < earliestCheckInTime) {
+      const formattedEarliestTime = `${String(
+        earliestCheckInTime.getHours()
+      ).padStart(2, "0")}:${String(earliestCheckInTime.getMinutes()).padStart(
+        2,
+        "0"
+      )}`;
+      Alert.alert(
+        t("error"),
+        `${policyDescription}. Vui lòng chọn thời gian sau ${formattedEarliestTime}`
+      );
       closeTimePicker();
       return;
     }
@@ -153,11 +178,11 @@ export default function BookingInformation({ route, navigation }) {
       ) {
         Alert.alert(
           t("error"),
-          t("opening_hours_error", {
+          t("check_in_time_error", {
             openHour: OPENING_HOUR,
             openMinute: String(OPENING_MINUTE).padStart(2, "0"),
             closeHour: CLOSING_HOUR,
-            closeMinute: String(CLOSING_MINUTE).padStart(2, "0")
+            closeMinute: String(CLOSING_MINUTE).padStart(2, "0"),
           })
         );
         closeTimePicker();
@@ -169,12 +194,13 @@ export default function BookingInformation({ route, navigation }) {
         (selectedHour === CLOSING_HOUR && selectedMinute < CLOSING_MINUTE)
       ) {
         Alert.alert(
-          "Lỗi",
-          `Thời gian nhận phòng chỉ từ ${OPENING_HOUR}:${String(
-            OPENING_MINUTE
-          ).padStart(2, "0")} đến ${CLOSING_HOUR}:${String(
-            CLOSING_MINUTE
-          ).padStart(2, "0")}.`
+          t("error"),
+          t("check_in_time_error", {
+            openHour: OPENING_HOUR,
+            openMinute: String(OPENING_MINUTE).padStart(2, "0"),
+            closeHour: CLOSING_HOUR,
+            closeMinute: String(CLOSING_MINUTE).padStart(2, "0"),
+          })
         );
         closeTimePicker();
         return;
@@ -189,16 +215,17 @@ export default function BookingInformation({ route, navigation }) {
           endDateTime.getMinutes() > CLOSING_MINUTE)
       ) {
         Alert.alert(
-          "Lỗi",
-          `Thời gian nhận phòng không được chọn sau ${CLOSING_HOUR}:${String(
-            CLOSING_MINUTE
-          ).padStart(2, "0")}.`
+          t("error"),
+          t("check_in_end_time_error", {
+            closeHour: CLOSING_HOUR,
+            closeMinute: String(CLOSING_MINUTE).padStart(2, "0"),
+          })
         );
         closeTimePicker();
         return;
       }
     }
-    
+
     closeTimePicker();
     setSelectedTime(time);
   };
@@ -279,8 +306,6 @@ export default function BookingInformation({ route, navigation }) {
       selectedTime
     )}:00`;
     const checkOutDateTime = `${formatDate(endTime)} ${formatTime(endTime)}:00`;
-    console.log(checkInDateTime);
-    console.log(checkOutDateTime);
     const formCheckAvailable = {
       rentalLocationId: rentalData?.data?.id,
       accommodationTypeId: accommodationTypeData?.data?.id,

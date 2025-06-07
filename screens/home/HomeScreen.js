@@ -5,7 +5,7 @@ import {
   ScrollView,
   RefreshControl,
   ActivityIndicator,
-  View
+  View,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
@@ -36,18 +36,17 @@ export default function HomeScreen() {
   const [displayUser, setDisplayUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const { data: notificationsResponse, refetch: refetchNotifications } = useGetNotificationsByUserQuery(
-    userId,
-    { skip: !userId }
-  );
+  const { data: notificationsResponse, refetch: refetchNotifications } =
+    useGetNotificationsByUserQuery(userId, { skip: !userId });
 
-   const unreadCount = notificationsResponse?.data?.reduce((count, noti) => {
-    return !noti.isRead ? count + 1 : count;
-  }, 0) || 0;
+  const unreadCount =
+    notificationsResponse?.data?.reduce((count, noti) => {
+      return !noti.isRead ? count + 1 : count;
+    }, 0) || 0;
   // Get the context at the component level (outside of any function)
   const asyncStorageContext = useAsyncStorage();
   const { removeAllIdChatPlaform, addIdChatPlatform } = useAsyncStorage();
-    const onRefresh = async () => {
+  const onRefresh = async () => {
     setRefreshing(true);
     try {
       await refetchUser();
@@ -55,14 +54,11 @@ export default function HomeScreen() {
       if (userId) {
         await refetchNotifications();
       }
-    } catch (error) {
-      console.error("Lỗi tải lại dữ liệu:", error);
-    }
+    } catch (error) {}
     setRefreshing(false);
   };
 
   const handleLocationPress = (locationId) => {
-    console.log("Navigating with locationId:", locationId);
     navigation.navigate("DetailRentalLocation", {
       rentalId: locationId,
       previousScreen: "Home",

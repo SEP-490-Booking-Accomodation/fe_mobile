@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 
 export default function RoomTypeInfo({ typeRoom, password }) {
   const { t } = useTranslation();
-  console.log("password", password);
   return (
     <InfoCard
       icon={<AntDesign name="home" size={20} color="#4E72E3" />}

@@ -24,7 +24,6 @@ export default function RatingDetail({
   const handleViewBooking = (bookingId) => {
     // Navigate to booking detail
     navigation.navigate("BookingDetail", { bookingId });
-    console.log("Navigating to booking:", bookingId);
   };
 
   return (

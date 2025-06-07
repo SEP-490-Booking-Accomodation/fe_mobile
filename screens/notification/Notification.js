@@ -18,7 +18,6 @@ export default function NotificationScreen({ navigation }) {
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       if (userId) {
-        console.log('NotificationScreen focused, refetching data...');
         refetch();
       }
     });
@@ -34,23 +33,19 @@ export default function NotificationScreen({ navigation }) {
       const unreadNotifications = notificationsData.data.filter(notification => !notification.isRead);
       
       if (unreadNotifications.length === 0) {
-        console.log('No unread notifications to mark');
         return;
       }
 
-      console.log(`Marking ${unreadNotifications.length} notifications as read`);
       
       const promises = unreadNotifications.map(notification => 
         markAsRead(notification._id).unwrap()
       );
       
       await Promise.all(promises);
-      console.log('All notifications marked as read successfully');
       
       // Refetch để cập nhật UI
       refetch();
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
     } finally {
       setIsMarkingAll(false);
     }

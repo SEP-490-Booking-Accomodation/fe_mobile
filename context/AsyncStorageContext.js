@@ -29,7 +29,6 @@ export const AsyncStorageProvider = ({ children }) => {
         setSearchHistory(JSON.parse(history));
       }
     } catch (error) {
-      console.error("Failed to load search history:", error);
     }
   };
 
@@ -45,7 +44,6 @@ export const AsyncStorageProvider = ({ children }) => {
         JSON.stringify(updatedHistory)
       );
     } catch (error) {
-      console.error("Failed to add search term:", error);
     }
   };
 
@@ -54,7 +52,6 @@ export const AsyncStorageProvider = ({ children }) => {
       await AsyncStorage.removeItem("search_history");
       setSearchHistory([]);
     } catch (error) {
-      console.error("Failed to clear search history:", error);
     }
   };
 
@@ -67,7 +64,6 @@ export const AsyncStorageProvider = ({ children }) => {
         JSON.stringify(updatedHistory)
       );
     } catch (error) {
-      console.error("Failed to remove search term:", error);
     }
   };
 
@@ -80,7 +76,6 @@ export const AsyncStorageProvider = ({ children }) => {
         setFavorites(JSON.parse(storedFavorites));
       }
     } catch (error) {
-      console.error("Failed to load favorites:", error);
     }
   };
 
@@ -94,7 +89,6 @@ export const AsyncStorageProvider = ({ children }) => {
       );
       return true;
     } catch (error) {
-      console.error("Failed to add favorite:", error);
       return false;
     }
   };
@@ -106,7 +100,6 @@ export const AsyncStorageProvider = ({ children }) => {
       await AsyncStorage.setItem("favorites", JSON.stringify(updatedFavorites));
       return true;
     } catch (error) {
-      console.error("Failed to remove favorite:", error);
       return false;
     }
   };
@@ -127,7 +120,6 @@ export const AsyncStorageProvider = ({ children }) => {
         return true;
       }
     } catch (error) {
-      console.error("Failed to toggle favorite:", error);
       return false;
     }
   };
@@ -144,7 +136,6 @@ export const AsyncStorageProvider = ({ children }) => {
       }
       return [];
     } catch (error) {
-      console.error("Failed to load idChatPlatform:", error);
       return [];
     }
   };
@@ -164,7 +155,6 @@ export const AsyncStorageProvider = ({ children }) => {
         );
       }
     } catch (error) {
-      console.error("Failed to add idChatPlatform:", error);
     }
   };
 

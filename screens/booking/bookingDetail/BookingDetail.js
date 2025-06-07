@@ -10,6 +10,7 @@ import dayjs from "dayjs"
 
 import { useGetBookingByIdQuery, useUpdateBookingMutation } from "../../../api/bookingApi"
 import { useProcessMomoPaymentMutation } from "../../../api/momoPayment"
+import { useCreateNotificationMutation } from "../../../api/notificationApi"
 import { BOOKING_STATUS, PAYMENT_STATUS } from "./Constants"
 
 import BookingHeader from "./BookingHeader"
@@ -24,6 +25,7 @@ import PaymentInfo from "./PaymentInfo"
 import BookingFooter from "./BookingFooter"
 import LoadingState from "./LoadingState"
 import EmptyState from "./EmptyState"
+import { formatMoney, getPaymentMethodText } from "../../../utils/formatters"
 
 export default function BookingDetail() {
   const { t } = useTranslation()
@@ -34,6 +36,7 @@ export default function BookingDetail() {
   const [isLoadingBtn, setIsLoadingBtn] = useState(false)
   const [isCheckingIn, setIsCheckingIn] = useState(false)
   const [isCheckingOut, setIsCheckingOut] = useState(false)
+  const [createNotification] = useCreateNotificationMutation()
 
   const handleRefresh = async () => {
     setRefreshing(true)
@@ -91,9 +94,7 @@ export default function BookingDetail() {
           Alert.alert(t("error"), t("payment_create_failed"))
           setIsLoadingBtn(false)
         }
-        // console.log(response);
       } catch (error) {
-        console.error("Thanh toán thất bại:", error)
         Alert.alert(t("error"), t("payment_failed"))
         // setIsLoadingBtn(false);
       } finally {
@@ -102,19 +103,50 @@ export default function BookingDetail() {
     }
   }
 
+  const formatDateTime = (dateTimeStr) => {
+    if (!dateTimeStr) return '';
+    return dayjs(dateTimeStr, "DD/MM/YYYY HH:mm:ss").format("DD/MM/YYYY [lúc] HH:mm");
+  };
+
+  const getCurrentDateTime = () => {
+    return dayjs().format("DD/MM/YYYY [lúc] HH:mm");
+  };
+
   const handleCancel = () => {
-    Alert.alert(t("cancel_confirmation_title"), t("cancel_confirmation_message"), [
+    // Check if refund is available
+    const isPaid = bookingData?.paymentStatus === PAYMENT_STATUS.PAID
+    const refundDeadline = bookingData?.timeExpireRefund
+    const now = dayjs()
+    const isRefundAvailable = refundDeadline && now.isBefore(dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss"))
+
+    let title = t("cancel_confirmation_title")
+    let message = t("cancel_confirmation_message")
+
+    if (isPaid && refundDeadline) {
+      const formattedTime = (() => {
+        try {
+          const deadline = dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss")
+          return deadline.isValid() ? deadline.format("HH:mm DD/MM/YYYY") : refundDeadline
+        } catch {
+          return refundDeadline
+        }
+      })()
+
+      if (isRefundAvailable) {
+        title = t("refund_cancel_title")
+        message = t("refund_cancel_message", { time: formattedTime })
+      } else {
+        title = t("refund_overdue_title")
+        message = t("refund_overdue_message", { time: formattedTime })
+      }
+    }
+
+    Alert.alert(title, message, [
       { text: t("no"), style: "cancel" },
       {
-        text: t("yes_cancel_booking"),
+        text: isRefundAvailable ? t("yes") : t("cancel_anyway"),
         onPress: async () => {
           try {
-            // Kiểm tra nếu hoàn tiền
-            const isPaid = bookingData?.paymentStatus === PAYMENT_STATUS.PAID
-            const refundDeadline = bookingData?.timeExpireRefund
-            const now = dayjs()
-            const isRefundAvailable = refundDeadline && now.isBefore(dayjs(refundDeadline))
-
             const updatedBookingData = {
               ...bookingData,
               status: BOOKING_STATUS.CANCELLED,
@@ -126,11 +158,40 @@ export default function BookingDetail() {
               data: updatedBookingData,
             }).unwrap()
 
+            // Create notification based on cancellation type
+            try {
+              let notificationData = {
+                userId: bookingData?.accommodationId?.rentalLocationId?.ownerId?.userId?._id,
+                bookingId: bookingId,
+                isRead: false,
+                type: 1
+              }
+
+              const currentDateTime = getCurrentDateTime();
+              const bookingDateTime = formatDateTime(bookingData?.checkInHour);
+
+              if (isPaid && isRefundAvailable) {
+                notificationData = {
+                  ...notificationData,
+                  title: t("customer_cancelled_with_refund_request"),
+                  content: `${t("booking_cancelled_with_refund_request_for")} ${bookingData?.accommodationId?.rentalLocationId?.name} ${t("for_date")} ${bookingDateTime}. ${t("cancelled_at")} ${currentDateTime}. ${t("requested_refund_amount")}: ${formatMoney(bookingData?.totalPrice)}`
+                }
+              } else {
+                notificationData = {
+                  ...notificationData,
+                  title: t("booking_cancelled"),
+                  content: `${t("booking_cancelled_for")} ${bookingData?.accommodationId?.rentalLocationId?.name} ${t("for_date")} ${bookingDateTime}. ${t("cancelled_at")} ${currentDateTime}`
+                }
+              }
+
+              await createNotification(notificationData).unwrap()
+            } catch (error) {
+            }
+
             Alert.alert(t("success"), isRefundAvailable ? t("cancel_refund_success") : t("cancel_success"), [
               { text: "OK", onPress: () => refetch() },
             ])
           } catch (error) {
-            console.error("Error cancelling booking:", error)
             Alert.alert(t("error"), error.data?.message || t("cancel_failed"))
           }
         },
@@ -156,9 +217,23 @@ export default function BookingDetail() {
         id: bookingId,
         data: updatedBookingData,
       }).unwrap()
+
+      try {
+        const currentDateTime = getCurrentDateTime();
+        const bookingDateTime = formatDateTime(bookingData?.checkInHour);
+        await createNotification({
+          userId: bookingData?.accommodationId?.rentalLocationId?.ownerId?.userId?._id,
+          bookingId: bookingId,
+          title: t("customer_checked_in"),
+          content: `${t("customer_checked_in_for")} ${bookingData?.accommodationId?.rentalLocationId?.name} ${t("for_date")} ${bookingDateTime}. ${t("checked_in_at")} ${currentDateTime}`,
+          isRead: false,
+          type: 1
+        }).unwrap()
+      } catch (error) {
+      }
+
       Alert.alert(t("success"), t("check_in_success"), [{ text: "OK", onPress: () => refetch() }])
     } catch (error) {
-      console.error("Error checking in:", error)
       Alert.alert(t("error"), error.data?.message || t("check_in_failed"))
     } finally {
       setIsCheckingIn(false)
@@ -193,7 +268,7 @@ export default function BookingDetail() {
       Alert.alert(
         t("early_checkout_title") || "Early Checkout",
         t("early_checkout_message", { time: timeMessage }) ||
-          `You still have ${timeMessage} remaining. Are you sure you want to check out now?`,
+        `You still have ${timeMessage} remaining. Are you sure you want to check out now?`,
         [
           {
             text: t("cancel") || "Cancel",
@@ -225,9 +300,23 @@ export default function BookingDetail() {
         id: bookingId,
         data: updatedBookingData,
       }).unwrap()
+
+      try {
+        const currentDateTime = getCurrentDateTime();
+        const bookingDateTime = formatDateTime(bookingData?.checkOutHour);
+        await createNotification({
+          userId: bookingData?.accommodationId?.rentalLocationId?.ownerId?.userId?._id,
+          bookingId: bookingId,
+          title: t("customer_checked_out"),
+          content: `${t("customer_checked_out_for")} ${bookingData?.accommodationId?.rentalLocationId?.name} ${t("for_date")} ${bookingDateTime}. ${t("checked_out_at")} ${currentDateTime}`,
+          isRead: false,
+          type: 1
+        }).unwrap()
+      } catch (error) {
+      }
+
       Alert.alert(t("success"), t("check_out_success"), [{ text: "OK", onPress: () => refetch() }])
     } catch (error) {
-      console.error("Error checking out:", error)
       Alert.alert(t("error"), error.data?.message || t("check_out_failed"))
     } finally {
       setIsCheckingOut(false)
@@ -250,7 +339,6 @@ export default function BookingDetail() {
   const accommodationType =
     bookingData?.accommodationId?.accommodationTypeId?.name || "";
   const roomNo = bookingData?.accommodationId?.roomNo || "";
-  console.log("room", roomNo);
   return (
     <SafeAreaView style={styles.container}>
       <BookingHeader

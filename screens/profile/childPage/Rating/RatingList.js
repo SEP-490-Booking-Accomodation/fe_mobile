@@ -44,7 +44,6 @@ export default function RatingList() {
 
   // Store images per accommodationTypeId
   const [accommodationImages, setAccommodationImages] = useState({});
-  console.log(accommodationImages);
 
   // Fetch accommodation type images
   useEffect(() => {

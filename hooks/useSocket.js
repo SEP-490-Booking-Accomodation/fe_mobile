@@ -20,7 +20,6 @@ export const useSocket = (options = {}) => {
   // Log function
   const log = useCallback((message, ...args) => {
     if (enableLogging) {
-      console.log(`[useSocket] ${message}`, ...args);
     }
   }, [enableLogging]);
 

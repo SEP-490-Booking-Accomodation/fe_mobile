@@ -26,6 +26,9 @@ import CouponSelector from "./components/CouponSelector";
 import { useGetPolicyHashTagQuery } from "../../api/policySystemApi";
 import { useTranslation } from "react-i18next";
 
+import { useGetAllPolicySystemsByCategoryQuery } from "../../api/policySystemApi";
+import { useCreateNotificationMutation } from "../../api/notificationApi";
+
 export default function ConfirmBooking() {
   const { t } = useTranslation();
   const authData = useSelector((state) => state.auth);
@@ -36,10 +39,12 @@ export default function ConfirmBooking() {
   const [discountAmount, setDiscountAmount] = useState(0);
   const [finalTotal, setFinalTotal] = useState(0);
   const [createBooking] = useCreateBookingMutation();
+  const [createNotification] = useCreateNotificationMutation();
   const navigation = useNavigation();
   const route = useRoute();
   const { bookingData } = route.params || {};
   const [isLoading, setIsLoading] = useState(false);
+  console.log("bookingData", bookingData);
 
   const values = getTimeRefundData?.data?.[0]?.values || [];
   let refundMinutes = values[0]?.val || 20; // mặc định nếu không có
@@ -47,6 +52,9 @@ export default function ConfirmBooking() {
   const refundDeadline = bookingTime.add(refundMinutes, "minute");
   // const refundDeadlineISO = refundDeadline.toISOString();
   const date = new Date(refundDeadline);
+  const { data: policyData } = useGetAllPolicySystemsByCategoryQuery("System");
+
+  const policySystemIds = policyData?.map((item) => item.id);
 
   // Hàm định dạng số thành 2 chữ số
   const pad = (n) => n.toString().padStart(2, "0");
@@ -57,9 +65,6 @@ export default function ConfirmBooking() {
   )}-${date.getFullYear()} ${pad(date.getHours())}:${pad(
     date.getMinutes()
   )}:${pad(date.getSeconds())}`;
-
-  console.log("refund" + deadlineFormatted);
-  // console.log(bookingTime);
 
   useEffect(() => {
     if (bookingData) {
@@ -145,18 +150,16 @@ export default function ConfirmBooking() {
     hoursEnd,
     minutesEnd
   ).toISOString();
+  console.log("Booking DATA", bookingData.date);
 
   const checkInDateTime = `${bookingData.date} ${bookingData.time}:00`;
-  const checkOutDateTime = `${bookingData.date} ${bookingData.endTime}:00`;
-  // console.log(checkInDateTime);
-  // console.log(checkOutDateTime);
-  // console.log(finalTotal);
+  const checkOutDateTime = `${bookingData.endDate} ${bookingData.endTime}:00`;
 
   const handleConfirm = async () => {
     setIsLoading(true);
 
     const formBooking = {
-      // policySystemIds: policyId || ["67ebf15d828b69a4d279d960"],
+      policySystemIds: policySystemIds,
       customerId: customerData.id,
       accommodationTypeId: typeRoom.id,
       couponId: selectedVoucher?.id || null,
@@ -176,37 +179,28 @@ export default function ConfirmBooking() {
       passwordRoom: "",
       note: bookingData.note || "",
       status: 8,
-      // timeExpireRefund: refundDeadline,
       timeExpireRefund: deadlineFormatted,
-      // discountAmount: discountAmount, // Add discount amount to the booking data
-      totalPrice: finalTotal, // Add final total after discount
+      totalPrice: finalTotal,
     };
-    // console.log(formBooking);
 
     try {
       const response = await createBooking({
         data: formBooking,
       }).unwrap();
 
-      // navigation.navigate("BookingDetail", {
-      //   bookingId: response.booking.id,
-      // });
+      try {
+        await createNotification({
+          userId: customerData.id,
+          bookingId: response.booking.id,
+          title: t("booking_success"),
+          content: `${t("booking_confirmed_for")} ${rentalData.name} ${t(
+            "on"
+          )} ${bookingData.date} ${t("at")} ${bookingData.time}`,
+          isRead: false,
+          type: 1,
+        }).unwrap();
+      } catch (notificationError) {}
 
-      // navigation.reset({
-      //   index: 1,
-      //   routes: [
-      //     {
-      //       name: "MainTabs",
-      //       params: {
-      //         screen: "Ticket",
-      //         params: {
-      //           screen: "BookingDetail",
-      //           params: { bookingId: response.booking.id },
-      //         },
-      //       },
-      //     },
-      //   ],
-      // });
       navigation.dispatch(
         CommonActions.reset({
           index: 1,
@@ -237,15 +231,12 @@ export default function ConfirmBooking() {
         })
       );
     } catch (error) {
-      console.log(error);
-
       Alert.alert(t("failed"), error.data?.message || t("booking_failed"));
     } finally {
       setIsLoading(false);
     }
   };
   // const handleConfirm1 = async () => {
-  //   console.log("Confirm");
   // };
 
   return (
@@ -295,7 +286,10 @@ export default function ConfirmBooking() {
             <View style={styles.jusBetween}>
               <Text style={styles.value}>{t("time")}:</Text>
               <Text>
-                {bookingData?.time} - {bookingData?.endTime}
+                {bookingData?.time} - {bookingData?.endTime}{" "}
+                {bookingData?.endTime < bookingData?.time
+                  ? `(${bookingData?.endDate})`
+                  : ""}
               </Text>
             </View>
           </View>
@@ -355,7 +349,7 @@ export default function ConfirmBooking() {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <AntDesign name="left" size={24} color="#000" />
+          <AntDesign name="left" size={24} color="#4E72E3" />
         </TouchableOpacity>
         <View>
           <Text>{t("total")}</Text>
