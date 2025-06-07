@@ -75,88 +75,20 @@ const ReportModal = ({
     "other",
   ];
 
-  // Fallback translations in case t function doesn't work properly
-  const fallbackTranslations = {
-    validation_error: "Validation Error",
-    please_select_reason: "Please select a reason for your report",
-    description_too_short: "Description must be at least 10 characters long",
-    please_add_min_images: "Please add at least 3 images",
-    too_many_images_error: "You can add a maximum of 10 images",
-    add_images: "Add Images",
-    add_image: "Add Image",
-    choose_image_source: "Choose image source",
-    camera: "Camera",
-    gallery: "Gallery",
-    cancel: "Cancel",
-    ok: "OK",
-    uploading_images: "Uploading images...",
-    upload_failed: "Failed to upload images",
-    report_submitted: "Report Submitted",
-    report_submission_success: "Your report has been submitted successfully.",
-    report_submission_failed: "Failed to submit report. Please try again.",
-    min3_max10_images_required: "Please add between 3 and 10 images",
-    image_limit_reached: "Image limit reached",
-    max_images_reached: "You've reached the maximum of 10 images",
-    more_needed: "more needed",
-    confirm_submission: "Confirm Submission",
-    submit_report_confirmation: "Are you sure you want to submit this report?",
-    submit: "Submit",
-    image_too_large: "Image Too Large",
-    image_compression_failed: "Failed to compress image. Please try a smaller image or different format.",
-    compressing_images: "Compressing images...",
-    // Report reasons in Vietnamese
-    inappropriate_content: "Nội dung không phù hợp",
-    false_information: "Thông tin sai lệch",
-    spam: "Spam",
-    fraud: "Lừa đảo",
-    offensive_behavior: "Hành vi xúc phạm",
-    other: "Khác",
-  };
-
-  // Vietnamese translations for report reasons
-  const vietnameseReasons = {
-    inappropriate_content: "Nội dung không phù hợp",
-    false_information: "Thông tin sai lệch", 
-    spam: "Spam",
-    fraud: "Lừa đảo",
-    offensive_behavior: "Hành vi xúc phạm",
-    other: "Khác",
-  };
-
-  // Safe translation function that falls back to our defaults
-  const safeT = (key) => {
-    try {
-      const translated = t(key);
-      // If translation returns empty or undefined, use fallback
-      return translated && translated !== key
-        ? translated
-        : fallbackTranslations[key] || key;
-    } catch (e) {
-      return fallbackTranslations[key] || key;
-    }
-  };
-
-  // Enhanced showAlert function with fallbacks and direct Alert usage
+  // Update the showAlert function to use t directly
   const showAlert = (title, message, buttons = [], icon = "") => {
+    setAlertTitle(t(title));
+    setAlertMessage(t(message));
 
-    // Set the state for the custom AlertModal
-    setAlertTitle(safeT(title));
-    setAlertMessage(safeT(message));
-
-    // Transform buttons to ensure they have text
     const safeButtons = buttons.map((btn) => ({
       ...btn,
-      text: safeT(btn.text || "ok"),
+      text: t(btn.text || "ok"),
     }));
 
     setAlertButtons(safeButtons);
     setAlertIcon(icon);
-
-    // First try to show our custom AlertModal
     setAlertModalVisible(true);
 
-    // As a fallback, also use the native Alert API
-    // This ensures at least one alert will show up
     if (Platform.OS !== "web") {
       const nativeButtons = safeButtons.map((btn) => ({
         text: btn.text,
@@ -166,9 +98,9 @@ const ReportModal = ({
 
       setTimeout(() => {
         Alert.alert(
-          safeT(title),
-          safeT(message),
-          nativeButtons.length > 0 ? nativeButtons : [{ text: safeT("ok") }]
+          t(title),
+          t(message),
+          nativeButtons.length > 0 ? nativeButtons : [{ text: t("ok") }]
         );
       }, 100);
     }
@@ -325,15 +257,15 @@ const ReportModal = ({
                  let errorMessage = `Failed to upload image ${i + 1}. Please try again.`;
                  
                  if (uploadError.message && uploadError.message.includes('too large')) {
-                   errorMessage = safeT("image_compression_failed");
+                   errorMessage = t("image_compression_failed");
                  } else if (uploadError.message && uploadError.message.includes('exceeded the maximum allowed size')) {
-                   errorMessage = safeT("image_too_large") + " - " + safeT("image_compression_failed");
+                   errorMessage = t("image_too_large") + " - " + t("image_compression_failed");
                  }
                  
                  Alert.alert(
-                   safeT("error") || 'Upload Error',
+                   t("error") || 'Upload Error',
                    errorMessage,
-                   [{ text: safeT("ok") || 'OK' }]
+                   [{ text: t("ok") || 'OK' }]
                  );
                  return;
                }
@@ -395,11 +327,10 @@ const ReportModal = ({
     }
 
     try {
-      // Check if we've reached the maximum number of images
       if (images.length >= MAX_IMAGES) {
         showAlert(
           "image_limit_reached",
-          safeT("max_images_reached"),
+          "max_images_reached",
           [
             {
               text: "ok",
@@ -422,7 +353,7 @@ const ReportModal = ({
         if (images.length >= MAX_IMAGES) {
           showAlert(
             "image_limit_reached",
-            safeT("max_images_reached"),
+            "max_images_reached",
             [
               {
                 text: "ok",
@@ -471,9 +402,9 @@ const ReportModal = ({
                
                let errorMessage = "Failed to upload image. Please try again.";
                if (uploadError.message && uploadError.message.includes('too large')) {
-                 errorMessage = safeT("image_compression_failed");
+                 errorMessage = t("image_compression_failed");
                } else if (uploadError.message && uploadError.message.includes('exceeded the maximum allowed size')) {
-                 errorMessage = safeT("image_too_large") + " - " + safeT("image_compression_failed");
+                 errorMessage = t("image_too_large") + " - " + t("image_compression_failed");
                }
                
                showAlert(
@@ -503,7 +434,7 @@ const ReportModal = ({
           if (images.length + uploadedImages.length >= MAX_IMAGES) {
             showAlert(
               "image_limit_reached",
-              safeT("max_images_reached"),
+              "max_images_reached",
               [
                 {
                   text: "ok",
@@ -733,13 +664,12 @@ const ReportModal = ({
   const handleSubmitButtonPress = () => {
     console.log("[Submit Button] Validating form...");
     
-    // Validate inputs
     if (selectedReasonIndex === null) {
       console.log("[Submit Button] No reason selected");
       Alert.alert(
-        "Validation Error",
-        "Please select a reason for your report",
-        [{ text: "OK" }]
+        t("validation_error"),
+        t("please_select_reason"),
+        [{ text: t("ok") }]
       );
       return;
     }
@@ -747,39 +677,37 @@ const ReportModal = ({
     if (description.trim().length < 10) {
       console.log("[Submit Button] Description too short");
       Alert.alert(
-        "Validation Error",
-        "Description must be at least 10 characters long",
-        [{ text: "OK" }]
+        t("validation_error"),
+        t("description_too_short"),
+        [{ text: t("ok") }]
       );
       return;
     }
 
-    // Check if there are at least MIN_IMAGES
     if (images.length < MIN_IMAGES) {
       console.log("[Submit Button] Not enough images:", images.length);
       Alert.alert(
-        "Validation Error",
-        `Please add at least ${MIN_IMAGES} images`,
+        t("validation_error"),
+        t("please_add_min_images"),
         [
           {
-            text: "Add Images",
+            text: t("add_images"),
             onPress: () => showImageOptions(),
           },
           {
-            text: "Cancel",
+            text: t("cancel"),
           },
         ]
       );
       return;
     }
 
-    // Check if there are too many images
     if (images.length > MAX_IMAGES) {
       console.log("[Submit Button] Too many images:", images.length);
       Alert.alert(
-        "Validation Error",
-        `You can add a maximum of ${MAX_IMAGES} images`,
-        [{ text: "OK" }]
+        t("validation_error"),
+        t("too_many_images_error"),
+        [{ text: t("ok") }]
       );
       return;
     }
@@ -787,9 +715,9 @@ const ReportModal = ({
     if (!bookingId) {
       console.log("[Submit Button] No booking ID");
       Alert.alert(
-        "Error",
-        "Invalid booking information",
-        [{ text: "OK" }]
+        t("error"),
+        t("invalid_booking"),
+        [{ text: t("ok") }]
       );
       return;
     }
@@ -797,18 +725,17 @@ const ReportModal = ({
     console.log("[Submit Button] Validation passed, showing confirmation");
     setError("");
     
-    // Show confirmation using Alert instead of modal
     Alert.alert(
-      safeT("confirm_submission"),
-      safeT("submit_report_confirmation"),
+      t("confirm_submission"),
+      t("submit_report_confirmation"),
       [
         {
-          text: safeT("submit"),
+          text: t("submit"),
           onPress: () => handleSubmit(),
           style: 'default'
         },
         {
-          text: safeT("cancel"),
+          text: t("cancel"),
           style: 'cancel'
         }
       ],
@@ -853,14 +780,13 @@ const ReportModal = ({
 
       // Get reason key and convert to Vietnamese
       const reasonKey = reportReasons[selectedReasonIndex];
-      const vietnameseReason = vietnameseReasons[reasonKey] || reasonKey;
-      console.log("[Submit] Reason converted from", reasonKey, "to", vietnameseReason);
+      console.log("[Submit] Reason converted from", reasonKey, "to", reasonKey);
 
       // Prepare the report data
       const reportData = {
         bookingId: bookingId,
         content: description.trim(),
-        reason: vietnameseReason, // Send Vietnamese translation instead of key
+        reason: reasonKey, // Send Vietnamese translation instead of key
         isReviewed: false,
         images: uploadedImageUrls,
       };
@@ -874,8 +800,8 @@ const ReportModal = ({
 
         // Show success message and close
         Alert.alert(
-          safeT("report_submitted"),
-          safeT("report_submission_success"),
+          t("report_submitted"),
+          t("report_submission_success"),
           [
             {
               text: "OK",
@@ -960,21 +886,20 @@ const ReportModal = ({
   const showImageOptions = () => {
     console.log("[Image Options] Showing image options...");
     
-    // Use native Alert for better compatibility
     Alert.alert(
-      safeT("add_image") || "Add Image",
-      safeT("choose_image_source") || "Choose image source",
+      t("add_image"),
+      t("choose_image_source"),
       [
         {
-          text: safeT("camera") || "Camera",
+          text: t("camera"),
           onPress: takePhoto
         },
         {
-          text: safeT("gallery") || "Gallery", 
+          text: t("gallery"), 
           onPress: pickImage
         },
         {
-          text: safeT("cancel") || "Cancel",
+          text: t("cancel"),
           style: "cancel"
         }
       ],
@@ -987,7 +912,7 @@ const ReportModal = ({
     if (apiError) {
       showAlert(
         "error",
-        safeT("report_submission_failed"),
+        t("report_submission_failed"),
         [
           {
             text: "ok",
@@ -1015,7 +940,7 @@ const ReportModal = ({
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{safeT("report_issue")}</Text>
+              <Text style={styles.modalTitle}>{t("report_issue")}</Text>
               <TouchableOpacity
                 onPress={handleClose}
                 style={styles.closeButton}
@@ -1027,31 +952,31 @@ const ReportModal = ({
             <ScrollView style={styles.modalContent}>
               <View style={styles.reportingInfoContainer}>
                 <Text style={styles.reportingText}>
-                  {safeT("booking_id")}:{" "}
+                  {t("booking_id")}:{" "}
                   <Text style={styles.reportingValue}>
                     {bookingId || "N/A"}
                   </Text>
                 </Text>
                 <Text style={styles.reportingText}>
-                  {safeT("rental_name")}:{" "}
+                  {t("rental_name")}:{" "}
                   <Text style={styles.reportingValue}>
                     {rentalName || "N/A"}
                   </Text>
                 </Text>
                 <Text style={styles.reportingText}>
-                  {safeT("accommodation_type")}:{" "}
+                  {t("accommodation_type")}:{" "}
                   <Text style={styles.reportingValue}>
                     {accommodationType || "N/A"}
                   </Text>
                 </Text>
                 <Text style={styles.reportingText}>
-                  {safeT("roomNo")}:{" "}
+                  {t("roomNo")}:{" "}
                   <Text style={styles.reportingValue}>{roomNo || "N/A"}</Text>
                 </Text>
               </View>
 
               <Text style={styles.sectionTitle}>
-                {safeT("reason_for_report")}
+                {t("reason_for_report")}
               </Text>
               <View style={styles.reasonsContainer}>
                 {reportReasons.map((item, index) => (
@@ -1071,28 +996,28 @@ const ReportModal = ({
                           styles.selectedReasonText,
                       ]}
                     >
-                      {safeT(item)}
+                      {t(item)}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </View>
 
-              <Text style={styles.sectionTitle}>{safeT("description")}</Text>
+              <Text style={styles.sectionTitle}>{t("description")}</Text>
               <TextInput
                 style={styles.descriptionInput}
                 multiline
                 numberOfLines={5}
-                placeholder={safeT("describe_issue_in_detail")}
+                placeholder={t("describe_issue_in_detail")}
                 value={description}
                 onChangeText={setDescription}
                 textAlignVertical="top"
               />
 
               <Text style={styles.sectionTitle}>
-                {safeT("evidence_images")}
+                {t("evidence_images")}
               </Text>
               <Text style={styles.helperText}>
-                {safeT("min3_max10_images_required")} ({images.length}/
+                {t("min3_max10_images_required")} ({images.length}/
                 {MAX_IMAGES})
               </Text>
 
@@ -1123,9 +1048,9 @@ const ReportModal = ({
                       color="#4e72e3"
                     />
                     <Text style={styles.addImageText}>
-                      {safeT("add_image")} (
+                      {t("add_image")} (
                       {Math.max(MIN_IMAGES - images.length, 0)}{" "}
-                      {safeT("more_needed")})
+                      {t("more_needed")})
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -1151,7 +1076,7 @@ const ReportModal = ({
                 onPress={handleClose}
                 disabled={isSubmitting}
               >
-                <Text style={styles.cancelButtonText}>{safeT("cancel")}</Text>
+                <Text style={styles.cancelButtonText}>{t("cancel")}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.submitButton}
@@ -1162,7 +1087,7 @@ const ReportModal = ({
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
                   <Text style={styles.submitButtonText}>
-                    {safeT("submit_report")}
+                    {t("submit_report")}
                   </Text>
                 )}
               </TouchableOpacity>
@@ -1256,22 +1181,22 @@ const ReportModal = ({
       <AlertModal
         visible={imagePickerModalVisible}
         onClose={() => setImagePickerModalVisible(false)}
-        title={safeT("add_image")}
-        message={safeT("choose_image_source")}
+        title={t("add_image")}
+        message={t("choose_image_source")}
         icon="photo-library"
         buttons={[
           {
-            text: safeT("camera"),
+            text: t("camera"),
             onPress: takePhoto,
             icon: "camera-alt",
           },
           {
-            text: safeT("gallery"),
+            text: t("gallery"),
             onPress: pickImage,
             icon: "photo-library",
           },
           {
-            text: safeT("cancel"),
+            text: t("cancel"),
             onPress: () => setImagePickerModalVisible(false),
             textStyle: { color: "#666" },
             style: { borderColor: "#e0e0e0", backgroundColor: "#f5f5f5" },
@@ -1283,18 +1208,18 @@ const ReportModal = ({
       <AlertModal
         visible={submitConfirmModalVisible}
         onClose={() => setSubmitConfirmModalVisible(false)}
-        title={safeT("confirm_submission")}
-        message={safeT("submit_report_confirmation")}
+        title={t("confirm_submission")}
+        message={t("submit_report_confirmation")}
         icon="help-outline"
         buttons={[
           {
-            text: safeT("submit"),
+            text: t("submit"),
             onPress: handleSubmit,
             primary: true,
             icon: "send",
           },
           {
-            text: safeT("cancel"),
+            text: t("cancel"),
             onPress: () => setSubmitConfirmModalVisible(false),
             textStyle: { color: "#666" },
             style: { borderColor: "#e0e0e0", backgroundColor: "#f5f5f5" },

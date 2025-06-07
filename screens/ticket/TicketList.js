@@ -28,6 +28,7 @@ const BOOKING_STATUS = Object.freeze({
   CANCELLED: 6,
   COMPLETED: 7,
   PENDING: 8,
+  REFUND: 9,
 });
 import { useCreateFeedbackMutation } from "../../api/feedbackApi";
 import NotAuth from "../auth/NotAuth";
@@ -62,46 +63,29 @@ export default function TicketList() {
   const [createNotification] = useCreateNotificationMutation();
   const mapStatusToFilterCategory = (status) => {
     switch (status) {
-      case BOOKING_STATUS.CONFIRMED:
       case BOOKING_STATUS.PENDING:
-        return "upcoming";
+      case BOOKING_STATUS.CONFIRMED:
+        return "upcoming"; 
       case BOOKING_STATUS.CHECKEDIN:
       case BOOKING_STATUS.NEEDCHECKIN:
       case BOOKING_STATUS.NEEDCHECKOUT:
-        return "current";
-      case BOOKING_STATUS.COMPLETED:
-        return "completed";
+        return "current"; 
       case BOOKING_STATUS.CANCELLED:
+      case BOOKING_STATUS.REFUND:
         return "cancelled";
+      case BOOKING_STATUS.COMPLETED:
       case BOOKING_STATUS.CHECKEDOUT:
-        return "completed";
+        return "completed"; // Hoàn thành
       default:
         return "upcoming";
     }
   };
 
   const mapStatusToUiCode = (status) => {
-    if (status === BOOKING_STATUS.CANCELLED) {
-      return "-1"; // Cancelled - Show "Đặt lại" button
-    } else if (
-      status === BOOKING_STATUS.PENDING ||
-      status === BOOKING_STATUS.CONFIRMED ||
-      status === BOOKING_STATUS.NEEDCHECKIN ||
-      status === BOOKING_STATUS.CHECKEDIN ||
-      status === BOOKING_STATUS.NEEDCHECKOUT
-    ) {
-      return "0"; // Current or Upcoming - Show "Hủy" + "Xem chi tiết" buttons
-    } else if (
-      status === BOOKING_STATUS.COMPLETED ||
-      status === BOOKING_STATUS.CHECKEDOUT
-    ) {
-      return "1"; // Completed - Show "Đánh giá" button
-    } else {
-      return "0"; // Default
-    }
+    return status; // Return the actual booking status number
   };
 
-  // Function to convert booking data - defined BEFORE it's used
+  // Function to convert booking data
   const convertBookingsData = (bookings) => {
     return bookings.map((booking) => ({
       id: booking.id,
@@ -110,11 +94,11 @@ export default function TicketList() {
       placeName: booking?.accommodationId?.rentalLocationId?.city,
       maxPeople: booking.adultNumber + booking.childNumber,
       price: booking.totalPrice.toLocaleString("vi-VN") + " VND",
-      dateCompleted: booking.checkOutHour,
       dateCheckin: booking.checkInHour,
+      dateCheckout: booking.checkOutHour,
       dateBooked: booking.createdAt,
       status: mapStatusToUiCode(booking.status),
-      bookingStatus: mapStatusToFilterCategory(booking.status),
+      bookingStatus: booking.status, 
       paymentStatus: booking.paymentStatus,
       feedbackId: booking.feedbackId,
       accommodationId: booking.accommodationId,
@@ -126,11 +110,10 @@ export default function TicketList() {
   // Use useEffect instead of useState for side effects
   useEffect(() => {
     if (bookingData?.bookings) {
-      setLocalBookings(convertBookingsData(bookingData.bookings));
+      const converted = convertBookingsData(bookingData.bookings);
+      setLocalBookings(converted);
     }
   }, [bookingData]);
-
-
 
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = async () => {
@@ -243,16 +226,15 @@ export default function TicketList() {
     });
   };
 
-  // Filter bookings based on active tab
+  // Filter bookings based on active tab and payment status
   const filteredBookings =
     activeTab.value === "0"
       ? convertedBookings
-      : convertedBookings.filter(
-        (booking) => booking.bookingStatus === activeTab.key
-      );
-
-
-
+      : convertedBookings.filter((booking) => {
+          const statusCategory = mapStatusToFilterCategory(booking.bookingStatus);
+          return statusCategory === activeTab.key;
+        });
+  
   return (
     <SafeAreaView style={styles.container}>
       {renderHeader()}
@@ -332,8 +314,8 @@ export default function TicketList() {
                   );
                 } else if (activeTab.key === "current") {
                   return (
-                    parseCustomDate(b.dateCompleted) -
-                    parseCustomDate(a.dateCompleted)
+                    parseCustomDate(b.dateCheckout) -
+                    parseCustomDate(a.dateCheckout)
                   );
                 } else {
                   return (
@@ -350,7 +332,8 @@ export default function TicketList() {
                     placeName={booking.placeName}
                     maxPeople={booking.maxPeople}
                     price={booking.price}
-                    dateCompleted={booking.dateCompleted}
+                    dateCheckin={booking.dateCheckin}
+                    dateCheckout={booking.dateCheckout}
                     status={booking.status}
                     paymentStatus={booking.paymentStatus}
                     feedbackId={booking.feedbackId}
@@ -358,10 +341,6 @@ export default function TicketList() {
                     onCancelAction={() => handleCancel(booking.id)}
                     onReviewAction={() => handleReview(booking.id)}
                     onRebookingAction={() => {
-                      console.log("Booking data in CardInMyTicket:", {
-                        accommodationType: booking.accommodationTypeId,
-                        rentalLocation: booking.rentalLocationId
-                      });
                       handleRebooking({
                         accommodationType: booking.accommodationTypeId,
                         rentalLocation: booking.rentalLocationId

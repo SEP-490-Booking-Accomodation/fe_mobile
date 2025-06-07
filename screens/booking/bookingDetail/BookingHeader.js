@@ -30,7 +30,7 @@ export default function BookingHeader({
       <View style={styles.headerContainer}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.navigate("TicketList")}
+          onPress={() => navigation.goBack()}
         >
           <AntDesign name="left" size={24} color="#4e72e3" />
         </TouchableOpacity>

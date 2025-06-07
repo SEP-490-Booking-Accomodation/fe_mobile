@@ -143,8 +143,7 @@ const AccomodationDetailScreen = ({ route, navigation }) => {
 
   const handleMoreOptions = () => {
     Alert.alert(t("more_options"), t("choose_action"), [
-      { text: t("share"), onPress: () => console.log("Share pressed") },
-      { text: t("report"), onPress: () => console.log("Report pressed") },
+      { text: t("back_to_home"), onPress: () => navigation.navigate("HomeScreen") },
       { text: t("cancel"), style: "cancel" },
     ]);
   };

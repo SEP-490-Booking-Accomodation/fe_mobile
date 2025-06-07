@@ -101,15 +101,6 @@ export default function LocationList({
     const filteredRentals = rentalData.data
       .filter((item) => item.status === 3 && item.accommodationTypeIds && item.accommodationTypeIds.length > 0);
     
-    console.log("Filtered Rentals (status=3 & has accommodationTypes):", 
-      filteredRentals.map(item => ({
-        id: item._id,
-        name: item.name,
-        status: item.status,
-        accommodationTypeIds: item.accommodationTypeIds
-      }))
-    );
-    
     return filteredRentals
       .map((item) => {
         const latitude = item.latitude;

@@ -1,4 +1,4 @@
-import { SafeAreaView, StyleSheet, ScrollView, Alert, Linking } from "react-native"
+import { SafeAreaView, StyleSheet, ScrollView, Alert, Linking, View } from "react-native"
 import { useNavigation, useRoute } from "@react-navigation/native"
 import { useFocusEffect } from "@react-navigation/native"
 import { useCallback } from "react"
@@ -348,23 +348,34 @@ export default function BookingDetail() {
         roomNo={roomNo}
       />
 
-      <BookingStatusBar status={bookingData.status} paymentStatus={bookingData.paymentStatus} note={bookingData.note} />
+      <BookingStatusBar 
+        status={bookingData.status} 
+        paymentStatus={bookingData.paymentStatus} 
+        note={bookingData.note} 
+        style={styles.statusBar}
+      />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
       >
-        {typeRoom.image && typeRoom.image.length > 0 && <BookingImage imageUrl={typeRoom.image[0]} />}
+        {typeRoom.image && typeRoom.image.length > 0 && (
+          <BookingImage imageUrl={typeRoom.image[0]} style={styles.bookingImage} />
+        )}
 
-        <LocationInfo rentalData={rentalData} />
-        <RoomTypeInfo typeRoom={typeRoom} password={password} />
-        <TimeInfo bookingData={bookingData} />
-
-        <GuestsInfo adultNumber={bookingData.adultNumber} childNumber={bookingData.childNumber} />
-
-        <NoteInfo note={bookingData.note} />
-        <PaymentInfo bookingData={bookingData} />
+        <View style={styles.infoSection}>
+          <LocationInfo rentalData={rentalData} />
+          <RoomTypeInfo typeRoom={typeRoom} password={password} />
+          <TimeInfo bookingData={bookingData} />
+          <GuestsInfo 
+            adultNumber={bookingData.adultNumber} 
+            childNumber={bookingData.childNumber} 
+          />
+          <NoteInfo note={bookingData.note} />
+          <PaymentInfo bookingData={bookingData} />
+        </View>
       </ScrollView>
 
       <BookingFooter
@@ -384,10 +395,39 @@ export default function BookingDetail() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f9f9f9",
-    padding: 20,
+    backgroundColor: "#F7FAFC",
+    paddingHorizontal: 16,
   },
   scrollView: {
-    padding: 16,
+    flex: 1,
   },
-})
+  contentContainer: {
+    padding: 16,
+    gap: 12,
+  },
+  bookingImage: {
+    marginBottom: 12,
+  },
+  infoSection: {
+    gap: 12,
+  },
+  footer: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#EDF2F7",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  statusBar: {
+    marginHorizontal: 16,
+    marginVertical: 8,
+  }
+});
