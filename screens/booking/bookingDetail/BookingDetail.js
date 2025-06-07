@@ -1,4 +1,5 @@
 import {
+  View,
   SafeAreaView,
   StyleSheet,
   ScrollView,
@@ -444,10 +445,10 @@ export default function BookingDetail() {
         roomNo={roomNo}
       />
 
-      <BookingStatusBar 
-        status={bookingData.status} 
-        paymentStatus={bookingData.paymentStatus} 
-        note={bookingData.note} 
+      <BookingStatusBar
+        status={bookingData.status}
+        paymentStatus={bookingData.paymentStatus}
+        note={bookingData.note}
         style={styles.statusBar}
       />
 
@@ -455,19 +456,24 @@ export default function BookingDetail() {
         showsVerticalScrollIndicator={false}
         style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
       >
         {typeRoom.image && typeRoom.image.length > 0 && (
-          <BookingImage imageUrl={typeRoom.image[0]} style={styles.bookingImage} />
+          <BookingImage
+            imageUrl={typeRoom.image[0]}
+            style={styles.bookingImage}
+          />
         )}
 
         <View style={styles.infoSection}>
           <LocationInfo rentalData={rentalData} />
           <RoomTypeInfo typeRoom={typeRoom} password={password} />
           <TimeInfo bookingData={bookingData} />
-          <GuestsInfo 
-            adultNumber={bookingData.adultNumber} 
-            childNumber={bookingData.childNumber} 
+          <GuestsInfo
+            adultNumber={bookingData.adultNumber}
+            childNumber={bookingData.childNumber}
           />
           <NoteInfo note={bookingData.note} />
           <PaymentInfo bookingData={bookingData} />
@@ -525,5 +531,5 @@ const styles = StyleSheet.create({
   statusBar: {
     marginHorizontal: 16,
     marginVertical: 8,
-  }
+  },
 });
