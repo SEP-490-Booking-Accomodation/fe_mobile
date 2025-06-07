@@ -589,6 +589,7 @@
   "notification_type_booking": "予約",
   "notification_type_feedback": "フィードバック",
   "notification_type_payment": "支払い",
+  "notification_type_report": "報告",
   "notification_type_default": "通知",
   "notification_status_unread": "未読",
   "notification_status_read": "既読",

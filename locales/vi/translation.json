@@ -586,6 +586,7 @@
   "notification_type_booking": "Đặt phòng",
   "notification_type_feedback": "Đánh giá",
   "notification_type_payment": "Thanh toán",
+  "notification_type_report": "Báo cáo",
   "notification_type_default": "Thông báo",
   "notification_status_unread": "Chưa đọc",
   "notification_status_read": "Đã đọc",

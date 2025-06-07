@@ -592,6 +592,7 @@
   "notification_type_default": "Notification",
   "notification_status_unread": "Unread",
   "notification_status_read": "Read",
+  "notification_type_report": "Report",
   "validation_error": "Validation Error",
   "password_required": "Password is required",
   "full_name_required": "Full name is required",

@@ -9,7 +9,7 @@ export default function LoadingState() {
     <View style={styles.container}>
       <ActivityIndicator size="large" color="#4E72E3" style={styles.spinner} />
       <Text style={styles.text}>{t("loading")}</Text>
-      <Text style={styles.subText}>{t("please_wait")}</Text>
+      {/* <Text style={styles.subText}>{t("please_wait")}</Text> */}
     </View>
   );
 }
