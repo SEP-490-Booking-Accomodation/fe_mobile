@@ -674,5 +674,6 @@
   "booking_cancelled_with_refund_request_for": "予約場所",
   "requested_refund_amount": "返金額",
   "view_policies": "ポリシーを表示",
-  "owner_policies": "オーナーポリシー"
+  "owner_policies": "オーナーポリシー",
+  "minimum_payment_warning": "支払いは10,000d以上である必要があります"
 }

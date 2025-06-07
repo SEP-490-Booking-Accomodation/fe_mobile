@@ -872,9 +872,6 @@ const ReportModal = ({
         const response = await createReport(reportData).unwrap();
         console.log("[Submit] Report created successfully:", response);
 
-        // Mark submission as successful before closing
-        setSubmissionSuccessful(true);
-        
         // Show success message and close
         Alert.alert(
           safeT("report_submitted"),
@@ -882,7 +879,7 @@ const ReportModal = ({
           [
             {
               text: "OK",
-              onPress: () => handleClose()
+              onPress: () => handleClose(true) // Truyền tham số success = true
             }
           ]
         );
@@ -911,10 +908,10 @@ const ReportModal = ({
     }
   };
 
-  const handleClose = async () => {
+  const handleClose = async (isSubmissionSuccessful = false) => {
     try {
       // Only clean up images if submission was NOT successful
-      if (!submissionSuccessful && images.length > 0) {
+      if (!isSubmissionSuccessful && images.length > 0) {
         console.log("[Close] Cleaning up uploaded images (submission not successful)...");
         
         for (const image of images) {
@@ -943,7 +940,7 @@ const ReportModal = ({
             }
           }
         }
-      } else if (submissionSuccessful) {
+      } else if (isSubmissionSuccessful) {
         console.log("[Close] Submission was successful - keeping images in Supabase");
       }
     } catch (error) {
