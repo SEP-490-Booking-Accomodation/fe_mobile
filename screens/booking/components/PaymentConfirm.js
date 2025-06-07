@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign } from "@expo/vector-icons";
 import CustomButton from "../../../components/buttons/Button";
 import { useTranslation } from "react-i18next";
 
@@ -26,10 +26,18 @@ const PaymentConfirm = ({ setPaymentMethod }) => {
     // },
     {
       value: 1,
-      labelKey: "momo", 
-      sublabelKey: "payment_with_momo", 
+      labelKey: "momo",
+      sublabelKey: "payment_with_momo",
       image: {
         uri: "https://developers.momo.vn/v3/assets/images/square-logo-f8712a4d5be38f389e6bc94c70a33bf4.png",
+      },
+    },
+    {
+      value: 2,
+      labelKey: "payos",
+      sublabelKey: "payment_with_payos",
+      image: {
+        uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQscRDPTsx1NVtGfABbWTth19WukKtd3n1BQfzu3MBAWqGFW_I_TTtuBtHoHTVcAS71_jI&usqp=CAU",
       },
     },
     // {
@@ -72,7 +80,9 @@ const PaymentConfirm = ({ setPaymentMethod }) => {
         <AntDesign name="Safety" size={24} color="#4caf50" />
         <View>
           <Text style={styles.securityTitle}>{t("payment_guarantee")}</Text>
-          <Text style={styles.securityText}>{t("payment_guarantee_description")}</Text>
+          <Text style={styles.securityText}>
+            {t("payment_guarantee_description")}
+          </Text>
         </View>
       </View>
     </View>

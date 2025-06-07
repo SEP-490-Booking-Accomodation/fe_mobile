@@ -21,8 +21,8 @@ export default function VerticalCard({
   numberOfReview = 0,
   distance,
   initFavourite = false,
-  onFavouritePress = () => { },
-  onCardPress = () => { },
+  onFavouritePress = () => {},
+  onCardPress = () => {},
   disabled = false,
 }) {
   const { t } = useTranslation();
@@ -51,7 +51,9 @@ export default function VerticalCard({
       const currentMinute = now.getMinutes();
 
       const [openHourValue, openMinuteValue] = openHour.split(":").map(Number);
-      const [closeHourValue, closeMinuteValue] = closeHour.split(":").map(Number);
+      const [closeHourValue, closeMinuteValue] = closeHour
+        .split(":")
+        .map(Number);
 
       const currentTimeInMinutes = currentHour * 60 + currentMinute;
       const openTimeInMinutes = openHourValue * 60 + openMinuteValue;
@@ -60,12 +62,12 @@ export default function VerticalCard({
       if (closeTimeInMinutes < openTimeInMinutes) {
         setIsOpen(
           currentTimeInMinutes >= openTimeInMinutes ||
-          currentTimeInMinutes <= closeTimeInMinutes
+            currentTimeInMinutes <= closeTimeInMinutes
         );
       } else {
         setIsOpen(
           currentTimeInMinutes >= openTimeInMinutes &&
-          currentTimeInMinutes <= closeTimeInMinutes
+            currentTimeInMinutes <= closeTimeInMinutes
         );
       }
     };
@@ -102,7 +104,7 @@ export default function VerticalCard({
   };
 
   const handleCardPress = () => {
-    onCardPress(); 
+    onCardPress();
   };
 
   const formatMoney = (value) => {
@@ -110,8 +112,9 @@ export default function VerticalCard({
   };
 
   const renderPriceRange = () => {
-    return `${formatMoney(minPrice)} - ${formatMoney(maxPrice)}${t("per_hour") || "đ/giờ"
-      }`;
+    return `${formatMoney(minPrice)} - ${formatMoney(maxPrice)}${
+      t("per_hour") || "đ/giờ"
+    }`;
   };
 
   const handleImageLoad = () => {
@@ -172,11 +175,14 @@ export default function VerticalCard({
         ) : status === 3 ? (
           <View
             style={
-              disabled ? styles.closedStatusContainer : styles.activeStatusContainer
+              disabled
+                ? styles.closedStatusContainer
+                : styles.activeStatusContainer
             }
           >
             <Text style={styles.openHoursText}>
-              {disabled ? t("close_hr") : t("open_hr")} ({openHour} - {closeHour})
+              {disabled ? t("close_hr") : t("open_hr")} ({openHour} -{" "}
+              {closeHour})
             </Text>
           </View>
         ) : status === 4 ? (
