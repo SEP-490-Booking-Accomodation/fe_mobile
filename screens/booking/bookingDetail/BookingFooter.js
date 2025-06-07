@@ -1,14 +1,14 @@
-import { View, StyleSheet, Alert, Text } from "react-native";
-import dayjs from "dayjs";
-import { BOOKING_STATUS, PAYMENT_STATUS } from "./Constants";
-import CustomButton from "../../../components/buttons/Button";
-import { useTranslation } from "react-i18next";
-import customParseFormat from "dayjs/plugin/customParseFormat";
-import { useGetPolicyHashTagQuery } from "../../../api/policySystemApi";
-import { useCreateNotificationMutation } from "../../../api/notificationApi";
+import { View, StyleSheet, Alert, Text } from "react-native"
+import dayjs from "dayjs"
+import { BOOKING_STATUS, PAYMENT_STATUS } from "./Constants"
+import CustomButton from "../../../components/buttons/Button"
+import { useTranslation } from "react-i18next"
+import customParseFormat from "dayjs/plugin/customParseFormat"
+import { useGetPolicyHashTagQuery } from "../../../api/policySystemApi"
+import { useCreateNotificationMutation } from "../../../api/notificationApi"
 
-dayjs.extend(customParseFormat);
-import { useRoute } from "@react-navigation/native";
+dayjs.extend(customParseFormat)
+import { useRoute } from "@react-navigation/native"
 
 export default function BookingFooter({
   bookingData,
@@ -20,204 +20,180 @@ export default function BookingFooter({
   isLoadingBtn,
   isUpdating,
 }) {
-  const { t } = useTranslation();
-  const [createNotification] = useCreateNotificationMutation();
-  const status = Number(bookingData?.status);
-  const paymentStatus = Number(bookingData?.paymentStatus);
-  const refundDeadline = bookingData?.timeExpireRefund;
-  const route = useRoute();
-  const { bookingId } = route.params || {};
-
-  const { data: checkInPolicyData } =
-    useGetPolicyHashTagQuery("thoigiancheckin");
-
+  const { t } = useTranslation()
+  const [createNotification] = useCreateNotificationMutation()
+  const status = Number(bookingData?.status)
+  const paymentStatus = Number(bookingData?.paymentStatus)
+  const refundDeadline = bookingData?.timeExpireRefund
+  const route = useRoute()
+  const { bookingId } = route.params || {}
+  
+  const { data: checkInPolicyData } = useGetPolicyHashTagQuery("thoigiancheckin")
+  
   const shouldShowCancel = () =>
     [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED].includes(status) &&
-    [
-      PAYMENT_STATUS.BOOKING,
-      PAYMENT_STATUS.PENDING,
-      PAYMENT_STATUS.PAID,
-    ].includes(paymentStatus);
+    [PAYMENT_STATUS.BOOKING, PAYMENT_STATUS.PENDING, PAYMENT_STATUS.PAID].includes(paymentStatus)
 
   const shouldShowPayNow = () =>
-    [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED].includes(status) &&
-    paymentStatus === PAYMENT_STATUS.PENDING;
-  const shouldShowViewTicket = () => !shouldShowCancel() && !shouldShowPayNow();
+    [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED].includes(status) && paymentStatus === PAYMENT_STATUS.PENDING
+  const shouldShowViewTicket = () => !shouldShowCancel() && !shouldShowPayNow()
 
   const isRefundAvailable = () => {
-    if (!refundDeadline) return false;
+    if (!refundDeadline) return false
 
     try {
-      const deadline = dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss");
-      const now = dayjs();
+      const deadline = dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss")
+      const now = dayjs()
 
       if (!deadline.isValid()) {
-        return false;
+        return false
       }
 
-      return now.isBefore(deadline);
+      return now.isBefore(deadline)
     } catch (error) {
-      return false;
+      return false
     }
-  };
+  }
 
   const shouldShowCheckIn = () => {
-    return (
-      status === BOOKING_STATUS.CONFIRMED &&
-      paymentStatus === PAYMENT_STATUS.PAID
-    );
-  };
+    return status === BOOKING_STATUS.CONFIRMED && paymentStatus === PAYMENT_STATUS.PAID
+  }
 
   const parseDateTime = (dateTimeString) => {
-    if (!dateTimeString) return null;
-
+    if (!dateTimeString) return null
+    
     try {
-      const parsed = dayjs(dateTimeString, "DD/MM/YYYY HH:mm:ss");
-
+      const parsed = dayjs(dateTimeString, "DD/MM/YYYY HH:mm:ss")
+      
       if (parsed.isValid()) {
-        return parsed;
+        return parsed
       }
-
-      return null;
+      
+      return null
     } catch (error) {
-      return null;
+      return null
     }
-  };
+  }
 
   const isCheckInButtonEnabled = () => {
-    const checkInTime = parseDateTime(bookingData?.checkInHour);
-    const checkOutTime = parseDateTime(bookingData?.checkOutHour);
-
+    const checkInTime = parseDateTime(bookingData?.checkInHour)
+    const checkOutTime = parseDateTime(bookingData?.checkOutHour)
+    
     if (!checkInTime) {
-      return false;
+      return false
     }
-
-    const currentDate = dayjs().format("YYYY-MM-DD");
-    const checkInDate = checkInTime.format("YYYY-MM-DD");
-
+    
+    const currentDate = dayjs().format("YYYY-MM-DD")
+    const checkInDate = checkInTime.format("YYYY-MM-DD")
+    
     if (currentDate !== checkInDate) {
-      return false;
+      return false
     }
 
-    const currentTime = dayjs();
-    const policyValues = checkInPolicyData?.[0]?.values || [];
-    const checkInMinutes =
-      policyValues.length > 0 ? parseInt(policyValues[0].val) : 20;
+    const currentTime = dayjs()
+    const policyValues = checkInPolicyData?.data?.[0]?.values || []
+    const checkInMinutes = policyValues.length > 0 ? parseInt(policyValues[0].val) : 20 
 
-    const checkInAvailableTime = checkInTime.subtract(checkInMinutes, "minute");
-
-    const isEnabled =
+    
+    const checkInAvailableTime = checkInTime.subtract(checkInMinutes, 'minute')
+    
+    const isEnabled = (
       currentTime.isAfter(checkInAvailableTime) ||
       currentTime.isSame(checkInAvailableTime) ||
-      (checkOutTime &&
-        currentTime.isAfter(checkInTime) &&
-        currentTime.isBefore(checkOutTime));
-
-    return isEnabled;
-  };
+      (checkOutTime && currentTime.isAfter(checkInTime) && currentTime.isBefore(checkOutTime))
+    )
+    
+    return isEnabled
+  }
 
   const getCheckInButtonText = () => {
-    const checkInTime = parseDateTime(bookingData?.checkInHour);
-
+    const checkInTime = parseDateTime(bookingData?.checkInHour)
+    
     if (!checkInTime) {
-      return t("check_in");
+      return t('check_in')
     }
-
-    const currentDate = dayjs().format("YYYY-MM-DD");
-    const checkInDate = checkInTime.format("YYYY-MM-DD");
-
+    
+    const currentDate = dayjs().format("YYYY-MM-DD")
+    const checkInDate = checkInTime.format("YYYY-MM-DD")
+    
     if (currentDate !== checkInDate) {
-      const daysUntilCheckIn = dayjs(checkInDate).diff(
-        dayjs(currentDate),
-        "day"
-      );
+      const daysUntilCheckIn = dayjs(checkInDate).diff(dayjs(currentDate), 'day')
       if (daysUntilCheckIn > 0) {
-        return `${t("check_in")} (${daysUntilCheckIn} ${t("days")})`;
+        return `${t('check_in')} (${daysUntilCheckIn} ${t('days')})`
       }
     }
-
+    
     if (isCheckInButtonEnabled()) {
-      return t("check_in");
+      return t('check_in')
     }
 
-    const currentTime = dayjs();
-    const policyValues = checkInPolicyData?.data?.[0]?.values || [];
-    const checkInMinutes =
-      policyValues.length > 0 ? parseInt(policyValues[0].val) : 20;
-    const checkInAvailableTime = checkInTime.subtract(checkInMinutes, "minute");
-
-    const remainingMinutes = checkInAvailableTime.diff(currentTime, "minute");
-
+    const currentTime = dayjs()
+    const policyValues = checkInPolicyData?.data?.[0]?.values || []
+    const checkInMinutes = policyValues.length > 0 ? parseInt(policyValues[0].val) : 20
+    const checkInAvailableTime = checkInTime.subtract(checkInMinutes, 'minute')
+    
+    const remainingMinutes = checkInAvailableTime.diff(currentTime, 'minute')
+    
     if (remainingMinutes > 0) {
-      return `${t("check_in")}`;
+      return `${t('check_in')}`
     }
-
-    return t("check_in");
-  };
+    
+    return t('check_in')
+  }
 
   const handleDisabledCheckInPress = () => {
-    const checkInTime = parseDateTime(bookingData?.checkInHour);
-
+    const checkInTime = parseDateTime(bookingData?.checkInHour)
+    
     if (!checkInTime) {
-      Alert.alert(t("check_in_not_available"), "Invalid check-in time", [
-        { text: t("yes"), style: "default" },
-      ]);
-      return;
+      Alert.alert(t('check_in_not_available'), "Invalid check-in time", [
+        { text: t('yes'), style: "default" }
+      ])
+      return
     }
-
-    const currentDate = dayjs().format("YYYY-MM-DD");
-    const checkInDate = checkInTime.format("YYYY-MM-DD");
-    const currentTime = dayjs();
-
-    const policyValues = checkInPolicyData?.data?.[0]?.values || [];
-    const checkInMinutes =
-      policyValues.length > 0 ? parseInt(policyValues[0].val) : 20;
-    const policyDescription =
-      policyValues.length > 0
-        ? policyValues[0].description
-        : "Được checkin sớm trước 20 phút trở đi";
-
-    let alertTitle = t("check_in_not_available");
-    let alertMessage = "";
-
+    
+    const currentDate = dayjs().format("YYYY-MM-DD")
+    const checkInDate = checkInTime.format("YYYY-MM-DD")
+    const currentTime = dayjs()
+    
+    const policyValues = checkInPolicyData?.data?.[0]?.values || []
+    const checkInMinutes = policyValues.length > 0 ? parseInt(policyValues[0].val) : 20
+    const policyDescription = policyValues.length > 0 ? policyValues[0].description : "Được checkin sớm trước 20 phút trở đi"
+    
+    let alertTitle = t('check_in_not_available')
+    let alertMessage = ""
+    
     if (currentDate !== checkInDate) {
-      const daysUntilCheckIn = dayjs(checkInDate).diff(
-        dayjs(currentDate),
-        "day"
-      );
-      alertMessage = t("check_in_date_not_reached", {
+      const daysUntilCheckIn = dayjs(checkInDate).diff(dayjs(currentDate), 'day')
+      alertMessage = t('check_in_date_not_reached', { 
         days: daysUntilCheckIn,
-        date: checkInTime.format("DD/MM/YYYY"),
-      });
+        date: checkInTime.format("DD/MM/YYYY")
+      })
     } else {
-      const checkInAvailableTime = checkInTime.subtract(
-        checkInMinutes,
-        "minute"
-      );
-      const remainingMinutes = checkInAvailableTime.diff(currentTime, "minute");
-
+      const checkInAvailableTime = checkInTime.subtract(checkInMinutes, 'minute')
+      const remainingMinutes = checkInAvailableTime.diff(currentTime, 'minute')
+      
       if (remainingMinutes > 0) {
-        alertMessage = t("check_in_policy_message", {
+        alertMessage = t('check_in_policy_message', {
           minutes: checkInMinutes,
           remainingMinutes: remainingMinutes,
           availableTime: checkInAvailableTime.format("HH:mm"),
-          policyDescription: policyDescription,
-        });
+          policyDescription: policyDescription
+        })
       }
     }
-
+    
     Alert.alert(alertTitle, alertMessage, [
-      { text: t("yes"), style: "default" },
-    ]);
-  };
+      { text: t('yes'), style: "default" }
+    ])
+  }
 
   const shouldShowCheckOut = () => {
-    return status === BOOKING_STATUS.CHECKEDIN;
-  };
+    return status === BOOKING_STATUS.CHECKEDIN
+  }
 
   const handleCancelPress = () => {
     onCancel();
-  };
+  }
 
   const handleCheckIn = async () => {
     try {
@@ -226,16 +202,13 @@ export default function BookingFooter({
         userId: bookingData.accommodationId.rentalLocationId.ownerId.userId._id,
         bookingId: bookingId,
         title: t("customer_checked_in"),
-        content: `${t("customer_checked_in_for")} ${
-          bookingData.rentalLocation.name
-        } ${t("on")} ${dayjs(bookingData.checkInHour).format("DD/MM/YYYY")} ${t(
-          "at"
-        )} ${dayjs(bookingData.checkInHour).format("HH:mm")}`,
+        content: `${t("customer_checked_in_for")} ${bookingData.rentalLocation.name} ${t("on")} ${dayjs(bookingData.checkInHour).format("DD/MM/YYYY")} ${t("at")} ${dayjs(bookingData.checkInHour).format("HH:mm")}`,
         isRead: false,
-        type: 1,
+        type: 1
       }).unwrap();
-    } catch (error) {}
-  };
+    } catch (error) {
+    }
+  }
 
   const handleCheckOut = async () => {
     try {
@@ -244,25 +217,20 @@ export default function BookingFooter({
         userId: bookingData.accommodationId.rentalLocationId.ownerId.userId._id,
         bookingId: bookingId,
         title: t("customer_checked_out"),
-        content: `${t("customer_checked_out_for")} ${
-          bookingData.rentalLocation.name
-        } ${t("on")} ${dayjs(bookingData.checkOutHour).format(
-          "DD/MM/YYYY"
-        )} ${t("at")} ${dayjs(bookingData.checkOutHour).format("HH:mm")}`,
+        content: `${t("customer_checked_out_for")} ${bookingData.rentalLocation.name} ${t("on")} ${dayjs(bookingData.checkOutHour).format("DD/MM/YYYY")} ${t("at")} ${dayjs(bookingData.checkOutHour).format("HH:mm")}`,
         isRead: false,
-        type: 1,
+        type: 1
       }).unwrap();
-    } catch (error) {}
-  };
+    } catch (error) {
+    }
+  }
 
   return (
     <View style={styles.footer}>
       {(shouldShowCancel() || shouldShowPayNow() || shouldShowCheckIn()) && (
         <View style={styles.buttonRow}>
           {/* Cancel button */}
-          {shouldShowCancel() &&
-          paymentStatus === PAYMENT_STATUS.PAID &&
-          isRefundAvailable() ? (
+          {shouldShowCancel() && paymentStatus === PAYMENT_STATUS.PAID && isRefundAvailable() ? (
             <CustomButton
               title={t("refund_cancel_button")}
               onPress={handleCancelPress}
@@ -280,10 +248,7 @@ export default function BookingFooter({
                 title={t("cancel_button")}
                 onPress={handleCancelPress}
                 titleColor="#4E72E3"
-                style={[
-                  styles.cancelButton,
-                  shouldShowCheckIn() && { flex: 1 },
-                ]}
+                style={[styles.cancelButton, shouldShowCheckIn() && { flex: 1 }]}
                 textStyle={styles.cancelButtonText}
                 loading={isUpdating}
                 disabled={isUpdating}
@@ -294,19 +259,9 @@ export default function BookingFooter({
           {shouldShowCheckIn() && (
             <CustomButton
               title={getCheckInButtonText()}
-              onPress={
-                isCheckInButtonEnabled()
-                  ? handleCheckIn
-                  : handleDisabledCheckInPress
-              }
-              style={[
-                styles.checkInButton,
-                !isCheckInButtonEnabled() && styles.disabledCheckInButton,
-              ]}
-              textStyle={[
-                styles.checkInButtonText,
-                !isCheckInButtonEnabled() && styles.disabledCheckInButtonText,
-              ]}
+              onPress={isCheckInButtonEnabled() ? handleCheckIn : handleDisabledCheckInPress}
+              style={[styles.checkInButton, !isCheckInButtonEnabled() && styles.disabledCheckInButton]}
+              textStyle={[styles.checkInButtonText, !isCheckInButtonEnabled() && styles.disabledCheckInButtonText]}
               disabled={false}
             />
           )}
@@ -330,18 +285,16 @@ export default function BookingFooter({
           {(() => {
             const formattedTime = (() => {
               try {
-                const deadline = dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss");
-                return deadline.isValid()
-                  ? deadline.format("HH:mm DD/MM/YYYY")
-                  : refundDeadline;
+                const deadline = dayjs(refundDeadline, "DD/MM/YYYY HH:mm:ss")
+                return deadline.isValid() ? deadline.format("HH:mm DD/MM/YYYY") : refundDeadline
               } catch {
-                return refundDeadline;
+                return refundDeadline
               }
-            })();
+            })()
 
             return isRefundAvailable()
               ? t("refund_note_available", { time: formattedTime })
-              : t("refund_note_overdue", { time: formattedTime });
+              : t("refund_note_overdue", { time: formattedTime })
           })()}
         </Text>
       )}
@@ -365,16 +318,12 @@ export default function BookingFooter({
               />
             </View>
           ) : (
-            <CustomButton
-              title={t("view_ticket_button")}
-              onPress={onViewTicketDetail}
-              style={styles.homeButton}
-            />
+            <CustomButton title={t("view_ticket_button")} onPress={onViewTicketDetail} style={styles.homeButton} />
           )}
         </>
       )}
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -399,7 +348,7 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     backgroundColor: "transparent",
-    height: "auto",
+    height: 'auto',
     minHeight: 50,
     paddingVertical: 8,
     borderRadius: 12,
@@ -411,7 +360,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     color: "#4E72E3",
-    textAlign: "center",
+    textAlign: 'center',
   },
   multilineButtonText: {
     textAlign: "center",
@@ -463,4 +412,4 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 5,
   },
-});
+})
