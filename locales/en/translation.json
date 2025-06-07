@@ -156,6 +156,7 @@
   "status_cancelled": "Cancelled",
   "status_completed": "Completed",
   "status_pending": "Pending",
+  "status_refund": "Refunded",
   "status_unknown": "Unknown",
   "payment_method_mean": "Mean Wallet",
   "payment_method_momo": "Momo",

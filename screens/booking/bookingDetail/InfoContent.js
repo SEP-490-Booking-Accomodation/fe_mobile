@@ -12,12 +12,15 @@ export function InfoSecondaryText({ children }) {
 const styles = StyleSheet.create({
   value: {
     fontSize: 15,
-    color: "#333",
-    marginBottom: 4,
+    fontWeight: "500",
+    color: "#2D3748",
+    marginBottom: 6,
+    lineHeight: 22,
   },
   valueSecondary: {
     fontSize: 14,
-    color: "#777",
+    color: "#718096",
     marginBottom: 4,
+    lineHeight: 20,
   },
 });

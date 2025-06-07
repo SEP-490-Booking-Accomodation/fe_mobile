@@ -156,6 +156,7 @@
   "status_completed": "完了",
   "status_pending": "保留中",
   "status_unknown": "不明",
+  "status_refund": "返金済み",
   "payment_method_mean": "Meanウォレット",
   "payment_method_momo": "Momo",
   "payment_method_test": "テスト",

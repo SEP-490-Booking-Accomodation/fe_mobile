@@ -44,7 +44,6 @@ export default function ConfirmBooking() {
   const route = useRoute();
   const { bookingData } = route.params || {};
   const [isLoading, setIsLoading] = useState(false);
-  console.log("bookingData", bookingData);
 
   const values = getTimeRefundData?.data?.[0]?.values || [];
   let refundMinutes = values[0]?.val || 20; // mặc định nếu không có
@@ -150,7 +149,6 @@ export default function ConfirmBooking() {
     hoursEnd,
     minutesEnd
   ).toISOString();
-  console.log("Booking DATA", bookingData.date);
 
   const checkInDateTime = `${bookingData.date} ${bookingData.time}:00`;
   const checkOutDateTime = `${bookingData.endDate} ${bookingData.endTime}:00`;
