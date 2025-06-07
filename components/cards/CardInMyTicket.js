@@ -12,6 +12,18 @@ const PAYMENT_STATUS = Object.freeze({
   FAILED: 5,
 });
 
+const BOOKING_STATUS = Object.freeze({
+  CONFIRMED: 1,
+  NEEDCHECKIN: 2,
+  CHECKEDIN: 3,
+  NEEDCHECKOUT: 4,
+  CHECKEDOUT: 5,
+  CANCELLED: 6,
+  COMPLETED: 7,
+  PENDING: 8,
+  REFUND: 9,
+});
+
 export default function CardInMyTicket(props) {
   const {
     imageUrl,
@@ -20,7 +32,8 @@ export default function CardInMyTicket(props) {
     placeName,
     maxPeople,
     price,
-    dateCompleted,
+    dateCheckin,
+    dateCheckout,
     status,
     paymentStatus,
     feedbackId,
@@ -34,15 +47,27 @@ export default function CardInMyTicket(props) {
   const [loading, setLoading] = useState(false);
 
   const getStatusInfo = () => {
-    switch (status) {
-      case "-1":
-        return { text: t('cancelled'), color: "#EF4444" };
-      case "0":
-        return { text: t('ongoing'), color: "#10B981" };
-      case "1":
-        return { text: t('completed'), color: "#6366F1" };
+    switch (parseInt(status)) {
+      case BOOKING_STATUS.CONFIRMED:
+        return { text: t('status_confirmed'), color: "#10B981" };
+      case BOOKING_STATUS.NEEDCHECKIN:
+        return { text: t('status_need_checkin'), color: "#F59E0B" };
+      case BOOKING_STATUS.CHECKEDIN:
+        return { text: t('status_checked_in'), color: "#10B981" };
+      case BOOKING_STATUS.NEEDCHECKOUT:
+        return { text: t('status_need_checkout'), color: "#F59E0B" };
+      case BOOKING_STATUS.CHECKEDOUT:
+        return { text: t('status_checked_out'), color: "#6366F1" };
+      case BOOKING_STATUS.CANCELLED:
+        return { text: t('status_cancelled'), color: "#EF4444" };
+      case BOOKING_STATUS.COMPLETED:
+        return { text: t('status_completed'), color: "#6366F1" };
+      case BOOKING_STATUS.PENDING:
+        return { text: t('status_pending'), color: "#F59E0B" };
+      case BOOKING_STATUS.REFUND:
+        return { text: t('status_refund'), color: "#6366F1" };
       default:
-        return { text: "N/A", color: "#6B7280" };
+        return { text: t('status_unknown'), color: "#6B7280" };
     }
   };
 
@@ -113,7 +138,16 @@ export default function CardInMyTicket(props) {
 
               <View style={styles.infoRow}>
                 <Icon name="event" size={16} color="#4B84F5" />
-                <Text style={styles.infoText}>{dateCompleted}</Text>
+                <Text style={styles.infoText}>
+                  {t('check_in')}: {dateCheckin}
+                </Text>
+              </View>
+
+              <View style={styles.infoRow}>
+                <Icon name="event" size={16} color="#4B84F5" />
+                <Text style={styles.infoText}>
+                  {t('check_out')}: {dateCheckout}
+                </Text>
               </View>
 
               <View style={styles.infoRow}>
@@ -128,7 +162,7 @@ export default function CardInMyTicket(props) {
 
           {/* Buttons */}
           <View style={styles.buttonContainer}>
-            {status === "-1" ? (
+            {status === BOOKING_STATUS.CANCELLED || status === BOOKING_STATUS.REFUND ? (
               <CustomButton
                 title={t('rebook')}
                 backgroundColor="#fef2f2"
@@ -140,7 +174,11 @@ export default function CardInMyTicket(props) {
                 disabled={false}
                 onPress={onRebookingAction}
               />
-            ) : status === "0" ? (
+            ) : (status === BOOKING_STATUS.PENDING || 
+                status === BOOKING_STATUS.CONFIRMED || 
+                status === BOOKING_STATUS.NEEDCHECKIN || 
+                status === BOOKING_STATUS.CHECKEDIN || 
+                status === BOOKING_STATUS.NEEDCHECKOUT) ? (
               <CustomButton
                 title={t('view_details')}
                 backgroundColor="#101828"
@@ -152,7 +190,7 @@ export default function CardInMyTicket(props) {
                 style={{ minWidth: "100%", paddingVertical: 10 }}
                 onPress={onViewDetail}
               />
-            ) : status === "1" && feedbackId === null ? (
+            ) : ((status === BOOKING_STATUS.COMPLETED || status === BOOKING_STATUS.CHECKEDOUT) && feedbackId === null) ? (
               <CustomButton
                 title={t('review')}
                 backgroundColor="#dadada"

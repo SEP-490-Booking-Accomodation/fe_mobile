@@ -12,6 +12,7 @@ const NOTIFICATION_TYPES = {
   USER: 4,
   RENTAL: 5,
   MESSAGE: 6,
+  REPORT: 7,
 };
 
 const getNotificationIcon = (type) => {
@@ -28,6 +29,8 @@ const getNotificationIcon = (type) => {
       return "home";
     case NOTIFICATION_TYPES.MESSAGE:
       return "mail";
+    case NOTIFICATION_TYPES.REPORT:
+      return "warning";
     default:
       return "notifications";
   }

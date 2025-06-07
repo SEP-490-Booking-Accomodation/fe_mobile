@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   View,
   Text,
+  Linking,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import React, { useEffect, useState } from "react";
@@ -118,6 +119,11 @@ const HorizontalCardMedium = ({
     }
   };
 
+  const handleOpenMap = () => {
+    const encodedAddress = encodeURIComponent(location);
+    Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`);
+  };
+
   return (
     <TouchableOpacity 
       style={[
@@ -159,9 +165,18 @@ const HorizontalCardMedium = ({
           </Text>
         </View>
       </View>
-      <View style={styles.distanceContainer}>
-        <Icon name="location-on" size={20} color="#979797" />
-        <Text style={styles.distanceText}>{distance} km</Text>
+      <View style={styles.rightContainer}>
+        <View style={styles.distanceContainer}>
+          <Icon name="location-on" size={20} color="#979797" />
+          <Text style={styles.distanceText}>{distance} km</Text>
+        </View>
+        <TouchableOpacity 
+          style={styles.directionButton}
+          onPress={handleOpenMap}
+          activeOpacity={0.7}
+        >
+          <Icon name="directions" size={20} color="#4e72e3" />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -251,15 +266,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#00000099",
   },
+  rightContainer: {
+    alignItems: "center",
+    gap: 8,
+  },
   distanceContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginLeft: 22,
   },
   distanceText: {
     marginLeft: 4,
     fontSize: 12,
     color: "#979797",
+  },
+  directionButton: {
+    backgroundColor: "#EEF2FF",
+    padding: 8,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
   disabledCard: {
     opacity: 0.6,

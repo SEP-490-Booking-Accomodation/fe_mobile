@@ -18,6 +18,7 @@ const DateTimePicker = ({
   handleTimeSelect,
   closeDatePicker,
   closeTimePicker,
+  dateError,
 }) => {
   const { t } = useTranslation();
   return (
@@ -32,20 +33,34 @@ const DateTimePicker = ({
         </Text>
         <AntDesign name="calendar" size={24} color="#666" />
       </TouchableOpacity>
+      {dateError ? (
+        <Text style={styles.errorText}>{dateError}</Text>
+      ) : null}
 
       {/* Time selection */}
-      <Text style={styles.sectionHeader}>{t("check_in_time")}</Text>
-      <TouchableOpacity style={styles.dateTimeButton} onPress={openTimePicker}>
+      <Text style={[styles.sectionHeader, dateError && styles.disabledText]}>{t("check_in_time")}</Text>
+      <TouchableOpacity 
+        style={[
+          styles.dateTimeButton, 
+          dateError && styles.disabledButton
+        ]} 
+        onPress={dateError ? null : openTimePicker}
+        disabled={!!dateError}
+      >
         <Text
-          style={[styles.dateTimeText, !selectedTime && styles.placeholderText]}
+          style={[
+            styles.dateTimeText, 
+            !selectedTime && styles.placeholderText,
+            dateError && styles.disabledText
+          ]}
         >
           {selectedTime ? formatTime(selectedTime) : t("select_time")}
         </Text>
-        <AntDesign name="clockcircle" size={24} color="#666" />
+        <AntDesign name="clockcircle" size={24} color={dateError ? "#ccc" : "#666"} />
       </TouchableOpacity>
 
       {/* Display expected end time */}
-      {endTime && (
+      {endTime && !dateError && (
         <View style={styles.endTimeContainer}>
           <Text style={styles.endTimeLabel}>{t("expected_end_time")}:</Text>
           <Text style={styles.endTimeValue}>
@@ -125,6 +140,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "#333",
+  },
+  errorText: {
+    color: "#FF4B26",
+    fontSize: 14,
+    marginTop: -16,
+    marginBottom: 16,
+    marginLeft: 4,
+  },
+  disabledButton: {
+    backgroundColor: "#f5f5f5",
+    borderColor: "#eee",
+  },
+  disabledText: {
+    color: "#999",
   },
 });
 

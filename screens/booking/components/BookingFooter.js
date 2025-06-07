@@ -18,7 +18,7 @@ const BookingFooter = ({
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <AntDesign name="left" size={24} color="#000" />
+        <AntDesign name="left" size={24} color="#4E72E3" />
       </TouchableOpacity>
       <View style={styles.priceContainer}>
         <Text style={styles.currencySymbol}>{t("total")}</Text>

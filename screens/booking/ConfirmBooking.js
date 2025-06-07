@@ -9,6 +9,7 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Linking,
 } from "react-native";
 import {
   CommonActions,
@@ -44,7 +45,6 @@ export default function ConfirmBooking() {
   const route = useRoute();
   const { bookingData } = route.params || {};
   const [isLoading, setIsLoading] = useState(false);
-  console.log("bookingData", bookingData);
 
   const values = getTimeRefundData?.data?.[0]?.values || [];
   let refundMinutes = values[0]?.val || 20; // mặc định nếu không có
@@ -150,7 +150,6 @@ export default function ConfirmBooking() {
     hoursEnd,
     minutesEnd
   ).toISOString();
-  console.log("Booking DATA", bookingData.date);
 
   const checkInDateTime = `${bookingData.date} ${bookingData.time}:00`;
   const checkOutDateTime = `${bookingData.endDate} ${bookingData.endTime}:00`;
@@ -236,8 +235,11 @@ export default function ConfirmBooking() {
       setIsLoading(false);
     }
   };
-  // const handleConfirm1 = async () => {
-  // };
+
+  const handleOpenMap = () => {
+    const encodedAddress = encodeURIComponent(address);
+    Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -247,62 +249,108 @@ export default function ConfirmBooking() {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
         >
+          {/* Location Section - exact match with LocationInfo.js */}
           <View style={styles.card}>
-            <Text style={styles.label}>{t("location")}:</Text>
-            <Text style={{ fontSize: 18 }}>{rentalData.name}</Text>
-            <View>
-              <Text style={styles.value}>{address}</Text>
-            </View>
-          </View>
-
-          <View style={styles.card}>
-            <Text style={styles.label}>{t("room_type")}:</Text>
-            <Text style={{ fontSize: 18, fontWeight: "700" }}>
-              {typeRoom?.name ?? t("no_info")}
+            <Text style={styles.label}>
+              <AntDesign name="enviromento" size={20} color="#4E72E3" style={{ marginRight: 8 }} />
+              {t("location")}
             </Text>
-            <View style={styles.jusBetween}>
-              <Text style={styles.value}>{t("base_price_text")}: </Text>
-              <Text>{formatMoney(typeRoom?.basePrice)}</Text>
-            </View>
-            <View style={styles.jusBetween}>
-              <Text style={styles.value}>{t("overtime_price")}: </Text>
-              <Text>{formatMoney(typeRoom?.overtimeHourlyPrice)}</Text>
-            </View>
-            <View style={styles.jusBetween}>
-              <Text style={styles.value}>{t("total_duration")}: </Text>
-              <Text>
-                {bookingData?.duration}
-                {t("h")}
+            <TouchableOpacity style={styles.locationContainer} onPress={handleOpenMap}>
+              <View style={styles.contentContainer}>
+                <View style={styles.mainInfo}>
+                  <Text style={styles.name}>{rentalData.name}</Text>
+                  <Text style={styles.address} numberOfLines={2}>
+                    {address}
+                  </Text>
+                </View>
+                <View>
+                  <AntDesign name="right" size={16} color="#4E72E3" />
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          {/* Room Type Section - exact match with RoomTypeInfo.js */}
+          <View style={styles.card}>
+            <Text style={styles.label}>
+              <AntDesign name="home" size={20} color="#4E72E3" style={{ marginRight: 8 }} />
+              {t("room_type")}
+            </Text>
+            <View style={styles.roomContainer}>
+              <Text style={styles.roomName}>
+                {typeRoom?.name ?? t("no_info")}
               </Text>
+              <View style={styles.timeRow}>
+                <Text style={styles.timeLabel}>{t("base_price_text")}</Text>
+                <Text style={styles.timeValue}>{formatMoney(typeRoom?.basePrice)}</Text>
+              </View>
+              <View style={styles.timeRow}>
+                <Text style={styles.timeLabel}>{t("overtime_price")}</Text>
+                <Text style={styles.timeValue}>{formatMoney(typeRoom?.overtimeHourlyPrice)}</Text>
+              </View>
+              <View style={[styles.timeRow, styles.durationRow]}>
+                <Text style={styles.timeLabel}>{t("total_duration")}</Text>
+                <Text style={styles.timeValue}>
+                  {bookingData?.duration} {t("h")}
+                </Text>
+              </View>
             </View>
           </View>
 
+          {/* Time Section - exact match with TimeInfo.js */}
           <View style={styles.card}>
-            <Text style={styles.label}>{t("rental_time")}:</Text>
-            <View style={styles.jusBetween}>
-              <Text style={styles.value}>{t("date")}: </Text>
-              <Text>{bookingData?.date}</Text>
-            </View>
-            <View style={styles.jusBetween}>
-              <Text style={styles.value}>{t("time")}:</Text>
-              <Text>
-                {bookingData?.time} - {bookingData?.endTime}{" "}
-                {bookingData?.endTime < bookingData?.time
-                  ? `(${bookingData?.endDate})`
-                  : ""}
-              </Text>
+            <Text style={styles.label}>
+              <AntDesign name="clockcircle" size={20} color="#4E72E3" style={{ marginRight: 8 }} />
+              {t("rental_time")}
+            </Text>
+            <View style={styles.timeContainer}>
+              <View style={styles.timeRow}>
+                <Text style={styles.timeLabel}>{t("check_in")}:</Text>
+                <Text style={styles.timeValue}>{bookingData?.date} {bookingData?.time}</Text>
+              </View>
+              <View style={styles.timeRow}>
+                <Text style={styles.timeLabel}>{t("check_out")}:</Text>
+                <Text style={styles.timeValue}>
+                  {bookingData?.endDate} {bookingData?.endTime}
+                </Text>
+              </View>
+              <View style={[styles.timeRow, styles.durationRow]}>
+                <Text style={styles.timeLabel}>{t("rental_duration")}:</Text>
+                <Text style={styles.timeValue}>
+                  {bookingData?.duration} {t("hours_text")}
+                </Text>
+              </View>
             </View>
           </View>
 
+          {/* Guests Section - exact match with GuestsInfo.js */}
           <View style={styles.card}>
-            <Text style={styles.label}>{t("guests")}:</Text>
-            <View style={styles.jusBetween}>
-              <Text style={styles.value}>{t("adults")}:</Text>
-              <Text>{bookingData?.guests?.adults}</Text>
-            </View>
-            <View style={styles.jusBetween}>
-              <Text style={styles.value}>{t("children")}:</Text>
-              <Text>{bookingData?.guests?.children}</Text>
+            <Text style={styles.label}>
+              <AntDesign name="team" size={20} color="#4E72E3" style={{ marginRight: 8 }} />
+              {t("guests")}
+            </Text>
+            <View style={styles.guestsContainer}>
+              <View style={styles.guestRow}>
+                <View style={styles.guestType}>
+                  <View style={styles.iconContainer}>
+                    <AntDesign name="user" size={16} color="#4E72E3" />
+                  </View>
+                  <Text style={styles.guestLabel}>{t("adults")}</Text>
+                </View>
+                <Text style={styles.guestCount}>{bookingData?.guests?.adults}</Text>
+              </View>
+
+              <View style={styles.separator} />
+
+              <View style={styles.guestRow}>
+                <View style={styles.guestType}>
+                  <View style={styles.iconContainer}>
+                    <AntDesign name="user" size={14} color="#4E72E3" />
+                  </View>
+                  <Text style={styles.guestLabel}>{t("children")}</Text>
+                </View>
+                <Text style={styles.guestCount}>{bookingData?.guests?.children}</Text>
+              </View>
             </View>
           </View>
 
@@ -317,29 +365,41 @@ export default function ConfirmBooking() {
             <PaymentConfirm setPaymentMethod={setPaymentMethod} />
           </View>
 
-          {/* Summary section */}
+          {/* Payment Summary Section */}
           <View style={styles.card}>
-            <Text style={styles.label}>{t("payment_summary")}:</Text>
-            <View style={styles.jusBetween}>
-              <Text style={styles.value}>{t("room_price")}:</Text>
-              <Text>{formatMoney(bookingData.totalPrice)}</Text>
+            <Text style={styles.label}>{t("payment_summary")}</Text>
+            <View style={styles.timeContainer}>
+              <View style={styles.timeRow}>
+                <Text style={styles.timeLabel}>{t("room_price")}</Text>
+                <Text style={styles.timeValue}>{formatMoney(bookingData.totalPrice)}</Text>
+              </View>
+
+              {selectedVoucher && (
+                <View style={styles.timeRow}>
+                  <Text style={[styles.timeLabel, { color: "#e63946" }]}>
+                    {t("discount")}
+                  </Text>
+                  <Text style={{ color: "#e63946", fontSize: 14, fontWeight: "600" }}>
+                    - {formatMoney(discountAmount)}
+                  </Text>
+                </View>
+              )}
+
+              <View style={[styles.timeRow, styles.durationRow]}>
+                <Text style={[styles.timeLabel, { fontSize: 15, fontWeight: "600" }]}>
+                  {t("total_amount")}
+                </Text>
+                <Text style={styles.totalAmount}>{formatMoney(finalTotal)}</Text>
+              </View>
             </View>
 
-            {selectedVoucher && (
-              <View style={styles.jusBetween}>
-                <Text style={[styles.value, styles.discountText]}>
-                  {t("discount")}:
-                </Text>
-                <Text style={styles.discountText}>
-                  - {formatMoney(discountAmount)}
+            {finalTotal <= 10000 && (
+              <View style={styles.warningContainer}>
+                <Text style={styles.warningText}>
+                  {t("minimum_payment_warning")}
                 </Text>
               </View>
             )}
-
-            <View style={[styles.jusBetween, styles.totalRow]}>
-              <Text style={styles.totalText}>{t("total_amount")}:</Text>
-              <Text style={styles.totalAmount}>{formatMoney(finalTotal)}</Text>
-            </View>
           </View>
         </KeyboardAvoidingView>
       </ScrollView>
@@ -359,7 +419,7 @@ export default function ConfirmBooking() {
           onPress={handleConfirm}
           style={{ width: "40%" }}
           title={t("book_now")}
-          disabled={isLoading}
+          disabled={isLoading || finalTotal <= 10000}
         />
       </View>
     </SafeAreaView>
@@ -370,7 +430,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f9f9f9",
-    padding: 20,
   },
   header: {
     fontSize: 22,
@@ -381,54 +440,141 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "white",
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 10,
-    marginBottom: 10,
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    marginHorizontal: 5,
+    shadowRadius: 8,
     elevation: 3,
-  },
-  jusBetween: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+    marginHorizontal: 20,
   },
   label: {
     fontSize: 16,
-    fontWeight: "700",
-    color: "#444",
-    marginBottom: 5,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
   },
-  value: {
-    fontSize: 16,
-    fontWeight: "400",
-    color: "#222",
+  // Location styles - exact match with LocationInfo.js
+  locationContainer: {
+    backgroundColor: "#F7FAFC",
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
   },
-  discountText: {
-    color: "#e63946",
+  contentContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  mainInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  name: {
+    color: "#2D3748",
+    fontSize: 15,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  address: {
+    color: "#718096",
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  // Room type styles - exact match with RoomTypeInfo.js
+  roomContainer: {
+    backgroundColor: "#F7FAFC",
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  roomName: {
+    color: "#2D3748",
+    fontSize: 15,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  description: {
+    color: "#718096",
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  // Time styles - exact match with TimeInfo.js
+  timeContainer: {
+    backgroundColor: "#F7FAFC",
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  timeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 4,
+  },
+  timeLabel: {
+    color: "#718096",
+    fontSize: 14,
     fontWeight: "500",
   },
-  totalRow: {
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
-    marginTop: 8,
+  timeValue: {
+    color: "#2D3748",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  durationRow: {
+    marginTop: 4,
     paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
   },
-  totalText: {
+  // Guests styles - exact match with GuestsInfo.js
+  guestsContainer: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#EDF2F7",
+  },
+  guestRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 16,
+  },
+  guestType: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: "#F3F7FF",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  guestLabel: {
+    color: "#2D3748",
+    fontSize: 15,
+    fontWeight: "500",
+  },
+  guestCount: {
+    color: "#4E72E3",
     fontSize: 16,
-    fontWeight: "700",
-    color: "#000",
+    fontWeight: "600",
   },
-  totalAmount: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
+  separator: {
+    height: 1,
+    backgroundColor: "#EDF2F7",
   },
   footer: {
     padding: 20,
@@ -445,11 +591,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  priceContainer: {
-    flexDirection: "column",
-    alignItems: "flex-start",
-    flex: 1,
-    justifyContent: "flex-start",
-    paddingLeft: 15,
+  totalAmount: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  warningContainer: {
+    backgroundColor: "#fff3cd",
+    borderColor: "#ffeaa7",
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 10,
+  },
+  warningText: {
+    color: "#856404",
+    fontSize: 14,
+    fontWeight: "500",
+    textAlign: "center",
   },
 });

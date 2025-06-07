@@ -11,6 +11,8 @@ import {
   Alert,
   Modal,
   RefreshControl,
+  Dimensions,
+  Linking,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useAsyncStorage } from "../../context/AsyncStorageContext";
@@ -25,7 +27,9 @@ import { useGetAverageFeedbackByRentalIdQuery } from "../../api/feedbackApi";
 import { useGetRentalLocationByIdQuery } from "../../api/rentalLocationApi";
 import { useGetAllAccommodationTypesQuery } from "../../api/accommodationTypeApi";
 import { useGetUserIdByOwnerIdQuery } from "../../api/ownerApi";
+import { useGetPolicyOwerQuery } from "../../api/policyOwerApi";
 import { useTranslation } from "react-i18next";
+import PolicyModal from "../../components/modals/PolicyModal";
 
 // Import only the MoreOptionsModal component
 import MoreOptionsModal from "../booking/modals/MoreOptionModal";
@@ -52,6 +56,8 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [selectedReviewImage, setSelectedReviewImage] = useState(null);
 
+  const [isPolicyModalVisible, setIsPolicyModalVisible] = useState(false);
+
   const {
     data: rentalData,
     isLoading: isRentalLoading,
@@ -72,6 +78,10 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
   const { data: feedbackDataList } = useGetAllFeedbackByRentalIdQuery(rentalId);
   const { data: feedbackAverage } =
     useGetAverageFeedbackByRentalIdQuery(rentalId);
+
+  const { data: policyData, isLoading: isPolicyLoading, error: policyError } = useGetPolicyOwerQuery(
+    rentalData?.data?.ownerId?.id
+  );
 
   const formatPrice = (value) => {
     return value.toLocaleString("vi-VN");
@@ -217,10 +227,10 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     } catch (error) {}
   };
 
-  // Update the handleMoreOptions function to show the modal
-  const handleMoreOptions = () => {
-    setMoreOptionsModalVisible(true);
-  };
+  // // Update the handleMoreOptions function to show the modal
+  // const handleMoreOptions = () => {
+  //   setMoreOptionsModalVisible(true);
+  // };
 
   // Add these handler functions for the modal actions
   const handleShare = () => {
@@ -417,6 +427,54 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
     });
   };
 
+  const handleShowPolicies = () => {
+    setIsPolicyModalVisible(true);
+  };
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const renderImageSlider = () => {
+    return (
+      <View style={styles.imageContainer}>
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={(event) => {
+            const slideWidth = Dimensions.get('window').width - 32; 
+            const currentIndex = Math.round(event.nativeEvent.contentOffset.x / slideWidth);
+            setCurrentImageIndex(currentIndex);
+          }}
+        >
+          {rental.image?.map((imageUrl, index) => (
+            <Image
+              key={index}
+              source={{ uri: imageUrl }}
+              style={styles.sliderImage}
+            />
+          ))}
+        </ScrollView>
+        <View style={styles.paginationDots}>
+          {rental.image?.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.dot,
+                { backgroundColor: currentImageIndex === index ? '#4E72E3' : '#ccc' }
+              ]}
+            />
+          ))}
+        </View>
+      </View>
+    );
+  };
+
+  const handleOpenMap = () => {
+    const address = `${rental.address}, ${rental.ward}, ${rental.district}, ${rental.city}`;
+    const encodedAddress = encodeURIComponent(address);
+    Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`);
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -493,9 +551,9 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
             <TouchableOpacity onPress={handleChatPress}>
               <MaterialIcons name="chat" size={24} color="#4E72E3" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleMoreOptions}>
+            {/* <TouchableOpacity onPress={handleMoreOptions}>
               <Icon name="more-vert" size={24} color="#4E72E3" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
         <View>
@@ -525,15 +583,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
           }
         >
           <View style={styles.headerContainer}>
-            <View style={styles.imageContainer}>
-              <Image
-                source={{
-                  uri: rental.image?.[0] || "https://via.placeholder.com/300",
-                }}
-                style={styles.headerImage}
-              />
-              {renderStatusIndicator()}
-            </View>
+            {renderImageSlider()}
             <View style={styles.headerDetails}>
               <View style={styles.destinationHeader}>
                 <Text style={styles.destinationName}>{rental.name}</Text>
@@ -546,9 +596,15 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
               <View style={styles.locationContainer}>
                 <Icon name="location-on" size={20} color="#4e72e3" />
                 <Text style={styles.locationText}>
-                  {rental.address}, {rental.ward}, {rental.district},{" "}
-                  {rental.city}
+                  {rental.address}, {rental.ward}, {rental.district}, {rental.city}
                 </Text>
+                <TouchableOpacity 
+                  style={styles.directionButton}
+                  onPress={handleOpenMap}
+                  activeOpacity={0.7}
+                >
+                  <Icon name="directions" size={20} color="#4e72e3" />
+                </TouchableOpacity>
               </View>
               <View style={styles.ratingContainer}>
                 <Icon name="star" size={20} color="#ffc907" />
@@ -556,8 +612,15 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
                   {feedbackAverage?.averageRating?.toFixed(1) || "0.0"} (
                   {feedbackAverage?.totalFeedbacks || 0} {t("reviews_count")}
                   {")"}
-                </Text>
+                </Text> 
               </View>
+              <TouchableOpacity
+                style={styles.policyButton}
+                onPress={handleShowPolicies}
+              >
+                <Icon name="policy" size={20} color="#4e72e3" />
+                <Text style={styles.policyButtonText}>{t("owner_policies")}</Text>
+              </TouchableOpacity>
               <Text style={styles.description}>
                 {isDescriptionExpanded
                   ? rental.description
@@ -574,6 +637,7 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
                   </Text>
                 )}
               </Text>
+              
             </View>
           </View>
 
@@ -648,6 +712,13 @@ const DetailRentalLocationScreen = ({ route, navigation }) => {
             />
           </View>
         </Modal>
+        <PolicyModal
+          visible={isPolicyModalVisible}
+          onClose={() => setIsPolicyModalVisible(false)}
+          policies={policyData?.owners || []}
+          isLoading={isPolicyLoading}
+          error={policyError}
+        />
       </View>
     </SafeAreaView>
   );
@@ -818,10 +889,23 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: "hidden",
   },
-  headerImage: {
-    width: "100%",
-    height: "100%",
+  sliderImage: {
+    width: Dimensions.get('window').width - 32, 
     borderRadius: 20,
+  },
+  paginationDots: {
+    position: 'absolute',
+    bottom: 10,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
   },
   headerDetails: {
     marginTop: 16,
@@ -843,8 +927,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 8,
+    flexWrap: "wrap",
   },
   locationText: {
+    flex: 1,
     marginHorizontal: 8,
     color: "#555",
   },
@@ -966,6 +1052,26 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     borderRadius: 20,
+  },
+  policyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f2ff',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+  },
+  policyButtonText: {
+    marginLeft: 8,
+    color: '#4e72e3',
+    fontWeight: '600',
+  },
+  directionButton: {
+    backgroundColor: "#EEF2FF",
+    padding: 8,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 
