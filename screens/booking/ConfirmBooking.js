@@ -154,6 +154,7 @@ export default function ConfirmBooking() {
 
   const checkInDateTime = `${bookingData.date} ${bookingData.time}:00`;
   const checkOutDateTime = `${bookingData.endDate} ${bookingData.endTime}:00`;
+  console.log("Check In Date Time", checkInDateTime);
 
   const handleConfirm = async () => {
     setIsLoading(true);
